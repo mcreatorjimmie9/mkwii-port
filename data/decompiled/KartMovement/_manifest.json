@@ -1,0 +1,708 @@
+[
+  {
+    "address": "0x80580128",
+    "name": "PlayerSub10_cancelWheelie",
+    "symbol": "PlayerSub10_cancelWheelie",
+    "size": 4,
+    "instructions": 1,
+    "calls": [],
+    "section_offset": "0x06d88c",
+    "file_offset": "0x06d964"
+  },
+  {
+    "address": "0x805814c8",
+    "name": "getMaxMtCharge__Kart8KartMove",
+    "symbol": "getMaxMtCharge__Q24Kart8KartMoveFv",
+    "size": 12,
+    "instructions": 3,
+    "calls": [],
+    "section_offset": "0x06ec2c",
+    "file_offset": "0x06ed04"
+  },
+  {
+    "address": "0x805814d4",
+    "name": "getMaxSmtCharge__Kart8KartMove",
+    "symbol": "getMaxSmtCharge__Q24Kart8KartMoveFv",
+    "size": 12,
+    "instructions": 3,
+    "calls": [
+      "0x807960a0"
+    ],
+    "section_offset": "0x06ec38",
+    "file_offset": "0x06ed10"
+  },
+  {
+    "address": "0x805814e0",
+    "name": "getAppliedHopStickX__Kart8KartMove",
+    "symbol": "getAppliedHopStickX__Q24Kart8KartMoveFv",
+    "size": 44,
+    "instructions": 11,
+    "calls": [],
+    "section_offset": "0x06ec44",
+    "file_offset": "0x06ed1c"
+  },
+  {
+    "address": "0x80583c08",
+    "name": "setScale__Kart8KartMove",
+    "symbol": "setScale__Q24Kart8KartMoveFQ23EGG8Vector3f",
+    "size": 28,
+    "instructions": 7,
+    "calls": [],
+    "section_offset": "0x07136c",
+    "file_offset": "0x071444"
+  },
+  {
+    "address": "0x80583f0c",
+    "name": "empty__Kart8KartMoveFl",
+    "symbol": "empty__Q24Kart8KartMoveFl",
+    "size": 4,
+    "instructions": 1,
+    "calls": [],
+    "section_offset": "0x071670",
+    "file_offset": "0x071748"
+  },
+  {
+    "address": "0x805857cc",
+    "name": "clearBoost__Kart8KartMove",
+    "symbol": "clearBoost__Q24Kart8KartMoveFv",
+    "size": 320,
+    "instructions": 80,
+    "calls": [
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4"
+    ],
+    "section_offset": "0x072f30",
+    "file_offset": "0x073008"
+  },
+  {
+    "address": "0x80589a74",
+    "name": "PlayerSub10_updateWheelie",
+    "symbol": "PlayerSub10_updateWheelie",
+    "size": 4,
+    "instructions": 1,
+    "calls": [],
+    "section_offset": "0x0771d8",
+    "file_offset": "0x0772b0"
+  },
+  {
+    "address": "0x8058a24c",
+    "name": "PlayerSub10Bike_updateWheelie",
+    "symbol": "PlayerSub10Bike_updateWheelie",
+    "size": 4,
+    "instructions": 1,
+    "calls": [
+      "indirect"
+    ],
+    "section_offset": "0x0779b0",
+    "file_offset": "0x077a88"
+  },
+  {
+    "address": "0x8058a80c",
+    "name": "PlayerSub10Bike_getWheelieSoftSpeedLimitBonus",
+    "symbol": "PlayerSub10Bike_getWheelieSoftSpeedLimitBonus",
+    "size": 44,
+    "instructions": 11,
+    "calls": [
+      "0x80555bf4"
+    ],
+    "section_offset": "0x077f70",
+    "file_offset": "0x078048"
+  },
+  {
+    "address": "0x8058a838",
+    "name": "PlayerSub10Bike_startWheelie",
+    "symbol": "PlayerSub10Bike_startWheelie",
+    "size": 116,
+    "instructions": 29,
+    "calls": [
+      "0x80555bf4",
+      "0x80555bf4"
+    ],
+    "section_offset": "0x077f9c",
+    "file_offset": "0x078074"
+  },
+  {
+    "address": "0x8058a8ac",
+    "name": "PlayerSub10Bike_cancelWheelie",
+    "symbol": "PlayerSub10Bike_cancelWheelie",
+    "size": 48,
+    "instructions": 12,
+    "calls": [
+      "0x80555bf4"
+    ],
+    "section_offset": "0x078010",
+    "file_offset": "0x0780e8"
+  },
+  {
+    "address": "0x8058ac80",
+    "name": "PlayerSub10Bike_tryStartWheelie",
+    "symbol": "PlayerSub10Bike_tryStartWheelie",
+    "size": 200,
+    "instructions": 50,
+    "calls": [
+      "0x8052f248",
+      "0x8052f248"
+    ],
+    "section_offset": "0x0783e4",
+    "file_offset": "0x0784bc"
+  },
+  {
+    "address": "0x8058b4c8",
+    "name": "PlayerSub10Bike_checkWheelieSpeed",
+    "symbol": "PlayerSub10Bike_checkWheelieSpeed",
+    "size": 68,
+    "instructions": 17,
+    "calls": [
+      "0x80555bf4"
+    ],
+    "section_offset": "0x078c2c",
+    "file_offset": "0x078d04"
+  },
+  {
+    "address": "0x8058bc2c",
+    "name": "PlayerSub10_checkWheelie",
+    "symbol": "PlayerSub10_checkWheelie",
+    "size": 8,
+    "instructions": 2,
+    "calls": [],
+    "section_offset": "0x079390",
+    "file_offset": "0x079468"
+  },
+  {
+    "address": "0x80590ef4",
+    "name": "PlayerKart_createTires",
+    "symbol": "PlayerKart_createTires",
+    "size": 508,
+    "instructions": 127,
+    "calls": [
+      "0x805a22e4"
+    ],
+    "section_offset": "0x07e658",
+    "file_offset": "0x07e730"
+  },
+  {
+    "address": "0x805954a8",
+    "name": "Kart12KartSettings",
+    "symbol": "__ct__Q24Kart12KartSettingsFv",
+    "size": 204,
+    "instructions": 51,
+    "calls": [
+      "0x80590aac"
+    ],
+    "section_offset": "0x082c0c",
+    "file_offset": "0x082ce4"
+  },
+  {
+    "address": "0x8059648c",
+    "name": "Kart15KartCollideArea",
+    "symbol": "__ct__Q24Kart15KartCollideAreaFv",
+    "size": 240,
+    "instructions": 60,
+    "calls": [
+      "0x8059148c",
+      "0x805899cc",
+      "0x805903ec",
+      "0x805b3c6c",
+      "0x80590774",
+      "0x805b3c6c",
+      "0x8059032c",
+      "0x805907bc",
+      "0x805849cc",
+      "0x8059478c"
+    ],
+    "section_offset": "0x083bf0",
+    "file_offset": "0x083cc8"
+  },
+  {
+    "address": "0x8059689c",
+    "name": "Kart9KartState",
+    "symbol": "__ct__Q24Kart9KartStateFPQ24Kart12KartSettings",
+    "size": 424,
+    "instructions": 106,
+    "calls": [
+      "0x80590a9c",
+      "0x80590a9c",
+      "0x80590d38"
+    ],
+    "section_offset": "0x084000",
+    "file_offset": "0x0840d8"
+  },
+  {
+    "address": "0x80596a44",
+    "name": "init__Kart9KartState",
+    "symbol": "init__Q24Kart9KartStateFv",
+    "size": 56,
+    "instructions": 14,
+    "calls": [
+      "0x80590cfc"
+    ],
+    "section_offset": "0x0841a8",
+    "file_offset": "0x084280"
+  },
+  {
+    "address": "0x80596a7c",
+    "name": "reset__Kart9KartState",
+    "symbol": "reset__Q24Kart9KartStateFv",
+    "size": 160,
+    "instructions": 40,
+    "calls": [
+      "0x8059040c"
+    ],
+    "section_offset": "0x0841e0",
+    "file_offset": "0x0842b8"
+  },
+  {
+    "address": "0x80596b1c",
+    "name": "resetOob__Kart9KartState",
+    "symbol": "resetOob__Q24Kart9KartStateFv",
+    "size": 16,
+    "instructions": 4,
+    "calls": [
+      "0x805907bc"
+    ],
+    "section_offset": "0x084280",
+    "file_offset": "0x084358"
+  },
+  {
+    "address": "0x80598230",
+    "name": "KartSub_createComponents",
+    "symbol": "KartSub_createComponents",
+    "size": 560,
+    "instructions": 140,
+    "calls": [
+      "0x805907bc",
+      "0x8059088c",
+      "0x8059024c",
+      "0x80788484",
+      "0x80590818",
+      "0x805907bc",
+      "0x8059156c",
+      "0x805907bc",
+      "0x80591560",
+      "0x80555bf4"
+    ],
+    "section_offset": "0x085994",
+    "file_offset": "0x085a6c"
+  },
+  {
+    "address": "0x80598460",
+    "name": "KartSub_init",
+    "symbol": "KartSub_init",
+    "size": 388,
+    "instructions": 97,
+    "calls": [
+      "0x80590a9c",
+      "0x80590690",
+      "0x805916a4",
+      "0x805961bc",
+      "0x805945d4",
+      "indirect",
+      "0x80569880",
+      "0x80591658",
+      "0x805b7904",
+      "0x805907bc",
+      "0x8058496c",
+      "0x805917c4",
+      "0x8059174c",
+      "0x80590e98",
+      "indirect"
+    ],
+    "section_offset": "0x085bc4",
+    "file_offset": "0x085c9c"
+  },
+  {
+    "address": "0x8059aff0",
+    "name": "KartSus_ct",
+    "symbol": "KartSus_ct",
+    "size": 72,
+    "instructions": 18,
+    "calls": [
+      "0x805914fc",
+      "indirect"
+    ],
+    "section_offset": "0x088754",
+    "file_offset": "0x08882c"
+  },
+  {
+    "address": "0x8059b048",
+    "name": "KartSus_init",
+    "symbol": "KartSus_init",
+    "size": 116,
+    "instructions": 29,
+    "calls": [
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x8059944c"
+    ],
+    "section_offset": "0x0887ac",
+    "file_offset": "0x088884"
+  },
+  {
+    "address": "0x8059b0bc",
+    "name": "KartSus_initPhysics",
+    "symbol": "KartSus_initPhysics",
+    "size": 8,
+    "instructions": 2,
+    "calls": [],
+    "section_offset": "0x088820",
+    "file_offset": "0x0888f8"
+  },
+  {
+    "address": "0x8059b8f4",
+    "name": "Kart16KartWheelPhysics",
+    "symbol": "__ct__Q24Kart16KartWheelPhysicsFUll",
+    "size": 100,
+    "instructions": 25,
+    "calls": [
+      "0x805665f0",
+      "0x805665f0",
+      "0x805665f0",
+      "0x805665f0",
+      "0x805635cc"
+    ],
+    "section_offset": "0x089058",
+    "file_offset": "0x089130"
+  },
+  {
+    "address": "0x8059b958",
+    "name": "init__Kart16KartWheelPhysics",
+    "symbol": "init__Q24Kart16KartWheelPhysicsFv",
+    "size": 100,
+    "instructions": 25,
+    "calls": [],
+    "section_offset": "0x0890bc",
+    "file_offset": "0x089194"
+  },
+  {
+    "address": "0x8059b9bc",
+    "name": "setBsp__Kart16KartWheelPhysics",
+    "symbol": "setBsp__Q24Kart16KartWheelPhysicsFv",
+    "size": 52,
+    "instructions": 13,
+    "calls": [
+      "indirect",
+      "0x80842214"
+    ],
+    "section_offset": "0x089120",
+    "file_offset": "0x0891f8"
+  },
+  {
+    "address": "0x8059b9f0",
+    "name": "reset__Kart16KartWheelPhysics",
+    "symbol": "reset__Q24Kart16KartWheelPhysicsFv",
+    "size": 184,
+    "instructions": 46,
+    "calls": [
+      "0x80566624",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x808569b0"
+    ],
+    "section_offset": "0x089154",
+    "file_offset": "0x08922c"
+  },
+  {
+    "address": "0x8059baa8",
+    "name": "setColState__Kart16KartWheelPhysicsFffRCQ23EGG8Vector3f",
+    "symbol": "setColState__Q24Kart16KartWheelPhysicsFffRCQ23EGG8Vector3f",
+    "size": 208,
+    "instructions": 52,
+    "calls": [
+      "indirect",
+      "0x805ba100",
+      "0x80568814",
+      "0x805669d0",
+      "0x80555bf4"
+    ],
+    "section_offset": "0x08920c",
+    "file_offset": "0x0892e4"
+  },
+  {
+    "address": "0x8059bb78",
+    "name": "calcCollision__Kart16KartWheelPhysics",
+    "symbol": "calcCollision__Q24Kart16KartWheelPhysicsFRCQ23EGG8Vector3fRCQ23EGG8Vector3f",
+    "size": 1088,
+    "instructions": 272,
+    "calls": [
+      "0x80566294",
+      "indirect",
+      "0x805665f0",
+      "0x80566624",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x805b9d48",
+      "0x805ba100",
+      "0x80568814",
+      "0x805669d0",
+      "0x805b9e80",
+      "0x80566294",
+      "0x805665f0",
+      "0x80607408",
+      "0x80566624",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x805ba100",
+      "0x80568814",
+      "0x805669d0",
+      "0x80566294",
+      "0x805665f0",
+      "0x80566624",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x805ba100",
+      "0x805686cc",
+      "indirect",
+      "0x8067f350"
+    ],
+    "section_offset": "0x0892dc",
+    "file_offset": "0x0893b4"
+  },
+  {
+    "address": "0x8059bfb8",
+    "name": "calc__Kart16KartWheelPhysics",
+    "symbol": "calc__Q24Kart16KartWheelPhysicsFRCQ23EGG8Vector3fRCQ23EGG8Vector3f",
+    "size": 716,
+    "instructions": 179,
+    "calls": [
+      "indirect",
+      "0x80566624",
+      "0x80566624",
+      "0x80566624",
+      "0x80566624",
+      "0x80555bf4",
+      "0x80566ecc",
+      "indirect",
+      "0x8056909c",
+      "0x80568284",
+      "0x80569104",
+      "0x805f8114",
+      "0x8056909c",
+      "0x80568284",
+      "0x80569104",
+      "0x805f8114",
+      "0x8056819c",
+      "0x80566ef8",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x805b0434",
+      "0x80555bf4",
+      "0x805b0434",
+      "0x80555bf4",
+      "0x805b3bf8",
+      "0x80555bf4",
+      "0x80555bf4"
+    ],
+    "section_offset": "0x08971c",
+    "file_offset": "0x0897f4"
+  },
+  {
+    "address": "0x8059c284",
+    "name": "updateEffectiveRadius__Kart16KartWheelPhysics",
+    "symbol": "updateEffectiveRadius__Q24Kart16KartWheelPhysicsFv",
+    "size": 36,
+    "instructions": 9,
+    "calls": [
+      "indirect",
+      "0x80555bf4"
+    ],
+    "section_offset": "0x0899e8",
+    "file_offset": "0x089ac0"
+  },
+  {
+    "address": "0x8059c2a8",
+    "name": "unk80599dc0__Kart16KartWheelPhysics",
+    "symbol": "unk80599dc0__Q24Kart16KartWheelPhysicsFRCQ23EGG8Vector3f",
+    "size": 236,
+    "instructions": 59,
+    "calls": [
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x805b06fc",
+      "0x805b3c6c",
+      "0x80555bf4",
+      "0x80555bf4"
+    ],
+    "section_offset": "0x089a0c",
+    "file_offset": "0x089ae4"
+  },
+  {
+    "address": "0x8059c394",
+    "name": "hasFloorCollision__Kart16KartWheelPhysicsC",
+    "symbol": "hasFloorCollision__Q24Kart16KartWheelPhysicsCFv",
+    "size": 16,
+    "instructions": 4,
+    "calls": [
+      "0x80555bf4"
+    ],
+    "section_offset": "0x089af8",
+    "file_offset": "0x089bd0"
+  },
+  {
+    "address": "0x8059c3a4",
+    "name": "getCollisionFloorNrm__Kart16KartWheelPhysicsC",
+    "symbol": "getCollisionFloorNrm__Q24Kart16KartWheelPhysicsCFv",
+    "size": 12,
+    "instructions": 3,
+    "calls": [],
+    "section_offset": "0x089b08",
+    "file_offset": "0x089be0"
+  },
+  {
+    "address": "0x8059c3b0",
+    "name": "getKartCollisionInfo__Kart16KartWheelPhysicsC",
+    "symbol": "getKartCollisionInfo__Q24Kart16KartWheelPhysicsCFv",
+    "size": 12,
+    "instructions": 3,
+    "calls": [
+      "0x80555bf4"
+    ],
+    "section_offset": "0x089b14",
+    "file_offset": "0x089bec"
+  },
+  {
+    "address": "0x8059c3bc",
+    "name": "Kart14KartSusPhysics",
+    "symbol": "__ct__Q24Kart14KartSusPhysicsFUlQ24Kart13KartWheelTypel",
+    "size": 128,
+    "instructions": 32,
+    "calls": [
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4"
+    ],
+    "section_offset": "0x089b20",
+    "file_offset": "0x089bf8"
+  },
+  {
+    "address": "0x8059c43c",
+    "name": "reset__Kart14KartSusPhysics",
+    "symbol": "reset__Q24Kart14KartSusPhysicsFv",
+    "size": 76,
+    "instructions": 19,
+    "calls": [],
+    "section_offset": "0x089ba0",
+    "file_offset": "0x089c78"
+  },
+  {
+    "address": "0x8059c488",
+    "name": "init__Kart14KartSusPhysics",
+    "symbol": "init__Q24Kart14KartSusPhysicsFv",
+    "size": 140,
+    "instructions": 35,
+    "calls": [],
+    "section_offset": "0x089bec",
+    "file_offset": "0x089cc4"
+  },
+  {
+    "address": "0x8059c514",
+    "name": "setInitialState__Kart14KartSusPhysics",
+    "symbol": "setInitialState__Q24Kart14KartSusPhysicsFv",
+    "size": 588,
+    "instructions": 147,
+    "calls": [
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x805b0aac",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4"
+    ],
+    "section_offset": "0x089c78",
+    "file_offset": "0x089d50"
+  },
+  {
+    "address": "0x8059c760",
+    "name": "calcCollision__Kart14KartSusPhysics",
+    "symbol": "calcCollision__Q24Kart14KartSusPhysicsFRCQ23EGG8Vector3fRCQ23EGG9Matrix34ff",
+    "size": 640,
+    "instructions": 160,
+    "calls": [
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4"
+    ],
+    "section_offset": "0x089ec4",
+    "file_offset": "0x089f9c"
+  },
+  {
+    "address": "0x8059ca5c",
+    "name": "WheelPhysicsHolder_applySuspensions",
+    "symbol": "WheelPhysicsHolder_applySuspensions",
+    "size": 1104,
+    "instructions": 276,
+    "calls": [
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4"
+    ],
+    "section_offset": "0x08a1c0",
+    "file_offset": "0x08a298"
+  },
+  {
+    "address": "0x8059cf2c",
+    "name": "KartTire_ct",
+    "symbol": "KartTire_ct",
+    "size": 108,
+    "instructions": 27,
+    "calls": [
+      "0x80555bf4"
+    ],
+    "section_offset": "0x08a690",
+    "file_offset": "0x08a768"
+  },
+  {
+    "address": "0x8059cf98",
+    "name": "KartTire_init",
+    "symbol": "KartTire_init",
+    "size": 100,
+    "instructions": 25,
+    "calls": [
+      "0x80555bf4"
+    ],
+    "section_offset": "0x08a6fc",
+    "file_offset": "0x08a7d4"
+  },
+  {
+    "address": "0x8059cffc",
+    "name": "KartTire_createPhysics",
+    "symbol": "KartTire_createPhysics",
+    "size": 84,
+    "instructions": 21,
+    "calls": [
+      "0x80555bf4",
+      "0x8059c0fc",
+      "0x805b3dfc"
+    ],
+    "section_offset": "0x08a760",
+    "file_offset": "0x08a838"
+  },
+  {
+    "address": "0x8059d050",
+    "name": "KartTire_initBsp",
+    "symbol": "KartTire_initBsp",
+    "size": 8,
+    "instructions": 2,
+    "calls": [],
+    "section_offset": "0x08a7b4",
+    "file_offset": "0x08a88c"
+  },
+  {
+    "address": "0x805a1aa4",
+    "name": "Kart11KartPhysicsFb",
+    "symbol": "__ct__Q24Kart11KartPhysicsFb",
+    "size": 188,
+    "instructions": 47,
+    "calls": [
+      "0x805aa8a8",
+      "0x8059024c",
+      "0x805aaa2c"
+    ],
+    "section_offset": "0x08f208",
+    "file_offset": "0x08f2e0"
+  }
+]

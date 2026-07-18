@@ -1,0 +1,94 @@
+{
+  "total_functions": 301,
+  "batch1_2_count": 100,
+  "batch3_count": 201,
+  "address_range": {
+    "start": "0x8056731c",
+    "end": "0x80590000"
+  },
+  "gaps": [
+    {
+      "after": "0x805685b4",
+      "before": "0x80575a44",
+      "gap_size": 54240
+    },
+    {
+      "after": "0x80575aa8",
+      "before": "0x80575b38",
+      "gap_size": 80
+    },
+    {
+      "after": "0x80575b38",
+      "before": "0x80575d7c",
+      "gap_size": 272
+    },
+    {
+      "after": "0x80575ee8",
+      "before": "0x8057616c",
+      "gap_size": 340
+    },
+    {
+      "after": "0x8057616c",
+      "before": "0x805763e4",
+      "gap_size": 436
+    },
+    {
+      "after": "0x805764fc",
+      "before": "0x805766b8",
+      "gap_size": 52
+    },
+    {
+      "after": "0x80576afc",
+      "before": "0x80577fc4",
+      "gap_size": 5256
+    },
+    {
+      "after": "0x8057811c",
+      "before": "0x8057829c",
+      "gap_size": 320
+    },
+    {
+      "after": "0x805788dc",
+      "before": "0x8057a140",
+      "gap_size": 1940
+    },
+    {
+      "after": "0x8057ab68",
+      "before": "0x8057b9bc",
+      "gap_size": 2452
+    },
+    {
+      "after": "0x8058477c",
+      "before": "0x80584970",
+      "gap_size": 8
+    },
+    {
+      "after": "0x80587d40",
+      "before": "0x80587da8",
+      "gap_size": 4
+    },
+    {
+      "after": "0x8058dc4c",
+      "before": "0x8058dc98",
+      "gap_size": 12
+    },
+    {
+      "after": "0x8058df30",
+      "before": "0x8058dfbc",
+      "gap_size": 28
+    },
+    {
+      "after": "0x8058ee88",
+      "before": "0x8058eefc",
+      "gap_size": 8
+    },
+    {
+      "after": "0x8058f08c",
+      "before": "0x8058f24c",
+      "gap_size": 24
+    }
+  ],
+  "failed_functions": [],
+  "completion_status": "complete",
+  "notes": "Physics functions from StaticR.rel decompiled in 3 batches. Batch 3 covers 0x80581a58 to 0x80590000."
+}

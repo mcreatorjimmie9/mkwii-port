@@ -1,91 +1,62 @@
 {
-  "batch": "Physics_batch_1",
-  "generated": "2025-06-18",
-  "total_functions": 50,
-  "named_functions": 50,
-  "unnamed_functions": 4,
+  "module": "Physics",
+  "total_functions_in_manifest": 301,
+  "total_named": 301,
+  "total_unnamed": 0,
+  "previously_named": 50,
+  "newly_named_this_batch": 251,
   "confidence_breakdown": {
-    "certain": 23,
-    "likely": 0,
-    "uncertain": 4,
-    "guess": 23
+    "guess": 109,
+    "uncertain": 110,
+    "certain": 58,
+    "confident": 24
   },
-  "sources_used": {
-    "mkw_structures_player_h": {
-      "count": 23,
-      "description": "Exact PAL address matches from SeekyCt/mkw-structures player.h comment annotations"
-    },
-    "dolphin_symbols": {
-      "count": 0,
-      "description": "File not present (data/symbols/dolphin_symbols.json does not exist)"
-    },
-    "gecko_codes": {
-      "count": 0,
-      "description": "No matching addresses found in gecko_codes.json for the 0x8056xxxx-0x8057xxxx range"
-    },
-    "global_map": {
-      "count": 0,
-      "description": "File not present (data/symbols/global_map.json does not exist)"
-    },
-    "code_analysis": {
-      "count": 27,
-      "description": "Pseudocode pattern analysis: linked list operations, vtable calls, virtual destructor patterns, effect spawning with type IDs"
-    }
+  "class_distribution": {
+    "PlayerSub10": 124,
+    "unknown": 90,
+    "EffectGroup/Entry": 23,
+    "PlayerSub10Bike": 21,
+    "vtable_stubs": 20,
+    "PlayerTrick": 9,
+    "PlayerBoost": 7,
+    "PlayerTrickBike": 4,
+    "PlayerSub10Kart": 2,
+    "PlayerPhysics": 1
   },
-  "classes_identified": {
-    "PlayerTrick": {
-      "methods_found": 8,
-      "addresses": [
-        "0x80575a44", "0x80575aa8", "0x80575b38", "0x80575d7c",
-        "0x80575ee8", "0x8057616c", "0x805763e4", "0x805764fc", "0x805766b8"
-      ],
-      "source": "mkw-structures player.h (certain)"
-    },
-    "PlayerTrickBike": {
-      "methods_found": 4,
-      "addresses": ["0x80576758", "0x8057689c", "0x80576994", "0x80576afc"],
-      "source": "mkw-structures player.h (certain)"
-    },
-    "PlayerSub10": {
-      "methods_found": 8,
-      "addresses": [
-        "0x80577fc4", "0x8057829c", "0x805784d4", "0x805788dc",
-        "0x8057a140", "0x8057a8b4", "0x8057ab68", "0x8057b9bc", "0x8057c3d4"
-      ],
-      "source": "mkw-structures player.h (certain)"
-    },
-    "PlayerBoost": {
-      "methods_found": 1,
-      "addresses": ["0x8057811c"],
-      "source": "mkw-structures player.h (certain)"
-    },
-    "EffectGroup (unknown class)": {
-      "methods_found": 23,
-      "confidence": "guess",
-      "description": "27 functions in 0x8056731c-0x805685b4 range operate on a global linked-list collection. Pattern: template-based effect spawning with type IDs 0-6, list CRUD operations, and 4 identical virtual destructors. Likely a physics particle/effect manager but class name unconfirmed.",
-      "addresses": [
-        "0x8056731c", "0x80567514", "0x80567594", "0x805675f8",
-        "0x80567648", "0x8056774c", "0x805677cc", "0x805678b4",
-        "0x80567920", "0x80567978", "0x805679d0", "0x80567b58",
-        "0x80567bac", "0x80567c10", "0x80567c88", "0x80567d00",
-        "0x80567fac", "0x80567fec", "0x8056802c", "0x8056806c",
-        "0x805680ac", "0x8056819c", "0x80568284", "0x8056836c",
-        "0x80568454", "0x80568504", "0x805685b4"
-      ]
-    }
+  "source_breakdown": {
+    "code_analysis": 239,
+    "mkw-structures player.h": 61,
+    "cross_reference (known call target)": 1
   },
-  "key_discoveries": [
-    "23 of 50 functions (46%) have exact PAL address matches in mkw-structures player.h, providing certain names",
-    "The 27 functions at 0x8056731c-0x805685b4 form a cohesive group managing a global linked-list collection, likely a physics particle/effect system",
-    "7 effect spawner variants (0x805680ac-0x805685b4) call a shared template creator (0x805679d0) with different type IDs (0, 1, 3, 4, 5, 6, or param)",
-    "4 identical virtual destructors (0x80567fac, 0x80567fec, 0x8056802c, 0x8056806c) belong to unknown small classes within the effect system",
-    "The effect spawners save/restore position data at object offsets 0x18/0x1c and load target position from 0x100/0x104",
-    "PlayerSub10::update (0x805788dc) is the largest function at 4304 bytes with 1076 instructions, serving as the main physics update loop"
-  ],
-  "address_range_coverage": {
-    "0x8056731c-0x805685b4": "EffectGroup system (27 functions, guess confidence)",
-    "0x80575a44-0x80576afc": "PlayerTrick + PlayerTrickBike (13 functions, certain)",
-    "0x80577fc4-0x805784d4": "PlayerSub10 ctor + PlayerBoost dtor + setTurnParams + init (4 functions, certain)",
-    "0x805788dc-0x8057c3d4": "PlayerSub10 update + core physics (6 functions, certain)"
+  "naming_methodology": {
+    "mkw_structures_player_h": "Direct address match from annotated C++ header \u2014 highest confidence (certain)",
+    "dolphin_symbols": "Exact address match from symbol database (0 matches in this batch)",
+    "call_target_analysis": "Identified by which known functions are called (e.g., calls releaseMt = drift-related)",
+    "field_access_patterns": "Identified by which struct offsets are read/written (e.g., 0x192 = crushTimer)",
+    "fpr_usage_analysis": "Heavy FPR usage = vector math/physics; GPR-only = data management",
+    "code_structure": "Function size, vtable dispatch patterns, guard check sequences"
+  },
+  "key_findings": {
+    "playerSub10_methods": "26 methods identified via player.h direct match, including core update chain (updateRotation, updateVehicleRotationVector, updateUps, hop, updateManualDrift, updateAutoDrift)",
+    "drift_subsystem": "8 drift helper functions identified: initDriftAuto, initDriftForced, endDrift, vec3CrossMagnitude, updateDriftAngle, initDriftAngle, updateAutoDriftAngle, computeProjectedSpeed",
+    "boost_activation_variants": "5 boost activation variants: activateBoostSlot (generic), activateBoostMushroomClean (ink-cleanup), activateBoostStart, activateBoostZipperInternal, activateBoostSsmt",
+    "status_effect_systems": "12 functions for status effects: updateStar, deactivateStar, startMega, updateMega, startCrush, updateCrush, endCrush, updateBullet, updateInvincibility, 3 squish functions",
+    "lightning_system": "5 functions: applyLightning, applyLightningEffect, applyLightningByCharacter, resetLightningEffect x2, applyLightningWithDuration",
+    "playerSub10Bike_overrides": "10 bike virtual overrides: PlayerSub10Bike constructor, setTurnParams, init, updateVehicleRotationVector, updateWheelie, updateMtCharge, cancelWheelie variants, getWheelieSoftSpeedLimitBonus, startWheelie",
+    "playerBoost_class": "PlayerBoost::update identified (568B, zero external calls, pure boost state machine)",
+    "playerPhysics_update": "PlayerPhysics::update identified at 0x805899cc (1496B, 35 calls, orchestrates all physics subsystems)"
+  },
+  "address_ranges": {
+    "EffectGroup": "0x8056731c - 0x805685b4",
+    "PlayerTrick": "0x80575a44 - 0x80576afc",
+    "PlayerSub10_core": "0x80577fc4 - 0x8057c3d4",
+    "PlayerSub10_update_chain": "0x8057c5e8 - 0x8057ec28 (speed, rotation, drift helpers)",
+    "PlayerSub10_boost": "0x8057f090 - 0x80580b14 (boost activation variants)",
+    "PlayerSub10_status": "0x80580438 - 0x805819a8 (lightning, star, mega, crush, bullet, squish)",
+    "PlayerSub10_remaining": "0x80581c90 - 0x805899cc (TC, respawn, ink, jumpPad, wheelie)",
+    "PlayerSub10Bike": "0x80587500 - 0x805897d8 (bike virtual overrides)",
+    "PlayerBoost_class": "0x80588e64 - 0x80589964",
+    "PlayerPhysics": "0x805899cc - 0x8058def0",
+    "Wheel/Collision": "0x8058e638 - 0x8058ff20"
   }
 }

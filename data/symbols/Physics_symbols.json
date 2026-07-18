@@ -81,7 +81,7 @@
     "address": "0x80567c10",
     "name": "EffectGroup_tryAddEntry",
     "confidence": "guess",
-    "source": "Code analysis: conditional list insertion — checks r3 != 0, r31 > 0, clears entry and calls allocator"
+    "source": "Code analysis: conditional list insertion \u2014 checks r3 != 0, r31 > 0, clears entry and calls allocator"
   },
   {
     "address": "0x80567c88",
@@ -99,25 +99,25 @@
     "address": "0x80567fac",
     "name": "unknown_0x80567fac",
     "confidence": "uncertain",
-    "source": "Code analysis: virtual destructor pattern (check r3!=null, r4>0, call allocator) — identical structure to PlayerBoost_dtor at 0x8057811c"
+    "source": "Code analysis: virtual destructor pattern (check r3!=null, r4>0, call allocator) \u2014 identical structure to PlayerBoost_dtor at 0x8057811c"
   },
   {
     "address": "0x80567fec",
     "name": "unknown_0x80567fec",
     "confidence": "uncertain",
-    "source": "Code analysis: virtual destructor pattern — identical to 0x80567fac"
+    "source": "Code analysis: virtual destructor pattern \u2014 identical to 0x80567fac"
   },
   {
     "address": "0x8056802c",
     "name": "unknown_0x8056802c",
     "confidence": "uncertain",
-    "source": "Code analysis: virtual destructor pattern — identical to 0x80567fac"
+    "source": "Code analysis: virtual destructor pattern \u2014 identical to 0x80567fac"
   },
   {
     "address": "0x8056806c",
     "name": "unknown_0x8056806c",
     "confidence": "uncertain",
-    "source": "Code analysis: virtual destructor pattern — identical to 0x80567fac"
+    "source": "Code analysis: virtual destructor pattern \u2014 identical to 0x80567fac"
   },
   {
     "address": "0x805680ac",
@@ -298,5 +298,1511 @@
     "name": "PlayerSub10::updateOffroad",
     "confidence": "certain",
     "source": "mkw-structures player.h line 169"
+  },
+  {
+    "address": "0x8057c5e8",
+    "name": "PlayerSub10::applyWheelSlipToSpeed",
+    "confidence": "guess",
+    "source": "Code analysis: between updateOffroad and updateRotation, reads fabs(0x15c), calls getBspWheel twice, reads wheel offset 0x1c, multiplies into vehicleSpeed at 0x20. Guard: vtable bit 20 or state bit 4. Wheel slip speed reduction."
+  },
+  {
+    "address": "0x8057c69c",
+    "name": "PlayerSub10::updateRotation",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 170"
+  },
+  {
+    "address": "0x8057cdd4",
+    "name": "PlayerSub10::computeProjectedSpeed",
+    "confidence": "guess",
+    "source": "Code analysis: calls getSpeed for direction at 0xf0, dot product with vector at 0x5c/0x60/0x64, sqrt normalization, clamps by factor from r30 param. Called during rotation update."
+  },
+  {
+    "address": "0x8057cf0c",
+    "name": "PlayerSub10::updateVehicleRotationVector",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 155"
+  },
+  {
+    "address": "0x8057d1d4",
+    "name": "PlayerSub10::updateStandstillBoostRot",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 171"
+  },
+  {
+    "address": "0x8057d398",
+    "name": "PlayerSub10::updateUps",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 172"
+  },
+  {
+    "address": "0x8057d888",
+    "name": "PlayerSub10::updateUpsWhileAirborne",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 154"
+  },
+  {
+    "address": "0x8057da5c",
+    "name": "PlayerSub10::hop",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 160"
+  },
+  {
+    "address": "0x8057dc44",
+    "name": "PlayerSub10::updateManualDrift",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 173"
+  },
+  {
+    "address": "0x8057e0dc",
+    "name": "PlayerSub10::updateAutoDrift",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 174"
+  },
+  {
+    "address": "0x8057e3f4",
+    "name": "PlayerSub10::updateAutoDriftAngle",
+    "confidence": "confident",
+    "source": "Code analysis: called by updateManualDrift (0x8057dc44). Checks getVehicleType for bike, cross product of vectors at 0xe0-0xe8 with matrix at 0xf0, updates outsideDriftAngle at 0x9c with magnitude-scaled result. Sets drift flag bit 4."
+  },
+  {
+    "address": "0x8057e638",
+    "name": "PlayerSub10::initDriftAuto",
+    "confidence": "confident",
+    "source": "Code analysis: checks vtable bit 24 (0x01000000) and bit 13 (0x00002000) to set drift direction at 0xcc to -1 or 1. Clears flag, sets drift bit 8, stores to driftState 0xfc and mtBoost 0x104. Determines drift direction from player state."
+  },
+  {
+    "address": "0x8057e6f4",
+    "name": "PlayerSub10::initDriftForced",
+    "confidence": "confident",
+    "source": "Code analysis: always sets drift direction to 1 (right), clears flags, sets drift bit 8, stores to 0xfc and 0x104. Identical to initDriftAuto but unconditionally sets direction=1. Used for forced drift start."
+  },
+  {
+    "address": "0x8057e77c",
+    "name": "PlayerSub10::endDrift",
+    "confidence": "confident",
+    "source": "Code analysis: calls releaseMt(0, 0) at 0x80582f9c, clears 0xcc (driftDir), 0xd0, 0xfc (driftState), 0x100, 0xfe. Sets bit 2 at 0x254 (specialFloor). Full drift state reset."
+  },
+  {
+    "address": "0x8057e804",
+    "name": "PlayerSub10::updateHopAndSlipdrift",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 175"
+  },
+  {
+    "address": "0x8057e99c",
+    "name": "PlayerSub10::vec3CrossMagnitude",
+    "confidence": "guess",
+    "source": "Code analysis: pure math helper taking two Vec3 (r4, r5), computes cross product, then sqrt of dot(cross, cross). Returns float magnitude of cross product. No player-specific access."
+  },
+  {
+    "address": "0x8057eab8",
+    "name": "PlayerSub10::updateDriftAngle",
+    "confidence": "confident",
+    "source": "Code analysis: called by updateManualDrift (0x8057dc44). Checks global frame counter at 0x78, reads drift direction from 0xcc (-1 or 1), adjusts outsideDriftAngle at 0x9c by fixed increment per frame. Clamps to max. Calls vtable method at end."
+  },
+  {
+    "address": "0x8057ec28",
+    "name": "PlayerSub10::initDriftAngle",
+    "confidence": "confident",
+    "source": "Code analysis: clears all drift state (0xcc, 0xd0, 0xfc, 0x100, 0xfe), calls getSpeed (0x80590d60), gets speed at 0x68, clamps outsideDriftAngle at 0x9c by adding/subtracting speed. Initializes drift angle from current speed."
+  },
+  {
+    "address": "0x8057f090",
+    "name": "PlayerSub10::activateBoostSlot",
+    "confidence": "guess",
+    "source": "Code analysis: generic boost activation. Takes slot index (r4) and duration (r5). Guard checks on vtable/state flags. Table lookup via getPlayerIdx, rumble (0x806a5d24), sound (0x80708a6c), stores duration at 0x10c+slot*2, sets bit in 0x118, stores float at 0x124, plays sound (0x807cbb5c), calls 0x80591084(4,0,1)."
+  },
+  {
+    "address": "0x8057f1d0",
+    "name": "PlayerSub10::activateBoostMushroomClean",
+    "confidence": "guess",
+    "source": "Code analysis: boost activation for mushroom (slot 1, bit 2 at 0x118, stores at 0x110). Extra: clears 0x18e (ink timer) if flag 0x10000000 set, stores 0 to 0x148. Sets bit 0x80 in state. Same guard/rumble/sound pattern as activateBoostSlot."
+  },
+  {
+    "address": "0x8057f3d8",
+    "name": "PlayerSub10::activateMushroom",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 176"
+  },
+  {
+    "address": "0x8057f630",
+    "name": "PlayerSub10::activateBoostStart",
+    "confidence": "guess",
+    "source": "Code analysis: boost activation variant. Sets bit 0x8000 in state (offset 4), stores duration at 0x1c4 and 0x148 (from global). Sets bit 0x80 in state. Calls 0x80708c08 (different sound). Uses rumble with character param. Calls 0x8059045c(4,1). Start boost pattern."
+  },
+  {
+    "address": "0x8057f7a8",
+    "name": "PlayerSub10::endTrick",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 177"
+  },
+  {
+    "address": "0x8057f96c",
+    "name": "PlayerSub10::activateZipperBoost",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 178"
+  },
+  {
+    "address": "0x8057fb6c",
+    "name": "PlayerSub10::activateBoostZipperInternal",
+    "confidence": "guess",
+    "source": "Code analysis: boost activation for zipper (slot 0, bit 0 at 0x118, stores at 0x10c). After standard boost activation: calls 0x8059045c(3,1) then 0x80591800(0x1e). Same guard/rumble/sound pattern."
+  },
+  {
+    "address": "0x8057fd18",
+    "name": "PlayerSub10::tryStartJumpPad",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 179"
+  },
+  {
+    "address": "0x805800bc",
+    "name": "PlayerSub10::activateBoostSsmt",
+    "confidence": "guess",
+    "source": "Code analysis: boost activation for SSMT (slot 0, bit 0 at 0x118, stores at 0x10c). After standard boost activation: stores global frame to 0x23a, calls 0x8059045c(3,1). Same guard/rumble/sound pattern as 0x8057fb6c but stores to 0x23a instead of 0x80591800."
+  },
+  {
+    "address": "0x80580268",
+    "name": "PlayerSub10::activateStar",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 146"
+  },
+  {
+    "address": "0x80580438",
+    "name": "PlayerSub10::applyLightning",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 180"
+  },
+  {
+    "address": "0x8058051c",
+    "name": "PlayerSub10::applyLightningByCharacter",
+    "confidence": "confident",
+    "source": "Code analysis: calls getScale (0x8059148c), reads character body type from global 0xb70, computes duration from lookup table (offset 0xb + index, table at global), calls applyLightningEffect (0x80580778) with computed frames. Character-dependent lightning duration."
+  },
+  {
+    "address": "0x805805ec",
+    "name": "PlayerSub10::resetLightningEffect",
+    "confidence": "confident",
+    "source": "Code analysis: calls getPlayerIdx, looks up player params, stores 0 to params[0x50], then calls applyLightningEffect(frames=0x264, 0, 1). Resets lightning by setting params and applying with fixed duration."
+  },
+  {
+    "address": "0x80580648",
+    "name": "PlayerSub10::resetLightningEffect2",
+    "confidence": "confident",
+    "source": "Code analysis: byte-identical to 0x805805ec. Calls getPlayerIdx, stores 0 to params[0x50], calls applyLightningEffect(0x264, 0, 1). Duplicate entry \u2014 possibly different calling context or linker artifact."
+  },
+  {
+    "address": "0x805806a4",
+    "name": "PlayerSub10::applyLightningWithDuration",
+    "confidence": "confident",
+    "source": "Code analysis: takes explicit duration param (r4). Reads character body type from global 0xb70, computes adjusted duration from lookup table, calls applyLightningEffect with computed frames. Like 0x8058051c but with explicit duration override in r4."
+  },
+  {
+    "address": "0x80580778",
+    "name": "PlayerSub10::applyLightningEffect",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 181"
+  },
+  {
+    "address": "0x80580998",
+    "name": "PlayerSub10::updateStar",
+    "confidence": "confident",
+    "source": "Code analysis: checks bit 0x80 at state 0xc (star active), decrements 0x18c (starTimer). On expire: clears flag, plays sound 0x116 via vtable 0xe0, resets 0x18c, calls 0x805b4f48(0). Updates scale at 0x178 by decrementing by 0x44(float) each frame, clamped to 0."
+  },
+  {
+    "address": "0x80580a84",
+    "name": "PlayerSub10::deactivateStar",
+    "confidence": "confident",
+    "source": "Code analysis: clears flag at 0xc (star/mega active), plays sound 0x116 via vtable 0xe0, resets 0x18c (starTimer) to 0, calls 0x805b4f48(0). If r4(param) != 0: resets scale at 0x178 to 1.0. Immediate star deactivation."
+  },
+  {
+    "address": "0x80580b14",
+    "name": "PlayerSub10::activateMega",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 147"
+  },
+  {
+    "address": "0x80580cdc",
+    "name": "PlayerSub10::startMega",
+    "confidence": "confident",
+    "source": "Code analysis: clears flag at 0xc, looks up player params via getPlayerIdx*0x248, calls 0x80795f64 (mega activation sound), plays sound 0x113 via vtable 0xe0, sets 0x194 (MegaTimer), calls 0x80598378 with 1.0, sets 0x196 flag, calls 0x805b4f48(1). If r4==0: resets 0x17c (megaScale) to 1.0."
+  },
+  {
+    "address": "0x80580dc0",
+    "name": "PlayerSub10::updateMega",
+    "confidence": "confident",
+    "source": "Code analysis: checks bit 0x8000 at 0xc (mega active), decrements 0x194 (MegaTimer). On expire: clears flag, plays sound 0x113, resets 0x194, calls 0x80598378, sets 0x196, calls 0x805b4f48(1). Updates 0x17c (megaScale) by adding 0x3c(float) each frame, clamped by getBspWheel(0x184)."
+  },
+  {
+    "address": "0x80580f28",
+    "name": "PlayerSub10::startCrush",
+    "confidence": "confident",
+    "source": "Code analysis: sets bit 1 at 0xc (crush flag), plays sound 0x1a4 via vtable 0xe0, stores r4 (duration) at 0x192 (crushTimer), calls 0x805b4e40. Starts crush effect with given duration."
+  },
+  {
+    "address": "0x80580f9c",
+    "name": "PlayerSub10::updateCrush",
+    "confidence": "confident",
+    "source": "Code analysis: checks bit 0x10000 at 0xc (crush active), decrements 0x192 (crushTimer). On expire: clears both crush flags (0x10000), plays sound 0x1a5 via vtable 0xe0, calls 0x805b4e74. Crush timer countdown."
+  },
+  {
+    "address": "0x80581034",
+    "name": "PlayerSub10::endCrush",
+    "confidence": "confident",
+    "source": "Code analysis: checks bit 0x10000 at 0xc (crush active), immediately clears crush flag, plays sound 0x1a5 via vtable 0xe0, calls 0x805b4e74. Immediate crush cancellation without timer check."
+  },
+  {
+    "address": "0x805810a8",
+    "name": "PlayerSub10::updateBullet",
+    "confidence": "confident",
+    "source": "Code analysis: decrements 0x152 (bullet timer), checks player type flag (0x3a==1), gets state via 0x90de4, checks if 0xb (stunned state). If speed < threshold: calls vtable respawn. Checks 0x40000 flag (bullet), sets state 0xb via 0x90d9c. Handles rumble patterns for character types (global 0xb70), calls 0x806ac8a8 or 0x806acd64. Sets 0x154 (bullet active byte)."
+  },
+  {
+    "address": "0x805813e8",
+    "name": "PlayerSub10::updateInvincibility",
+    "confidence": "confident",
+    "source": "Code analysis: checks 0x40000 flag (star invincibility), decrements 0x160 (invinc timer). On expire: plays sound 0x1aa, clears flag, calls 0x807960a0. Second block: checks 0x20000 flag, increments 0x21c frame counter. At threshold 0x5a: calls 0x805917c4. At final threshold: clears 0x20000, plays sound 0x1a/0x1b, calls computeStartBoost (0x80595cf4). Star invincibility + post-star start boost sequence."
+  },
+  {
+    "address": "0x8058160c",
+    "name": "PlayerSub10::updatePlayerScale",
+    "confidence": "guess",
+    "source": "Code analysis: gets PlayerPhysics at 0x260, calls 0x805b4ff8 (physics accessor), does 3x3 matrix multiply with speed data (0x160, 0x178, 0x17c, 0x180). Stores results at 0x170, 0x174, 0x184 (scale factors). Calls 0x805916a4 if denominator nonzero. Computes display scale from speed/physics matrices."
+  },
+  {
+    "address": "0x8058173c",
+    "name": "PlayerSub10::startSquish",
+    "confidence": "guess",
+    "source": "Code analysis: sets bit 0x100 at state offset 8, stores r4 (duration) at 0x1a8 (squish timer), calls 0x805910cc + 0x8056c7d4 (external effect start). Small function (60 bytes), direct timer set with effect activation."
+  },
+  {
+    "address": "0x80581778",
+    "name": "PlayerSub10::tryStartSquish",
+    "confidence": "guess",
+    "source": "Code analysis: checks state 0x14 for bit 3 (0x08), if not set: sets bits 1 and 7 at 0x14, resets 0x1ac to 0. Then checks character body type from global 0xb70. If valid: sets bit 0x100 at offset 8, stores duration at 0x1a8, calls 0x805910cc + 0x8056c7d4. Guard-protected squish start."
+  },
+  {
+    "address": "0x80581824",
+    "name": "PlayerSub10::updateSquish",
+    "confidence": "guess",
+    "source": "Code analysis: checks bit 0x100 at offset 8 (squish active), decrements 0x1a8 (squish timer). On expire: clears bit 0x100, calls 0x805910cc + 0x8056c7e4 (effect end). Then: checks global 0xb78, state flags (0x10000, 0x08, 0x10, 0x6000), increments 0x1ac (grow-back timer). At threshold: calls 0x80591834(6), resets 0x1ac, clears/set bits at 0x14. Squish timer + grow-back animation."
+  },
+  {
+    "address": "0x8058196c",
+    "name": "PlayerSub10::cancelSquish",
+    "confidence": "guess",
+    "source": "Code analysis: immediately clears bit 0x100 at offset 8, calls 0x805910cc + 0x8056c7e4 with r4=1 (immediate end). Minimal function (60 bytes), force-cancels squish without timer check."
+  },
+  {
+    "address": "0x805819a8",
+    "name": "PlayerSub10::applySquish",
+    "confidence": "guess",
+    "source": "Code analysis: checks character body type from global 0xb70. If valid: sets bit 0x100 at offset 8, stores global frame as duration at 0x1a8, calls 0x805910cc + 0x8056c7d4. External squish trigger (from Thwomp/Mega hitting player)."
+  },
+  {
+    "address": "0x80581a58",
+    "name": "PlayerSub10::applyInk",
+    "confidence": "certain",
+    "source": "mkw-structures player.h: virtual applyInk(int unk); // 80581a58"
+  },
+  {
+    "address": "0x80581b1c",
+    "name": "PlayerSub10::updateInk",
+    "confidence": "certain",
+    "source": "mkw-structures player.h: updateInk(); // 80581b1c"
+  },
+  {
+    "address": "0x80581c90",
+    "name": "PlayerSub10::activateTc",
+    "confidence": "confident",
+    "source": "Code analysis: 1180B, 30 calls. Dual boost activation pattern (two separate rumble+sound+duration cycles), calls startExternalEffect (0x8056c7d4), rumble patterns 0x806b4d40. TC (Thunder Cloud) has complex dual-activation behavior."
+  },
+  {
+    "address": "0x8058212c",
+    "name": "PlayerSub10::applyStartBoost",
+    "confidence": "certain",
+    "source": "mkw-structures player.h: applyStartBoost(int frames); // 8058212c"
+  },
+  {
+    "address": "0x80582278",
+    "name": "PlayerSub10::endTcBoost",
+    "confidence": "guess",
+    "source": "Code analysis: 300B, calls setPlayerState2 (0x8059045c) and playSound (0x805907f0). State/sound management for ending a TC boost phase."
+  },
+  {
+    "address": "0x805823a4",
+    "name": "PlayerSub10::handleTcShock",
+    "confidence": "guess",
+    "source": "Code analysis: 396B, calls getAbsValue + getHitboxGroup + vtable indirect. TC shock effect when cloud strikes player."
+  },
+  {
+    "address": "0x80582530",
+    "name": "PlayerSub10::tryEndJumpPad",
+    "confidence": "certain",
+    "source": "mkw-structures player.h: tryEndJumpPad(); // 80582530"
+  },
+  {
+    "address": "0x80582694",
+    "name": "PlayerSub10::updateBoost",
+    "confidence": "certain",
+    "source": "mkw-structures player.h: updateBoost(); // 80582694, always inlined"
+  },
+  {
+    "address": "0x80582804",
+    "name": "PlayerSub10::endTcShrink",
+    "confidence": "guess",
+    "source": "Code analysis: 200B, calls setPlayerState + setSpeedFromTable (0x80590e80) + state functions. Ends TC shrink effect and restores state."
+  },
+  {
+    "address": "0x805828cc",
+    "name": "PlayerSub10::activateBulletInternal",
+    "confidence": "confident",
+    "source": "Code analysis: 1292B, 30 calls. Two identical boost activation cycles (rumble 0x806b5188, sound, duration, endEffect 0x80591800). Bullet Bill gives dual boost. Matches player.h activateBullet at nearby 0x805858ac."
+  },
+  {
+    "address": "0x80582dd8",
+    "name": "PlayerSub10::getBoostState",
+    "confidence": "guess",
+    "source": "Code analysis: 92B, calls two state accessor functions (0x80590e98, 0x80591090). Returns boost-related state."
+  },
+  {
+    "address": "0x80582e34",
+    "name": "PlayerSub10::computeSpeedFactor",
+    "confidence": "guess",
+    "source": "Code analysis: 360B, calls getSpeed twice, FPR-heavy. Computes a speed ratio/factor from speed vector, likely for KCL speed factor or offroad factor."
+  },
+  {
+    "address": "0x80582f9c",
+    "name": "PlayerSub10::releaseMt",
+    "confidence": "certain",
+    "source": "mkw-structures player.h: releaseMt(int unk0, int unk1); // 80582f9c"
+  },
+  {
+    "address": "0x805832e4",
+    "name": "PlayerSub10::getDriftBoostState",
+    "confidence": "guess",
+    "source": "Code analysis: 320B, calls state accessors (0x80590e98, 0x80591090). Reads and returns drift/boost state information."
+  },
+  {
+    "address": "0x80583424",
+    "name": "PlayerSub10::getPlayerIndex",
+    "confidence": "guess",
+    "source": "Code analysis: 104B, calls getPlayerIdx (0x80590a9c). Simple wrapper returning player index."
+  },
+  {
+    "address": "0x8058348c",
+    "name": "PlayerSub10::endTrickWithEffects",
+    "confidence": "guess",
+    "source": "Code analysis: 460B, calls state accessors + PlayerTrick::end (0x805766b8) + 0x805b6c90 (collision effect). Ends trick with additional visual/collision effects."
+  },
+  {
+    "address": "0x80583658",
+    "name": "PlayerSub10::handleCollisionEffect",
+    "confidence": "guess",
+    "source": "Code analysis: 372B, calls state accessors + 0x805b7964 (collision handler). Processes collision side effects like trick ending."
+  },
+  {
+    "address": "0x805837cc",
+    "name": "PlayerSub10::handleMegaCrush",
+    "confidence": "confident",
+    "source": "Code analysis: 956B, calls getHitboxGroup, WheelPhysics_reset (0x805b4f48), WheelPhysics_method2 (0x805b4e74), playMegaSound (0x80795f64), setScaleTarget (0x80598378), PlayerTrick::end (0x805766b8). Full mega crush handling: reset wheels, play sound, scale target, end trick."
+  },
+  {
+    "address": "0x80583b88",
+    "name": "PlayerSub10::updateStickyRoad",
+    "confidence": "certain",
+    "source": "mkw-structures player.h: updateStickyRoad(); // 80583b88"
+  },
+  {
+    "address": "0x80583f2c",
+    "name": "PlayerSub10::sqrtHelper",
+    "confidence": "guess",
+    "source": "Code analysis: 64B, calls sqrtf (0x80555bf4) only. Simple sqrt wrapper."
+  },
+  {
+    "address": "0x80583f6c",
+    "name": "PlayerSub10::computeSpeedMagnitude",
+    "confidence": "guess",
+    "source": "Code analysis: 280B, calls sqrtf + getSpeed twice + 0x8078cfdc. Computes magnitude of speed vector with clamping."
+  },
+  {
+    "address": "0x80584084",
+    "name": "PlayerSub10::setInitialPhysicsValues",
+    "confidence": "confident",
+    "source": "Code analysis: 752B, 16 calls to diverse physics functions (setPlayerPosition, setPlayerRotation, setScaleTarget, etc). Matches player.h setInitialPhysicsValues at nearby 0x80584044. This is likely the internal helper called by 0x80584044."
+  },
+  {
+    "address": "0x80584374",
+    "name": "unknown_0x80584374",
+    "confidence": "uncertain",
+    "source": "size=788, calls=27, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x80584688",
+    "name": "unknown_0x80584688",
+    "confidence": "uncertain",
+    "source": "size=244, calls=3, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x8058477c",
+    "name": "unknown_0x8058477c",
+    "confidence": "uncertain",
+    "source": "size=492, calls=15, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x80584970",
+    "name": "unknown_0x80584970",
+    "confidence": "uncertain",
+    "source": "size=92, calls=4, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x805849cc",
+    "name": "PlayerSub10::stateAccessor",
+    "confidence": "guess",
+    "source": "State field accessor. size=972, calls=27, fpr=1, vtable=1"
+  },
+  {
+    "address": "0x80584d98",
+    "name": "PlayerSub10::stateAccessor",
+    "confidence": "guess",
+    "source": "State field accessor. size=1392, calls=13, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x80585308",
+    "name": "PlayerSub10::stateAccessor",
+    "confidence": "guess",
+    "source": "State field accessor. size=212, calls=3, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x805853dc",
+    "name": "unknown_0x805853dc",
+    "confidence": "uncertain",
+    "source": "size=544, calls=4, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x805855fc",
+    "name": "unknown_0x805855fc",
+    "confidence": "uncertain",
+    "source": "size=752, calls=12, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x805858ec",
+    "name": "PlayerSub10::wheelSpeedHelper",
+    "confidence": "guess",
+    "source": "Uses getBspWheel + getSpeed. size=344, calls=14, fpr=1, vtable=1"
+  },
+  {
+    "address": "0x80585a44",
+    "name": "unknown_0x80585a44",
+    "confidence": "uncertain",
+    "source": "Tiny function (36B, 2 calls). size=36, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x80585a68",
+    "name": "unknown_0x80585a68",
+    "confidence": "uncertain",
+    "source": "size=120, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x80585ae0",
+    "name": "unknown_0x80585ae0",
+    "confidence": "uncertain",
+    "source": "size=88, calls=1, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x80585b38",
+    "name": "unknown_0x80585b38",
+    "confidence": "uncertain",
+    "source": "size=1476, calls=27, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x805860fc",
+    "name": "unknown_0x805860fc",
+    "confidence": "uncertain",
+    "source": "size=1728, calls=28, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x805867bc",
+    "name": "PlayerSub10::bspWheelHelper",
+    "confidence": "guess",
+    "source": "Uses getBspWheel. size=608, calls=14, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x80586a1c",
+    "name": "unknown_0x80586a1c",
+    "confidence": "uncertain",
+    "source": "size=984, calls=13, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x80586df4",
+    "name": "unknown_0x80586df4",
+    "confidence": "uncertain",
+    "source": "size=220, calls=6, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x80586ed0",
+    "name": "PlayerSub10Bike::helper",
+    "confidence": "guess",
+    "source": "Calls bike-specific function 0x80537f4c. size=280, calls=1, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x80586fe8",
+    "name": "unknown_0x80586fe8",
+    "confidence": "uncertain",
+    "source": "size=1304, calls=29, fpr=1, vtable=1"
+  },
+  {
+    "address": "0x80587500",
+    "name": "PlayerSub10Bike::updateSpecialFloor",
+    "confidence": "guess",
+    "source": "Code analysis: 208B, calls getPlayerIdx + 0x805907bc. Bike-specific special floor update."
+  },
+  {
+    "address": "0x805875d0",
+    "name": "PlayerSub10Bike::activateMega",
+    "confidence": "confident",
+    "source": "Code analysis: 1044B, 20 calls. Calls 0x80537f4c (bike-specific init), then boost activation pattern (rumble, sound, duration). This is the PlayerSub10Bike override of activateMega (base at 0x80580b14). Has bike-specific sound (0x80708c08) and calls tryStartJumpPad."
+  },
+  {
+    "address": "0x805879e4",
+    "name": "PlayerSub10Bike::computeWheelieParams",
+    "confidence": "guess",
+    "source": "Code analysis: 396B, 3 calls all to sqrtf. FPR-heavy with no player method calls. Pure math computation for bike wheelie parameters (lean angles, speed limits)."
+  },
+  {
+    "address": "0x80587b70",
+    "name": "PlayerSub10Bike::PlayerSub10Bike",
+    "confidence": "certain",
+    "source": "Code analysis: 72B, calls PlayerSub10::PlayerSub10 (0x80577fc4). Constructor that delegates to parent. Matches player.h PlayerSub10Bike() at 0x80587b30 \u2014 this is a secondary constructor or the actual impl at slightly different address."
+  },
+  {
+    "address": "0x80587bb8",
+    "name": "PlayerSub10Bike::initMath",
+    "confidence": "guess",
+    "source": "Code analysis: 64B, calls sqrtf only. Math initialization helper for bike physics."
+  },
+  {
+    "address": "0x80587bf8",
+    "name": "PlayerSub10Bike::initSubObjects",
+    "confidence": "guess",
+    "source": "Code analysis: 156B, calls PlayerTrick::PlayerTrick (0x80575a44) + 0x805b5500 + 0x805b4b24. Initializes bike sub-objects: trick system and physics components."
+  },
+  {
+    "address": "0x80587c94",
+    "name": "PlayerSub10Bike::setTurnParams",
+    "confidence": "certain",
+    "source": "Code analysis: 172B, calls PlayerSub10::setTurnParams (0x8057829c) + getVehicleType (0x80590a50) + 0x80537f4c. Override: calls parent setTurnParams then bike-specific turn parameter setup. Matches player.h line 312."
+  },
+  {
+    "address": "0x80587d40",
+    "name": "PlayerSub10Bike::init",
+    "confidence": "guess",
+    "source": "Code analysis: 100B, calls PlayerSub10::init (0x805784d4). Simple init override that delegates to parent."
+  },
+  {
+    "address": "0x80587da8",
+    "name": "PlayerSub10Bike::updateVehicleRotationVector",
+    "confidence": "certain",
+    "source": "Code analysis: 1512B, 10 calls. Calls updateStandstillBoostRot (0x8057d1d4), getSpeed, sub_0x80586a1c. Large bike-specific rotation update. Matches player.h line 315: virtual updateVehicleRotationVector(float turn) // 80587d68. This is the actual implementation (0x87da8 is the vtable entry point)."
+  },
+  {
+    "address": "0x80588390",
+    "name": "PlayerSub10Bike::getSoftSpeedLimit",
+    "confidence": "guess",
+    "source": "Code analysis: 164B, calls 0x805907e0 + 0x808677c4. Retrieves soft speed limit from bike-specific stats."
+  },
+  {
+    "address": "0x80588434",
+    "name": "PlayerSub10Bike::updateWheelie",
+    "confidence": "certain",
+    "source": "Code analysis: 932B, vtable calls + getSpeed. Large function with bike wheelie logic (lean rotation, speed limit bonus). Matches player.h line 317: virtual updateWheelie() // 80587d64. Implementation at 0x88434."
+  },
+  {
+    "address": "0x805887d8",
+    "name": "PlayerSub10Bike::updateMtCharge",
+    "confidence": "certain",
+    "source": "Code analysis: 440B, calls getPlayerType (0x80590434) + vtable calls. Bike-specific MT charge logic. Matches player.h line 318: virtual updateMtCharge() // 80588888. Implementation at 0x887d8."
+  },
+  {
+    "address": "0x80588990",
+    "name": "PlayerSub10Bike::cancelWheelie_v1",
+    "confidence": "guess",
+    "source": "Code analysis: 520B, calls 0x805b6c90 (effect) + PlayerTrick::end + vtable. Bike wheelie cancellation with effect cleanup. One of two cancelWheelie overrides (see 0x80588b30 in player.h)."
+  },
+  {
+    "address": "0x80588b98",
+    "name": "PlayerSub10Bike::cancelWheelie_v2",
+    "confidence": "guess",
+    "source": "Code analysis: 340B, similar to 0x80588990 but simpler. Second cancelWheelie variant for different context."
+  },
+  {
+    "address": "0x80588cec",
+    "name": "PlayerSub10Bike::handleCrushEffect",
+    "confidence": "guess",
+    "source": "Code analysis: 376B, calls handleMegaCrush (0x805837cc) + vtable. Bike-specific crush handling, delegates to mega crush handler."
+  },
+  {
+    "address": "0x80588e64",
+    "name": "PlayerBoost::update",
+    "confidence": "certain",
+    "source": "Code analysis: 568B, NO external calls. Pure logic processing boost types array (frames countdown, multiplier computation). Matches player.h: bool update(bool *unk0); // 80588e24. Actual impl at 0x88e64."
+  },
+  {
+    "address": "0x8058909c",
+    "name": "PlayerBoost::reset_vtableStub",
+    "confidence": "guess",
+    "source": "Code analysis: 84B, two indirect vtable calls. Small vtable dispatch stub in PlayerBoost."
+  },
+  {
+    "address": "0x805890f0",
+    "name": "PlayerBoost::activate_vtableStub",
+    "confidence": "guess",
+    "source": "Code analysis: 104B, three indirect vtable calls. Small vtable dispatch in PlayerBoost."
+  },
+  {
+    "address": "0x80589158",
+    "name": "PlayerBoost::cancelAll_vtableStub",
+    "confidence": "guess",
+    "source": "Code analysis: 168B, five indirect vtable calls. Multi-dispatch vtable stub in PlayerBoost."
+  },
+  {
+    "address": "0x80589200",
+    "name": "PlayerBoost::getter_vtableStub",
+    "confidence": "guess",
+    "source": "Code analysis: 172B, two indirect vtable calls. Getter vtable stub in PlayerBoost."
+  },
+  {
+    "address": "0x805892ac",
+    "name": "PlayerBoost::activateWithRumble",
+    "confidence": "guess",
+    "source": "Code analysis: 156B, calls getPlayerIdx + 0x806aa37c (rumble) + playSound + getHitboxGroup + vtable. Boost activation with rumble feedback."
+  },
+  {
+    "address": "0x80589348",
+    "name": "PlayerSub10::computeScaleFactor",
+    "confidence": "guess",
+    "source": "Code analysis: 248B, calls sqrtf + 0x805903ec + 0x8059c788 + 0x805907bc. Computes a scale factor using sqrt and physics functions."
+  },
+  {
+    "address": "0x80589440",
+    "name": "PlayerSub10Kart::hopWrapper",
+    "confidence": "guess",
+    "source": "Code analysis: 64B, calls hop (0x8057da5c) + 0x80591498. Kart-specific hop wrapper."
+  },
+  {
+    "address": "0x80589480",
+    "name": "PlayerSub10Kart::hopWrapper2",
+    "confidence": "guess",
+    "source": "Code analysis: 64B, identical to 0x80589440. Duplicate hop wrapper."
+  },
+  {
+    "address": "0x805894c0",
+    "name": "PlayerSub10Bike::getWheelieSoftSpeedLimitBonus",
+    "confidence": "certain",
+    "source": "Code analysis: 148B, calls 0x805907e0 + 0x808677c4 + 0x80591498. Bike wheelie speed limit bonus computation. Matches player.h: virtual getWheelieSoftSpeedLimitBonus() // 80588324. Implementation at 0x894c0."
+  },
+  {
+    "address": "0x80589554",
+    "name": "PlayerSub10::getSomeFloat",
+    "confidence": "guess",
+    "source": "Code analysis: 88B, calls 0x80591498 only. Simple float getter wrapper."
+  },
+  {
+    "address": "0x805895ac",
+    "name": "PlayerSub10::getBoolState1",
+    "confidence": "guess",
+    "source": "Code analysis: 96B, calls 0x805914a8 only. Boolean state getter."
+  },
+  {
+    "address": "0x8058960c",
+    "name": "PlayerSub10::getBoolState2",
+    "confidence": "guess",
+    "source": "Code analysis: 96B, identical to 0x805895ac. Boolean state getter."
+  },
+  {
+    "address": "0x8058966c",
+    "name": "PlayerSub10Bike::startWheelie",
+    "confidence": "certain",
+    "source": "Code analysis: 152B, calls 0x805914a8 twice + vtable. Bike wheelie start logic. Matches player.h: virtual startWheelie() // 80588350. Implementation at 0x8966c."
+  },
+  {
+    "address": "0x80589704",
+    "name": "PlayerSub10Bike::~PlayerSub10Bike",
+    "confidence": "certain",
+    "source": "mkw-structures player.h: virtual ~PlayerSub10Bike(); // 80589704"
+  },
+  {
+    "address": "0x80589744",
+    "name": "PlayerSub10Bike::checkWheelie",
+    "confidence": "certain",
+    "source": "mkw-structures player.h: virtual bool checkWheelie(); // 80589744"
+  },
+  {
+    "address": "0x80589798",
+    "name": "PlayerSub10::sqrtf_1arg",
+    "confidence": "guess",
+    "source": "Code analysis: 64B, calls sqrtf only. Single-arg sqrt wrapper."
+  },
+  {
+    "address": "0x805897d8",
+    "name": "PlayerSub10::sqrtf_1arg_v2",
+    "confidence": "guess",
+    "source": "Code analysis: 64B, identical to 0x80589798. Duplicate sqrt wrapper."
+  },
+  {
+    "address": "0x80589818",
+    "name": "PlayerSub10::sqrtf_computed",
+    "confidence": "guess",
+    "source": "Code analysis: 132B, calls sqrtf. Slightly larger sqrt computation with input transformation."
+  },
+  {
+    "address": "0x8058989c",
+    "name": "PlayerSub10::getPlayerAccessor",
+    "confidence": "guess",
+    "source": "Code analysis: 136B, calls 0x805901cc. Player object accessor wrapper."
+  },
+  {
+    "address": "0x80589924",
+    "name": "PlayerSub10::sqrtf_simple",
+    "confidence": "guess",
+    "source": "Code analysis: 64B, calls sqrtf. Minimal sqrt wrapper."
+  },
+  {
+    "address": "0x80589964",
+    "name": "PlayerSub10::sqrtf_clamped",
+    "confidence": "guess",
+    "source": "Code analysis: 104B, calls sqrtf. Sqrt with clamping logic."
+  },
+  {
+    "address": "0x805899cc",
+    "name": "PlayerPhysics::update",
+    "confidence": "certain",
+    "source": "Code analysis: 1496B, 35 calls. Massive function calling physics subsystems (0x80589fa4=init, 0x8058be60=wheelInit, 0x8058b1d8=collision, 0x8058d5b0=suspension, 0x8058b4d4=stabilize, 0x80520c4c/0x80520d50/0x80520e50=external physics). Matches player.h update(float, float, bool) pattern. This IS the main PlayerPhysics::update."
+  },
+  {
+    "address": "0x80589fa4",
+    "name": "unknown_0x80589fa4",
+    "confidence": "uncertain",
+    "source": "size=2064, calls=48, fpr=1, vtable=1"
+  },
+  {
+    "address": "0x8058a7b4",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058a7f4",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058a834",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058a874",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058a8b4",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058a8f4",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058a934",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058a974",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058a9b4",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058a9f4",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058aa34",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058aa74",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058aab4",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058aaf4",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058ab34",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058ab74",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058abb4",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058abf4",
+    "name": "unknown_0x8058abf4",
+    "confidence": "uncertain",
+    "source": "size=84, calls=1, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x8058ac48",
+    "name": "unknown_0x8058ac48",
+    "confidence": "uncertain",
+    "source": "size=84, calls=1, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x8058ac9c",
+    "name": "unknown_0x8058ac9c",
+    "confidence": "uncertain",
+    "source": "size=84, calls=1, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x8058acf0",
+    "name": "unknown_0x8058acf0",
+    "confidence": "uncertain",
+    "source": "size=84, calls=1, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x8058ad44",
+    "name": "unknown_0x8058ad44",
+    "confidence": "uncertain",
+    "source": "size=84, calls=1, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x8058ad98",
+    "name": "unknown_0x8058ad98",
+    "confidence": "uncertain",
+    "source": "size=136, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058ae20",
+    "name": "vtable_dispatch_0x8058ae20",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (112B). size=112, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058ae90",
+    "name": "vtable_dispatch_0x8058ae90",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (112B). size=112, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058af00",
+    "name": "vtable_dispatch_0x8058af00",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (112B). size=112, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058af70",
+    "name": "vtable_dispatch_0x8058af70",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (112B). size=112, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058afe0",
+    "name": "vtable_dispatch_0x8058afe0",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (112B). size=112, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058b050",
+    "name": "vtable_dispatch_0x8058b050",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (112B). size=112, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058b0c0",
+    "name": "unknown_0x8058b0c0",
+    "confidence": "uncertain",
+    "source": "size=196, calls=2, fpr=1, vtable=1"
+  },
+  {
+    "address": "0x8058b184",
+    "name": "unknown_0x8058b184",
+    "confidence": "uncertain",
+    "source": "size=84, calls=4, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058b1d8",
+    "name": "unknown_0x8058b1d8",
+    "confidence": "uncertain",
+    "source": "size=764, calls=13, fpr=1, vtable=1"
+  },
+  {
+    "address": "0x8058b4d4",
+    "name": "unknown_0x8058b4d4",
+    "confidence": "uncertain",
+    "source": "size=1044, calls=14, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x8058b8e8",
+    "name": "PlayerSub10::bspWheelHelper",
+    "confidence": "guess",
+    "source": "Uses getBspWheel. size=336, calls=7, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x8058ba38",
+    "name": "unknown_0x8058ba38",
+    "confidence": "uncertain",
+    "source": "size=1000, calls=16, fpr=1, vtable=1"
+  },
+  {
+    "address": "0x8058be20",
+    "name": "unknown_0x8058be20",
+    "confidence": "uncertain",
+    "source": "Tiny function (64B, 2 calls). size=64, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058be60",
+    "name": "unknown_0x8058be60",
+    "confidence": "uncertain",
+    "source": "size=620, calls=16, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x8058c0cc",
+    "name": "unknown_0x8058c0cc",
+    "confidence": "uncertain",
+    "source": "size=80, calls=1, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x8058c11c",
+    "name": "unknown_0x8058c11c",
+    "confidence": "uncertain",
+    "source": "size=764, calls=28, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x8058c418",
+    "name": "unknown_0x8058c418",
+    "confidence": "uncertain",
+    "source": "size=232, calls=8, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x8058c500",
+    "name": "unknown_0x8058c500",
+    "confidence": "uncertain",
+    "source": "size=572, calls=2, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x8058c73c",
+    "name": "vtable_dispatch_0x8058c73c",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (100B). size=100, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058c7a0",
+    "name": "vtable_dispatch_0x8058c7a0",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (100B). size=100, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058c804",
+    "name": "vtable_dispatch_0x8058c804",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (100B). size=100, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058c868",
+    "name": "vtable_dispatch_0x8058c868",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (100B). size=100, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058c8cc",
+    "name": "vtable_dispatch_0x8058c8cc",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (100B). size=100, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058c930",
+    "name": "vtable_dispatch_0x8058c930",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (100B). size=100, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058c994",
+    "name": "vtable_dispatch_0x8058c994",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (100B). size=100, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058c9f8",
+    "name": "vtable_dispatch_0x8058c9f8",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (112B). size=112, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058ca68",
+    "name": "unknown_0x8058ca68",
+    "confidence": "uncertain",
+    "source": "Small GPR function (76B). size=76, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058cab4",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (72B). size=72, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058cafc",
+    "name": "PlayerSub10Bike::helper",
+    "confidence": "guess",
+    "source": "Calls bike-specific function 0x80537f4c. size=116, calls=4, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058cb70",
+    "name": "unknown_0x8058cb70",
+    "confidence": "uncertain",
+    "source": "size=2204, calls=55, fpr=1, vtable=1"
+  },
+  {
+    "address": "0x8058d40c",
+    "name": "unknown_0x8058d40c",
+    "confidence": "uncertain",
+    "source": "Small GPR function (72B). size=72, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058d454",
+    "name": "unknown_0x8058d454",
+    "confidence": "uncertain",
+    "source": "size=140, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058d4e0",
+    "name": "unknown_0x8058d4e0",
+    "confidence": "uncertain",
+    "source": "Tiny function (60B, 1 calls). size=60, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058d51c",
+    "name": "unknown_0x8058d51c",
+    "confidence": "uncertain",
+    "source": "size=148, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058d5b0",
+    "name": "unknown_0x8058d5b0",
+    "confidence": "uncertain",
+    "source": "size=212, calls=3, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058d684",
+    "name": "unknown_0x8058d684",
+    "confidence": "uncertain",
+    "source": "size=404, calls=6, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058d818",
+    "name": "unknown_0x8058d818",
+    "confidence": "uncertain",
+    "source": "size=208, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058d8e8",
+    "name": "vtable_dispatch_0x8058d8e8",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (48B). size=48, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058d918",
+    "name": "vtable_dispatch_0x8058d918",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (48B). size=48, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058d948",
+    "name": "vtable_dispatch_0x8058d948",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (52B). size=52, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058d97c",
+    "name": "unknown_0x8058d97c",
+    "confidence": "uncertain",
+    "source": "Tiny function (36B, 2 calls). size=36, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058d9a0",
+    "name": "unknown_0x8058d9a0",
+    "confidence": "uncertain",
+    "source": "Tiny function (36B, 2 calls). size=36, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058d9c4",
+    "name": "unknown_0x8058d9c4",
+    "confidence": "uncertain",
+    "source": "Tiny function (36B, 2 calls). size=36, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058d9e8",
+    "name": "unknown_0x8058d9e8",
+    "confidence": "uncertain",
+    "source": "size=132, calls=3, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058da6c",
+    "name": "unknown_0x8058da6c",
+    "confidence": "uncertain",
+    "source": "Tiny function (36B, 2 calls). size=36, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058da90",
+    "name": "unknown_0x8058da90",
+    "confidence": "uncertain",
+    "source": "Small GPR function (84B). size=84, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058dae4",
+    "name": "unknown_0x8058dae4",
+    "confidence": "uncertain",
+    "source": "Tiny function (60B, 2 calls). size=60, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058db20",
+    "name": "PlayerSub10::releaseMtHelper",
+    "confidence": "guess",
+    "source": "Small function calling releaseMt. size=80, calls=3, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058db70",
+    "name": "unknown_0x8058db70",
+    "confidence": "uncertain",
+    "source": "Tiny function (36B, 2 calls). size=36, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058db94",
+    "name": "unknown_0x8058db94",
+    "confidence": "uncertain",
+    "source": "size=136, calls=6, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058dc1c",
+    "name": "vtable_dispatch_0x8058dc1c",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (48B). size=48, calls=2, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058dc4c",
+    "name": "unknown_0x8058dc4c",
+    "confidence": "uncertain",
+    "source": "size=64, calls=3, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058dc98",
+    "name": "unknown_0x8058dc98",
+    "confidence": "uncertain",
+    "source": "Small GPR function (68B). size=68, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058dcdc",
+    "name": "unknown_0x8058dcdc",
+    "confidence": "uncertain",
+    "source": "Small GPR function (68B). size=68, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058dd20",
+    "name": "unknown_0x8058dd20",
+    "confidence": "uncertain",
+    "source": "Small GPR function (68B). size=68, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058dd64",
+    "name": "unknown_0x8058dd64",
+    "confidence": "uncertain",
+    "source": "Tiny function (60B, 2 calls). size=60, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058dda0",
+    "name": "unknown_0x8058dda0",
+    "confidence": "uncertain",
+    "source": "size=92, calls=3, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058ddfc",
+    "name": "unknown_0x8058ddfc",
+    "confidence": "uncertain",
+    "source": "size=244, calls=3, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058def0",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058df30",
+    "name": "vtable_dispatch_0x8058df30",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (112B). size=112, calls=3, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058dfbc",
+    "name": "unknown_0x8058dfbc",
+    "confidence": "uncertain",
+    "source": "size=152, calls=8, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058e054",
+    "name": "unknown_0x8058e054",
+    "confidence": "uncertain",
+    "source": "size=372, calls=9, fpr=1, vtable=1"
+  },
+  {
+    "address": "0x8058e1c8",
+    "name": "unknown_0x8058e1c8",
+    "confidence": "uncertain",
+    "source": "size=164, calls=8, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058e26c",
+    "name": "unknown_0x8058e26c",
+    "confidence": "uncertain",
+    "source": "size=972, calls=43, fpr=1, vtable=1"
+  },
+  {
+    "address": "0x8058e638",
+    "name": "unknown_0x8058e638",
+    "confidence": "uncertain",
+    "source": "Small GPR function (80B). size=80, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058e688",
+    "name": "unknown_0x8058e688",
+    "confidence": "uncertain",
+    "source": "size=220, calls=4, fpr=1, vtable=1"
+  },
+  {
+    "address": "0x8058e764",
+    "name": "unknown_0x8058e764",
+    "confidence": "uncertain",
+    "source": "size=160, calls=3, fpr=1, vtable=1"
+  },
+  {
+    "address": "0x8058e804",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058e844",
+    "name": "unknown_0x8058e844",
+    "confidence": "uncertain",
+    "source": "size=396, calls=2, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x8058e9d0",
+    "name": "unknown_0x8058e9d0",
+    "confidence": "uncertain",
+    "source": "size=124, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058ea4c",
+    "name": "unknown_0x8058ea4c",
+    "confidence": "uncertain",
+    "source": "size=508, calls=9, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058ec48",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058ec88",
+    "name": "unknown_0x8058ec88",
+    "confidence": "uncertain",
+    "source": "size=152, calls=5, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058ed20",
+    "name": "unknown_0x8058ed20",
+    "confidence": "uncertain",
+    "source": "size=72, calls=3, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058ed68",
+    "name": "unknown_0x8058ed68",
+    "confidence": "uncertain",
+    "source": "Tiny function (64B, 2 calls). size=64, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058eda8",
+    "name": "unknown_0x8058eda8",
+    "confidence": "uncertain",
+    "source": "size=224, calls=8, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058ee88",
+    "name": "unknown_0x8058ee88",
+    "confidence": "uncertain",
+    "source": "size=108, calls=6, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058eefc",
+    "name": "unknown_0x8058eefc",
+    "confidence": "uncertain",
+    "source": "size=400, calls=12, fpr=1, vtable=1"
+  },
+  {
+    "address": "0x8058f08c",
+    "name": "unknown_0x8058f08c",
+    "confidence": "uncertain",
+    "source": "size=424, calls=14, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058f24c",
+    "name": "unknown_0x8058f24c",
+    "confidence": "uncertain",
+    "source": "Small GPR function (84B). size=84, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058f2a0",
+    "name": "unknown_0x8058f2a0",
+    "confidence": "uncertain",
+    "source": "size=136, calls=4, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058f328",
+    "name": "unknown_0x8058f328",
+    "confidence": "uncertain",
+    "source": "size=452, calls=11, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058f4ec",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058f52c",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058f56c",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058f5ac",
+    "name": "unknown_0x8058f5ac",
+    "confidence": "uncertain",
+    "source": "size=72, calls=3, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058f5f4",
+    "name": "unknown_0x8058f5f4",
+    "confidence": "uncertain",
+    "source": "size=620, calls=27, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058f860",
+    "name": "unknown_0x8058f860",
+    "confidence": "uncertain",
+    "source": "size=144, calls=8, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058f8f0",
+    "name": "vtable_dispatch_0x8058f8f0",
+    "confidence": "uncertain",
+    "source": "Small vtable dispatch (116B). size=116, calls=3, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058f964",
+    "name": "unknown_0x8058f964",
+    "confidence": "uncertain",
+    "source": "size=108, calls=1, fpr=1, vtable=0"
+  },
+  {
+    "address": "0x8058f9d0",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058fa10",
+    "name": "PlayerSub10::mathSqrt",
+    "confidence": "guess",
+    "source": "Tiny sqrtf wrapper (64B). size=64, calls=1, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058fa50",
+    "name": "unknown_0x8058fa50",
+    "confidence": "uncertain",
+    "source": "size=152, calls=3, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058fae8",
+    "name": "unknown_0x8058fae8",
+    "confidence": "uncertain",
+    "source": "size=132, calls=2, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058fb6c",
+    "name": "unknown_0x8058fb6c",
+    "confidence": "uncertain",
+    "source": "size=680, calls=15, fpr=0, vtable=0"
+  },
+  {
+    "address": "0x8058fe14",
+    "name": "unknown_0x8058fe14",
+    "confidence": "uncertain",
+    "source": "size=268, calls=6, fpr=0, vtable=1"
+  },
+  {
+    "address": "0x8058ff20",
+    "name": "unknown_0x8058ff20",
+    "confidence": "uncertain",
+    "source": "size=224, calls=3, fpr=1, vtable=1"
   }
 ]
