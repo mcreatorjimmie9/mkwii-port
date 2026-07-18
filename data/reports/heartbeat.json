@@ -1,27 +1,27 @@
 {
-  "timestamp": "2026-07-19T03:05:00Z",
+  "timestamp": "2026-07-19T00:40:00Z",
   "cycle": 3,
-  "phase": "decompile",
-  "status": "in_progress",
-  "current_module": "Physics",
-  "current_step": "decompile",
-  "current_batch": 1,
-  "last_agent": "ghidra",
-  "last_result": "success",
+  "phase": "ingest_complete",
+  "status": "phase:decompile",
   "totals": {
-    "functions_total": 16134,
-    "decompiled": 0,
-    "symbolized": 35313,
+    "functions_total": 18444,
+    "decompiled": 607,
+    "symbolized": 0,
     "reconstructed": 0,
     "compiling": 0,
     "tested_passing": 0
   },
   "modules_completed": [],
   "modules_in_progress": {
-    "Physics": {"analyze": "100%", "decompile": "0%", "symbolize": "96.9%"}
+    "Physics": {"decompile": "100", "symbolize": "0", "reconstruct": "0"},
+    "KartMovement": {"decompile": "100", "symbolize": "0", "reconstruct": "0"},
+    "AIRace": {"decompile": "100", "symbolize": "0", "reconstruct": "0"},
+    "Collision": {"decompile": "100", "symbolize": "0", "reconstruct": "0"},
+    "ItemSystem": {"decompile": "100", "symbolize": "0", "reconstruct": "0"},
+    "RaceEngine": {"decompile": "100", "symbolize": "0", "reconstruct": "0"}
   },
   "milestone": null,
   "open_issues": 0,
   "budget_pct": 0,
-  "next_action": "phase:decompile — Physics module batch 1 (capstone disassembly)"
+  "next_action": "Phase 3 Step 3.2: SYMBOLIZE — name functions using mkw-structures knowledge base"
 }

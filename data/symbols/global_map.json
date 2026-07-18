@@ -1,0 +1,24 @@
+{
+  "source": "mkw-structures (PAL region)",
+  "total_addresses": 3,
+  "addresses": [
+    {
+      "address": "0X808B63D0",
+      "source": "mkw-structures/player.h",
+      "type": "vtable",
+      "line": "// vtable 0x808b63d0"
+    },
+    {
+      "address": "0X808B63EC",
+      "source": "mkw-structures/player.h",
+      "type": "vtable",
+      "line": "// vtable 0x808b63ec"
+    },
+    {
+      "address": "0X809BD728",
+      "source": "mkw-structures/racedata.h",
+      "type": "static_instance",
+      "line": "static Racedata * sInstance; // 0x809bd728"
+    }
+  ]
+}

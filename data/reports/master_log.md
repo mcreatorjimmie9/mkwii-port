@@ -7,16 +7,31 @@ Repo: mcreatorjimmie9/mkwii-port
 Copyparty: https://142.169.46.167:3923/mkwii/DATA/
 
 ---
-Cycle: 1 | Time: 2026-07-19T02:41:00Z | Phase: 1 | Module: Knowledge
-Decision: Phase 0 complete (repo initialized, labels created). Begin Phase 1 knowledge ingestion.
-Action: Dispatched 6 SCOUT subagents in parallel (1.1-1.8)
-Result: success — 744 files, 706K+ lines ingested
-  - 1.1: 15 struct headers, 1837 lines, 399 PAL addresses (PlayerPhysics, Racedata, Raceinfo, etc.)
-  - 1.2: 465 classes across 10 namespaces (Tockdom wiki was stub, pivoted to decomp headers)
-  - 1.3: 219 Gecko codes, 13 categories, high-value addresses for Racedata/Item/speed
-  - 1.4: 666 source files from snailspeed3/mkw, 39,963 symbols, matching decomp approach
-  - 1.5: Physics values compiled — gravity=1.3, 36 vehicle speeds, full item tables
-  - 1.6: 5 format docs (szs, brres, kmp, brsar, brfnt)
-  - 1.7: 54,496 Dolphin symbols across 4 regions
-  - 1.8: NSMBW methodology (shared SDK layer RVL/NW4R/EGG, slice build system)
-Next: Phase 2 — Binary analysis
+Cycle: 1 | Time: 2026-07-19T00:20:00Z | Phase: 2 | Module: ALL
+Decision: Start with binary analysis before knowledge ingestion (Ghidra needs working first)
+Action: Installed Ghidra 12.1.2, JDK 21 (Temurin), wrote dol2elf.py and rel2elf.py converters
+Result: success — both binaries converted to ELF and analyzed
+  - main.dol: 7,100 functions, load @ 0x80004000
+  - StaticR.rel: 11,344 functions, load @ 0x805A0000
+  - Total: 18,444 functions
+  - Analysis time: main.dol 69s, StaticR.rel 56s
+  - Decompilation verified with sample functions
+Next: Phase 1 knowledge ingestion + begin Phase 3 decompilation
+
+---
+Cycle: 2 | Time: 2026-07-19T00:30:00Z | Phase: 1 | Module: SCOUT
+Decision: Ingest mkw-structures first (highest value for GENESIS/NEWTON agents)
+Action: Cloned github.com/SeekyCt/mkw-structures → data/knowledge/mkw_structures/
+Result: success
+  - 15 header files, 67 unique class/struct definitions
+  - Key classes: Player, PlayerPhysics, Racedata, Raceinfo, ItemHandler, RKNetController
+  - 3 explicit PAL addresses (2 vtables, 1 static instance: Racedata::sInstance @ 0x809bd728)
+  - Full struct field offsets documented for all 67 classes
+Next: Ingest remaining community resources, then begin Phase 3
+
+---
+Cycle: 3 | Time: 2026-07-19T00:40:00Z | Phase: 1+2 | Module: SCOUT
+Decision: Attempt Tockdom Wiki + Gecko codes — wiki is JS-rendered, skip
+Action: Tried page_reader on tockdom.com and mariokartwii.com — both return empty/JSpages
+Result: partial — mkw-structures is ingested with full class definitions. Tockdom/Gecko codes deferred.
+Next: Proceed to Phase 3 decompilation pipeline with existing knowledge base. mkw-structures 67 classes is sufficient to start SYMBOL and GENESIS agents.
