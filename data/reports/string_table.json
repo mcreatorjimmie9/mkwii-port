@@ -1,0 +1,5012 @@
+{
+  "main_dol": {
+    "count": 3583,
+    "strings": [
+      {
+        "offset": 3904,
+        "string": "/Boot/Strap/us/English.szs",
+        "length": 26
+      },
+      {
+        "offset": 3988,
+        "string": "/Boot/Strap/us/French.szs",
+        "length": 25
+      },
+      {
+        "offset": 4016,
+        "string": "/Boot/Strap/us/Spanish_US.szs",
+        "length": 29
+      },
+      {
+        "offset": 4104,
+        "string": "strapA_16_9_832x456",
+        "length": 19
+      },
+      {
+        "offset": 4124,
+        "string": "strapA_608x456",
+        "length": 14
+      },
+      {
+        "offset": 4140,
+        "string": "strapB_16_9_832x456",
+        "length": 19
+      },
+      {
+        "offset": 4160,
+        "string": "strapB_608x456",
+        "length": 14
+      },
+      {
+        "offset": 4192,
+        "string": "[Boot] NWC24TrySuspendScheduler: errcode=%d",
+        "length": 43
+      },
+      {
+        "offset": 4240,
+        "string": "/contents/RFLRes01.arc",
+        "length": 22
+      },
+      {
+        "offset": 4264,
+        "string": "/contents/HomeButton.arc",
+        "length": 24
+      },
+      {
+        "offset": 4292,
+        "string": "/contents/HomeButtonSe.arc",
+        "length": 26
+      },
+      {
+        "offset": 4320,
+        "string": "/contents/globe.arc",
+        "length": 19
+      },
+      {
+        "offset": 4340,
+        "string": "/RKChRes.arc",
+        "length": 12
+      },
+      {
+        "offset": 5920,
+        "string": "***********************************",
+        "length": 35
+      },
+      {
+        "offset": 5957,
+        "string": "*   PAL50 mode                    *",
+        "length": 35
+      },
+      {
+        "offset": 6068,
+        "string": "*   NTSC/Progressive/PAL60 mode   *",
+        "length": 35
+      },
+      {
+        "offset": 6144,
+        "string": "/rel/StaticR.rel",
+        "length": 16
+      },
+      {
+        "offset": 6164,
+        "string": "/rel/StaticR.SMAP",
+        "length": 17
+      },
+      {
+        "offset": 6200,
+        "string": "bssSize           %d",
+        "length": 20
+      },
+      {
+        "offset": 6222,
+        "string": "relOffset         %08xh",
+        "length": 23
+      },
+      {
+        "offset": 6247,
+        "string": "impOffset         %08xh",
+        "length": 23
+      },
+      {
+        "offset": 6272,
+        "string": "impSize           %08xh",
+        "length": 23
+      },
+      {
+        "offset": 6297,
+        "string": "prolog            %08xh",
+        "length": 23
+      },
+      {
+        "offset": 6322,
+        "string": "epilog            %08xh",
+        "length": 23
+      },
+      {
+        "offset": 6347,
+        "string": "unresolved        %08xh",
+        "length": 23
+      },
+      {
+        "offset": 6372,
+        "string": "align             %08xh",
+        "length": 23
+      },
+      {
+        "offset": 6397,
+        "string": "bssAlign          %08xh",
+        "length": 23
+      },
+      {
+        "offset": 6422,
+        "string": "fixSize           %08xh",
+        "length": 23
+      },
+      {
+        "offset": 6449,
+        "string": "[Rel] Load Module[%d]: size=%dBytes time=%dmsec",
+        "length": 47
+      },
+      {
+        "offset": 6498,
+        "string": "[Rel] Load Module[%d] fail(filename=%s)",
+        "length": 39
+      },
+      {
+        "offset": 6539,
+        "string": "id                %d",
+        "length": 20
+      },
+      {
+        "offset": 6561,
+        "string": "numSections       %d",
+        "length": 20
+      },
+      {
+        "offset": 6583,
+        "string": "sectionInfoOffset %08xh",
+        "length": 23
+      },
+      {
+        "offset": 6608,
+        "string": "nameOffset        %08xh [%s]",
+        "length": 28
+      },
+      {
+        "offset": 6638,
+        "string": "nameSize          %d",
+        "length": 20
+      },
+      {
+        "offset": 6660,
+        "string": "version           %d",
+        "length": 20
+      },
+      {
+        "offset": 6684,
+        "string": "offset%d           0x%08x - 0x%08x",
+        "length": 34
+      },
+      {
+        "offset": 6976,
+        "string": "SceneCreatorStatic.cpp",
+        "length": 22
+      },
+      {
+        "offset": 6999,
+        "string": "Undefined Scene.",
+        "length": 16
+      },
+      {
+        "offset": 7039,
+        "string": "Undefined Scene",
+        "length": 15
+      },
+      {
+        "offset": 7184,
+        "string": "/rel/RevoKartR.SMAP",
+        "length": 19
+      },
+      {
+        "offset": 7204,
+        "string": "[SYS] isNdev: %s returnCode: 0x%08x launchCode: 0x%08x",
+        "length": 54
+      },
+      {
+        "offset": 7265,
+        "string": "FALSE",
+        "length": 5
+      },
+      {
+        "offset": 7271,
+        "string": "[SYS] \"%s\"->0x%08x, 0x%08x",
+        "length": 26
+      },
+      {
+        "offset": 7299,
+        "string": "[SYS] illigal length argument for invitation.",
+        "length": 45
+      },
+      {
+        "offset": 7346,
+        "string": "[SYS] LaunchType: %d",
+        "length": 20
+      },
+      {
+        "offset": 7368,
+        "string": "[SYS] Argument=\"%s\"",
+        "length": 19
+      },
+      {
+        "offset": 7389,
+        "string": "[SYS] Load MapFile \"%s\" success.",
+        "length": 32
+      },
+      {
+        "offset": 7423,
+        "string": "[SYS] Load MapFile \"%s\" fail.",
+        "length": 29
+      },
+      {
+        "offset": 7454,
+        "string": "[SYS] Static .text: 0x%08x-0x%08x(%dKBytes)",
+        "length": 43
+      },
+      {
+        "offset": 7499,
+        "string": "[SYS] Warning! Illegal language type=%d. Change to English.",
+        "length": 59
+      },
+      {
+        "offset": 7560,
+        "string": "[SYS] Can't get SimpleAddressData.",
+        "length": 34
+      },
+      {
+        "offset": 7596,
+        "string": "[SYS] Get SimpleAddressData. ID=0x%x latitude=0x%x, longitude=0x%x",
+        "length": 66
+      },
+      {
+        "offset": 7664,
+        "string": "[SYS] Matching Area: %d",
+        "length": 23
+      },
+      {
+        "offset": 7719,
+        "string": "D542101086242752217003726400434970855712890625",
+        "length": 46
+      },
+      {
+        "offset": 7766,
+        "string": "11102230246251565404236316680908203125",
+        "length": 38
+      },
+      {
+        "offset": 7805,
+        "string": "23283064365386962890625",
+        "length": 23
+      },
+      {
+        "offset": 7829,
+        "string": "152587890625",
+        "length": 12
+      },
+      {
+        "offset": 7842,
+        "string": "390625",
+        "length": 6
+      },
+      {
+        "offset": 7849,
+        "string": "78125",
+        "length": 5
+      },
+      {
+        "offset": 7855,
+        "string": "15625",
+        "length": 5
+      },
+      {
+        "offset": 7904,
+        "string": "179769313486231580793728714053034151",
+        "length": 36
+      },
+      {
+        "offset": 8488,
+        "string": " !\"#$%&'()*+,-./0123456789:;<=>?@abcdefghijklmnopqrstuvwxyz[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+        "length": 95
+      },
+      {
+        "offset": 8744,
+        "string": " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`ABCDEFGHIJKLMNOPQRSTUVWXYZ{|}~",
+        "length": 95
+      },
+      {
+        "offset": 8968,
+        "string": "%a %b %e %T %Y",
+        "length": 14
+      },
+      {
+        "offset": 8984,
+        "string": "%I:%M:%S %p",
+        "length": 11
+      },
+      {
+        "offset": 8996,
+        "string": "%m/%d/%y",
+        "length": 8
+      },
+      {
+        "offset": 9008,
+        "string": "Sun|Sunday|Mon|Monday|Tue|Tuesday|Wed|Wednesday|Thu|Thursday|Fri|Friday|Sat|Saturday",
+        "length": 84
+      },
+      {
+        "offset": 9096,
+        "string": "Jan|January|Feb|February|Mar|March|Apr|April|May|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December",
+        "length": 133
+      },
+      {
+        "offset": 9312,
+        "string": "INFINITY",
+        "length": 8
+      },
+      {
+        "offset": 11232,
+        "string": "@,F:@/jz@1G\\@2",
+        "length": 14
+      },
+      {
+        "offset": 11268,
+        "string": "@<F:@=",
+        "length": 6
+      },
+      {
+        "offset": 11275,
+        "string": "Z@?jz@@~L@AG\\@B",
+        "length": 15
+      },
+      {
+        "offset": 11384,
+        "string": "8z% @",
+        "length": 5
+      },
+      {
+        "offset": 11410,
+        "string": "UUUUUc?",
+        "length": 7
+      },
+      {
+        "offset": 11578,
+        "string": "UUUUU",
+        "length": 5
+      },
+      {
+        "offset": 11651,
+        "string": "D,jl/?",
+        "length": 6
+      },
+      {
+        "offset": 11800,
+        "string": "GCN_Mem_Alloc.c : InitDefaultHeap. No Heap Available",
+        "length": 52
+      },
+      {
+        "offset": 11854,
+        "string": "Metrowerks CW runtime library initializing default heap",
+        "length": 55
+      },
+      {
+        "offset": 11952,
+        "string": "zzzzzzzzz",
+        "length": 9
+      },
+      {
+        "offset": 11963,
+        "string": "zzzzz",
+        "length": 5
+      },
+      {
+        "offset": 11985,
+        "string": ")def+gh%&i*j',k",
+        "length": 15
+      },
+      {
+        "offset": 12010,
+        "string": "$lmno(p",
+        "length": 7
+      },
+      {
+        "offset": 12039,
+        "string": " !\"#qrstu",
+        "length": 9
+      },
+      {
+        "offset": 12075,
+        "string": "vwxyzp",
+        "length": 6
+      },
+      {
+        "offset": 12972,
+        "string": "AnmObjVis",
+        "length": 9
+      },
+      {
+        "offset": 12988,
+        "string": "AnmObjMatClr",
+        "length": 12
+      },
+      {
+        "offset": 13012,
+        "string": "AnmObjMatClrNode",
+        "length": 16
+      },
+      {
+        "offset": 13036,
+        "string": "AnmObjMatClrOverride",
+        "length": 20
+      },
+      {
+        "offset": 13068,
+        "string": "AnmObjMatClrRes",
+        "length": 15
+      },
+      {
+        "offset": 13092,
+        "string": "AnmObjTexPat",
+        "length": 12
+      },
+      {
+        "offset": 13116,
+        "string": "AnmObjTexPatNode",
+        "length": 16
+      },
+      {
+        "offset": 13140,
+        "string": "AnmObjTexPatOverride",
+        "length": 20
+      },
+      {
+        "offset": 13172,
+        "string": "AnmObjTexPatRes",
+        "length": 15
+      },
+      {
+        "offset": 13196,
+        "string": "AnmObjTexSrt",
+        "length": 12
+      },
+      {
+        "offset": 13220,
+        "string": "AnmObjTexSrtNode",
+        "length": 16
+      },
+      {
+        "offset": 13244,
+        "string": "AnmObjTexSrtOverride",
+        "length": 20
+      },
+      {
+        "offset": 13276,
+        "string": "AnmObjTexSrtRes",
+        "length": 15
+      },
+      {
+        "offset": 13300,
+        "string": "AnmObjChr",
+        "length": 9
+      },
+      {
+        "offset": 13316,
+        "string": "AnmObjChrNode",
+        "length": 13
+      },
+      {
+        "offset": 13336,
+        "string": "AnmObjChrBlend",
+        "length": 14
+      },
+      {
+        "offset": 13356,
+        "string": "AnmObjChrRes",
+        "length": 12
+      },
+      {
+        "offset": 13380,
+        "string": "AnmObjShp",
+        "length": 9
+      },
+      {
+        "offset": 13396,
+        "string": "AnmObjShpNode",
+        "length": 13
+      },
+      {
+        "offset": 13416,
+        "string": "AnmObjShpBlend",
+        "length": 14
+      },
+      {
+        "offset": 13436,
+        "string": "AnmObjShpRes",
+        "length": 12
+      },
+      {
+        "offset": 13460,
+        "string": "AnmScn",
+        "length": 6
+      },
+      {
+        "offset": 13476,
+        "string": "AnmScnRes",
+        "length": 9
+      },
+      {
+        "offset": 13492,
+        "string": "G3dObj",
+        "length": 6
+      },
+      {
+        "offset": 13508,
+        "string": "AnmObj",
+        "length": 6
+      },
+      {
+        "offset": 15708,
+        "string": "ScnObj",
+        "length": 6
+      },
+      {
+        "offset": 15724,
+        "string": "ScnLeaf",
+        "length": 7
+      },
+      {
+        "offset": 15740,
+        "string": "ScnGroup",
+        "length": 8
+      },
+      {
+        "offset": 15756,
+        "string": "ScnRoot",
+        "length": 7
+      },
+      {
+        "offset": 15772,
+        "string": "ScnMdlSimple",
+        "length": 12
+      },
+      {
+        "offset": 15796,
+        "string": "ScnMdl",
+        "length": 6
+      },
+      {
+        "offset": 15812,
+        "string": "ScnGroupEx",
+        "length": 10
+      },
+      {
+        "offset": 15828,
+        "string": "ScnMdl1Mat1Shp",
+        "length": 14
+      },
+      {
+        "offset": 15852,
+        "string": "ScnProc",
+        "length": 7
+      },
+      {
+        "offset": 15962,
+        "string": "@d?}:",
+        "length": 5
+      },
+      {
+        "offset": 15980,
+        "string": "?|;.<",
+        "length": 5
+      },
+      {
+        "offset": 16236,
+        "string": "?XHZ<",
+        "length": 5
+      },
+      {
+        "offset": 16266,
+        "string": "h'?QM@<",
+        "length": 7
+      },
+      {
+        "offset": 16326,
+        "string": "s2?'6Y?A",
+        "length": 8
+      },
+      {
+        "offset": 16364,
+        "string": "?9h@<",
+        "length": 5
+      },
+      {
+        "offset": 16392,
+        "string": "?9h@?0",
+        "length": 6
+      },
+      {
+        "offset": 16427,
+        "string": "s?'6Y<",
+        "length": 6
+      },
+      {
+        "offset": 16487,
+        "string": "s?QM@?",
+        "length": 6
+      },
+      {
+        "offset": 16494,
+        "string": "h'<c}",
+        "length": 5
+      },
+      {
+        "offset": 16520,
+        "string": "?XHZ?",
+        "length": 5
+      },
+      {
+        "offset": 16543,
+        "string": "A<Jy5",
+        "length": 5
+      },
+      {
+        "offset": 16590,
+        "string": "3j<0_",
+        "length": 5
+      },
+      {
+        "offset": 16776,
+        "string": "?|;.>/",
+        "length": 6
+      },
+      {
+        "offset": 16798,
+        "string": "@d;Xw%",
+        "length": 6
+      },
+      {
+        "offset": 17287,
+        "string": "*?QM@",
+        "length": 5
+      },
+      {
+        "offset": 17462,
+        "string": "s2?\"g",
+        "length": 5
+      },
+      {
+        "offset": 18226,
+        "string": "vu<908",
+        "length": 6
+      },
+      {
+        "offset": 19007,
+        "string": "#;1F_<",
+        "length": 6
+      },
+      {
+        "offset": 19024,
+        "string": ";Xw%<",
+        "length": 5
+      },
+      {
+        "offset": 19049,
+        "string": "|;.>/",
+        "length": 5
+      },
+      {
+        "offset": 19246,
+        "string": "3j<908<",
+        "length": 7
+      },
+      {
+        "offset": 19278,
+        "string": "] <Jy5<",
+        "length": 7
+      },
+      {
+        "offset": 19433,
+        "string": "9h@?0",
+        "length": 5
+      },
+      {
+        "offset": 19497,
+        "string": "'6Y?A",
+        "length": 5
+      },
+      {
+        "offset": 20260,
+        "string": "?~a/?~,",
+        "length": 7
+      },
+      {
+        "offset": 20280,
+        "string": "?}Xs?}\"",
+        "length": 7
+      },
+      {
+        "offset": 20300,
+        "string": "?|KT?|",
+        "length": 6
+      },
+      {
+        "offset": 20335,
+        "string": "+?z[K?z#8?y",
+        "length": 11
+      },
+      {
+        "offset": 20372,
+        "string": "?x[i?x!",
+        "length": 7
+      },
+      {
+        "offset": 20407,
+        "string": "\"?vJ{?v",
+        "length": 7
+      },
+      {
+        "offset": 20444,
+        "string": "?t'2?s",
+        "length": 6
+      },
+      {
+        "offset": 20456,
+        "string": "?slm?s-",
+        "length": 7
+      },
+      {
+        "offset": 20488,
+        "string": "?qo\"?q.G?p",
+        "length": 10
+      },
+      {
+        "offset": 20519,
+        "string": "N?o`{?o",
+        "length": 7
+      },
+      {
+        "offset": 20535,
+        "string": ":?nR7?n",
+        "length": 7
+      },
+      {
+        "offset": 20564,
+        "string": "?lme?l&",
+        "length": 7
+      },
+      {
+        "offset": 20580,
+        "string": "?kQ9?k",
+        "length": 6
+      },
+      {
+        "offset": 20619,
+        "string": "~?hr[?h&",
+        "length": 8
+      },
+      {
+        "offset": 20647,
+        "string": "c?fY|?f",
+        "length": 7
+      },
+      {
+        "offset": 20659,
+        "string": "p?emI?e",
+        "length": 7
+      },
+      {
+        "offset": 20708,
+        "string": "?G/Z?Af",
+        "length": 7
+      },
+      {
+        "offset": 20750,
+        "string": "%+16<AGLQUZ^bfjmpsuxz{}~~",
+        "length": 25
+      },
+      {
+        "offset": 22002,
+        "string": "v|8!O@8#-d8%",
+        "length": 12
+      },
+      {
+        "offset": 22052,
+        "string": "89588;ZT8=",
+        "length": 10
+      },
+      {
+        "offset": 22076,
+        "string": "8Ft48H",
+        "length": 6
+      },
+      {
+        "offset": 22119,
+        "string": "<8a?_8c",
+        "length": 7
+      },
+      {
+        "offset": 22143,
+        "string": " 8q[f8t&",
+        "length": 8
+      },
+      {
+        "offset": 22492,
+        "string": "9$I 9&0",
+        "length": 7
+      },
+      {
+        "offset": 22536,
+        "string": "9:wW9<",
+        "length": 6
+      },
+      {
+        "offset": 22600,
+        "string": "9`.m9b",
+        "length": 6
+      },
+      {
+        "offset": 22608,
+        "string": "9eg<9h",
+        "length": 6
+      },
+      {
+        "offset": 22992,
+        "string": ":-2[:/3",
+        "length": 7
+      },
+      {
+        "offset": 23000,
+        "string": ":1;):3H",
+        "length": 7
+      },
+      {
+        "offset": 23032,
+        "string": ":BTy:D",
+        "length": 6
+      },
+      {
+        "offset": 23055,
+        "string": "L:P:s:R",
+        "length": 7
+      },
+      {
+        "offset": 23087,
+        "string": "T:dQh:f",
+        "length": 7
+      },
+      {
+        "offset": 23100,
+        "string": ":lWh:o",
+        "length": 6
+      },
+      {
+        "offset": 23468,
+        "string": ";*gr;,`",
+        "length": 7
+      },
+      {
+        "offset": 23480,
+        "string": ";0dw;2oX;4",
+        "length": 10
+      },
+      {
+        "offset": 23508,
+        "string": ";?2N;Ai",
+        "length": 7
+      },
+      {
+        "offset": 23536,
+        "string": ";O>9;Q",
+        "length": 6
+      },
+      {
+        "offset": 23592,
+        "string": ";s}C;vO",
+        "length": 7
+      },
+      {
+        "offset": 23600,
+        "string": ";y)2;|",
+        "length": 6
+      },
+      {
+        "offset": 24016,
+        "string": "<NC)<P",
+        "length": 6
+      },
+      {
+        "offset": 24071,
+        "string": "(<rVN<u$",
+        "length": 8
+      },
+      {
+        "offset": 24410,
+        "string": "ZW=!2",
+        "length": 5
+      },
+      {
+        "offset": 24464,
+        "string": "=;9,==d*=?",
+        "length": 10
+      },
+      {
+        "offset": 24484,
+        "string": "=FQ'=H",
+        "length": 6
+      },
+      {
+        "offset": 24496,
+        "string": "=MIJ=O",
+        "length": 6
+      },
+      {
+        "offset": 24516,
+        "string": "=YsE=[",
+        "length": 6
+      },
+      {
+        "offset": 24891,
+        "string": "L> op>\"K",
+        "length": 8
+      },
+      {
+        "offset": 24940,
+        "string": ">84R>:V^><~",
+        "length": 11
+      },
+      {
+        "offset": 25003,
+        "string": "e>]v^>`",
+        "length": 7
+      },
+      {
+        "offset": 25044,
+        "string": ">x|!>{\\",
+        "length": 7
+      },
+      {
+        "offset": 25379,
+        "string": "l?#e<?%I",
+        "length": 8
+      },
+      {
+        "offset": 25392,
+        "string": "?)#5?+",
+        "length": 6
+      },
+      {
+        "offset": 25420,
+        "string": "?7U-?9t",
+        "length": 7
+      },
+      {
+        "offset": 25440,
+        "string": "?B2$?Dq",
+        "length": 7
+      },
+      {
+        "offset": 25520,
+        "string": "?tze?wO",
+        "length": 7
+      },
+      {
+        "offset": 25528,
+        "string": "?z,8?}",
+        "length": 6
+      },
+      {
+        "offset": 25832,
+        "string": "?yjR?x",
+        "length": 6
+      },
+      {
+        "offset": 25864,
+        "string": "?uF~?t",
+        "length": 6
+      },
+      {
+        "offset": 25908,
+        "string": "?owQ?n",
+        "length": 6
+      },
+      {
+        "offset": 25968,
+        "string": "?gO/?f",
+        "length": 6
+      },
+      {
+        "offset": 25975,
+        "string": "Z?f3.?e",
+        "length": 7
+      },
+      {
+        "offset": 26004,
+        "string": "?bF0?a",
+        "length": 6
+      },
+      {
+        "offset": 26032,
+        "string": "?^Gs?]",
+        "length": 6
+      },
+      {
+        "offset": 26092,
+        "string": "?Uwu?T",
+        "length": 6
+      },
+      {
+        "offset": 26112,
+        "string": "?Rrx?Q",
+        "length": 6
+      },
+      {
+        "offset": 26120,
+        "string": "?Q:&?P",
+        "length": 6
+      },
+      {
+        "offset": 26132,
+        "string": "?Ob:?N",
+        "length": 6
+      },
+      {
+        "offset": 26140,
+        "string": "?N%E?M",
+        "length": 6
+      },
+      {
+        "offset": 26151,
+        "string": "e?LF:?K",
+        "length": 7
+      },
+      {
+        "offset": 26219,
+        "string": "\\?AT(?@",
+        "length": 7
+      },
+      {
+        "offset": 26256,
+        "string": "?;Fs?:",
+        "length": 6
+      },
+      {
+        "offset": 26308,
+        "string": "?2+ ?1r",
+        "length": 7
+      },
+      {
+        "offset": 26324,
+        "string": "?/Eo?.",
+        "length": 6
+      },
+      {
+        "offset": 26340,
+        "string": "?,SE?+",
+        "length": 6
+      },
+      {
+        "offset": 26388,
+        "string": "?#++?\"a",
+        "length": 7
+      },
+      {
+        "offset": 26748,
+        "string": ">owQ>f",
+        "length": 6
+      },
+      {
+        "offset": 26884,
+        "string": "?~C#?~",
+        "length": 6
+      },
+      {
+        "offset": 26900,
+        "string": "?}tt?}:",
+        "length": 7
+      },
+      {
+        "offset": 26920,
+        "string": "?|;(?{",
+        "length": 6
+      },
+      {
+        "offset": 26956,
+        "string": "?ynN?y",
+        "length": 6
+      },
+      {
+        "offset": 27043,
+        "string": "s?oh0?n",
+        "length": 7
+      },
+      {
+        "offset": 27119,
+        "string": "s?c<Z?b",
+        "length": 7
+      },
+      {
+        "offset": 27136,
+        "string": "?`F!?_",
+        "length": 6
+      },
+      {
+        "offset": 27152,
+        "string": "?]-S?\\a",
+        "length": 7
+      },
+      {
+        "offset": 27175,
+        "string": "j?XHS?Wp&?V",
+        "length": 11
+      },
+      {
+        "offset": 27208,
+        "string": "?QM=?Pd",
+        "length": 7
+      },
+      {
+        "offset": 27304,
+        "string": "?9hB?8R",
+        "length": 7
+      },
+      {
+        "offset": 27312,
+        "string": "?7:#?6 l?5",
+        "length": 10
+      },
+      {
+        "offset": 27368,
+        "string": "?'6V?&",
+        "length": 6
+      },
+      {
+        "offset": 27684,
+        "string": ">f|f>`\\",
+        "length": 7
+      },
+      {
+        "offset": 27792,
+        "string": "={+t=b",
+        "length": 6
+      },
+      {
+        "offset": 28944,
+        "string": "!=Bz!=",
+        "length": 6
+      },
+      {
+        "offset": 30520,
+        "string": "nosefrhdfacehaircap_berdnslnmaskglas",
+        "length": 36
+      },
+      {
+        "offset": 31084,
+        "string": " !\"#$%&(+,-/01234689@B",
+        "length": 22
+      },
+      {
+        "offset": 31300,
+        "string": " !\"$%&(*+,-/012345678:;<@ABCDF",
+        "length": 30
+      },
+      {
+        "offset": 31372,
+        "string": " !\"$%&'(+,-/012345678:;<@ABCDF",
+        "length": 30
+      },
+      {
+        "offset": 31515,
+        "string": "$%)-/3567:;AC",
+        "length": 13
+      },
+      {
+        "offset": 31587,
+        "string": "$%')-/3567:;AC",
+        "length": 14
+      },
+      {
+        "offset": 31754,
+        "string": ".2=>?@E",
+        "length": 7
+      },
+      {
+        "offset": 31972,
+        "string": "*2:<>?@EG",
+        "length": 9
+      },
+      {
+        "offset": 32044,
+        "string": "2:<>?@EG",
+        "length": 8
+      },
+      {
+        "offset": 32385,
+        "string": "!!!%$$",
+        "length": 6
+      },
+      {
+        "offset": 33952,
+        "string": "0123456789abcdef",
+        "length": 16
+      },
+      {
+        "offset": 33976,
+        "string": "2147483647",
+        "length": 10
+      },
+      {
+        "offset": 58672,
+        "string": "wt\\HomeButtonSe.wt",
+        "length": 18
+      },
+      {
+        "offset": 58692,
+        "string": "wt\\HomeButtonSe.pcm",
+        "length": 19
+      },
+      {
+        "offset": 59504,
+        "string": "?fff=",
+        "length": 5
+      },
+      {
+        "offset": 59548,
+        "string": "AK33@",
+        "length": 5
+      },
+      {
+        "offset": 60368,
+        "string": "/shared2/sys",
+        "length": 12
+      },
+      {
+        "offset": 60384,
+        "string": "/shared2/sys/SYSCONF",
+        "length": 20
+      },
+      {
+        "offset": 60408,
+        "string": "/title/00000001/00000002/data/setting.txt",
+        "length": 41
+      },
+      {
+        "offset": 60475,
+        "string": "!(0)\"",
+        "length": 5
+      },
+      {
+        "offset": 60488,
+        "string": "#*1892+$",
+        "length": 8
+      },
+      {
+        "offset": 60501,
+        "string": "%,3:;4-&",
+        "length": 8
+      },
+      {
+        "offset": 60510,
+        "string": "'.5<=6/7>??????????????????",
+        "length": 27
+      },
+      {
+        "offset": 60824,
+        "string": "--t9Sf4yfjf1RtvDu3AA",
+        "length": 20
+      },
+      {
+        "offset": 60888,
+        "string": "Content-Disposition: form-data; name=\"",
+        "length": 38
+      },
+      {
+        "offset": 60928,
+        "string": "Content-Type: application/octet-stream",
+        "length": 38
+      },
+      {
+        "offset": 60968,
+        "string": "Content-Transfer-Encoding: binary",
+        "length": 33
+      },
+      {
+        "offset": 61004,
+        "string": "Content-Type: application/x-www-form-urlencoded",
+        "length": 47
+      },
+      {
+        "offset": 61056,
+        "string": "Content-Type: multipart/form-data; boundary=",
+        "length": 44
+      },
+      {
+        "offset": 61389,
+        "string": "\\ & % ",
+        "length": 6
+      },
+      {
+        "offset": 61458,
+        "string": "\"f\"g\"",
+        "length": 5
+      },
+      {
+        "offset": 61464,
+        "string": "\"4&B&@",
+        "length": 6
+      },
+      {
+        "offset": 61472,
+        "string": " 2 3!",
+        "length": 5
+      },
+      {
+        "offset": 61638,
+        "string": "\"a\"R\"j\"k\"",
+        "length": 9
+      },
+      {
+        "offset": 61652,
+        "string": "\"5\"+\",",
+        "length": 6
+      },
+      {
+        "offset": 61672,
+        "string": "!+ 0&o&m&j   !",
+        "length": 14
+      },
+      {
+        "offset": 61888,
+        "string": "0A0B0C0D0E0F0G0H0I0J0K0L0M0N0O0P0Q0R0S0T0U0V0W0X0Y0Z0[0\\0]0^0_0`0a0b0c0d0e0f0g0h0i0j0k0l0m0n0o0p0q0r0s0t0u0v0w0x0y0z0{0|0}0~0",
+        "length": 125
+      },
+      {
+        "offset": 62658,
+        "string": "%,%$%4%<%",
+        "length": 9
+      },
+      {
+        "offset": 62678,
+        "string": "%#%3%+%;%K% %/%(%7%?%",
+        "length": 21
+      },
+      {
+        "offset": 62700,
+        "string": "%0%%%8%B",
+        "length": 8
+      },
+      {
+        "offset": 62832,
+        "string": "$`$a$b$c$d$e$f$g$h$i$j$k$l$m$n$o$p$q$r$s!`!a!b!c!d!e!f!g!h!i",
+        "length": 60
+      },
+      {
+        "offset": 62898,
+        "string": "3\"3M3",
+        "length": 5
+      },
+      {
+        "offset": 62908,
+        "string": "363Q3W3",
+        "length": 7
+      },
+      {
+        "offset": 62916,
+        "string": "3&3#3+3J3;3",
+        "length": 11
+      },
+      {
+        "offset": 62980,
+        "string": "2122293~3}3|\"R\"a\"+\".\"",
+        "length": 21
+      },
+      {
+        "offset": 63012,
+        "string": "\"5\")\"*",
+        "length": 6
+      },
+      {
+        "offset": 63514,
+        "string": "uOupy",
+        "length": 5
+      },
+      {
+        "offset": 63565,
+        "string": "/QASpT",
+        "length": 6
+      },
+      {
+        "offset": 63660,
+        "string": "[0_qf f",
+        "length": 7
+      },
+      {
+        "offset": 63674,
+        "string": "m)t[v",
+        "length": 5
+      },
+      {
+        "offset": 63718,
+        "string": "X0YD[",
+        "length": 5
+      },
+      {
+        "offset": 63764,
+        "string": "lZu%Q",
+        "length": 5
+      },
+      {
+        "offset": 63770,
+        "string": "Y.Ye_",
+        "length": 5
+      },
+      {
+        "offset": 63782,
+        "string": "j*k'k",
+        "length": 5
+      },
+      {
+        "offset": 63814,
+        "string": "hvraNYO",
+        "length": 7
+      },
+      {
+        "offset": 63822,
+        "string": "Sx`in)zO",
+        "length": 8
+      },
+      {
+        "offset": 63838,
+        "string": "OUO=O",
+        "length": 5
+      },
+      {
+        "offset": 63972,
+        "string": "mwppuLv",
+        "length": 7
+      },
+      {
+        "offset": 64048,
+        "string": "h<h8k",
+        "length": 5
+      },
+      {
+        "offset": 64100,
+        "string": "o_RrU",
+        "length": 5
+      },
+      {
+        "offset": 64134,
+        "string": "h*Q\\z",
+        "length": 5
+      },
+      {
+        "offset": 64192,
+        "string": "^r^y`",
+        "length": 5
+      },
+      {
+        "offset": 64214,
+        "string": "k>kSlWo\"o",
+        "length": 9
+      },
+      {
+        "offset": 64276,
+        "string": "N8T+\\",
+        "length": 5
+      },
+      {
+        "offset": 64286,
+        "string": "vLw<\\",
+        "length": 5
+      },
+      {
+        "offset": 64344,
+        "string": "j_^0k",
+        "length": 5
+      },
+      {
+        "offset": 64356,
+        "string": "yH[cz",
+        "length": 5
+      },
+      {
+        "offset": 64433,
+        "string": "px'gu",
+        "length": 5
+      },
+      {
+        "offset": 64472,
+        "string": "g=lBlrl",
+        "length": 7
+      },
+      {
+        "offset": 64548,
+        "string": "STS!S",
+        "length": 5
+      },
+      {
+        "offset": 64562,
+        "string": "_7_J`/`P`mc",
+        "length": 11
+      },
+      {
+        "offset": 64574,
+        "string": "eYjKl",
+        "length": 5
+      },
+      {
+        "offset": 64612,
+        "string": "im\\@f",
+        "length": 5
+      },
+      {
+        "offset": 64638,
+        "string": "k#k=t4y",
+        "length": 7
+      },
+      {
+        "offset": 64670,
+        "string": "N]P6S",
+        "length": 5
+      },
+      {
+        "offset": 64702,
+        "string": "zzPv[",
+        "length": 5
+      },
+      {
+        "offset": 64718,
+        "string": "\\Q\\Hc",
+        "length": 5
+      },
+      {
+        "offset": 64774,
+        "string": "QDUSW-s",
+        "length": 7
+      },
+      {
+        "offset": 64784,
+        "string": "YQ_b_",
+        "length": 5
+      },
+      {
+        "offset": 64790,
+        "string": "`uavaga",
+        "length": 7
+      },
+      {
+        "offset": 64800,
+        "string": "d:elfohBn",
+        "length": 9
+      },
+      {
+        "offset": 64810,
+        "string": "ufz=|",
+        "length": 5
+      },
+      {
+        "offset": 64864,
+        "string": "k lzoTzt}P",
+        "length": 10
+      },
+      {
+        "offset": 64882,
+        "string": "P9P&PeQ|R8RcU",
+        "length": 13
+      },
+      {
+        "offset": 64914,
+        "string": "j)r}r",
+        "length": 5
+      },
+      {
+        "offset": 64924,
+        "string": "xo}yw",
+        "length": 5
+      },
+      {
+        "offset": 64958,
+        "string": "^{_&n",
+        "length": 5
+      },
+      {
+        "offset": 64998,
+        "string": "_'b8eEg",
+        "length": 7
+      },
+      {
+        "offset": 65040,
+        "string": "SHTIT>Z/_",
+        "length": 9
+      },
+      {
+        "offset": 65084,
+        "string": "QIQlR",
+        "length": 5
+      },
+      {
+        "offset": 65108,
+        "string": "Y}[T[][",
+        "length": 7
+      },
+      {
+        "offset": 65132,
+        "string": "`RaLb",
+        "length": 5
+      },
+      {
+        "offset": 65150,
+        "string": "gmh!h",
+        "length": 5
+      },
+      {
+        "offset": 65158,
+        "string": "l_m*min/n",
+        "length": 9
+      },
+      {
+        "offset": 65172,
+        "string": "xlz?|",
+        "length": 5
+      },
+      {
+        "offset": 65256,
+        "string": "QKR;TJV",
+        "length": 7
+      },
+      {
+        "offset": 65302,
+        "string": "ZZ`ha",
+        "length": 5
+      },
+      {
+        "offset": 65376,
+        "string": "_ibMc",
+        "length": 5
+      },
+      {
+        "offset": 65382,
+        "string": "h=ksn",
+        "length": 5
+      },
+      {
+        "offset": 65396,
+        "string": "x&yme",
+        "length": 5
+      },
+      {
+        "offset": 65412,
+        "string": "RdW(gP",
+        "length": 6
+      },
+      {
+        "offset": 65444,
+        "string": "O\\RJT",
+        "length": 5
+      },
+      {
+        "offset": 65450,
+        "string": "d>f(g",
+        "length": 5
+      },
+      {
+        "offset": 65520,
+        "string": "ech_q",
+        "length": 5
+      },
+      {
+        "offset": 65576,
+        "string": "[P\\M^",
+        "length": 5
+      },
+      {
+        "offset": 65590,
+        "string": "e/[\\e",
+        "length": 5
+      },
+      {
+        "offset": 65610,
+        "string": "sEyIy",
+        "length": 5
+      },
+      {
+        "offset": 65656,
+        "string": "QP[W[",
+        "length": 5
+      },
+      {
+        "offset": 65666,
+        "string": "fBk!n",
+        "length": 5
+      },
+      {
+        "offset": 65764,
+        "string": "qny>}",
+        "length": 5
+      },
+      {
+        "offset": 65786,
+        "string": "\\:gSp|r5",
+        "length": 8
+      },
+      {
+        "offset": 65814,
+        "string": "bKg1k",
+        "length": 5
+      },
+      {
+        "offset": 65908,
+        "string": "OOQESA_",
+        "length": 7
+      },
+      {
+        "offset": 65940,
+        "string": "y]~.|",
+        "length": 5
+      },
+      {
+        "offset": 66048,
+        "string": "S SGS",
+        "length": 5
+      },
+      {
+        "offset": 66056,
+        "string": "UFU1V",
+        "length": 5
+      },
+      {
+        "offset": 66100,
+        "string": "f-fvg~h",
+        "length": 7
+      },
+      {
+        "offset": 66118,
+        "string": "nXq<q&qgu",
+        "length": 9
+      },
+      {
+        "offset": 66200,
+        "string": "[\"^8`",
+        "length": 5
+      },
+      {
+        "offset": 66208,
+        "string": "gagVmDr",
+        "length": 7
+      },
+      {
+        "offset": 66256,
+        "string": "\\;O8O",
+        "length": 5
+      },
+      {
+        "offset": 66274,
+        "string": "aNc/e",
+        "length": 5
+      },
+      {
+        "offset": 66400,
+        "string": "]iepg",
+        "length": 5
+      },
+      {
+        "offset": 66410,
+        "string": "cngIi",
+        "length": 5
+      },
+      {
+        "offset": 66432,
+        "string": "p,u]f/Q",
+        "length": 7
+      },
+      {
+        "offset": 66452,
+        "string": "e?etf",
+        "length": 5
+      },
+      {
+        "offset": 66520,
+        "string": "zM|M~>",
+        "length": 6
+      },
+      {
+        "offset": 66566,
+        "string": "QHSCS`[",
+        "length": 7
+      },
+      {
+        "offset": 66580,
+        "string": "b&bGd",
+        "length": 5
+      },
+      {
+        "offset": 66598,
+        "string": "o\\qNq}e",
+        "length": 7
+      },
+      {
+        "offset": 66646,
+        "string": "o8q6Qhy",
+        "length": 7
+      },
+      {
+        "offset": 66660,
+        "string": "VLXQ\\",
+        "length": 5
+      },
+      {
+        "offset": 66716,
+        "string": "YOr=[",
+        "length": 5
+      },
+      {
+        "offset": 66812,
+        "string": "PtRGSs`ocIg_n,",
+        "length": 14
+      },
+      {
+        "offset": 66848,
+        "string": "[X[k\\",
+        "length": 5
+      },
+      {
+        "offset": 66906,
+        "string": "` aKb4f",
+        "length": 7
+      },
+      {
+        "offset": 66954,
+        "string": "p'SSUD[",
+        "length": 7
+      },
+      {
+        "offset": 67020,
+        "string": "N9SXV",
+        "length": 5
+      },
+      {
+        "offset": 67086,
+        "string": "`efzl`u",
+        "length": 7
+      },
+      {
+        "offset": 67128,
+        "string": "w@N-N",
+        "length": 5
+      },
+      {
+        "offset": 67188,
+        "string": "_5_k_",
+        "length": 5
+      },
+      {
+        "offset": 67202,
+        "string": "onrRu:w:",
+        "length": 8
+      },
+      {
+        "offset": 67276,
+        "string": "OCo,g",
+        "length": 5
+      },
+      {
+        "offset": 67289,
+        "string": "Ti?opWjX",
+        "length": 8
+      },
+      {
+        "offset": 67298,
+        "string": "[,},r*T",
+        "length": 7
+      },
+      {
+        "offset": 67312,
+        "string": "ONP\\PuRC",
+        "length": 8
+      },
+      {
+        "offset": 67322,
+        "string": "THX$[",
+        "length": 5
+      },
+      {
+        "offset": 67407,
+        "string": "DQxXkY)\\U^",
+        "length": 10
+      },
+      {
+        "offset": 67446,
+        "string": "X5XWY",
+        "length": 5
+      },
+      {
+        "offset": 67458,
+        "string": "g\\n!v{",
+        "length": 6
+      },
+      {
+        "offset": 67473,
+        "string": "Mx%x:R",
+        "length": 6
+      },
+      {
+        "offset": 67502,
+        "string": "XTXXYW[",
+        "length": 7
+      },
+      {
+        "offset": 67518,
+        "string": "d-gqhCh",
+        "length": 7
+      },
+      {
+        "offset": 67544,
+        "string": "yw{I{T{R|",
+        "length": 9
+      },
+      {
+        "offset": 67626,
+        "string": "rywcy",
+        "length": 5
+      },
+      {
+        "offset": 67662,
+        "string": "Vx\\o`",
+        "length": 5
+      },
+      {
+        "offset": 67710,
+        "string": "uwSWi`",
+        "length": 6
+      },
+      {
+        "offset": 67742,
+        "string": "NsQeY",
+        "length": 5
+      },
+      {
+        "offset": 67826,
+        "string": "m>t6x4ZF",
+        "length": 8
+      },
+      {
+        "offset": 67848,
+        "string": "eWgov",
+        "length": 5
+      },
+      {
+        "offset": 67874,
+        "string": "isqdr",
+        "length": 5
+      },
+      {
+        "offset": 67897,
+        "string": ")O/ReSZb",
+        "length": 8
+      },
+      {
+        "offset": 67954,
+        "string": "uQu`Qk",
+        "length": 6
+      },
+      {
+        "offset": 67990,
+        "string": "O4R$SJS",
+        "length": 7
+      },
+      {
+        "offset": 68008,
+        "string": "l>lNrHr",
+        "length": 7
+      },
+      {
+        "offset": 68038,
+        "string": "c=fiujv",
+        "length": 7
+      },
+      {
+        "offset": 68052,
+        "string": "S*SQT&Y",
+        "length": 7
+      },
+      {
+        "offset": 68066,
+        "string": "bIbyb",
+        "length": 5
+      },
+      {
+        "offset": 68232,
+        "string": "Y+Zf[",
+        "length": 5
+      },
+      {
+        "offset": 68254,
+        "string": "fnmnr6{&",
+        "length": 8
+      },
+      {
+        "offset": 68338,
+        "string": "T;VtX",
+        "length": 5
+      },
+      {
+        "offset": 68366,
+        "string": "OuQuX@^c^s_",
+        "length": 11
+      },
+      {
+        "offset": 68442,
+        "string": "cUkiu+",
+        "length": 6
+      },
+      {
+        "offset": 68476,
+        "string": "TFX1YI[",
+        "length": 7
+      },
+      {
+        "offset": 68494,
+        "string": "cge>e",
+        "length": 5
+      },
+      {
+        "offset": 68544,
+        "string": "RVWJY",
+        "length": 5
+      },
+      {
+        "offset": 68598,
+        "string": "g4rgwfzF",
+        "length": 8
+      },
+      {
+        "offset": 68616,
+        "string": "^LYTg,",
+        "length": 6
+      },
+      {
+        "offset": 68730,
+        "string": "Y\"q!r_w",
+        "length": 7
+      },
+      {
+        "offset": 68818,
+        "string": "\\$b;|~",
+        "length": 6
+      },
+      {
+        "offset": 68883,
+        "string": "8U/OQQ*R",
+        "length": 8
+      },
+      {
+        "offset": 68912,
+        "string": "s6s7u1yP",
+        "length": 8
+      },
+      {
+        "offset": 69039,
+        "string": "jNqSu]Pk",
+        "length": 8
+      },
+      {
+        "offset": 69060,
+        "string": "\\egNh",
+        "length": 5
+      },
+      {
+        "offset": 69102,
+        "string": "uYxk|",
+        "length": 5
+      },
+      {
+        "offset": 69188,
+        "string": "t`XAm",
+        "length": 5
+      },
+      {
+        "offset": 69248,
+        "string": "o#qI|>}",
+        "length": 7
+      },
+      {
+        "offset": 69454,
+        "string": "N*N1N6N<N?NBNVNXN",
+        "length": 17
+      },
+      {
+        "offset": 69520,
+        "string": "OZO0O[O]OWOGOvO",
+        "length": 15
+      },
+      {
+        "offset": 69540,
+        "string": "O{OiOpO",
+        "length": 7
+      },
+      {
+        "offset": 69582,
+        "string": "P*P%P",
+        "length": 5
+      },
+      {
+        "offset": 69592,
+        "string": "P!P)P,O",
+        "length": 7
+      },
+      {
+        "offset": 69606,
+        "string": "PCPGg",
+        "length": 5
+      },
+      {
+        "offset": 69612,
+        "string": "PUPPPHPZPVPlPxP",
+        "length": 15
+      },
+      {
+        "offset": 69674,
+        "string": "Q!Q:Q7Q<Q;Q?Q@QRQLQTQbz",
+        "length": 23
+      },
+      {
+        "offset": 69698,
+        "string": "QiQjQnQ",
+        "length": 7
+      },
+      {
+        "offset": 69778,
+        "string": "R'R*R.R3R9RORDRKRLR^RTRjRtRiRsR",
+        "length": 31
+      },
+      {
+        "offset": 69876,
+        "string": "S#S/S1S3S8S@SFSEN",
+        "length": 17
+      },
+      {
+        "offset": 69894,
+        "string": "SISMQ",
+        "length": 5
+      },
+      {
+        "offset": 69900,
+        "string": "S^SiSnY",
+        "length": 7
+      },
+      {
+        "offset": 69908,
+        "string": "S{SwS",
+        "length": 5
+      },
+      {
+        "offset": 69950,
+        "string": "T=T@T,T-T<T.T6T)T",
+        "length": 17
+      },
+      {
+        "offset": 69976,
+        "string": "T_TqTwTpT",
+        "length": 9
+      },
+      {
+        "offset": 70044,
+        "string": "U9U@UcULU.U\\UEUVUWU8U3U]U",
+        "length": 25
+      },
+      {
+        "offset": 70078,
+        "string": "U{U~U",
+        "length": 5
+      },
+      {
+        "offset": 70126,
+        "string": "VNVPq",
+        "length": 5
+      },
+      {
+        "offset": 70132,
+        "string": "V4V6V2V8",
+        "length": 8
+      },
+      {
+        "offset": 70142,
+        "string": "VkVdV/VlVjV",
+        "length": 11
+      },
+      {
+        "offset": 70220,
+        "string": "W&W7W8WNW;W@WOWiW",
+        "length": 17
+      },
+      {
+        "offset": 70280,
+        "string": "XrX!XbXKXpk",
+        "length": 11
+      },
+      {
+        "offset": 70292,
+        "string": "XRX=XyX",
+        "length": 7
+      },
+      {
+        "offset": 70358,
+        "string": "Y%Y,Y-Y2Y8Y>z",
+        "length": 13
+      },
+      {
+        "offset": 70372,
+        "string": "YUYPYNYZYXYbY`YgYlYiYxY",
+        "length": 23
+      },
+      {
+        "offset": 70430,
+        "string": "Z@ZlZIZ5Z6ZbZjZ",
+        "length": 15
+      },
+      {
+        "offset": 70480,
+        "string": "[*[6[>[C[E[@[Q[U[Z[[[e[i[p[s[u[xe",
+        "length": 33
+      },
+      {
+        "offset": 70564,
+        "string": "\\ \\\"\\(\\8\\9\\A\\F\\N\\S\\P\\O[q\\l\\nNb\\v\\y\\",
+        "length": 35
+      },
+      {
+        "offset": 70660,
+        "string": "]L]R]N]K]l]s]v]",
+        "length": 15
+      },
+      {
+        "offset": 70724,
+        "string": "^6^7^D^C^@^N^W^T^_^b^d^G^u^v^z",
+        "length": 30
+      },
+      {
+        "offset": 70806,
+        "string": "_]_\\_",
+        "length": 5
+      },
+      {
+        "offset": 70816,
+        "string": "_)_-_8_A_H_L_N_/_Q_V_W_Y_a_m_s_w_",
+        "length": 33
+      },
+      {
+        "offset": 70912,
+        "string": "`+`&`",
+        "length": 5
+      },
+      {
+        "offset": 70918,
+        "string": "`:`Z`A`j`w`_`J`F`M`c`C`d`B`l`k`Y`",
+        "length": 33
+      },
+      {
+        "offset": 71022,
+        "string": "aGa>a(a'aJa?a<a,a4a=aBaDasawaXaYaZakataoaeaqa_a]aSaua",
+        "length": 53
+      },
+      {
+        "offset": 71150,
+        "string": "b!b*b.b0b2b3bAbNb^bcb[b`bhb|b",
+        "length": 29
+      },
+      {
+        "offset": 71242,
+        "string": "cPc>cMd",
+        "length": 7
+      },
+      {
+        "offset": 71304,
+        "string": "d&d6e",
+        "length": 5
+      },
+      {
+        "offset": 71316,
+        "string": "dgdodvdNe*d",
+        "length": 11
+      },
+      {
+        "offset": 71388,
+        "string": "e$e#e+e4e5e7e6e8uKeHeVeUeMeXe^e]erexe",
+        "length": 37
+      },
+      {
+        "offset": 71468,
+        "string": "gsf5f6f4f",
+        "length": 9
+      },
+      {
+        "offset": 71478,
+        "string": "fOfDfIfAf^f]fdfgfhf_fbfpf",
+        "length": 25
+      },
+      {
+        "offset": 71559,
+        "string": "8g.g?g6gAg8g7gFg^g`gYgcgdg",
+        "length": 26
+      },
+      {
+        "offset": 71590,
+        "string": "g|gjg",
+        "length": 5
+      },
+      {
+        "offset": 71640,
+        "string": "hFh)h@hMh2hN",
+        "length": 12
+      },
+      {
+        "offset": 71656,
+        "string": "h+hYhchwh",
+        "length": 9
+      },
+      {
+        "offset": 71706,
+        "string": "i\"i&h",
+        "length": 5
+      },
+      {
+        "offset": 71740,
+        "string": "i(i*i",
+        "length": 5
+      },
+      {
+        "offset": 71746,
+        "string": "i#i!h",
+        "length": 5
+      },
+      {
+        "offset": 71752,
+        "string": "iyiwi\\ixikiTi~ini9iti=iYi0iai^i]i",
+        "length": 33
+      },
+      {
+        "offset": 71872,
+        "string": "jrj6jxjGjbjYjfjHj8j\"j",
+        "length": 21
+      },
+      {
+        "offset": 71948,
+        "string": "k8k7v",
+        "length": 5
+      },
+      {
+        "offset": 71958,
+        "string": "kGkCkIkPkYkTk[k_kakxkyk",
+        "length": 23
+      },
+      {
+        "offset": 72042,
+        "string": "l$l#l^lUlbljl",
+        "length": 13
+      },
+      {
+        "offset": 72064,
+        "string": "l~lhlsl",
+        "length": 7
+      },
+      {
+        "offset": 72107,
+        "string": "Mm6m+m=m8m",
+        "length": 10
+      },
+      {
+        "offset": 72118,
+        "string": "m5m3m",
+        "length": 5
+      },
+      {
+        "offset": 72130,
+        "string": "mdmZmymYm",
+        "length": 9
+      },
+      {
+        "offset": 72186,
+        "string": "n-nnn.n",
+        "length": 7
+      },
+      {
+        "offset": 72194,
+        "string": "nrn_n>n#nkn+nvnMn",
+        "length": 17
+      },
+      {
+        "offset": 72212,
+        "string": "nCn:nNn$n",
+        "length": 9
+      },
+      {
+        "offset": 72290,
+        "string": "ozoxo",
+        "length": 5
+      },
+      {
+        "offset": 72298,
+        "string": "ooo[o",
+        "length": 5
+      },
+      {
+        "offset": 72308,
+        "string": "o|oXo",
+        "length": 5
+      },
+      {
+        "offset": 72376,
+        "string": "p0p>p2pQpcp",
+        "length": 11
+      },
+      {
+        "offset": 72420,
+        "string": "qeqUq",
+        "length": 5
+      },
+      {
+        "offset": 72426,
+        "string": "qfqbqLqVqlq",
+        "length": 11
+      },
+      {
+        "offset": 72482,
+        "string": "r(r-r,r0r2r;r<r?r@rFrKrXrtr~r",
+        "length": 29
+      },
+      {
+        "offset": 72560,
+        "string": "s4s/s)s%s>sNsO",
+        "length": 14
+      },
+      {
+        "offset": 72576,
+        "string": "sWsjshspsxsus{szs",
+        "length": 17
+      },
+      {
+        "offset": 72612,
+        "string": "tot%s",
+        "length": 5
+      },
+      {
+        "offset": 72618,
+        "string": "t2t:tUt?t_tYtAt\\titptctjtvt~t",
+        "length": 29
+      },
+      {
+        "offset": 72698,
+        "string": "u&u,u<uDuMuJuIu[uFuZuiudugukumuxuvu",
+        "length": 35
+      },
+      {
+        "offset": 72808,
+        "string": "v'v v!v\"v$v4v0v;vGvHvFv\\vXvavbvhvivjvgvlvpvrvvvxv|v",
+        "length": 51
+      },
+      {
+        "offset": 72914,
+        "string": "w)w$w",
+        "length": 5
+      },
+      {
+        "offset": 72920,
+        "string": "w%w&w",
+        "length": 5
+      }
+    ]
+  },
+  "StaticR_rel": {
+    "count": 3244,
+    "strings": [
+      {
+        "offset": 48,
+        "string": "RevoKartNR.wad",
+        "length": 14
+      },
+      {
+        "offset": 100,
+        "string": "RevoKartTR.wad",
+        "length": 14
+      },
+      {
+        "offset": 148,
+        "string": "/Boot/wadlistR.dat",
+        "length": 18
+      },
+      {
+        "offset": 168,
+        "string": "[CINS] OSIsTitleInstalled(0x%016llx) start",
+        "length": 42
+      },
+      {
+        "offset": 212,
+        "string": "[CINS] OSIsTitleInstalled(0x%016llx) errcode=%d",
+        "length": 47
+      },
+      {
+        "offset": 261,
+        "string": "[CINS] OSLaunchInstaller(0x%08x, *, Info[0x%08x])",
+        "length": 49
+      },
+      {
+        "offset": 312,
+        "string": "[CINS] argument=%s, crc=0x%08x",
+        "length": 30
+      },
+      {
+        "offset": 344,
+        "string": "[CINS] OSLaunch[Title|Disk]l(id=%d, 0x%08x, arg1, arg2, NULL)",
+        "length": 61
+      },
+      {
+        "offset": 856,
+        "string": "course.kmp",
+        "length": 10
+      },
+      {
+        "offset": 876,
+        "string": "buffer_data",
+        "length": 11
+      },
+      {
+        "offset": 920,
+        "string": "------------------- %d Scene Exit -------------------",
+        "length": 53
+      },
+      {
+        "offset": 975,
+        "string": "-------------------- %d Scene Restart --------------------",
+        "length": 58
+      },
+      {
+        "offset": 1040,
+        "string": "/hbm/home.csv",
+        "length": 13
+      },
+      {
+        "offset": 1056,
+        "string": "/hbm/homeBtn.szs",
+        "length": 16
+      },
+      {
+        "offset": 1076,
+        "string": "/hbm/homeBtn_ENG.szs",
+        "length": 20
+      },
+      {
+        "offset": 1100,
+        "string": "/hbm/homeBtn_GER.szs",
+        "length": 20
+      },
+      {
+        "offset": 1124,
+        "string": "/hbm/homeBtn_FRA.szs",
+        "length": 20
+      },
+      {
+        "offset": 1148,
+        "string": "/hbm/homeBtn_SPA.szs",
+        "length": 20
+      },
+      {
+        "offset": 1172,
+        "string": "/hbm/homeBtn_ITA.szs",
+        "length": 20
+      },
+      {
+        "offset": 1196,
+        "string": "/hbm/homeBtn_NED.szs",
+        "length": 20
+      },
+      {
+        "offset": 1224,
+        "string": "/hbm/config.txt",
+        "length": 15
+      },
+      {
+        "offset": 1240,
+        "string": "/hbm/SpeakerSe.arc",
+        "length": 18
+      },
+      {
+        "offset": 1260,
+        "string": "/hbm/homeBtnIcon.tpl",
+        "length": 20
+      },
+      {
+        "offset": 1284,
+        "string": "/hbm/HomeButtonSe.arc",
+        "length": 21
+      },
+      {
+        "offset": 1476,
+        "string": "?fffB",
+        "length": 5
+      },
+      {
+        "offset": 1524,
+        "string": "/vibration.krm",
+        "length": 14
+      },
+      {
+        "offset": 1624,
+        "string": "/Race/MissionRun/mission_single.kmt",
+        "length": 35
+      },
+      {
+        "offset": 1676,
+        "string": "_U.szs",
+        "length": 6
+      },
+      {
+        "offset": 1688,
+        "string": "_Q.szs",
+        "length": 6
+      },
+      {
+        "offset": 1696,
+        "string": "_M.szs",
+        "length": 6
+      },
+      {
+        "offset": 1712,
+        "string": "_Dif.szs",
+        "length": 8
+      },
+      {
+        "offset": 1776,
+        "string": "rksys.dat",
+        "length": 9
+      },
+      {
+        "offset": 1788,
+        "string": "wc24dl.vff",
+        "length": 10
+      },
+      {
+        "offset": 1800,
+        "string": "wc24scr.vff",
+        "length": 11
+      },
+      {
+        "offset": 1812,
+        "string": "/Boot/savebanner.tpl",
+        "length": 20
+      },
+      {
+        "offset": 1836,
+        "string": "banner.bin",
+        "length": 10
+      },
+      {
+        "offset": 1852,
+        "string": "/title/00010000/524d4745/data/banner.bin",
+        "length": 40
+      },
+      {
+        "offset": 2516,
+        "string": "/boot/menuset.prm",
+        "length": 17
+      },
+      {
+        "offset": 2637,
+        "string": "s33C0",
+        "length": 5
+      },
+      {
+        "offset": 2658,
+        "string": "p_Gj`",
+        "length": 5
+      },
+      {
+        "offset": 2676,
+        "string": "Nnk(7'",
+        "length": 6
+      },
+      {
+        "offset": 2712,
+        "string": "/ranktimeGP.krt",
+        "length": 15
+      },
+      {
+        "offset": 2744,
+        "string": "/minigame.kmg",
+        "length": 13
+      },
+      {
+        "offset": 3128,
+        "string": "/Race/Common",
+        "length": 12
+      },
+      {
+        "offset": 3152,
+        "string": "/Scene/UI/Font",
+        "length": 14
+      },
+      {
+        "offset": 3168,
+        "string": "/Scene/Model/Earth",
+        "length": 18
+      },
+      {
+        "offset": 3188,
+        "string": "/Scene/Model/MiiBody",
+        "length": 20
+      },
+      {
+        "offset": 3212,
+        "string": "/Scene/Model/Driver",
+        "length": 19
+      },
+      {
+        "offset": 3232,
+        "string": "/Demo/Award",
+        "length": 11
+      },
+      {
+        "offset": 3244,
+        "string": "/Scene/Model/BackModel",
+        "length": 22
+      },
+      {
+        "offset": 3268,
+        "string": "castle_course",
+        "length": 13
+      },
+      {
+        "offset": 3284,
+        "string": "farm_course",
+        "length": 11
+      },
+      {
+        "offset": 3296,
+        "string": "kinoko_course",
+        "length": 13
+      },
+      {
+        "offset": 3312,
+        "string": "volcano_course",
+        "length": 14
+      },
+      {
+        "offset": 3328,
+        "string": "factory_course",
+        "length": 14
+      },
+      {
+        "offset": 3344,
+        "string": "shopping_course",
+        "length": 15
+      },
+      {
+        "offset": 3360,
+        "string": "boardcross_course",
+        "length": 17
+      },
+      {
+        "offset": 3380,
+        "string": "truck_course",
+        "length": 12
+      },
+      {
+        "offset": 3400,
+        "string": "beginner_course",
+        "length": 15
+      },
+      {
+        "offset": 3416,
+        "string": "senior_course",
+        "length": 13
+      },
+      {
+        "offset": 3432,
+        "string": "ridgehighway_course",
+        "length": 19
+      },
+      {
+        "offset": 3452,
+        "string": "treehouse_course",
+        "length": 16
+      },
+      {
+        "offset": 3472,
+        "string": "koopa_course",
+        "length": 12
+      },
+      {
+        "offset": 3488,
+        "string": "rainbow_course",
+        "length": 14
+      },
+      {
+        "offset": 3504,
+        "string": "desert_course",
+        "length": 13
+      },
+      {
+        "offset": 3520,
+        "string": "water_course",
+        "length": 12
+      },
+      {
+        "offset": 3536,
+        "string": "old_peach_gc",
+        "length": 12
+      },
+      {
+        "offset": 3552,
+        "string": "old_mario_gc",
+        "length": 12
+      },
+      {
+        "offset": 3568,
+        "string": "old_waluigi_gc",
+        "length": 14
+      },
+      {
+        "offset": 3584,
+        "string": "old_donkey_gc",
+        "length": 13
+      },
+      {
+        "offset": 3600,
+        "string": "old_falls_ds",
+        "length": 12
+      },
+      {
+        "offset": 3616,
+        "string": "old_desert_ds",
+        "length": 13
+      },
+      {
+        "offset": 3632,
+        "string": "old_garden_ds",
+        "length": 13
+      },
+      {
+        "offset": 3648,
+        "string": "old_town_ds",
+        "length": 11
+      },
+      {
+        "offset": 3660,
+        "string": "old_mario_sfc",
+        "length": 13
+      },
+      {
+        "offset": 3676,
+        "string": "old_obake_sfc",
+        "length": 13
+      },
+      {
+        "offset": 3692,
+        "string": "old_mario_64",
+        "length": 12
+      },
+      {
+        "offset": 3708,
+        "string": "old_sherbet_64",
+        "length": 14
+      },
+      {
+        "offset": 3724,
+        "string": "old_koopa_64",
+        "length": 12
+      },
+      {
+        "offset": 3740,
+        "string": "old_donkey_64",
+        "length": 13
+      },
+      {
+        "offset": 3756,
+        "string": "old_koopa_gba",
+        "length": 13
+      },
+      {
+        "offset": 3772,
+        "string": "old_heyho_gba",
+        "length": 13
+      },
+      {
+        "offset": 3788,
+        "string": "venice_battle",
+        "length": 13
+      },
+      {
+        "offset": 3804,
+        "string": "block_battle",
+        "length": 12
+      },
+      {
+        "offset": 3820,
+        "string": "casino_battle",
+        "length": 13
+      },
+      {
+        "offset": 3836,
+        "string": "skate_battle",
+        "length": 12
+      },
+      {
+        "offset": 3852,
+        "string": "sand_battle",
+        "length": 11
+      },
+      {
+        "offset": 3864,
+        "string": "old_CookieLand_gc",
+        "length": 17
+      },
+      {
+        "offset": 3884,
+        "string": "old_House_ds",
+        "length": 12
+      },
+      {
+        "offset": 3904,
+        "string": "old_battle4_sfc",
+        "length": 15
+      },
+      {
+        "offset": 3920,
+        "string": "old_battle3_gba",
+        "length": 15
+      },
+      {
+        "offset": 3936,
+        "string": "old_matenro_64",
+        "length": 14
+      },
+      {
+        "offset": 3952,
+        "string": "ring_mission",
+        "length": 12
+      },
+      {
+        "offset": 3968,
+        "string": "winningrun_demo",
+        "length": 15
+      },
+      {
+        "offset": 3984,
+        "string": "loser_demo",
+        "length": 10
+      },
+      {
+        "offset": 3996,
+        "string": "draw_dmeo",
+        "length": 9
+      },
+      {
+        "offset": 4008,
+        "string": "ending_demo",
+        "length": 11
+      },
+      {
+        "offset": 4116,
+        "string": "sa_mii_m",
+        "length": 8
+      },
+      {
+        "offset": 4128,
+        "string": "sa_mii_f",
+        "length": 8
+      },
+      {
+        "offset": 4140,
+        "string": "sb_mii_m",
+        "length": 8
+      },
+      {
+        "offset": 4152,
+        "string": "sb_mii_f",
+        "length": 8
+      },
+      {
+        "offset": 4164,
+        "string": "sc_mii_m",
+        "length": 8
+      },
+      {
+        "offset": 4176,
+        "string": "sc_mii_f",
+        "length": 8
+      },
+      {
+        "offset": 4188,
+        "string": "ma_mii_m",
+        "length": 8
+      },
+      {
+        "offset": 4200,
+        "string": "ma_mii_f",
+        "length": 8
+      },
+      {
+        "offset": 4212,
+        "string": "mb_mii_m",
+        "length": 8
+      },
+      {
+        "offset": 4224,
+        "string": "mb_mii_f",
+        "length": 8
+      },
+      {
+        "offset": 4236,
+        "string": "mc_mii_m",
+        "length": 8
+      },
+      {
+        "offset": 4248,
+        "string": "mc_mii_f",
+        "length": 8
+      },
+      {
+        "offset": 4260,
+        "string": "la_mii_m",
+        "length": 8
+      },
+      {
+        "offset": 4272,
+        "string": "la_mii_f",
+        "length": 8
+      },
+      {
+        "offset": 4284,
+        "string": "lb_mii_m",
+        "length": 8
+      },
+      {
+        "offset": 4296,
+        "string": "lb_mii_f",
+        "length": 8
+      },
+      {
+        "offset": 4308,
+        "string": "lc_mii_m",
+        "length": 8
+      },
+      {
+        "offset": 4320,
+        "string": "lc_mii_f",
+        "length": 8
+      },
+      {
+        "offset": 4332,
+        "string": "m_mii",
+        "length": 5
+      },
+      {
+        "offset": 4340,
+        "string": "s_mii",
+        "length": 5
+      },
+      {
+        "offset": 4348,
+        "string": "l_mii",
+        "length": 5
+      },
+      {
+        "offset": 4360,
+        "string": "pc_menu",
+        "length": 7
+      },
+      {
+        "offset": 4368,
+        "string": "ds_menu",
+        "length": 7
+      },
+      {
+        "offset": 4376,
+        "string": "rs_menu",
+        "length": 7
+      },
+      {
+        "offset": 4384,
+        "string": "sdf_kart",
+        "length": 8
+      },
+      {
+        "offset": 4396,
+        "string": "mdf_kart",
+        "length": 8
+      },
+      {
+        "offset": 4408,
+        "string": "ldf_kart",
+        "length": 8
+      },
+      {
+        "offset": 4424,
+        "string": "sa_kart",
+        "length": 7
+      },
+      {
+        "offset": 4432,
+        "string": "ma_kart",
+        "length": 7
+      },
+      {
+        "offset": 4440,
+        "string": "la_kart",
+        "length": 7
+      },
+      {
+        "offset": 4448,
+        "string": "sb_kart",
+        "length": 7
+      },
+      {
+        "offset": 4456,
+        "string": "mb_kart",
+        "length": 7
+      },
+      {
+        "offset": 4464,
+        "string": "lb_kart",
+        "length": 7
+      },
+      {
+        "offset": 4472,
+        "string": "sc_kart",
+        "length": 7
+      },
+      {
+        "offset": 4480,
+        "string": "mc_kart",
+        "length": 7
+      },
+      {
+        "offset": 4488,
+        "string": "lc_kart",
+        "length": 7
+      },
+      {
+        "offset": 4496,
+        "string": "sd_kart",
+        "length": 7
+      },
+      {
+        "offset": 4504,
+        "string": "md_kart",
+        "length": 7
+      },
+      {
+        "offset": 4512,
+        "string": "ld_kart",
+        "length": 7
+      },
+      {
+        "offset": 4520,
+        "string": "se_kart",
+        "length": 7
+      },
+      {
+        "offset": 4528,
+        "string": "me_kart",
+        "length": 7
+      },
+      {
+        "offset": 4536,
+        "string": "le_kart",
+        "length": 7
+      },
+      {
+        "offset": 4544,
+        "string": "sdf_bike",
+        "length": 8
+      },
+      {
+        "offset": 4556,
+        "string": "mdf_bike",
+        "length": 8
+      },
+      {
+        "offset": 4568,
+        "string": "ldf_bike",
+        "length": 8
+      },
+      {
+        "offset": 4584,
+        "string": "sa_bike",
+        "length": 7
+      },
+      {
+        "offset": 4592,
+        "string": "ma_bike",
+        "length": 7
+      },
+      {
+        "offset": 4600,
+        "string": "la_bike",
+        "length": 7
+      },
+      {
+        "offset": 4608,
+        "string": "sb_bike",
+        "length": 7
+      },
+      {
+        "offset": 4616,
+        "string": "mb_bike",
+        "length": 7
+      },
+      {
+        "offset": 4624,
+        "string": "lb_bike",
+        "length": 7
+      },
+      {
+        "offset": 4632,
+        "string": "sc_bike",
+        "length": 7
+      },
+      {
+        "offset": 4640,
+        "string": "mc_bike",
+        "length": 7
+      },
+      {
+        "offset": 4648,
+        "string": "lc_bike",
+        "length": 7
+      },
+      {
+        "offset": 4656,
+        "string": "sd_bike",
+        "length": 7
+      },
+      {
+        "offset": 4664,
+        "string": "md_bike",
+        "length": 7
+      },
+      {
+        "offset": 4672,
+        "string": "ld_bike",
+        "length": 7
+      },
+      {
+        "offset": 4680,
+        "string": "se_bike",
+        "length": 7
+      },
+      {
+        "offset": 4688,
+        "string": "me_bike",
+        "length": 7
+      },
+      {
+        "offset": 4696,
+        "string": "le_bike",
+        "length": 7
+      },
+      {
+        "offset": 4712,
+        "string": "_blue",
+        "length": 5
+      },
+      {
+        "offset": 4736,
+        "string": "/earth.brres.LZ",
+        "length": 15
+      },
+      {
+        "offset": 4776,
+        "string": "Race/Course/%s_d",
+        "length": 16
+      },
+      {
+        "offset": 4793,
+        "string": "Race/Course/%s",
+        "length": 14
+      },
+      {
+        "offset": 4808,
+        "string": "Race/MissionRun/mr%02d.szs",
+        "length": 26
+      },
+      {
+        "offset": 4867,
+        "string": "Race/Competition/CommonObj/CommonObj%02d.szs",
+        "length": 44
+      },
+      {
+        "offset": 4927,
+        "string": "Race/Kart/%s%s-%s%s",
+        "length": 19
+      },
+      {
+        "offset": 4987,
+        "string": "Scene/Model/Kart/%s-allkart",
+        "length": 27
+      },
+      {
+        "offset": 5015,
+        "string": "Scene/Model/Kart/%s-allkart_BT",
+        "length": 30
+      },
+      {
+        "offset": 5046,
+        "string": "%s.brres",
+        "length": 8
+      },
+      {
+        "offset": 5064,
+        "string": "/bsp/%s.bsp",
+        "length": 11
+      },
+      {
+        "offset": 5210,
+        "string": "/Race/TimeAttack/ghost1/ghost1_comp_%02d.rkg",
+        "length": 44
+      },
+      {
+        "offset": 5255,
+        "string": "/Race/TimeAttack/ghost2/ghost2_comp_%02d.rkg",
+        "length": 44
+      },
+      {
+        "offset": 5351,
+        "string": "ANnk(B",
+        "length": 6
+      },
+      {
+        "offset": 5360,
+        "string": "/Race/TimeAttack/ghost%c/ghost%c_comp_%02d.rkg",
+        "length": 46
+      },
+      {
+        "offset": 5408,
+        "string": "lensflare.brres",
+        "length": 15
+      },
+      {
+        "offset": 6349,
+        "string": "/Demo/Lose",
+        "length": 10
+      },
+      {
+        "offset": 6372,
+        "string": "/Demo/Ending",
+        "length": 12
+      },
+      {
+        "offset": 6409,
+        "string": "Error: A called an unlinked function.",
+        "length": 37
+      },
+      {
+        "offset": 6448,
+        "string": "Address:      Back Chain    LR Save",
+        "length": 35
+      },
+      {
+        "offset": 6485,
+        "string": "0x%08x:   0x%08x    0x%08x",
+        "length": 26
+      },
+      {
+        "offset": 6592,
+        "string": "MiniTurbo",
+        "length": 9
+      },
+      {
+        "offset": 6604,
+        "string": "LapRun01",
+        "length": 8
+      },
+      {
+        "offset": 6616,
+        "string": "LapRun02",
+        "length": 8
+      },
+      {
+        "offset": 6628,
+        "string": "Drift",
+        "length": 5
+      },
+      {
+        "offset": 6640,
+        "string": "ItemBox",
+        "length": 7
+      },
+      {
+        "offset": 6648,
+        "string": "EnemyDown01",
+        "length": 11
+      },
+      {
+        "offset": 6660,
+        "string": "EnemyDown02",
+        "length": 11
+      },
+      {
+        "offset": 6672,
+        "string": "EnemyDown03",
+        "length": 11
+      },
+      {
+        "offset": 6684,
+        "string": "CoinGet01",
+        "length": 9
+      },
+      {
+        "offset": 6696,
+        "string": "ToGate01",
+        "length": 8
+      },
+      {
+        "offset": 6708,
+        "string": "RocketStart",
+        "length": 11
+      },
+      {
+        "offset": 6720,
+        "string": "ItemHit",
+        "length": 7
+      },
+      {
+        "offset": 6728,
+        "string": "Wheelie",
+        "length": 7
+      },
+      {
+        "offset": 6736,
+        "string": "Slipstream",
+        "length": 10
+      },
+      {
+        "offset": 6748,
+        "string": "BalloonBattle",
+        "length": 13
+      },
+      {
+        "offset": 6764,
+        "string": "CoinBattle",
+        "length": 10
+      },
+      {
+        "offset": 6776,
+        "string": "Jump+Halfpipe01",
+        "length": 15
+      },
+      {
+        "offset": 6792,
+        "string": "Jump+Halfpipe02",
+        "length": 15
+      },
+      {
+        "offset": 6808,
+        "string": "Star3",
+        "length": 5
+      },
+      {
+        "offset": 6816,
+        "string": "Star2",
+        "length": 5
+      },
+      {
+        "offset": 6824,
+        "string": "Star1",
+        "length": 5
+      },
+      {
+        "offset": 7280,
+        "string": "%s/%s.brasd",
+        "length": 11
+      },
+      {
+        "offset": 7329,
+        "string": "face_1",
+        "length": 6
+      },
+      {
+        "offset": 7396,
+        "string": "posteffect/posteffect.blight",
+        "length": 28
+      },
+      {
+        "offset": 7425,
+        "string": "lightset/default.blight",
+        "length": 23
+      },
+      {
+        "offset": 7449,
+        "string": "posteffect/posteffect.blmap",
+        "length": 27
+      },
+      {
+        "offset": 7477,
+        "string": "lightset/default.blmap",
+        "length": 22
+      },
+      {
+        "offset": 7500,
+        "string": "default.blight",
+        "length": 14
+      },
+      {
+        "offset": 7515,
+        "string": "default.blmap",
+        "length": 13
+      },
+      {
+        "offset": 7529,
+        "string": "mii_capture.blight",
+        "length": 18
+      },
+      {
+        "offset": 7548,
+        "string": "mii_capture.blmap",
+        "length": 17
+      },
+      {
+        "offset": 7666,
+        "string": "333333?fff",
+        "length": 10
+      },
+      {
+        "offset": 7728,
+        "string": "?fff;",
+        "length": 5
+      },
+      {
+        "offset": 7752,
+        "string": "?fff;7",
+        "length": 6
+      },
+      {
+        "offset": 7759,
+        "string": "4?333D4",
+        "length": 7
+      },
+      {
+        "offset": 7831,
+        "string": "4?333DJ",
+        "length": 7
+      },
+      {
+        "offset": 8000,
+        "string": "driver.brres",
+        "length": 12
+      },
+      {
+        "offset": 8142,
+        "string": "ff?333A",
+        "length": 7
+      },
+      {
+        "offset": 8176,
+        "string": "?s33=L",
+        "length": 6
+      },
+      {
+        "offset": 8208,
+        "string": "?fff:",
+        "length": 5
+      },
+      {
+        "offset": 8380,
+        "string": "jump2",
+        "length": 5
+      },
+      {
+        "offset": 8388,
+        "string": "throw",
+        "length": 5
+      },
+      {
+        "offset": 8396,
+        "string": "damage",
+        "length": 6
+      },
+      {
+        "offset": 8404,
+        "string": "sjump",
+        "length": 5
+      },
+      {
+        "offset": 8440,
+        "string": "brake",
+        "length": 5
+      },
+      {
+        "offset": 8448,
+        "string": "shake",
+        "length": 5
+      },
+      {
+        "offset": 8456,
+        "string": "arm_fl",
+        "length": 6
+      },
+      {
+        "offset": 8464,
+        "string": "arm_fr",
+        "length": 6
+      },
+      {
+        "offset": 8472,
+        "string": "arm_rl",
+        "length": 6
+      },
+      {
+        "offset": 8480,
+        "string": "arm_rr",
+        "length": 6
+      },
+      {
+        "offset": 8504,
+        "string": "kart_model.brres",
+        "length": 16
+      },
+      {
+        "offset": 8521,
+        "string": "driver_model.brres",
+        "length": 18
+      },
+      {
+        "offset": 8540,
+        "string": "model_lod",
+        "length": 9
+      },
+      {
+        "offset": 8575,
+        "string": "tire_fl",
+        "length": 7
+      },
+      {
+        "offset": 8583,
+        "string": "tire_fr",
+        "length": 7
+      },
+      {
+        "offset": 8591,
+        "string": "tire_rl",
+        "length": 7
+      },
+      {
+        "offset": 8599,
+        "string": "tire_rr",
+        "length": 7
+      },
+      {
+        "offset": 8607,
+        "string": "sus_fr",
+        "length": 6
+      },
+      {
+        "offset": 8614,
+        "string": "handle",
+        "length": 6
+      },
+      {
+        "offset": 8621,
+        "string": "swingarm",
+        "length": 8
+      },
+      {
+        "offset": 8630,
+        "string": "tire_f",
+        "length": 6
+      },
+      {
+        "offset": 8637,
+        "string": "tire_r",
+        "length": 6
+      },
+      {
+        "offset": 8644,
+        "string": "f_sus",
+        "length": 5
+      },
+      {
+        "offset": 8650,
+        "string": "r_sus",
+        "length": 5
+      },
+      {
+        "offset": 8656,
+        "string": "shadow",
+        "length": 6
+      },
+      {
+        "offset": 8663,
+        "string": "kart_killer.brres",
+        "length": 17
+      },
+      {
+        "offset": 8681,
+        "string": "kart_killer",
+        "length": 11
+      },
+      {
+        "offset": 8698,
+        "string": "kart_killer_s",
+        "length": 13
+      },
+      {
+        "offset": 8954,
+        "string": "333333>",
+        "length": 7
+      },
+      {
+        "offset": 9360,
+        "string": "kartParam.bin",
+        "length": 13
+      },
+      {
+        "offset": 9374,
+        "string": "driverParam.bin",
+        "length": 15
+      },
+      {
+        "offset": 9390,
+        "string": "kartDriverDispParam.bin",
+        "length": 23
+      },
+      {
+        "offset": 9414,
+        "string": "kartPartsDispParam.bin",
+        "length": 22
+      },
+      {
+        "offset": 9437,
+        "string": "bikePartsDispParam.bin",
+        "length": 22
+      },
+      {
+        "offset": 9460,
+        "string": "miiDispParam.bin",
+        "length": 16
+      },
+      {
+        "offset": 9477,
+        "string": "kartCameraParam.bin",
+        "length": 19
+      },
+      {
+        "offset": 9497,
+        "string": "driverDispParam.bin",
+        "length": 19
+      },
+      {
+        "offset": 9541,
+        "string": "parameter/%s",
+        "length": 12
+      },
+      {
+        "offset": 10268,
+        "string": "?333?fffB4",
+        "length": 10
+      },
+      {
+        "offset": 10280,
+        "string": "?&ff?fffA",
+        "length": 9
+      },
+      {
+        "offset": 10304,
+        "string": "?333?k",
+        "length": 6
+      },
+      {
+        "offset": 10316,
+        "string": "?333?Y",
+        "length": 6
+      },
+      {
+        "offset": 10340,
+        "string": "?333?fffA",
+        "length": 9
+      },
+      {
+        "offset": 10356,
+        "string": "?fffA ",
+        "length": 6
+      },
+      {
+        "offset": 10364,
+        "string": "?333?fffB",
+        "length": 9
+      },
+      {
+        "offset": 10400,
+        "string": "?&ff?Y",
+        "length": 6
+      },
+      {
+        "offset": 10456,
+        "string": "?fff@",
+        "length": 5
+      },
+      {
+        "offset": 10604,
+        "string": "?333CH",
+        "length": 6
+      },
+      {
+        "offset": 10767,
+        "string": "orace_camera.bcp",
+        "length": 16
+      },
+      {
+        "offset": 10784,
+        "string": "battle_camera.bcp",
+        "length": 17
+      },
+      {
+        "offset": 10802,
+        "string": "mission_camera.bcp",
+        "length": 18
+      },
+      {
+        "offset": 10821,
+        "string": "start_camera.bcp",
+        "length": 16
+      },
+      {
+        "offset": 11003,
+        "string": ">posteffect/posteffect.bfg",
+        "length": 26
+      },
+      {
+        "offset": 11112,
+        "string": "btiEnv",
+        "length": 6
+      },
+      {
+        "offset": 11120,
+        "string": "btiMat",
+        "length": 6
+      },
+      {
+        "offset": 11164,
+        "string": "course.%s",
+        "length": 9
+      },
+      {
+        "offset": 11272,
+        "string": "posteffect/posteffect.bdof_demo",
+        "length": 31
+      },
+      {
+        "offset": 11304,
+        "string": "posteffect/posteffect.bdof",
+        "length": 26
+      },
+      {
+        "offset": 11331,
+        "string": "posteffect/posteffect.bti",
+        "length": 25
+      },
+      {
+        "offset": 11357,
+        "string": "posteffect/posteffect.bblm",
+        "length": 26
+      },
+      {
+        "offset": 11389,
+        "string": "mat '%s' has more than %d textures.(%d)",
+        "length": 39
+      },
+      {
+        "offset": 11430,
+        "string": "mat '%s' has more than %d tex coord gens.(%d)",
+        "length": 45
+      },
+      {
+        "offset": 11477,
+        "string": "mat '%s' has more than %d tev stages.(%d)",
+        "length": 41
+      },
+      {
+        "offset": 11684,
+        "string": "thunder_scale_up",
+        "length": 16
+      },
+      {
+        "offset": 11704,
+        "string": "thunder_scale_down",
+        "length": 18
+      },
+      {
+        "offset": 11728,
+        "string": "kinoko_scale_up",
+        "length": 15
+      },
+      {
+        "offset": 11744,
+        "string": "kinoko_scale_down",
+        "length": 17
+      },
+      {
+        "offset": 11764,
+        "string": "press_scale_up",
+        "length": 14
+      },
+      {
+        "offset": 11955,
+        "string": "xbody",
+        "length": 5
+      },
+      {
+        "offset": 11972,
+        "string": "123dai",
+        "length": 6
+      },
+      {
+        "offset": 11980,
+        "string": "hiradai2",
+        "length": 8
+      },
+      {
+        "offset": 11992,
+        "string": "hiradai3",
+        "length": 8
+      },
+      {
+        "offset": 12004,
+        "string": "hiradai4",
+        "length": 8
+      },
+      {
+        "offset": 12016,
+        "string": "demowin0",
+        "length": 8
+      },
+      {
+        "offset": 12062,
+        "string": "RKAwardDemoCamera.cpp",
+        "length": 21
+      },
+      {
+        "offset": 12084,
+        "string": "NW4R:Failed assertion mResCamAnm[num].IsValid()",
+        "length": 47
+      },
+      {
+        "offset": 12132,
+        "string": "demolos01",
+        "length": 9
+      },
+      {
+        "offset": 12151,
+        "string": "%s_%s",
+        "length": 5
+      },
+      {
+        "offset": 12162,
+        "string": "16vs9",
+        "length": 5
+      },
+      {
+        "offset": 12190,
+        "string": "NW4R:Failed assertion mResCamAnm[0].IsValid()",
+        "length": 45
+      },
+      {
+        "offset": 12456,
+        "string": "message_window",
+        "length": 14
+      },
+      {
+        "offset": 12471,
+        "string": "BusySymbol",
+        "length": 10
+      },
+      {
+        "offset": 12508,
+        "string": "MessageWindow",
+        "length": 13
+      },
+      {
+        "offset": 12522,
+        "string": "MessageWindowPopup",
+        "length": 18
+      },
+      {
+        "offset": 12556,
+        "string": "BlackBack",
+        "length": 9
+      },
+      {
+        "offset": 12613,
+        "string": "globe",
+        "length": 5
+      },
+      {
+        "offset": 12619,
+        "string": "SimpleMessageWindow",
+        "length": 19
+      },
+      {
+        "offset": 12720,
+        "string": "Select",
+        "length": 6
+      },
+      {
+        "offset": 12736,
+        "string": "FreeToSelect",
+        "length": 12
+      },
+      {
+        "offset": 12760,
+        "string": "SelectToFree",
+        "length": 12
+      },
+      {
+        "offset": 12776,
+        "string": "SelectIn",
+        "length": 8
+      },
+      {
+        "offset": 12800,
+        "string": "SelectStop",
+        "length": 10
+      },
+      {
+        "offset": 12820,
+        "string": "OKStop",
+        "length": 6
+      },
+      {
+        "offset": 12852,
+        "string": "PushButton",
+        "length": 10
+      },
+      {
+        "offset": 12863,
+        "string": "touch",
+        "length": 5
+      },
+      {
+        "offset": 12869,
+        "string": "fuchi_pattern",
+        "length": 13
+      },
+      {
+        "offset": 12883,
+        "string": "color_base",
+        "length": 10
+      },
+      {
+        "offset": 12925,
+        "string": "PushButtonScaleFade",
+        "length": 19
+      },
+      {
+        "offset": 12952,
+        "string": "Visible",
+        "length": 7
+      },
+      {
+        "offset": 12968,
+        "string": "HideToShow",
+        "length": 10
+      },
+      {
+        "offset": 12988,
+        "string": "ShowToHide",
+        "length": 10
+      },
+      {
+        "offset": 13032,
+        "string": "NotifyButton",
+        "length": 12
+      },
+      {
+        "offset": 13045,
+        "string": "button",
+        "length": 6
+      },
+      {
+        "offset": 13065,
+        "string": "Notify",
+        "length": 6
+      },
+      {
+        "offset": 13077,
+        "string": "text_light_01",
+        "length": 13
+      },
+      {
+        "offset": 13091,
+        "string": "text_light_02",
+        "length": 13
+      },
+      {
+        "offset": 13112,
+        "string": "ChannelMenuFriendList",
+        "length": 21
+      },
+      {
+        "offset": 13134,
+        "string": "FriendList",
+        "length": 10
+      },
+      {
+        "offset": 13149,
+        "string": "mii_c_down",
+        "length": 10
+      },
+      {
+        "offset": 13163,
+        "string": "id_c_down",
+        "length": 9
+      },
+      {
+        "offset": 13193,
+        "string": "ChannelMenu",
+        "length": 11
+      },
+      {
+        "offset": 13205,
+        "string": "Ranking",
+        "length": 7
+      },
+      {
+        "offset": 13232,
+        "string": "Ghost",
+        "length": 5
+      },
+      {
+        "offset": 13257,
+        "string": "TrialEvent",
+        "length": 10
+      },
+      {
+        "offset": 13307,
+        "string": "ButtonBack",
+        "length": 10
+      },
+      {
+        "offset": 13325,
+        "string": "GhostMenuGhostBattle",
+        "length": 20
+      },
+      {
+        "offset": 13346,
+        "string": "ButtonGhostBattle",
+        "length": 17
+      },
+      {
+        "offset": 13374,
+        "string": "GhostMenu",
+        "length": 9
+      },
+      {
+        "offset": 13384,
+        "string": "ButtonGhostList",
+        "length": 15
+      },
+      {
+        "offset": 13430,
+        "string": "RankingMenu",
+        "length": 11
+      },
+      {
+        "offset": 13442,
+        "string": "ButtonTARanking",
+        "length": 15
+      },
+      {
+        "offset": 13477,
+        "string": "ButtonEventRanking",
+        "length": 18
+      },
+      {
+        "offset": 13547,
+        "string": "ConfirmOK",
+        "length": 9
+      },
+      {
+        "offset": 13580,
+        "string": "ButtonBackPopup",
+        "length": 15
+      },
+      {
+        "offset": 13611,
+        "string": "MessageWindowHalf",
+        "length": 17
+      },
+      {
+        "offset": 13648,
+        "string": "%s.brctr",
+        "length": 8
+      },
+      {
+        "offset": 13657,
+        "string": "Common",
+        "length": 6
+      },
+      {
+        "offset": 13692,
+        "string": "Fadein",
+        "length": 6
+      },
+      {
+        "offset": 13712,
+        "string": "Fadeout",
+        "length": 7
+      },
+      {
+        "offset": 13720,
+        "string": "Number10s",
+        "length": 9
+      },
+      {
+        "offset": 13744,
+        "string": "Number1s",
+        "length": 8
+      },
+      {
+        "offset": 13768,
+        "string": "Number100ms",
+        "length": 11
+      },
+      {
+        "offset": 13792,
+        "string": "Number10ms",
+        "length": 10
+      },
+      {
+        "offset": 13816,
+        "string": "Number1ms",
+        "length": 9
+      },
+      {
+        "offset": 13840,
+        "string": "Alert",
+        "length": 5
+      },
+      {
+        "offset": 14008,
+        "string": "CountDownTimerControl",
+        "length": 21
+      },
+      {
+        "offset": 14030,
+        "string": "control",
+        "length": 7
+      },
+      {
+        "offset": 14038,
+        "string": "CountDownTimer",
+        "length": 14
+      },
+      {
+        "offset": 14080,
+        "string": "DownloadGhostList",
+        "length": 17
+      },
+      {
+        "offset": 14123,
+        "string": "DownloadGhostListArrowRight",
+        "length": 27
+      },
+      {
+        "offset": 14151,
+        "string": "ButtonArrowRight",
+        "length": 16
+      },
+      {
+        "offset": 14168,
+        "string": "DownloadGhostListArrowLeft",
+        "length": 26
+      },
+      {
+        "offset": 14195,
+        "string": "ButtonArrowLeft",
+        "length": 15
+      },
+      {
+        "offset": 14219,
+        "string": "DownloadGhostListPageNum",
+        "length": 24
+      },
+      {
+        "offset": 14323,
+        "string": "Watch",
+        "length": 5
+      },
+      {
+        "offset": 14354,
+        "string": "Delete",
+        "length": 6
+      },
+      {
+        "offset": 14427,
+        "string": "GhostDeleteConfirmBack",
+        "length": 22
+      },
+      {
+        "offset": 14473,
+        "string": "GhostDeleteConfirm",
+        "length": 18
+      },
+      {
+        "offset": 14518,
+        "string": "DeleteYes",
+        "length": 9
+      },
+      {
+        "offset": 14554,
+        "string": "DeleteNo",
+        "length": 8
+      },
+      {
+        "offset": 14640,
+        "string": "Indicator",
+        "length": 9
+      },
+      {
+        "offset": 14684,
+        "string": "Player",
+        "length": 6
+      },
+      {
+        "offset": 14815,
+        "string": "aDpdPointerControl",
+        "length": 18
+      },
+      {
+        "offset": 14834,
+        "string": "dpd_pointer",
+        "length": 11
+      },
+      {
+        "offset": 14846,
+        "string": "DpdPointerRace",
+        "length": 14
+      },
+      {
+        "offset": 14873,
+        "string": "DpdPointer",
+        "length": 10
+      },
+      {
+        "offset": 14884,
+        "string": "point_null_1",
+        "length": 12
+      },
+      {
+        "offset": 14897,
+        "string": "yajirushi",
+        "length": 9
+      },
+      {
+        "offset": 14907,
+        "string": "yajirushi_sha",
+        "length": 13
+      },
+      {
+        "offset": 14921,
+        "string": "indicator_null",
+        "length": 14
+      },
+      {
+        "offset": 14936,
+        "string": "locus_root",
+        "length": 10
+      },
+      {
+        "offset": 14947,
+        "string": "locus%02d",
+        "length": 9
+      },
+      {
+        "offset": 15056,
+        "string": "Input",
+        "length": 5
+      },
+      {
+        "offset": 15072,
+        "string": "InputOff",
+        "length": 8
+      },
+      {
+        "offset": 15120,
+        "string": "Cursor",
+        "length": 6
+      },
+      {
+        "offset": 15136,
+        "string": "NumericEditBox",
+        "length": 14
+      },
+      {
+        "offset": 15151,
+        "string": "cursor_n",
+        "length": 8
+      },
+      {
+        "offset": 15160,
+        "string": "text_n_%02d",
+        "length": 11
+      },
+      {
+        "offset": 15302,
+        "string": "NumericEditBox::EditLetter",
+        "length": 26
+      },
+      {
+        "offset": 15812,
+        "string": "tt_kart_font_rodan_ntlg_pro_b.brfnt",
+        "length": 35
+      },
+      {
+        "offset": 15848,
+        "string": "kart_kanji_font.brfnt",
+        "length": 21
+      },
+      {
+        "offset": 15872,
+        "string": "tt_kart_extension_font.brfnt",
+        "length": 28
+      },
+      {
+        "offset": 15904,
+        "string": "indicator_font.brfnt",
+        "length": 20
+      },
+      {
+        "offset": 15928,
+        "string": "mario_font_number_red.brfnt",
+        "length": 27
+      },
+      {
+        "offset": 15956,
+        "string": "mario_font_number_blue.brfnt",
+        "length": 28
+      },
+      {
+        "offset": 15992,
+        "string": "State",
+        "length": 5
+      },
+      {
+        "offset": 16000,
+        "string": "Offline",
+        "length": 7
+      },
+      {
+        "offset": 16008,
+        "string": "Online",
+        "length": 6
+      },
+      {
+        "offset": 16016,
+        "string": "RandomMatching",
+        "length": 14
+      },
+      {
+        "offset": 16032,
+        "string": "FriendParent",
+        "length": 12
+      },
+      {
+        "offset": 16136,
+        "string": "State2",
+        "length": 6
+      },
+      {
+        "offset": 16144,
+        "string": "Offline2",
+        "length": 8
+      },
+      {
+        "offset": 16160,
+        "string": "Online2",
+        "length": 7
+      },
+      {
+        "offset": 16168,
+        "string": "RandomMatching2",
+        "length": 15
+      },
+      {
+        "offset": 16184,
+        "string": "FriendParent2",
+        "length": 13
+      },
+      {
+        "offset": 16312,
+        "string": "FriendButton",
+        "length": 12
+      },
+      {
+        "offset": 16325,
+        "string": "ButtonMii%1d",
+        "length": 12
+      },
+      {
+        "offset": 16345,
+        "string": "FriendListMii",
+        "length": 13
+      },
+      {
+        "offset": 16359,
+        "string": "chara",
+        "length": 5
+      },
+      {
+        "offset": 16365,
+        "string": "chara_shadow",
+        "length": 12
+      },
+      {
+        "offset": 16378,
+        "string": "chara_c_down",
+        "length": 12
+      },
+      {
+        "offset": 16391,
+        "string": "chara_light_01",
+        "length": 14
+      },
+      {
+        "offset": 16406,
+        "string": "chara_light_02",
+        "length": 14
+      },
+      {
+        "offset": 16421,
+        "string": "w_null",
+        "length": 6
+      },
+      {
+        "offset": 16434,
+        "string": "no_linkmii",
+        "length": 10
+      },
+      {
+        "offset": 16685,
+        "string": "FriendListArrowRight",
+        "length": 20
+      },
+      {
+        "offset": 16723,
+        "string": "FriendListArrowLeft",
+        "length": 19
+      },
+      {
+        "offset": 16767,
+        "string": "FriendListPageNum",
+        "length": 17
+      },
+      {
+        "offset": 16803,
+        "string": "JoinFriendButton",
+        "length": 16
+      },
+      {
+        "offset": 16827,
+        "string": "FriendSelectL",
+        "length": 13
+      },
+      {
+        "offset": 16879,
+        "string": "FriendSelectS",
+        "length": 13
+      },
+      {
+        "offset": 16929,
+        "string": "FriendSelectMessageWindow",
+        "length": 25
+      },
+      {
+        "offset": 16955,
+        "string": "CantMatching",
+        "length": 12
+      },
+      {
+        "offset": 17000,
+        "string": "NotBuddy",
+        "length": 8
+      },
+      {
+        "offset": 17015,
+        "string": "FriendSelectRecordMe",
+        "length": 20
+      },
+      {
+        "offset": 17036,
+        "string": "RecordMe",
+        "length": 8
+      },
+      {
+        "offset": 17045,
+        "string": "chara_icon",
+        "length": 10
+      },
+      {
+        "offset": 17056,
+        "string": "chara_icon_sha",
+        "length": 14
+      },
+      {
+        "offset": 17071,
+        "string": "mii_name",
+        "length": 8
+      },
+      {
+        "offset": 17093,
+        "string": "FriendSelectRecordFriend",
+        "length": 24
+      },
+      {
+        "offset": 17118,
+        "string": "RecordFriend",
+        "length": 12
+      },
+      {
+        "offset": 17173,
+        "string": "point",
+        "length": 5
+      },
+      {
+        "offset": 17179,
+        "string": "point_sha",
+        "length": 9
+      },
+      {
+        "offset": 17193,
+        "string": "pts_sha",
+        "length": 7
+      },
+      {
+        "offset": 17236,
+        "string": "FriendDeleteConfirm",
+        "length": 19
+      },
+      {
+        "offset": 17256,
+        "string": "ButtonYes",
+        "length": 9
+      },
+      {
+        "offset": 17293,
+        "string": "ButtonNo",
+        "length": 8
+      },
+      {
+        "offset": 17340,
+        "string": "FriendDeleteBusySymbol",
+        "length": 22
+      },
+      {
+        "offset": 17389,
+        "string": "FriendDeleteMessageWindow",
+        "length": 25
+      },
+      {
+        "offset": 17415,
+        "string": "FriendDelete",
+        "length": 12
+      },
+      {
+        "offset": 17432,
+        "string": "Course0",
+        "length": 7
+      },
+      {
+        "offset": 17440,
+        "string": "Course1",
+        "length": 7
+      },
+      {
+        "offset": 17448,
+        "string": "Course2",
+        "length": 7
+      },
+      {
+        "offset": 17456,
+        "string": "Course3",
+        "length": 7
+      },
+      {
+        "offset": 17464,
+        "string": "MyDownload",
+        "length": 10
+      },
+      {
+        "offset": 17476,
+        "string": "Staff",
+        "length": 5
+      },
+      {
+        "offset": 17532,
+        "string": "Slide",
+        "length": 5
+      },
+      {
+        "offset": 17544,
+        "string": "SlideInFromLeft",
+        "length": 15
+      },
+      {
+        "offset": 17560,
+        "string": "SlideInFromRight",
+        "length": 16
+      },
+      {
+        "offset": 17588,
+        "string": "SlideOutToLeft",
+        "length": 14
+      },
+      {
+        "offset": 17608,
+        "string": "SlideOutToRight",
+        "length": 15
+      },
+      {
+        "offset": 17648,
+        "string": "NewIcon",
+        "length": 7
+      },
+      {
+        "offset": 17656,
+        "string": "NewShow",
+        "length": 7
+      },
+      {
+        "offset": 17664,
+        "string": "NewHide",
+        "length": 7
+      },
+      {
+        "offset": 17740,
+        "string": "GhostInfoControl",
+        "length": 16
+      },
+      {
+        "offset": 17765,
+        "string": "GhostInfo",
+        "length": 9
+      },
+      {
+        "offset": 17779,
+        "string": "course_name",
+        "length": 11
+      },
+      {
+        "offset": 17796,
+        "string": "player",
+        "length": 6
+      },
+      {
+        "offset": 17803,
+        "string": "nationality",
+        "length": 11
+      },
+      {
+        "offset": 17821,
+        "string": "machine",
+        "length": 7
+      },
+      {
+        "offset": 17865,
+        "string": "nintendo",
+        "length": 8
+      },
+      {
+        "offset": 17936,
+        "string": "Vehicle%02d",
+        "length": 11
+      },
+      {
+        "offset": 18312,
+        "string": "Comment",
+        "length": 7
+      },
+      {
+        "offset": 18320,
+        "string": "RegisterFriend",
+        "length": 14
+      },
+      {
+        "offset": 18336,
+        "string": "CloseMatching",
+        "length": 13
+      },
+      {
+        "offset": 18360,
+        "string": "CommentWindow",
+        "length": 13
+      },
+      {
+        "offset": 18386,
+        "string": "NameWindow",
+        "length": 10
+      },
+      {
+        "offset": 18402,
+        "string": "flag_null",
+        "length": 9
+      },
+      {
+        "offset": 18428,
+        "string": "user_id",
+        "length": 7
+      },
+      {
+        "offset": 18436,
+        "string": "user_id_shadow",
+        "length": 14
+      },
+      {
+        "offset": 18461,
+        "string": "flag_shadow",
+        "length": 11
+      },
+      {
+        "offset": 18900,
+        "string": "GlobePage::MessageWindow",
+        "length": 24
+      },
+      {
+        "offset": 18928,
+        "string": "%s.brlyt",
+        "length": 8
+      },
+      {
+        "offset": 19200,
+        "string": "message/%s.bmg",
+        "length": 14
+      },
+      {
+        "offset": 19295,
+        "string": "OKKey",
+        "length": 5
+      },
+      {
+        "offset": 19301,
+        "string": "OKKeyPopup",
+        "length": 10
+      },
+      {
+        "offset": 19528,
+        "string": "MessageWindowControl",
+        "length": 20
+      },
+      {
+        "offset": 19549,
+        "string": "MessageWindowControlScaleFade",
+        "length": 29
+      },
+      {
+        "offset": 19579,
+        "string": "SimpleMessageWindowControl",
+        "length": 26
+      },
+      {
+        "offset": 19606,
+        "string": "BlackBackControlForMessage",
+        "length": 26
+      },
+      {
+        "offset": 19764,
+        "string": "MiiIconAdmin",
+        "length": 12
+      },
+      {
+        "offset": 19896,
+        "string": "PadType",
+        "length": 7
+      },
+      {
+        "offset": 19904,
+        "string": "InvalidPad",
+        "length": 10
+      },
+      {
+        "offset": 19924,
+        "string": "FreeStyle",
+        "length": 9
+      },
+      {
+        "offset": 19936,
+        "string": "Classic",
+        "length": 7
+      },
+      {
+        "offset": 19944,
+        "string": "Dolphin",
+        "length": 7
+      },
+      {
+        "offset": 19952,
+        "string": "Validity",
+        "length": 8
+      },
+      {
+        "offset": 19964,
+        "string": "Valid",
+        "length": 5
+      },
+      {
+        "offset": 19976,
+        "string": "Invalid",
+        "length": 7
+      },
+      {
+        "offset": 20112,
+        "string": "PadControl",
+        "length": 10
+      },
+      {
+        "offset": 20123,
+        "string": "PadControlScaleFade",
+        "length": 19
+      },
+      {
+        "offset": 20143,
+        "string": "RecognizePadWindow",
+        "length": 18
+      },
+      {
+        "offset": 20196,
+        "string": "Initialize",
+        "length": 10
+      },
+      {
+        "offset": 20208,
+        "string": "Disable",
+        "length": 7
+      },
+      {
+        "offset": 20216,
+        "string": "Ready",
+        "length": 5
+      },
+      {
+        "offset": 20248,
+        "string": "Terminal",
+        "length": 8
+      },
+      {
+        "offset": 20268,
+        "string": "Accept",
+        "length": 6
+      },
+      {
+        "offset": 20276,
+        "string": "Disacceptable",
+        "length": 13
+      },
+      {
+        "offset": 20296,
+        "string": "Connect",
+        "length": 7
+      },
+      {
+        "offset": 20304,
+        "string": "Disconnect",
+        "length": 10
+      },
+      {
+        "offset": 20328,
+        "string": "Enter",
+        "length": 5
+      },
+      {
+        "offset": 20336,
+        "string": "Stable",
+        "length": 6
+      }
+    ]
+  }
+}

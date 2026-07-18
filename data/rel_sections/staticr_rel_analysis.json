@@ -1,0 +1,471 @@
+{
+  "name": "StaticR.rel",
+  "size_bytes": 4902804,
+  "architecture": "PowerPC 32-bit Big Endian",
+  "sections": [
+    {
+      "index": 0,
+      "name": ".null",
+      "file_offset": "0x00000000",
+      "size": 0,
+      "type": "null",
+      "is_bss": false
+    },
+    {
+      "index": 1,
+      "name": ".text",
+      "file_offset": "0x000000d5",
+      "size": 3665820,
+      "type": "code",
+      "is_bss": false,
+      "functions_estimated": 10234
+    },
+    {
+      "index": 2,
+      "name": ".ctors",
+      "file_offset": "0x0037f070",
+      "size": 772,
+      "type": "rodata",
+      "is_bss": false
+    },
+    {
+      "index": 3,
+      "name": ".dtors",
+      "file_offset": "0x0037f374",
+      "size": 12,
+      "type": "rodata",
+      "is_bss": false
+    },
+    {
+      "index": 4,
+      "name": ".rodata",
+      "file_offset": "0x0037f380",
+      "size": 143936,
+      "type": "rodata",
+      "is_bss": false
+    },
+    {
+      "index": 5,
+      "name": ".data",
+      "file_offset": "0x003a25c0",
+      "size": 173916,
+      "type": "data",
+      "is_bss": false
+    },
+    {
+      "index": 6,
+      "name": ".bss",
+      "file_offset": "0x00000000",
+      "size": 30896,
+      "type": "bss",
+      "is_bss": true
+    },
+    {
+      "index": 7,
+      "name": ".null7",
+      "file_offset": "0x00000000",
+      "size": 0,
+      "type": "null",
+      "is_bss": false
+    },
+    {
+      "index": 8,
+      "name": ".null8",
+      "file_offset": "0x00000000",
+      "size": 0,
+      "type": "null",
+      "is_bss": false
+    },
+    {
+      "index": 9,
+      "name": ".null9",
+      "file_offset": "0x00000000",
+      "size": 0,
+      "type": "null",
+      "is_bss": false
+    },
+    {
+      "index": 10,
+      "name": ".null10",
+      "file_offset": "0x00000000",
+      "size": 0,
+      "type": "null",
+      "is_bss": false
+    },
+    {
+      "index": 11,
+      "name": ".null11",
+      "file_offset": "0x00000000",
+      "size": 0,
+      "type": "null",
+      "is_bss": false
+    },
+    {
+      "index": 12,
+      "name": ".null12",
+      "file_offset": "0x00000000",
+      "size": 0,
+      "type": "null",
+      "is_bss": false
+    },
+    {
+      "index": 13,
+      "name": ".null13",
+      "file_offset": "0x00000000",
+      "size": 0,
+      "type": "null",
+      "is_bss": false
+    },
+    {
+      "index": 14,
+      "name": ".null14",
+      "file_offset": "0x00000000",
+      "size": 0,
+      "type": "null",
+      "is_bss": false
+    },
+    {
+      "index": 15,
+      "name": ".null15",
+      "file_offset": "0x00000000",
+      "size": 0,
+      "type": "null",
+      "is_bss": false
+    },
+    {
+      "index": 16,
+      "name": ".null16",
+      "file_offset": "0x00000000",
+      "size": 0,
+      "type": "null",
+      "is_bss": false
+    }
+  ],
+  "sdk_libs_found": [
+    "Game",
+    "Nand",
+    "RKNet",
+    "SO"
+  ],
+  "game_functions_estimated": 10234,
+  "total_instructions": 906165,
+  "bl_count": 56315,
+  "blr_count": 17422,
+  "unique_branch_targets": 21034,
+  "strings_found": 3244,
+  "known_symbols_matched": 23508,
+  "rel_header": {
+    "module_id": 1,
+    "version": 3,
+    "section_count": 17,
+    "prolog_section": 1,
+    "epilog_section": 1,
+    "bss_section": 0,
+    "bss_size": 30896,
+    "num_relocations": 229478,
+    "imp_table_offset": "0x003ccd1c",
+    "imp_table_size": 16
+  },
+  "top_matched_symbols": [
+    {
+      "offset": "0x0000001c",
+      "name": "fn_1_1C",
+      "type": "function",
+      "size": 152
+    },
+    {
+      "offset": "0x000000b4",
+      "name": "fn_1_B4",
+      "type": "function",
+      "size": 116
+    },
+    {
+      "offset": "0x00000128",
+      "name": "fn_1_128",
+      "type": "function",
+      "size": 48
+    },
+    {
+      "offset": "0x00000158",
+      "name": "fn_1_158",
+      "type": "function",
+      "size": 4
+    },
+    {
+      "offset": "0x0000015c",
+      "name": "fn_1_15C",
+      "type": "function",
+      "size": 196
+    },
+    {
+      "offset": "0x00000220",
+      "name": "fn_1_220",
+      "type": "function",
+      "size": 156
+    },
+    {
+      "offset": "0x000002bc",
+      "name": "fn_1_2BC",
+      "type": "function",
+      "size": 64
+    },
+    {
+      "offset": "0x000002fc",
+      "name": "fn_1_2FC",
+      "type": "function",
+      "size": 288
+    },
+    {
+      "offset": "0x0000041c",
+      "name": "fn_1_41C",
+      "type": "function",
+      "size": 188
+    },
+    {
+      "offset": "0x000004d8",
+      "name": "fn_1_4D8",
+      "type": "function",
+      "size": 420
+    },
+    {
+      "offset": "0x0000067c",
+      "name": "fn_1_67C",
+      "type": "function",
+      "size": 8
+    },
+    {
+      "offset": "0x00000684",
+      "name": "fn_1_684",
+      "type": "function",
+      "size": 8
+    },
+    {
+      "offset": "0x0000068c",
+      "name": "fn_1_68C",
+      "type": "function",
+      "size": 16
+    },
+    {
+      "offset": "0x0000069c",
+      "name": "fn_1_69C",
+      "type": "function",
+      "size": 64
+    },
+    {
+      "offset": "0x000006dc",
+      "name": "fn_1_6DC",
+      "type": "function",
+      "size": 40
+    },
+    {
+      "offset": "0x00000704",
+      "name": "fn_1_704",
+      "type": "function",
+      "size": 204
+    },
+    {
+      "offset": "0x000007d0",
+      "name": "lbl_1_rodata_7D0",
+      "type": "object",
+      "size": 112
+    },
+    {
+      "offset": "0x0000083c",
+      "name": "fn_1_83C",
+      "type": "function",
+      "size": 132
+    },
+    {
+      "offset": "0x000008c0",
+      "name": "fn_1_8C0",
+      "type": "function",
+      "size": 264
+    },
+    {
+      "offset": "0x000009c8",
+      "name": "lbl_1_rodata_9C8",
+      "type": "object",
+      "size": 60
+    },
+    {
+      "offset": "0x00000b64",
+      "name": "fn_1_B64",
+      "type": "function",
+      "size": 64
+    },
+    {
+      "offset": "0x00000ba4",
+      "name": "fn_1_BA4",
+      "type": "function",
+      "size": 220
+    },
+    {
+      "offset": "0x00000c80",
+      "name": "lbl_1_rodata_C80",
+      "type": "object",
+      "size": 4
+    },
+    {
+      "offset": "0x00000d5c",
+      "name": "KmpHolder_findNextCheckpointRec",
+      "type": "function",
+      "size": 1008
+    },
+    {
+      "offset": "0x0000114c",
+      "name": "@2456",
+      "type": "object",
+      "size": 9
+    },
+    {
+      "offset": "0x00001a4c",
+      "name": "fn_1_1A4C",
+      "type": "function",
+      "size": 124
+    },
+    {
+      "offset": "0x00001ac8",
+      "name": "lbl_1_data_1AC8",
+      "type": "object",
+      "size": 16
+    },
+    {
+      "offset": "0x00001b14",
+      "name": "computeExactFinishingTimeInner",
+      "type": "function",
+      "size": 340
+    },
+    {
+      "offset": "0x00001c68",
+      "name": "lbl_1_rodata_1C68",
+      "type": "object",
+      "size": 4
+    },
+    {
+      "offset": "0x00001c8c",
+      "name": "VEC2_add",
+      "type": "function",
+      "size": 36
+    },
+    {
+      "offset": "0x00001cb0",
+      "name": "lbl_1_data_1CB0",
+      "type": "object",
+      "size": 16
+    },
+    {
+      "offset": "0x00001fbc",
+      "name": "CheckpointHolder_computeMeanTotalDistance",
+      "type": "function",
+      "size": 804
+    },
+    {
+      "offset": "0x000022e0",
+      "name": "lbl_1_rodata_22E0",
+      "type": "object",
+      "size": 4
+    },
+    {
+      "offset": "0x00002368",
+      "name": "destroyInstance__Q26System9CourseMapFv",
+      "type": "function",
+      "size": 80
+    },
+    {
+      "offset": "0x000023b8",
+      "name": "__ct__Q26System9CourseMapFv",
+      "type": "function",
+      "size": 64
+    },
+    {
+      "offset": "0x000023f8",
+      "name": "lbl_1_data_23F8",
+      "type": "object",
+      "size": 32
+    },
+    {
+      "offset": "0x00002438",
+      "name": "lbl_1_data_2438",
+      "type": "object",
+      "size": 32
+    },
+    {
+      "offset": "0x0000285c",
+      "name": "loadFile__Q26System9CourseMapFlPCc",
+      "type": "function",
+      "size": 28
+    },
+    {
+      "offset": "0x00002878",
+      "name": "lbl_1_rodata_2878",
+      "type": "object",
+      "size": 16
+    },
+    {
+      "offset": "0x000028b8",
+      "name": "getCameraType__Q26System13MapdataCameraCFv",
+      "type": "function",
+      "size": 12
+    },
+    {
+      "offset": "0x000028c4",
+      "name": "lbl_1_rodata_28C4",
+      "type": "object",
+      "size": 8
+    },
+    {
+      "offset": "0x000028e0",
+      "name": "getVersion__Q26System19MapdataFileAccessorCFv",
+      "type": "function",
+      "size": 8
+    },
+    {
+      "offset": "0x000028e8",
+      "name": "getExtraValue__Q26System21MapdataCameraAccessorCFv",
+      "type": "function",
+      "size": 16
+    },
+    {
+      "offset": "0x000028f8",
+      "name": "@1015",
+      "type": "object",
+      "size": 4
+    },
+    {
+      "offset": "0x00002900",
+      "name": "@1101",
+      "type": "object",
+      "size": 4
+    },
+    {
+      "offset": "0x0000291c",
+      "name": "getEnemyPointCount__Q26System9CourseMapCFv",
+      "type": "function",
+      "size": 28
+    },
+    {
+      "offset": "0x00002938",
+      "name": "lbl_1_rodata_2938",
+      "type": "object",
+      "size": 12
+    },
+    {
+      "offset": "0x00002954",
+      "name": "getJugemPointCount__Q26System9CourseMapCFv",
+      "type": "function",
+      "size": 28
+    },
+    {
+      "offset": "0x00002970",
+      "name": "getStartPointCount__Q26System9CourseMapCFv",
+      "type": "function",
+      "size": 28
+    },
+    {
+      "offset": "0x0000298c",
+      "name": "getStartConfig__Q26System12MapdataStageCFv",
+      "type": "function",
+      "size": 12
+    }
+  ]
+}

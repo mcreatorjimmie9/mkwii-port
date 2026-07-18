@@ -1,0 +1,508 @@
+{
+  "name": "main.dol",
+  "size_bytes": 2749248,
+  "architecture": "PowerPC 32-bit Big Endian",
+  "entry_point": "0x800060a4",
+  "bss_address": "0x8029fd00",
+  "bss_size": 938236,
+  "sections": [
+    {
+      "name": ".init",
+      "address": "0x80004000",
+      "size": 9312,
+      "type": "code",
+      "functions_estimated": 5900
+    },
+    {
+      "name": ".text",
+      "address": "0x800072c0",
+      "size": 2349696,
+      "type": "code",
+      "functions_estimated": 5900
+    },
+    {
+      "name": ".data",
+      "address": "0x80006460",
+      "size": 1472,
+      "type": "data"
+    },
+    {
+      "name": ".data1",
+      "address": "0x80006a20",
+      "size": 2208,
+      "type": "data"
+    },
+    {
+      "name": ".data2",
+      "address": "0x80244d40",
+      "size": 192,
+      "type": "data"
+    },
+    {
+      "name": ".data3",
+      "address": "0x80244e00",
+      "size": 32,
+      "type": "data"
+    },
+    {
+      "name": ".data4",
+      "address": "0x80244e40",
+      "size": 78880,
+      "type": "data"
+    },
+    {
+      "name": ".data5",
+      "address": "0x80258260",
+      "size": 293536,
+      "type": "data"
+    },
+    {
+      "name": ".data6",
+      "address": "0x80380880",
+      "size": 5056,
+      "type": "data"
+    },
+    {
+      "name": ".data7",
+      "address": "0x80382c20",
+      "size": 8608,
+      "type": "data"
+    },
+    {
+      "name": ".bss",
+      "address": "0x8029fd00",
+      "size": 938236,
+      "type": "bss"
+    }
+  ],
+  "sdk_libs_found": [
+    "AI",
+    "AX",
+    "DSP",
+    "DVD",
+    "EXI",
+    "GX",
+    "IPC",
+    "MEM",
+    "NET",
+    "Nand",
+    "OS",
+    "PAD",
+    "RKSys",
+    "RevoEX",
+    "SI",
+    "SO",
+    "SP",
+    "SSL"
+  ],
+  "game_functions_estimated": 5900,
+  "total_instructions": 577016,
+  "bl_count": 36828,
+  "blr_count": 9753,
+  "unique_branch_targets": 18739,
+  "strings_found": 3583,
+  "known_symbols_matched": 11805,
+  "dolphin_symbols_matched": 23585,
+  "top_matched_symbols": [
+    {
+      "address": "0x80004000",
+      "name": "gTRKInterruptVectorTable",
+      "type": "label",
+      "size": 0,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80004100",
+      "name": "interrupt_system_reset",
+      "type": "function",
+      "size": 4,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80004200",
+      "name": "interrupt_machine_check",
+      "type": "function",
+      "size": 76,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80004300",
+      "name": "interrupt_data_storage",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80004400",
+      "name": "interrupt_instruction_storage",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80004500",
+      "name": "interrupt_external_interrupt",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80004600",
+      "name": "interrupt_alignment",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80004700",
+      "name": "interrupt_program",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80004800",
+      "name": "interrupt_floating_point_unavailable",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80004900",
+      "name": "interrupt_decrementer",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80004c00",
+      "name": "interrupt_system_call",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80004d00",
+      "name": "interrupt_trace",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80004e00",
+      "name": "interrupt_floating_point_assist",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80004f00",
+      "name": "interrupt_unknown_4f00",
+      "type": "function",
+      "size": 136,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80005000",
+      "name": "interrupt_software_emulation",
+      "type": "function",
+      "size": 112,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80005100",
+      "name": "interrupt_instruction_tlb_miss",
+      "type": "function",
+      "size": 112,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80005200",
+      "name": "interrupt_data_tlb_miss",
+      "type": "function",
+      "size": 112,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80005300",
+      "name": "interrupt_instruction_tlb_error",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80005400",
+      "name": "interrupt_data_tlb_error",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80005600",
+      "name": "interrupt_reserved_5600",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80005700",
+      "name": "interrupt_reserved_5700",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80005c00",
+      "name": "interrupt_data_breakpoint",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80005d00",
+      "name": "interrupt_instruction_breakpoint",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80005e00",
+      "name": "interrupt_peripheral_breakpoint",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80005f00",
+      "name": "interrupt_non_maskable_development_port",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80005f34",
+      "name": "gTRKInterruptVectorTableEnd",
+      "type": "label",
+      "size": 0,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80005f84",
+      "name": "__fill_mem",
+      "type": "function",
+      "size": 180,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80006038",
+      "name": "memset",
+      "type": "function",
+      "size": 48,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80006068",
+      "name": "__check_pad3",
+      "type": "function",
+      "size": 40,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80006090",
+      "name": "__set_debug_bba",
+      "type": "function",
+      "size": 12,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x8000609c",
+      "name": "__get_debug_bba",
+      "type": "function",
+      "size": 8,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x800060a4",
+      "name": "__start",
+      "type": "function",
+      "size": 364,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80006210",
+      "name": "__init_registers",
+      "type": "function",
+      "size": 144,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x800062a0",
+      "name": "__init_data",
+      "type": "function",
+      "size": 168,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80006348",
+      "name": "__init_hardware",
+      "type": "function",
+      "size": 36,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x8000636c",
+      "name": "__flush_cache",
+      "type": "function",
+      "size": 52,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x800063a0",
+      "name": "_rom_copy_info",
+      "type": "object",
+      "size": 132,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x80006424",
+      "name": "_bss_init_info",
+      "type": "object",
+      "size": 32,
+      "section": "init",
+      "in_binary_section": ".init"
+    },
+    {
+      "address": "0x800072c0",
+      "name": "StrapScene_construct",
+      "type": "function",
+      "size": 304,
+      "section": "text",
+      "in_binary_section": ".text"
+    },
+    {
+      "address": "0x800073f0",
+      "name": "RKScene_destroy",
+      "type": "function",
+      "size": 88,
+      "section": "text",
+      "in_binary_section": ".text"
+    },
+    {
+      "address": "0x80007448",
+      "name": "StrapScene_destroy",
+      "type": "function",
+      "size": 92,
+      "section": "text",
+      "in_binary_section": ".text"
+    },
+    {
+      "address": "0x800074a4",
+      "name": "StrapScene_linkModule",
+      "type": "function",
+      "size": 52,
+      "section": "text",
+      "in_binary_section": ".text"
+    },
+    {
+      "address": "0x800074d8",
+      "name": "StrapScene_enter",
+      "type": "function",
+      "size": 752,
+      "section": "text",
+      "in_binary_section": ".text"
+    },
+    {
+      "address": "0x800077c8",
+      "name": "StrapScene_getUserInput",
+      "type": "function",
+      "size": 520,
+      "section": "text",
+      "in_binary_section": ".text"
+    },
+    {
+      "address": "0x800079d0",
+      "name": "StrapScene_calc",
+      "type": "function",
+      "size": 496,
+      "section": "text",
+      "in_binary_section": ".text"
+    },
+    {
+      "address": "0x80007bc0",
+      "name": "ColorFader_getStatus",
+      "type": "function",
+      "size": 8,
+      "section": "text",
+      "in_binary_section": ".text"
+    },
+    {
+      "address": "0x80007bc8",
+      "name": "StrapScene_draw",
+      "type": "function",
+      "size": 868,
+      "section": "text",
+      "in_binary_section": ".text"
+    },
+    {
+      "address": "0x80007f2c",
+      "name": "StrapScene_exit",
+      "type": "function",
+      "size": 8,
+      "section": "text",
+      "in_binary_section": ".text"
+    },
+    {
+      "address": "0x80007f34",
+      "name": "outgoing_childCreate__Q23EGG5SceneFv",
+      "type": "function",
+      "size": 4,
+      "section": "text",
+      "in_binary_section": ".text"
+    },
+    {
+      "address": "0x80007f38",
+      "name": "incoming_childDestroy__Q23EGG5SceneFv",
+      "type": "function",
+      "size": 4,
+      "section": "text",
+      "in_binary_section": ".text"
+    }
+  ]
+}

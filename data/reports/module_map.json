@@ -1,0 +1,307 @@
+{
+  "files": [
+    {
+      "name": "main.dol",
+      "size_bytes": 2749248,
+      "architecture": "PowerPC 32-bit Big Endian",
+      "entry_point": "0x800060a4",
+      "sections": [
+        {
+          "name": ".init",
+          "address": "0x80004000",
+          "size": 9312,
+          "type": "code",
+          "functions_estimated": 5900
+        },
+        {
+          "name": ".text",
+          "address": "0x800072c0",
+          "size": 2349696,
+          "type": "code",
+          "functions_estimated": 5900
+        },
+        {
+          "name": ".data",
+          "address": "0x80006460",
+          "size": 1472,
+          "type": "data"
+        },
+        {
+          "name": ".data1",
+          "address": "0x80006a20",
+          "size": 2208,
+          "type": "data"
+        },
+        {
+          "name": ".data2",
+          "address": "0x80244d40",
+          "size": 192,
+          "type": "data"
+        },
+        {
+          "name": ".data3",
+          "address": "0x80244e00",
+          "size": 32,
+          "type": "data"
+        },
+        {
+          "name": ".data4",
+          "address": "0x80244e40",
+          "size": 78880,
+          "type": "data"
+        },
+        {
+          "name": ".data5",
+          "address": "0x80258260",
+          "size": 293536,
+          "type": "data"
+        },
+        {
+          "name": ".data6",
+          "address": "0x80380880",
+          "size": 5056,
+          "type": "data"
+        },
+        {
+          "name": ".data7",
+          "address": "0x80382c20",
+          "size": 8608,
+          "type": "data"
+        },
+        {
+          "name": ".bss",
+          "address": "0x8029fd00",
+          "size": 938236,
+          "type": "bss"
+        }
+      ],
+      "sdk_libs_found": [
+        "AI",
+        "AX",
+        "DSP",
+        "DVD",
+        "EXI",
+        "GX",
+        "IPC",
+        "MEM",
+        "NET",
+        "Nand",
+        "OS",
+        "PAD",
+        "RKSys",
+        "RevoEX",
+        "SI",
+        "SO",
+        "SP",
+        "SSL"
+      ],
+      "game_functions_estimated": 5900,
+      "strings_found": 3583,
+      "known_symbols_matched": 11805
+    },
+    {
+      "name": "StaticR.rel",
+      "size_bytes": 4902804,
+      "architecture": "PowerPC 32-bit Big Endian",
+      "sections": [
+        {
+          "index": 0,
+          "name": ".null",
+          "file_offset": "0x00000000",
+          "size": 0,
+          "type": "null",
+          "is_bss": false
+        },
+        {
+          "index": 1,
+          "name": ".text",
+          "file_offset": "0x000000d5",
+          "size": 3665820,
+          "type": "code",
+          "is_bss": false,
+          "functions_estimated": 10234
+        },
+        {
+          "index": 2,
+          "name": ".ctors",
+          "file_offset": "0x0037f070",
+          "size": 772,
+          "type": "rodata",
+          "is_bss": false
+        },
+        {
+          "index": 3,
+          "name": ".dtors",
+          "file_offset": "0x0037f374",
+          "size": 12,
+          "type": "rodata",
+          "is_bss": false
+        },
+        {
+          "index": 4,
+          "name": ".rodata",
+          "file_offset": "0x0037f380",
+          "size": 143936,
+          "type": "rodata",
+          "is_bss": false
+        },
+        {
+          "index": 5,
+          "name": ".data",
+          "file_offset": "0x003a25c0",
+          "size": 173916,
+          "type": "data",
+          "is_bss": false
+        },
+        {
+          "index": 6,
+          "name": ".bss",
+          "file_offset": "0x00000000",
+          "size": 30896,
+          "type": "bss",
+          "is_bss": true
+        },
+        {
+          "index": 7,
+          "name": ".null7",
+          "file_offset": "0x00000000",
+          "size": 0,
+          "type": "null",
+          "is_bss": false
+        },
+        {
+          "index": 8,
+          "name": ".null8",
+          "file_offset": "0x00000000",
+          "size": 0,
+          "type": "null",
+          "is_bss": false
+        },
+        {
+          "index": 9,
+          "name": ".null9",
+          "file_offset": "0x00000000",
+          "size": 0,
+          "type": "null",
+          "is_bss": false
+        },
+        {
+          "index": 10,
+          "name": ".null10",
+          "file_offset": "0x00000000",
+          "size": 0,
+          "type": "null",
+          "is_bss": false
+        },
+        {
+          "index": 11,
+          "name": ".null11",
+          "file_offset": "0x00000000",
+          "size": 0,
+          "type": "null",
+          "is_bss": false
+        },
+        {
+          "index": 12,
+          "name": ".null12",
+          "file_offset": "0x00000000",
+          "size": 0,
+          "type": "null",
+          "is_bss": false
+        },
+        {
+          "index": 13,
+          "name": ".null13",
+          "file_offset": "0x00000000",
+          "size": 0,
+          "type": "null",
+          "is_bss": false
+        },
+        {
+          "index": 14,
+          "name": ".null14",
+          "file_offset": "0x00000000",
+          "size": 0,
+          "type": "null",
+          "is_bss": false
+        },
+        {
+          "index": 15,
+          "name": ".null15",
+          "file_offset": "0x00000000",
+          "size": 0,
+          "type": "null",
+          "is_bss": false
+        },
+        {
+          "index": 16,
+          "name": ".null16",
+          "file_offset": "0x00000000",
+          "size": 0,
+          "type": "null",
+          "is_bss": false
+        }
+      ],
+      "sdk_libs_found": [
+        "Game",
+        "Nand",
+        "RKNet",
+        "SO"
+      ],
+      "game_functions_estimated": 10234,
+      "strings_found": 3244,
+      "known_symbols_matched": 23508,
+      "rel_header": {
+        "module_id": 1,
+        "version": 3,
+        "section_count": 17,
+        "prolog_section": 1,
+        "epilog_section": 1,
+        "bss_section": 0,
+        "bss_size": 30896,
+        "num_relocations": 229478,
+        "imp_table_offset": "0x003ccd1c",
+        "imp_table_size": 16
+      }
+    }
+  ],
+  "total_functions_estimated": 16134,
+  "total_known_symbols": 35313,
+  "coverage_pct": 218.9,
+  "all_sdk_libs_found": [
+    "AI",
+    "AX",
+    "DSP",
+    "DVD",
+    "EXI",
+    "GX",
+    "Game",
+    "IPC",
+    "MEM",
+    "NET",
+    "Nand",
+    "OS",
+    "PAD",
+    "RKNet",
+    "RKSys",
+    "RevoEX",
+    "SI",
+    "SO",
+    "SP",
+    "SSL"
+  ],
+  "analysis_timestamp": "2026-07-18T19:31:36.717583+00:00",
+  "notes": {
+    "function_estimation_method": "stwu r1,-N(r1) prologue scanning (conservative lower bound)",
+    "known_symbols_source": "snailspeed3/mkw decomp + riptl/wii-symbols",
+    "rel_symbols_are_relative": "Module symbols use offsets relative to REL .text section start",
+    "rel_load_address": "StaticR.rel typically loaded at 0x80560000 (NTSC-U RMCP01)",
+    "limitations": [
+      "Prologue scanning underestimates: leaf functions and optimized prologues missed",
+      "REL addresses are relative; add 0x80560000 for absolute NTSC-U mapping",
+      "String extraction is heuristic (ASCII >= 5 chars)",
+      "DOL format has no section names \u2014 names are assigned heuristically",
+      "Gecko code addresses are NTSC-U region"
+    ]
+  }
+}
