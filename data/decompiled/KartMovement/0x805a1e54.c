@@ -8,53 +8,56 @@
 
 // Pseudocode:
 void func_805a1e54(void) {
-    // Frame: 0x10 bytes
-    // 1 call(s), 7 branches
+    // stack: 0x10
+    // 1 calls, 7 branches
 
-    save_sp(0x10);
-    save_lr();
-    r4 = 0 << 16
-    r31 =  r3
-    r3 = *(int*)( 0(r4))
-    r3 = *(int*)( 0(r3))
-    r0 = *(uint8*)(0x38b(r3))
+    // prologue: sp -= 0x10
+    // save lr
+    /* lis r4, 0 */
+    *(u32*)(0x14(r1)) = r0
+    *(u32*)(0xc(r1)) = r31
+    r31 = r3
+    r3 = *(u32*)(0(r4))
+    r3 = *(u32*)(0(r3))
+    r0 = *(u8*)(0x38b(r3))
     cmp(r0, 0)
-    // bne 0x805a1ef0
-    r3 = 0 << 16
-    r4 = *(int*)( 0(r3))
-    r3 = *(uint16*)(0x60(r4))
-    r0 = *(uint16*)(0x94(r4))
-    r3 = rotate_and_mask(r3, 0)
-    // andc. r0, r3, r0
-    // beq 0x805a1ef0
-    r3 = 0 << 16
-    r3 = *(int*)( 0(r3))
-    r0 = *(int*)( 0xb70(r3))
+    if (!=) goto LOC_805A1EF4
+    /* lis r3, 0 */
+    r4 = *(u32*)(0(r3))
+    r3 = *(u16*)(0x60(r4))
+    r0 = *(u16*)(0x94(r4))
+    r3 = rlwinm(r3, 0)
+    /* andc. r0, r3, r0 */
+    if (==) goto LOC_805A1EF4
+    /* lis r3, 0 */
+    r3 = *(u32*)(0(r3))
+    r0 = *(u32*)(0xb70(r3))
     cmp(r0, 2)
-    // beq 0x805a1eb8
+    if (==) goto LOC_805A1EBC
     cmp(r0, 0)
-    // bne 0x805a1ec4
-    r0 = *(int*)( 0xb74(r3))
-loc_805A1EBC:
+    if (!=) goto LOC_805A1EC8
+    r0 = *(u32*)(0xb74(r3))
+LOC_805A1EBC:
     cmp(r0, 1)
-    // beq 0x805a1ee4
-    r4 = 0 << 16
-loc_805A1EC8:
-    r4 = *(int*)( 0(r4))
-    r0 = *(uint8*)(0x25(r4))
+    if (==) goto LOC_805A1EE8
+    /* lis r4, 0 */
+LOC_805A1EC8:
+    r4 = *(u32*)(0(r4))
+    r0 = *(u8*)(0x25(r4))
     cmp(r0, 0)
-    // bne 0x805a1ee4
-    0x80533d50()
+    if (!=) goto LOC_805A1EE8
+    sub_80533d50()
     cmp(r3, 0)
-    // beq 0x805a1ef0
-    r0 = *(uint16*)(0x340(r31))
-loc_805A1EE8:
+    if (==) goto LOC_805A1EF4
+    r0 = *(u16*)(0x340(r31))
+LOC_805A1EE8:
     r0 = ~r0
-    *(uint16*)(0x340(r31)) = (uint16)r0
-    r0 = *(int*)( 0x14(r1))
-    restore_r31();
+    *(u16*)(0x340(r31)) = (u16)r0
+    r0 = *(u32*)(0x14(r1))
+LOC_805A1EF4:
+    r31 = saved_r31
     lr = r0
-    restore_sp();
+    // epilogue: restore sp
     return
 }
 

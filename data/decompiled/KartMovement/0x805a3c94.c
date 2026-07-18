@@ -1,12 +1,614 @@
 // sub_805a3c94
 // Address: 0x805a3c94
-// Size: 2164 bytes (541 instructions)
+// Total size: 2164 bytes (code: 2164, data: 0)
+// Instructions: 541
 // Stack frame: 0x30
-// Symbol: N/A
 
 #include "types.h"
 
-// Disassembly:
+// Pseudocode:
+void func_805a3c94(void) {
+    // stack: 0x30
+    // 30 calls, 78 branches
+
+    // prologue: sp -= 0x30
+    // save lr
+    *(u32*)(0x34(r1)) = r0
+    r31 = r3
+    sub_8059d264()
+    /* lis r3, 0 */
+    r23 = r31 + 4
+    r3 = r3 + 0
+    *(u32*)(0(r31)) = r3
+    r3 = r23
+    sub_80555bf8()
+    /* lis r3, 0 */
+    /* li r0, 0 */
+    r3 = r3 + 0
+    *(u32*)(0(r23)) = r3
+    /* lis r4, 0 */
+    /* li r5, 0 */
+    *(u8*)(0x24(r31)) = (u8)r0
+    /* li r6, 0 */
+    *(u8*)(0x27(r31)) = (u8)r0
+    *(u16*)(0x2a(r31)) = (u16)r0
+    *(u16*)(0x2c(r31)) = (u16)r0
+    r3 = *(u32*)(0(r4))
+    r3 = *(u32*)(0xb74(r3))
+    r0 = r3 + -6
+    r0 = __builtin_clz(r0)
+    r0 = srwi(r0, 5)
+    *(u8*)(0x25(r31)) = (u8)r0
+    r4 = *(u32*)(0(r4))
+    r0 = *(u8*)(0x27(r4))
+    cmp(r0, 4)
+    if (!=) goto LOC_805A3D30
+    /* lis r3, 0 */
+    r0 = *(u32*)(0(r3))
+    cmp(r0, 4)
+    if (!=) goto LOC_805A3D30
+    /* li r6, 1 */
+    cmp(r6, 0)
+LOC_805A3D30:
+    if (==) goto LOC_805A3D48
+    r0 = *(u8*)(0x26(r4))
+    cmp(r0, 3)
+    if (!=) goto LOC_805A3D48
+    /* li r5, 1 */
+    *(u8*)(0x26(r31)) = (u8)r5
+LOC_805A3D48:
+    r3 = r31
+    sub_8059d294()
+    r0 = *(u8*)(0x25(r31))
+    /* lis r3, 0 */
+    r3 = *(u32*)(0(r3))
+    cmp(r0, 0)
+    *(u32*)(0x1c(r31)) = r3
+    *(u32*)(0x20(r31)) = r3
+    if (==) goto LOC_805A3D84
+    /* lis r3, 0 */
+    r3 = *(u32*)(0(r3))
+    r0 = *(u8*)(0x24(r3))
+    *(u32*)(0x1c(r31)) = r0
+    goto LOC_805A3DA0
+    r0 = *(u8*)(0x26(r31))
+LOC_805A3D84:
+    cmp(r0, 0)
+    if (==) goto LOC_805A3DA0
+    /* li r3, 3 */
+    /* li r0, 6 */
+    *(u32*)(0x20(r31)) = r3
+    *(u32*)(0x1c(r31)) = r0
+    r0 = *(u32*)(0x1c(r31))
+LOC_805A3DA0:
+    r3 = slwi(r0, 2)
+    sub_80555bf8()
+    r0 = *(u32*)(0x1c(r31))
+    *(u32*)(0x14(r31)) = r3
+    r3 = slwi(r0, 2)
+    sub_80555bf8()
+    *(u32*)(0x18(r31)) = r3
+    /* lis r3, 0 */
+    /* lis r5, 0 */
+    /* li r4, 0 */
+    r7 = *(u32*)(0(r3))
+    r5 = r5 + 0
+    r6 = *(u32*)(0xb70(r7))
+    r3 = r6 + -3
+    cmp(r3, 7)
+    if (>) goto LOC_805A3DF8
+    /* li r0, 1 */
+    r0 = slw(r0, r3)
+    /* andi. r0, r0, 0xc1 */
+    if (==) goto LOC_805A3DF8
+    /* li r4, 1 */
+    cmp(r4, 0)
+LOC_805A3DF8:
+    if (==) goto LOC_805A3E10
+    /* lis r3, 0 */
+    r3 = r3 + 0
+    r5 = r3 + 16
+    goto LOC_805A3E30
+    cmp(r6, 4)
+LOC_805A3E10:
+    if (!=) goto LOC_805A3E30
+    r0 = *(u16*)(0xbe4(r7))
+    cmp(r0, 7)
+    if (!=) goto LOC_805A3E30
+    /* lis r3, 0 */
+    r3 = r3 + 0
+    r5 = r3 + 34
+    /* lis r23, 0 */
+LOC_805A3E30:
+    /* li r4, 0 */
+    r3 = *(u32*)(0(r23))
+    /* li r6, 0 */
+    sub_80542528()
+    cmp(r3, 0)
+    *(u32*)(0x34(r31)) = r3
+    if (!=) goto LOC_805A3E70
+    /* lis r5, 0 */
+    r3 = *(u32*)(0(r23))
+    r5 = r5 + 0
+    /* li r4, 0 */
+    r5 = r5 + 53
+    /* li r6, 0 */
+    sub_80542528()
+    *(u32*)(0x34(r31)) = r3
+    r0 = *(u8*)(0x25(r31))
+LOC_805A3E70:
+    cmp(r0, 0)
+    if (==) goto LOC_805A3FF8
+    /* lis r27, 0 */
+    /* lis r26, 0 */
+    r27 = r27 + 0
+    /* li r24, 0 */
+    r26 = r26 + 0
+    /* li r28, 1 */
+    /* lis r29, 0 */
+    /* li r23, 0 */
+    goto LOC_805A3FE4
+    r3 = *(u32*)(0(r29))
+LOC_805A3EA0:
+    /* li r4, 0 */
+    r3 = *(u32*)(0xb70(r3))
+    r0 = r3 + -3
+    cmp(r0, 7)
+    if (>) goto LOC_805A3EC8
+    r0 = slw(r28, r0)
+    /* andi. r0, r0, 0xc1 */
+    if (==) goto LOC_805A3EC8
+    /* li r4, 1 */
+    cmp(r4, 0)
+LOC_805A3EC8:
+    if (==) goto LOC_805A3F44
+    /* li r3, 0x360 */
+    sub_80555bf8()
+    cmp(r3, 0)
+    r30 = r3
+    if (==) goto LOC_805A3FAC
+    /* clrlwi. r0, r24, 0x18 */
+    if (!=) goto LOC_805A3EF4
+    r25 = *(u32*)(0x34(r31))
+    goto LOC_805A3EF8
+    /* li r25, 0 */
+LOC_805A3EF4:
+    r0 = *(u32*)(4(r27))
+LOC_805A3EF8:
+    cmp(r0, 0)
+    if (>) goto LOC_805A3F18
+    r12 = *(u32*)(0(r27))
+    r3 = r27
+    r12 = *(u32*)(0x18(r12))
+    ctr = r12
+    call_indirect(ctr)
+    r5 = *(u32*)(8(r27))
+LOC_805A3F18:
+    r3 = r30
+    r6 = r25
+    r4 = (s8)r24
+    r5 = *(u32*)(0(r5))
+    /* li r7, 0 */
+    sub_8059d540()
+    *(u32*)(0(r30)) = r26
+    r0 = r26 + 48
+    *(u32*)(0x88(r30)) = r0
+    goto LOC_805A3FAC
+    /* li r3, 0x348 */
+LOC_805A3F44:
+    sub_80555bf8()
+    cmp(r3, 0)
+    r30 = r3
+    if (==) goto LOC_805A3FAC
+    /* clrlwi. r0, r24, 0x18 */
+    if (!=) goto LOC_805A3F68
+    r25 = *(u32*)(0x34(r31))
+    goto LOC_805A3F6C
+    /* li r25, 0 */
+LOC_805A3F68:
+    r0 = *(u32*)(4(r27))
+LOC_805A3F6C:
+    cmp(r0, 0)
+    if (>) goto LOC_805A3F8C
+    r12 = *(u32*)(0(r27))
+    r3 = r27
+    r12 = *(u32*)(0x18(r12))
+    ctr = r12
+    call_indirect(ctr)
+    r5 = *(u32*)(8(r27))
+LOC_805A3F8C:
+    r3 = r30
+    r6 = r25
+    r4 = (s8)r24
+    r5 = *(u32*)(0(r5))
+    /* li r7, 0 */
+    sub_8059d540()
+    r30 = r3
+    /* clrlwi. r0, r24, 0x18 */
+LOC_805A3FAC:
+    if (!=) goto LOC_805A3FC0
+    r3 = *(u32*)(0x8c(r30))
+    r0 = *(u32*)(0x90(r30))
+    *(u32*)(0x6c(r3)) = r0
+    /* clrlwi. r0, r24, 0x18 */
+LOC_805A3FC0:
+    if (==) goto LOC_805A3FCC
+    *(u8*)(0x33e(r30)) = (u8)r23
+    r3 = *(u32*)(0x14(r31))
+LOC_805A3FCC:
+    r0 = rlwinm(r24, 2)
+    r24 = r24 + 1
+    /* stwx r30, r3, r0 */
+    r3 = *(u32*)(0x18(r31))
+    /* stwx r30, r3, r0 */
+    r0 = *(u32*)(0x1c(r31))
+LOC_805A3FE4:
+    /* clrlwi r3, r24, 0x18 */
+    cmp(r3, r0)
+    if (<) goto LOC_805A3EA0
+    goto LOC_805A448C
+    r0 = *(u8*)(0x26(r31))
+LOC_805A3FF8:
+    cmp(r0, 0)
+    if (==) goto LOC_805A4304
+    /* lis r28, 0 */
+    /* lis r26, 0 */
+    /* li r23, 0 */
+    /* lis r30, 0 */
+    r27 = r28 + 0
+    r26 = r26 + 0
+    /* li r29, 1 */
+    r3 = *(u32*)(0(r30))
+LOC_805A4020:
+    /* clrlwi r4, r23, 0x18 */
+    sub_80533c90()
+    r5 = *(u32*)(0(r30))
+    /* clrlwi r25, r3, 0x18 */
+    /* li r4, 0 */
+    r3 = *(u32*)(0xb70(r5))
+    r0 = r3 + -3
+    cmp(r0, 7)
+    if (>) goto LOC_805A4058
+    r0 = slw(r29, r0)
+    /* andi. r0, r0, 0xc1 */
+    if (==) goto LOC_805A4058
+    /* li r4, 1 */
+    cmp(r4, 0)
+LOC_805A4058:
+    if (==) goto LOC_805A40E0
+    /* li r3, 0x360 */
+    sub_80555bf8()
+    cmp(r3, 0)
+    r24 = r3
+    if (==) goto LOC_805A4154
+    /* clrlwi. r3, r23, 0x18 */
+    r22 = *(u32*)(0x34(r31))
+    /* li r4, 0 */
+    if (<) goto LOC_805A4094
+    r0 = *(u32*)(4(r27))
+    cmp(r3, r0)
+    if (>=) goto LOC_805A4094
+    /* li r4, 1 */
+    cmp(r4, 0)
+LOC_805A4094:
+    if (!=) goto LOC_805A40B0
+    r3 = r28 + 0
+    r12 = *(u32*)(0(r3))
+    r12 = *(u32*)(0x18(r12))
+    ctr = r12
+    call_indirect(ctr)
+    r4 = *(u32*)(8(r27))
+LOC_805A40B0:
+    r0 = rlwinm(r23, 2)
+    r3 = r24
+    r6 = r22
+    r5 = *(u32*)(r4)
+    r4 = (s8)r25
+    /* li r7, 0 */
+    sub_8059d540()
+    *(u32*)(0(r24)) = r26
+    r0 = r26 + 48
+    *(u32*)(0x88(r24)) = r0
+    goto LOC_805A4154
+    /* li r3, 0x348 */
+LOC_805A40E0:
+    sub_80555bf8()
+    cmp(r3, 0)
+    r24 = r3
+    if (==) goto LOC_805A4154
+    /* clrlwi. r3, r23, 0x18 */
+    r22 = *(u32*)(0x34(r31))
+    /* li r4, 0 */
+    if (<) goto LOC_805A4114
+    r0 = *(u32*)(4(r27))
+    cmp(r3, r0)
+    if (>=) goto LOC_805A4114
+    /* li r4, 1 */
+    cmp(r4, 0)
+LOC_805A4114:
+    if (!=) goto LOC_805A4130
+    r3 = r28 + 0
+    r12 = *(u32*)(0(r3))
+    r12 = *(u32*)(0x18(r12))
+    ctr = r12
+    call_indirect(ctr)
+    r4 = *(u32*)(8(r27))
+LOC_805A4130:
+    r0 = rlwinm(r23, 2)
+    r3 = r24
+    r6 = r22
+    r5 = *(u32*)(r4)
+    r4 = (s8)r25
+    /* li r7, 0 */
+    sub_8059d540()
+    r24 = r3
+    r3 = *(u32*)(0x8c(r24))
+LOC_805A4154:
+    r4 = rlwinm(r23, 2)
+    r0 = *(u32*)(0x90(r24))
+    r23 = r23 + 1
+    *(u32*)(0x6c(r3)) = r0
+    cmp(r23, 3)
+    r3 = *(u32*)(0x14(r31))
+    /* stwx r24, r3, r4 */
+    r3 = *(u32*)(0x18(r31))
+    /* stwx r24, r3, r4 */
+    if (<) goto LOC_805A4020
+    /* lis r27, 0 */
+    /* lis r26, 0 */
+    r27 = r27 + 0
+    /* li r23, 0 */
+    r26 = r26 + 0
+    /* lis r29, 0 */
+    /* li r28, 1 */
+    /* li r30, 0 */
+    r3 = *(u32*)(0(r29))
+LOC_805A41A0:
+    /* clrlwi r4, r23, 0x18 */
+    sub_80533c90()
+    r5 = *(u32*)(0(r29))
+    /* clrlwi r24, r3, 0x18 */
+    /* li r4, 0 */
+    r3 = *(u32*)(0xb70(r5))
+    r0 = r3 + -3
+    cmp(r0, 7)
+    if (>) goto LOC_805A41D8
+    r0 = slw(r28, r0)
+    /* andi. r0, r0, 0xc1 */
+    if (==) goto LOC_805A41D8
+    /* li r4, 1 */
+    cmp(r4, 0)
+LOC_805A41D8:
+    if (==) goto LOC_805A4254
+    /* li r3, 0x360 */
+    sub_80555bf8()
+    cmp(r3, 0)
+    r25 = r3
+    if (==) goto LOC_805A42BC
+    /* clrlwi. r0, r23, 0x18 */
+    if (!=) goto LOC_805A4204
+    r22 = *(u32*)(0x34(r31))
+    goto LOC_805A4208
+    /* li r22, 0 */
+LOC_805A4204:
+    r0 = *(u32*)(4(r27))
+LOC_805A4208:
+    cmp(r0, 3)
+    if (>) goto LOC_805A4228
+    r12 = *(u32*)(0(r27))
+    r3 = r27
+    r12 = *(u32*)(0x18(r12))
+    ctr = r12
+    call_indirect(ctr)
+    r5 = *(u32*)(8(r27))
+LOC_805A4228:
+    r3 = r25
+    r6 = r22
+    r4 = (s8)r24
+    r5 = *(u32*)(0xc(r5))
+    /* li r7, 1 */
+    sub_8059d540()
+    *(u32*)(0(r25)) = r26
+    r0 = r26 + 48
+    *(u32*)(0x88(r25)) = r0
+    goto LOC_805A42BC
+    /* li r3, 0x348 */
+LOC_805A4254:
+    sub_80555bf8()
+    cmp(r3, 0)
+    r25 = r3
+    if (==) goto LOC_805A42BC
+    /* clrlwi. r0, r23, 0x18 */
+    if (!=) goto LOC_805A4278
+    r22 = *(u32*)(0x34(r31))
+    goto LOC_805A427C
+    /* li r22, 0 */
+LOC_805A4278:
+    r0 = *(u32*)(4(r27))
+LOC_805A427C:
+    cmp(r0, 3)
+    if (>) goto LOC_805A429C
+    r12 = *(u32*)(0(r27))
+    r3 = r27
+    r12 = *(u32*)(0x18(r12))
+    ctr = r12
+    call_indirect(ctr)
+    r5 = *(u32*)(8(r27))
+LOC_805A429C:
+    r3 = r25
+    r6 = r22
+    r4 = (s8)r24
+    r5 = *(u32*)(0xc(r5))
+    /* li r7, 1 */
+    sub_8059d540()
+    r25 = r3
+    /* clrlwi. r0, r23, 0x18 */
+LOC_805A42BC:
+    if (!=) goto LOC_805A42D0
+    r3 = *(u32*)(0x8c(r25))
+    r0 = *(u32*)(0x90(r25))
+    *(u32*)(0x6c(r3)) = r0
+    /* clrlwi. r0, r23, 0x18 */
+LOC_805A42D0:
+    if (==) goto LOC_805A42DC
+    *(u8*)(0x33e(r25)) = (u8)r30
+    r0 = r23 + 3
+LOC_805A42DC:
+    r3 = *(u32*)(0x14(r31))
+    r0 = rlwinm(r0, 2)
+    r23 = r23 + 1
+    /* stwx r25, r3, r0 */
+    cmp(r23, 3)
+    r3 = *(u32*)(0x18(r31))
+    /* stwx r25, r3, r0 */
+    if (<) goto LOC_805A41A0
+    goto LOC_805A448C
+    /* lis r28, 0 */
+LOC_805A4304:
+    /* lis r30, 0 */
+    /* li r23, 0 */
+    /* lis r26, 0 */
+    r29 = r28 + 0
+    r30 = r30 + 0
+    /* li r27, 1 */
+    goto LOC_805A447C
+    r3 = *(u32*)(0(r26))
+LOC_805A4324:
+    /* clrlwi r4, r23, 0x18 */
+    sub_80533c90()
+    r5 = *(u32*)(0(r26))
+    /* clrlwi r24, r3, 0x18 */
+    /* li r4, 0 */
+    r3 = *(u32*)(0xb70(r5))
+    r0 = r3 + -3
+    cmp(r0, 7)
+    if (>) goto LOC_805A435C
+    r0 = slw(r27, r0)
+    /* andi. r0, r0, 0xc1 */
+    if (==) goto LOC_805A435C
+    /* li r4, 1 */
+    cmp(r4, 0)
+LOC_805A435C:
+    if (==) goto LOC_805A43E4
+    /* li r3, 0x360 */
+    sub_80555bf8()
+    cmp(r3, 0)
+    r25 = r3
+    if (==) goto LOC_805A4458
+    /* clrlwi. r3, r23, 0x18 */
+    r22 = *(u32*)(0x34(r31))
+    /* li r4, 0 */
+    if (<) goto LOC_805A4398
+    r0 = *(u32*)(4(r29))
+    cmp(r3, r0)
+    if (>=) goto LOC_805A4398
+    /* li r4, 1 */
+    cmp(r4, 0)
+LOC_805A4398:
+    if (!=) goto LOC_805A43B4
+    r3 = r28 + 0
+    r12 = *(u32*)(0(r3))
+    r12 = *(u32*)(0x18(r12))
+    ctr = r12
+    call_indirect(ctr)
+    r4 = *(u32*)(8(r29))
+LOC_805A43B4:
+    r0 = rlwinm(r23, 2)
+    r3 = r25
+    r6 = r22
+    r5 = *(u32*)(r4)
+    r4 = (s8)r24
+    /* li r7, 0 */
+    sub_8059d540()
+    *(u32*)(0(r25)) = r30
+    r0 = r30 + 48
+    *(u32*)(0x88(r25)) = r0
+    goto LOC_805A4458
+    /* li r3, 0x348 */
+LOC_805A43E4:
+    sub_80555bf8()
+    cmp(r3, 0)
+    r25 = r3
+    if (==) goto LOC_805A4458
+    /* clrlwi. r3, r23, 0x18 */
+    r22 = *(u32*)(0x34(r31))
+    /* li r4, 0 */
+    if (<) goto LOC_805A4418
+    r0 = *(u32*)(4(r29))
+    cmp(r3, r0)
+    if (>=) goto LOC_805A4418
+    /* li r4, 1 */
+    cmp(r4, 0)
+LOC_805A4418:
+    if (!=) goto LOC_805A4434
+    r3 = r28 + 0
+    r12 = *(u32*)(0(r3))
+    r12 = *(u32*)(0x18(r12))
+    ctr = r12
+    call_indirect(ctr)
+    r4 = *(u32*)(8(r29))
+LOC_805A4434:
+    r0 = rlwinm(r23, 2)
+    r3 = r25
+    r6 = r22
+    r5 = *(u32*)(r4)
+    r4 = (s8)r24
+    /* li r7, 0 */
+    sub_8059d540()
+    r25 = r3
+    r3 = *(u32*)(0x8c(r25))
+LOC_805A4458:
+    r4 = rlwinm(r23, 2)
+    r0 = *(u32*)(0x90(r25))
+    r23 = r23 + 1
+    *(u32*)(0x6c(r3)) = r0
+    r3 = *(u32*)(0x14(r31))
+    /* stwx r25, r3, r4 */
+    r3 = *(u32*)(0x18(r31))
+    /* stwx r25, r3, r4 */
+    r0 = *(u32*)(0x1c(r31))
+LOC_805A447C:
+    /* clrlwi r3, r23, 0x18 */
+    cmp(r3, r0)
+    if (<) goto LOC_805A4324
+    /* li r0, 0 */
+LOC_805A448C:
+    *(u8*)(0x28(r31)) = (u8)r0
+    /* lis r3, 0 */
+    r3 = *(u32*)(0(r3))
+    r0 = *(u32*)(0xb70(r3))
+    cmp(r0, 0xb)
+    if (!=) goto LOC_805A44D4
+    r4 = *(u32*)(0xb74(r3))
+    /* subfic r3, r4, 0xc */
+    r0 = r4 + -0xc
+    r0 = r3 | r0
+    r0 = srwi(r0, 0x1f)
+    *(u8*)(0x28(r31)) = (u8)r0
+    sub_805ba6c0()
+    /* lis r3, 0 */
+    r4 = *(u8*)(0x28(r31))
+    r3 = *(u32*)(0(r3))
+    sub_805ba92c()
+    /* li r3, 0x1c */
+LOC_805A44D4:
+    sub_80555bf8()
+    cmp(r3, 0)
+    if (==) goto LOC_805A44F0
+    /* lis r4, 0 */
+    r4 = *(u32*)(0(r4))
+    sub_8054fe80()
+    *(u32*)(0x30(r31)) = r3
+LOC_805A44F0:
+    r3 = r31
+    // restore saved regs
+    r0 = *(u32*)(0x34(r1))
+    lr = r0
+    // epilogue: restore sp
+    return
+}
+
+// === Raw Disassembly ===
     /* 0x805a3c94 */ stwu r1, -0x30(r1)
     /* 0x805a3c98 */ mflr r0
     /* 0x805a3c9c */ stw r0, 0x34(r1)

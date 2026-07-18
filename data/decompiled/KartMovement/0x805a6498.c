@@ -1,12 +1,64 @@
 // sub_805a6498
 // Address: 0x805a6498
-// Size: 164 bytes (41 instructions)
+// Total size: 164 bytes (code: 164, data: 0)
+// Instructions: 41
 // Stack frame: 0x10
-// Symbol: N/A
 
 #include "types.h"
 
-// Disassembly:
+// Pseudocode:
+void func_805a6498(void) {
+    // stack: 0x10
+    // 2 calls, 6 branches
+
+    // prologue: sp -= 0x10
+    // save lr
+    *(u32*)(0x14(r1)) = r0
+    *(u32*)(0xc(r1)) = r31
+    *(u32*)(8(r1)) = r30
+    r30 = r3
+    r0 = *(u32*)(0x4c(r3))
+    cmp(r0, 1)
+    if (!=) goto LOC_805A6500
+    r0 = *(u8*)(0x50(r3))
+    cmp(r0, 0)
+    if (!=) goto LOC_805A6528
+    /* li r31, 1 */
+    *(u32*)(0x4c(r3)) = r31
+    r12 = *(u32*)(0(r3))
+    r12 = *(u32*)(0x14(r12))
+    ctr = r12
+    call_indirect(ctr)
+    sub_805190c8()
+    cmp(r3, 0)
+    if (==) goto LOC_805A64F8
+    *(u32*)(8(r30)) = r3
+    goto LOC_805A6528
+    *(u8*)(0x50(r30)) = (u8)r31
+LOC_805A64F8:
+    goto LOC_805A6528
+    cmp(r4, -1)
+LOC_805A6500:
+    *(u16*)(0x30(r3)) = (u16)r4
+    if (==) goto LOC_805A6520
+    /* lis r3, 0 */
+    /* clrlwi r4, r4, 0x10 */
+    r3 = *(u32*)(0(r3))
+    sub_80518ff0()
+    *(u32*)(8(r30)) = r3
+    /* li r0, 0 */
+LOC_805A6520:
+    *(u32*)(0x4c(r30)) = r0
+    r0 = *(u32*)(0x14(r1))
+LOC_805A6528:
+    r31 = saved_r31
+    r30 = *(u32*)(8(r1))
+    lr = r0
+    // epilogue: restore sp
+    return
+}
+
+// === Raw Disassembly ===
     /* 0x805a6498 */ stwu r1, -0x10(r1)
     /* 0x805a649c */ mflr r0
     /* 0x805a64a0 */ stw r0, 0x14(r1)

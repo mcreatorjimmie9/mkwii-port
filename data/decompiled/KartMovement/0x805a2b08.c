@@ -1,12 +1,50 @@
 // sub_805a2b08
 // Address: 0x805a2b08
-// Size: 124 bytes (31 instructions)
+// Total size: 124 bytes (code: 124, data: 0)
+// Instructions: 31
 // Stack frame: 0x10
-// Symbol: N/A
 
 #include "types.h"
 
-// Disassembly:
+// Pseudocode:
+void func_805a2b08(void) {
+    // stack: 0x10
+    // 5 FP ops
+
+    // prologue: sp -= 0x10
+    // save lr
+    /* li r4, 0 */
+    *(u32*)(0x14(r1)) = r0
+    *(u32*)(0xc(r1)) = r31
+    /* lis r31, 0 */
+    r31 = r31 + 0
+    *(u32*)(8(r1)) = r30
+    r30 = r3
+    f1 = *(f32*)(0(r31))
+    r3 = *(u32*)(0x70(r3))
+    r12 = *(u32*)(0(r3))
+    r12 = *(u32*)(0x10(r12))
+    ctr = r12
+    call_indirect(ctr)
+    r3 = *(u32*)(0x70(r30))
+    /* li r4, 1 */
+    f1 = *(f32*)(0x1fc(r31))
+    /* li r0, 0 */
+    *(u8*)(0x16(r3)) = (u8)r4
+    f0 = *(f32*)(0x114(r31))
+    *(u32*)(0x78(r30)) = r0
+    r3 = *(u32*)(4(r30))
+    *(f32*)(0xb4(r30)) = f1
+    *(f32*)(0x344(r3)) = f0
+    r31 = saved_r31
+    r30 = *(u32*)(8(r1))
+    r0 = *(u32*)(0x14(r1))
+    lr = r0
+    // epilogue: restore sp
+    return
+}
+
+// === Raw Disassembly ===
     /* 0x805a2b08 */ stwu r1, -0x10(r1)
     /* 0x805a2b0c */ mflr r0
     /* 0x805a2b10 */ li r4, 0

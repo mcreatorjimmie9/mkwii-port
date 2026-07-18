@@ -1,12 +1,42 @@
 // sub_805a2efc
 // Address: 0x805a2efc
-// Size: 92 bytes (23 instructions)
+// Total size: 92 bytes (code: 92, data: 0)
+// Instructions: 23
 // Stack frame: 0x20
-// Symbol: N/A
 
 #include "types.h"
 
-// Disassembly:
+// Pseudocode:
+void func_805a2efc(void) {
+    // stack: 0x20
+    // 1 calls, 10 FP ops
+
+    // prologue: sp -= 0x20
+    // save lr
+    /* lis r4, 0 */
+    r6 = r3 + 160
+    *(u32*)(0x24(r1)) = r0
+    r5 = r1 + 8
+    f3 = *(f32*)(0(r4))
+    r4 = r3 + 136
+    f2 = *(f32*)(0x9c(r3))
+    f1 = *(f32*)(0x98(r3))
+    f0 = *(f32*)(0x94(r3))
+    f2 = f3 * f2
+    f1 = f3 * f1
+    r3 = r3 + 12
+    f0 = f3 * f0
+    *(f32*)(0x10(r1)) = f2
+    *(f32*)(8(r1)) = f0
+    *(f32*)(0xc(r1)) = f1
+    sub_80555bf8()
+    r0 = *(u32*)(0x24(r1))
+    lr = r0
+    // epilogue: restore sp
+    return
+}
+
+// === Raw Disassembly ===
     /* 0x805a2efc */ stwu r1, -0x20(r1)
     /* 0x805a2f00 */ mflr r0
     /* 0x805a2f04 */ lis r4, 0

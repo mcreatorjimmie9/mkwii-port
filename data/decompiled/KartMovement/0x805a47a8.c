@@ -1,12 +1,59 @@
 // sub_805a47a8
 // Address: 0x805a47a8
-// Size: 144 bytes (36 instructions)
+// Total size: 144 bytes (code: 144, data: 0)
+// Instructions: 36
 // Stack frame: 0x10
-// Symbol: N/A
 
 #include "types.h"
 
-// Disassembly:
+// Pseudocode:
+void func_805a47a8(void) {
+    // stack: 0x10
+    // 1 calls, 5 branches, 2 returns
+
+    // prologue: sp -= 0x10
+    // save lr
+    cmp(r3, 0)
+    *(u32*)(0x14(r1)) = r0
+    *(u32*)(0xc(r1)) = r31
+    r31 = r3
+    if (==) goto LOC_805A47D4
+    cmp(r4, 0)
+    if (<=) goto LOC_805A47D4
+    sub_80555bf8()
+    r3 = r31
+LOC_805A47D4:
+    r31 = saved_r31
+    r0 = *(u32*)(0x14(r1))
+    lr = r0
+    // epilogue: restore sp
+    return
+    r0 = *(u32*)(0x20(r3))
+    /* li r6, 0 */
+    /* li r5, 0 */
+    ctr = r0
+    cmp(r0, 0)
+    if (<=) goto LOC_805A4828
+    r4 = *(u32*)(0x18(r3))
+LOC_805A4804:
+    r4 = *(u32*)(r4)
+    r4 = *(u32*)(0x198(r4))
+    r0 = *(u16*)(0x6c(r4))
+    /* rlwinm. r0, r0, 0, 0x1c, 0x1c */
+    if (==) goto LOC_805A4820
+    r6 = r6 + 1
+    r5 = r5 + 4
+LOC_805A4820:
+    if (ctr-- != 0) goto LOC_805A4804
+    r0 = *(u32*)(0x20(r3))
+LOC_805A4828:
+    r0 = r0 - r6
+    r0 = __builtin_clz(r0)
+    r3 = srwi(r0, 5)
+    return
+}
+
+// === Raw Disassembly ===
     /* 0x805a47a8 */ stwu r1, -0x10(r1)
     /* 0x805a47ac */ mflr r0
     /* 0x805a47b0 */ cmpwi r3, 0

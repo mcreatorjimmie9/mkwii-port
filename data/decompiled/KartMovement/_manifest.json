@@ -732,7 +732,7 @@
     "size": 176,
     "instructions": 44,
     "calls": [
-      "0x84533d50"
+      "0x80533d50"
     ],
     "section_offset": "0x8f5b8",
     "file_offset": "0x8f690"
@@ -744,11 +744,11 @@
     "size": 424,
     "instructions": 106,
     "calls": [
-      "0x84590438",
-      "0x84537f50",
-      "0x84590aa0",
+      "0x80590438",
+      "0x80537f50",
+      "0x80590aa0",
       "0x80720be4",
-      "0x84590aa0",
+      "0x80590aa0",
       "0x80720be4"
     ],
     "section_offset": "0x8f668",
@@ -791,7 +791,7 @@
     "size": 604,
     "instructions": 151,
     "calls": [
-      "0x84555bf8"
+      "0x80555bf8"
     ],
     "section_offset": "0x8fbe8",
     "file_offset": "0x8fcc0"
@@ -815,7 +815,7 @@
     "size": 64,
     "instructions": 16,
     "calls": [
-      "0x84555bf8"
+      "0x80555bf8"
     ],
     "section_offset": "0x8fe94",
     "file_offset": "0x8ff6c"
@@ -827,12 +827,12 @@
     "size": 348,
     "instructions": 87,
     "calls": [
-      "0x845a2670",
-      "0x84555bf8",
-      "0x84555bf8",
-      "0x84555bf8",
-      "0x84555bf8",
-      "0x84555bf8"
+      "0x805a2670",
+      "0x80555bf8",
+      "0x80555bf8",
+      "0x80555bf8",
+      "0x80555bf8",
+      "0x80555bf8"
     ],
     "section_offset": "0x8fed4",
     "file_offset": "0x8ffac"
@@ -844,13 +844,13 @@
     "size": 572,
     "instructions": 143,
     "calls": [
-      "0x84537ffc",
-      "0x84555bf8",
+      "0x80537ffc",
+      "0x80555bf8",
       "0x806e346c",
       "0x806e3720",
-      "0x84555bf8",
-      "0x84555bf8",
-      "0x84555bf8",
+      "0x80555bf8",
+      "0x80555bf8",
+      "0x80555bf8",
       "0x806e35dc"
     ],
     "section_offset": "0x90030",
@@ -873,9 +873,9 @@
     "size": 628,
     "instructions": 157,
     "calls": [
-      "0x84537f50",
+      "0x80537f50",
       "0x806e35dc",
-      "0x84555bf8"
+      "0x80555bf8"
     ],
     "section_offset": "0x902e8",
     "file_offset": "0x903c0"
@@ -887,9 +887,9 @@
     "size": 260,
     "instructions": 65,
     "calls": [
-      "0x84555bf8",
-      "0x84555bf8",
-      "0x84555bf8"
+      "0x80555bf8",
+      "0x80555bf8",
+      "0x80555bf8"
     ],
     "section_offset": "0x9055c",
     "file_offset": "0x90634"
@@ -901,7 +901,7 @@
     "size": 92,
     "instructions": 23,
     "calls": [
-      "0x84555bf8"
+      "0x80555bf8"
     ],
     "section_offset": "0x90660",
     "file_offset": "0x90738"
@@ -913,8 +913,8 @@
     "size": 244,
     "instructions": 61,
     "calls": [
-      "0x84555bf8",
-      "0x84555bf8"
+      "0x80555bf8",
+      "0x80555bf8"
     ],
     "section_offset": "0x906bc",
     "file_offset": "0x90794"
@@ -936,8 +936,8 @@
     "size": 152,
     "instructions": 38,
     "calls": [
-      "0x84555bf8",
-      "0x84555bf8"
+      "0x80555bf8",
+      "0x80555bf8"
     ],
     "section_offset": "0x912dc",
     "file_offset": "0x913b4"
@@ -949,7 +949,7 @@
     "size": 132,
     "instructions": 33,
     "calls": [
-      "0x84555bf8",
+      "0x80555bf8",
       "0x805a3c98"
     ],
     "section_offset": "0x91374",
@@ -962,36 +962,36 @@
     "size": 2164,
     "instructions": 541,
     "calls": [
-      "0x8459d264",
-      "0x84555bf8",
-      "0x8459d294",
-      "0x84555bf8",
-      "0x84555bf8",
-      "0x84542528",
-      "0x84542528",
-      "0x84555bf8",
-      "0x8459d540",
-      "0x84555bf8",
-      "0x8459d540",
-      "0x84533c90",
-      "0x84555bf8",
-      "0x8459d540",
-      "0x84555bf8",
-      "0x8459d540",
-      "0x84533c90",
-      "0x84555bf8",
-      "0x8459d540",
-      "0x84555bf8",
-      "0x8459d540",
-      "0x84533c90",
-      "0x84555bf8",
-      "0x8459d540",
-      "0x84555bf8",
-      "0x8459d540",
+      "0x8059d264",
+      "0x80555bf8",
+      "0x8059d294",
+      "0x80555bf8",
+      "0x80555bf8",
+      "0x80542528",
+      "0x80542528",
+      "0x80555bf8",
+      "0x8059d540",
+      "0x80555bf8",
+      "0x8059d540",
+      "0x80533c90",
+      "0x80555bf8",
+      "0x8059d540",
+      "0x80555bf8",
+      "0x8059d540",
+      "0x80533c90",
+      "0x80555bf8",
+      "0x8059d540",
+      "0x80555bf8",
+      "0x8059d540",
+      "0x80533c90",
+      "0x80555bf8",
+      "0x8059d540",
+      "0x80555bf8",
+      "0x8059d540",
       "0x805ba6c0",
       "0x805ba92c",
-      "0x84555bf8",
-      "0x8454fe80"
+      "0x80555bf8",
+      "0x8054fe80"
     ],
     "section_offset": "0x913f8",
     "file_offset": "0x914d0"
@@ -1004,8 +1004,8 @@
     "instructions": 46,
     "calls": [
       "0x805ba760",
-      "0x84555bf8",
-      "0x84555bf8"
+      "0x80555bf8",
+      "0x80555bf8"
     ],
     "section_offset": "0x91c6c",
     "file_offset": "0x91d44"
@@ -1017,10 +1017,10 @@
     "size": 488,
     "instructions": 122,
     "calls": [
-      "0x84555bf8",
-      "0x8459d540",
-      "0x84555bf8",
-      "0x8459d540"
+      "0x80555bf8",
+      "0x8059d540",
+      "0x80555bf8",
+      "0x8059d540"
     ],
     "section_offset": "0x91d24",
     "file_offset": "0x91dfc"
@@ -1032,7 +1032,7 @@
     "size": 144,
     "instructions": 36,
     "calls": [
-      "0x84555bf8"
+      "0x80555bf8"
     ],
     "section_offset": "0x91f0c",
     "file_offset": "0x91fe4"
@@ -1045,7 +1045,7 @@
     "instructions": 24,
     "calls": [
       "0x805bac44",
-      "0x845504dc",
+      "0x805504dc",
       "0x8083d8bc"
     ],
     "section_offset": "0x91f9c",
@@ -1111,7 +1111,7 @@
     "size": 64,
     "instructions": 16,
     "calls": [
-      "0x84555bf8"
+      "0x80555bf8"
     ],
     "section_offset": "0x92af4",
     "file_offset": "0x92bcc"
@@ -1123,7 +1123,7 @@
     "size": 96,
     "instructions": 24,
     "calls": [
-      "0x84555bf8"
+      "0x80555bf8"
     ],
     "section_offset": "0x92b34",
     "file_offset": "0x92c0c"
@@ -1135,7 +1135,7 @@
     "size": 180,
     "instructions": 45,
     "calls": [
-      "0x84555bf8",
+      "0x80555bf8",
       "0x807417c8"
     ],
     "section_offset": "0x92b94",
@@ -1171,8 +1171,8 @@
     "size": 120,
     "instructions": 30,
     "calls": [
-      "0x84590250",
-      "0x84590a0c"
+      "0x80590250",
+      "0x80590a0c"
     ],
     "section_offset": "0x92e74",
     "file_offset": "0x92f4c"
@@ -1184,9 +1184,9 @@
     "size": 492,
     "instructions": 112,
     "calls": [
-      "0x845907c0",
-      "0x845907c0",
-      "0x84555bf8"
+      "0x805907c0",
+      "0x805907c0",
+      "0x80555bf8"
     ],
     "section_offset": "0x92eec",
     "file_offset": "0x92fc4"
@@ -1198,8 +1198,8 @@
     "size": 236,
     "instructions": 59,
     "calls": [
-      "0x84590250",
-      "0x84590a0c",
+      "0x80590250",
+      "0x80590a0c",
       "0x805a5a64"
     ],
     "section_offset": "0x930d8",
@@ -1212,8 +1212,8 @@
     "size": 1252,
     "instructions": 86,
     "calls": [
-      "0x84555bf8",
-      "0x845907c0",
+      "0x80555bf8",
+      "0x805907c0",
       "0x805aa32c"
     ],
     "section_offset": "0x931c4",
@@ -1226,7 +1226,7 @@
     "size": 216,
     "instructions": 54,
     "calls": [
-      "0x84590aa0",
+      "0x80590aa0",
       "0x806e3720"
     ],
     "section_offset": "0x936a8",
@@ -1269,8 +1269,8 @@
     "size": 188,
     "instructions": 47,
     "calls": [
-      "0x84516c60",
-      "0x84555bf8"
+      "0x80516c60",
+      "0x80555bf8"
     ],
     "section_offset": "0x938d8",
     "file_offset": "0x939b0"
@@ -1302,8 +1302,8 @@
     "size": 164,
     "instructions": 41,
     "calls": [
-      "0x845190c8",
-      "0x84518ff0"
+      "0x805190c8",
+      "0x80518ff0"
     ],
     "section_offset": "0x93bfc",
     "file_offset": "0x93cd4"
@@ -1316,7 +1316,7 @@
     "instructions": 102,
     "calls": [
       "0x8078cfe0",
-      "0x84555bf8",
+      "0x80555bf8",
       "0x807b5774"
     ],
     "section_offset": "0x93ca0",
@@ -1329,7 +1329,7 @@
     "size": 1552,
     "instructions": 388,
     "calls": [
-      "0x845a5434"
+      "0x805a5434"
     ],
     "section_offset": "0x93efc",
     "file_offset": "0x93fd4"
@@ -1341,23 +1341,23 @@
     "size": 8192,
     "instructions": 326,
     "calls": [
-      "0x84555bf8",
-      "0x84555bf8",
-      "0x84555bf8",
+      "0x80555bf8",
+      "0x80555bf8",
+      "0x80555bf8",
       "0x805a7694",
-      "0x845a2434",
-      "0x845a578c",
-      "0x84590250",
-      "0x84590a0c",
-      "0x845a5a64",
-      "0x84555bf8",
+      "0x805a2434",
+      "0x805a578c",
+      "0x80590250",
+      "0x80590a0c",
+      "0x805a5a64",
+      "0x80555bf8",
       "0x805a7694",
       "0x805a8534",
-      "0x84590250",
-      "0x84518bfc",
-      "0x845190c8",
-      "0x84518ff0",
-      "0x845a2434",
+      "0x80590250",
+      "0x80518bfc",
+      "0x805190c8",
+      "0x80518ff0",
+      "0x805a2434",
       "0x805a7694"
     ],
     "section_offset": "0x9450c",

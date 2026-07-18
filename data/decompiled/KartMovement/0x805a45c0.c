@@ -1,12 +1,153 @@
 // sub_805a45c0
 // Address: 0x805a45c0
-// Size: 488 bytes (122 instructions)
+// Total size: 488 bytes (code: 488, data: 0)
+// Instructions: 122
 // Stack frame: 0x30
-// Symbol: N/A
 
 #include "types.h"
 
-// Disassembly:
+// Pseudocode:
+void func_805a45c0(void) {
+    // stack: 0x30
+    // 4 calls, 18 branches
+
+    // prologue: sp -= 0x30
+    // save lr
+    /* lis r9, 0 */
+    *(u32*)(0x34(r1)) = r0
+    r25 = r3
+    r26 = r4
+    r27 = r5
+    r28 = r6
+    r29 = r7
+    r30 = r8
+    /* li r4, 0 */
+    r3 = *(u32*)(0(r9))
+    r3 = *(u32*)(0xb70(r3))
+    r0 = r3 + -3
+    cmp(r0, 7)
+    if (>) goto LOC_805A461C
+    /* li r3, 1 */
+    r0 = slw(r3, r0)
+    /* andi. r0, r0, 0xc1 */
+    if (==) goto LOC_805A461C
+    r4 = r3
+    cmp(r4, 0)
+LOC_805A461C:
+    if (==) goto LOC_805A46CC
+    /* li r3, 0x360 */
+    sub_80555bf8()
+    cmp(r3, 0)
+    r31 = r3
+    if (==) goto LOC_805A4760
+    cmp(r29, 0)
+    if (==) goto LOC_805A4648
+    r24 = *(u32*)(0x34(r25))
+    goto LOC_805A464C
+    /* li r24, 0 */
+LOC_805A4648:
+    cmp(r28, 0)
+LOC_805A464C:
+    /* li r4, 0 */
+    if (<) goto LOC_805A4670
+    /* lis r3, 0 */
+    r3 = r3 + 0
+    r0 = *(u32*)(4(r3))
+    cmp(r28, r0)
+    if (>=) goto LOC_805A4670
+    /* li r4, 1 */
+    cmp(r4, 0)
+LOC_805A4670:
+    if (!=) goto LOC_805A468C
+    /* lis r3, 0 */
+    r12 = *(u32*)(0(r3))
+    r12 = *(u32*)(0x18(r12))
+    ctr = r12
+    call_indirect(ctr)
+    /* lis r4, 0 */
+LOC_805A468C:
+    r0 = rlwinm(r28, 2)
+    r4 = r4 + 0
+    r3 = r31
+    r5 = *(u32*)(8(r4))
+    r6 = r24
+    r7 = r30
+    r4 = (s8)r27
+    r5 = *(u32*)(r5)
+    sub_8059d540()
+    /* lis r3, 0 */
+    r3 = r3 + 0
+    *(u32*)(0(r31)) = r3
+    r0 = r3 + 48
+    *(u32*)(0x88(r31)) = r0
+    goto LOC_805A4760
+    /* li r3, 0x348 */
+LOC_805A46CC:
+    sub_80555bf8()
+    cmp(r3, 0)
+    r31 = r3
+    if (==) goto LOC_805A4760
+    cmp(r29, 0)
+    if (==) goto LOC_805A46F0
+    r24 = *(u32*)(0x34(r25))
+    goto LOC_805A46F4
+    /* li r24, 0 */
+LOC_805A46F0:
+    cmp(r28, 0)
+LOC_805A46F4:
+    /* li r4, 0 */
+    if (<) goto LOC_805A4718
+    /* lis r3, 0 */
+    r3 = r3 + 0
+    r0 = *(u32*)(4(r3))
+    cmp(r28, r0)
+    if (>=) goto LOC_805A4718
+    /* li r4, 1 */
+    cmp(r4, 0)
+LOC_805A4718:
+    if (!=) goto LOC_805A4734
+    /* lis r3, 0 */
+    r12 = *(u32*)(0(r3))
+    r12 = *(u32*)(0x18(r12))
+    ctr = r12
+    call_indirect(ctr)
+    /* lis r4, 0 */
+LOC_805A4734:
+    r0 = rlwinm(r28, 2)
+    r4 = r4 + 0
+    r3 = r31
+    r5 = *(u32*)(8(r4))
+    r6 = r24
+    r7 = r30
+    r4 = (s8)r27
+    r5 = *(u32*)(r5)
+    sub_8059d540()
+    r31 = r3
+    cmp(r29, 0)
+LOC_805A4760:
+    if (==) goto LOC_805A4774
+    r3 = *(u32*)(0x8c(r31))
+    r0 = *(u32*)(0x90(r31))
+    *(u32*)(0x6c(r3)) = r0
+    cmp(r29, 0)
+LOC_805A4774:
+    if (!=) goto LOC_805A4784
+    /* li r0, 0 */
+    *(u8*)(0x33e(r31)) = (u8)r0
+    r3 = *(u32*)(0x14(r25))
+LOC_805A4784:
+    r0 = rlwinm(r26, 2)
+    /* stwx r31, r3, r0 */
+    r3 = *(u32*)(0x18(r25))
+    /* stwx r31, r3, r0 */
+    // restore saved regs
+    r0 = *(u32*)(0x34(r1))
+    lr = r0
+    // epilogue: restore sp
+    return
+}
+
+// === Raw Disassembly ===
     /* 0x805a45c0 */ stwu r1, -0x30(r1)
     /* 0x805a45c4 */ mflr r0
     /* 0x805a45c8 */ lis r9, 0

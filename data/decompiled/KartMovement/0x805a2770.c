@@ -1,12 +1,110 @@
 // sub_805a2770
 // Address: 0x805a2770
-// Size: 348 bytes (87 instructions)
+// Total size: 348 bytes (code: 348, data: 0)
+// Instructions: 87
 // Stack frame: 0x20
-// Symbol: N/A
 
 #include "types.h"
 
-// Disassembly:
+// Pseudocode:
+void func_805a2770(void) {
+    // stack: 0x20
+    // 6 calls, 28 FP ops, 4 branches
+
+    // prologue: sp -= 0x20
+    // save lr
+    cmp(r4, 0)
+    *(u32*)(0x24(r1)) = r0
+    *(u32*)(0x1c(r1)) = r31
+    /* lis r31, 0 */
+    r31 = r31 + 0
+    *(u32*)(0x18(r1)) = r30
+    r30 = r3
+    if (==) goto LOC_805A27A8
+    r3 = r3 + 124
+    sub_805a2670()
+    goto LOC_805A2890
+    /* li r0, 0x10 */
+LOC_805A27A8:
+    f0 = *(f32*)(0x128(r31))
+    r4 = r0 * 0xc
+    *(u16*)(0x80(r3)) = (u16)r0
+    *(f32*)(0x84(r3)) = f0
+    r3 = r4 + 16
+    sub_80555bf8()
+    /* lis r4, 0 */
+    /* lis r5, 0 */
+    r4 = r4 + 0
+    /* li r6, 0xc */
+    r5 = r5 + 0
+    /* li r7, 0x10 */
+    sub_80555bf8()
+    r0 = *(u16*)(0x80(r30))
+    *(u32*)(0xac(r30)) = r3
+    r3 = slwi(r0, 2)
+    sub_80555bf8()
+    f2 = *(f32*)(0(r31))
+    /* li r6, 0 */
+    f4 = *(f32*)(0xf8(r31))
+    /* li r4, 0 */
+    f3 = *(f32*)(0x178(r31))
+    /* li r5, 0 */
+    f1 = *(f32*)(0x1f8(r31))
+    *(u32*)(0xb0(r30)) = r3
+    f0 = *(f32*)(0x1a0(r31))
+    *(f32*)(0x90(r30)) = f4
+    *(f32*)(0x8c(r30)) = f4
+    *(f32*)(0x88(r30)) = f4
+    *(f32*)(0x9c(r30)) = f2
+    *(f32*)(0x98(r30)) = f2
+    *(f32*)(0x94(r30)) = f2
+    *(f32*)(0xa8(r30)) = f2
+    *(f32*)(0xa4(r30)) = f2
+    *(f32*)(0xa0(r30)) = f2
+    *(f32*)(8(r1)) = f2
+    *(f32*)(0xc(r1)) = f3
+    *(f32*)(0x10(r1)) = f1
+    goto LOC_805A2884
+    r0 = *(u32*)(0xac(r30))
+LOC_805A2848:
+    r6 = r6 + 1
+    f2 = *(f32*)(0x10(r1))
+    f1 = *(f32*)(8(r1))
+    r3 = r0 + r4
+    /* stfsx f1, r4, r0 */
+    f2 = f2 - f3
+    f1 = *(f32*)(0xc(r1))
+    r4 = r4 + 12
+    *(f32*)(4(r3)) = f1
+    *(f32*)(8(r3)) = f2
+    r3 = *(u32*)(0xb0(r30))
+    *(f32*)(0x10(r1)) = f2
+    /* stfsx f0, r3, r5 */
+    r5 = r5 + 4
+    r0 = *(u16*)(0x80(r30))
+LOC_805A2884:
+    cmp(r6, r0)
+    if (<) goto LOC_805A2848
+    /* li r3, 0xd0 */
+LOC_805A2890:
+    sub_80555bf8()
+    /* lis r4, 0 */
+    /* lis r5, 0 */
+    r4 = r4 + 0
+    /* li r6, 0xc */
+    r5 = r5 + 0
+    /* li r7, 0x10 */
+    sub_80555bf8()
+    *(u32*)(8(r30)) = r3
+    r31 = saved_r31
+    r30 = *(u32*)(0x18(r1))
+    r0 = *(u32*)(0x24(r1))
+    lr = r0
+    // epilogue: restore sp
+    return
+}
+
+// === Raw Disassembly ===
     /* 0x805a2770 */ stwu r1, -0x20(r1)
     /* 0x805a2774 */ mflr r0
     /* 0x805a2778 */ cmpwi r4, 0

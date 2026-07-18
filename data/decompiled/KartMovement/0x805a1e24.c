@@ -7,15 +7,16 @@
 
 // Pseudocode:
 void func_805a1e24(void) {
+    // 2 FP ops
 
-    r4 = 0 << 16
-    r4 = *(int*)( 0(r4))
-    r0 = *(int*)( 0xb68(r4))
+    /* lis r4, 0 */
+    r4 = *(u32*)(0(r4))
+    r0 = *(u32*)(0xb68(r4))
     cmp(r0, 0x1f)
-    // bnelr 
-    r4 = 0 << 16
-    f1 = *(float*)(0x68(r3))
-    f0 = *(float*)(0(r4))
+    if (cond) goto 
+    /* lis r4, 0 */
+    f1 = *(f32*)(0x68(r3))
+    f0 = *(f32*)(0(r4))
 }
 
 // === Raw Disassembly ===

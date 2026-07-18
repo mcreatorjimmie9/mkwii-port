@@ -1,12 +1,133 @@
 // sub_805a5788
 // Address: 0x805a5788
-// Size: 492 bytes (112 instructions)
+// Total size: 492 bytes (code: 448, data: 44)
+// Instructions: 112
 // Stack frame: 0x60
-// Symbol: N/A
 
 #include "types.h"
 
-// Disassembly:
+// Pseudocode:
+void func_805a5788(void) {
+    // stack: 0x60
+    // 3 calls, 49 FP ops, 8 branches
+
+    // prologue: sp -= 0x60
+    // save lr
+    *(u32*)(0x64(r1)) = r0
+    // SIMD: xscmpgtdp vs31, f1, f0
+    *(u32*)(0x4c(r1)) = r31
+    /* lis r31, 0 */
+    r31 = r31 + 0
+    *(u32*)(0x48(r1)) = r30
+    r30 = r4
+    *(u32*)(0x44(r1)) = r29
+    r29 = r3
+    r0 = *(u32*)(0x2c(r3))
+    cmp(r0, 0)
+    if (==) goto LOC_805A594C
+    cmp(r4, 0)
+    if (!=) goto LOC_805A5848
+    r12 = *(u32*)(0(r3))
+    r12 = *(u32*)(0x14(r12))
+    ctr = r12
+    call_indirect(ctr)
+    cmp(r3, 0)
+    if (==) goto LOC_805A5848
+    r12 = *(u32*)(0(r29))
+    r3 = r29
+    r12 = *(u32*)(0x18(r12))
+    ctr = r12
+    call_indirect(ctr)
+    cmp(r3, 0)
+    if (!=) goto LOC_805A5848
+    r12 = *(u32*)(0(r29))
+    r3 = r29
+    r12 = *(u32*)(0x14(r12))
+    ctr = r12
+    call_indirect(ctr)
+    cmp(r3, 0)
+    if (==) goto LOC_805A594C
+    r12 = *(u32*)(0(r29))
+    r3 = r29
+    r12 = *(u32*)(0x14(r12))
+    ctr = r12
+    call_indirect(ctr)
+    r3 = *(u32*)(0(r3))
+    r0 = *(u32*)(0x24(r29))
+    r3 = *(u8*)(0(r3))
+    cmp(r0, r3)
+    if (==) goto LOC_805A594C
+    r3 = *(u32*)(0x2c(r29))
+LOC_805A5848:
+    sub_805907c0()
+    f0 = *(f32*)(0x80(r3))
+    cmp(r30, 0)
+    *(f32*)(0x54(r29)) = f0
+    f0 = *(f32*)(0x84(r3))
+    *(f32*)(0x58(r29)) = f0
+    f0 = *(f32*)(0x88(r3))
+    *(f32*)(0x5c(r29)) = f0
+    if (==) goto LOC_805A5924
+    /* lis r3, 0 */
+    f31 = *(f32*)(0x20(r31))
+    r3 = *(u32*)(0(r3))
+    r0 = *(u32*)(0xb68(r3))
+    cmp(r0, 0x22)
+    if (!=) goto LOC_805A588C
+    f31 = *(f32*)(0x24(r31))
+    r3 = *(u32*)(0x2c(r29))
+LOC_805A588C:
+    sub_805907c0()
+    f0 = *(f32*)(0x28(r31))
+    r4 = r3
+    r3 = r1 + 8
+    f1 = f0 * f31
+    r4 = r4 + 56
+    sub_80555bf8()
+    f3 = *(f32*)(0x28(r1))
+    f2 = *(f32*)(0x54(r29))
+    f1 = *(f32*)(0x18(r1))
+    f7 = f3 * f2
+    f0 = *(f32*)(8(r1))
+    f4 = f1 * f2
+    f3 = *(f32*)(0x2c(r1))
+    f1 = f0 * f2
+    f5 = *(f32*)(0x58(r29))
+    f0 = *(f32*)(0xc(r1))
+    f6 = f3 * f5
+    f2 = *(f32*)(0x1c(r1))
+    f0 = f0 * f5
+    f8 = *(f32*)(0x30(r1))
+    f3 = f2 * f5
+    f9 = *(f32*)(0x5c(r29))
+    f5 = *(f32*)(0x20(r1))
+    f6 = f7 + f6
+    f2 = *(f32*)(0x10(r1))
+    f8 = f8 * f9
+    f3 = f4 + f3
+    f5 = f5 * f9
+    f0 = f1 + f0
+    f2 = f2 * f9
+    f4 = f8 + f6
+    f1 = f5 + f3
+    f0 = f2 + f0
+    *(f32*)(0x5c(r29)) = f4
+    *(f32*)(0x58(r29)) = f1
+    *(f32*)(0x54(r29)) = f0
+    r3 = *(u32*)(4(r29))
+LOC_805A5924:
+    f0 = *(f32*)(0(r31))
+    r3 = *(u32*)(0x90(r3))
+    f1 = *(f32*)(0x64(r3))
+    *(f32*)(0x60(r29)) = f1
+    f1 = *(f32*)(0x68(r3))
+    *(f32*)(0x64(r29)) = f1
+    f1 = *(f32*)(0x6c(r3))
+    *(f32*)(0x68(r29)) = f1
+    *(f32*)(0x6c(r29)) = f0
+}
+
+// === Raw Disassembly ===
     /* 0x805a5788 */ stwu r1, -0x60(r1)
     /* 0x805a578c */ mflr r0
     /* 0x805a5790 */ stw r0, 0x64(r1)
@@ -119,3 +240,16 @@
     /* 0x805a593c */ lfs f1, 0x6c(r3)
     /* 0x805a5940 */ stfs f1, 0x68(r29)
     /* 0x805a5944 */ stfs f0, 0x6c(r29)
+
+// === Embedded Data (44 bytes at 0x805a5948) ===
+    /* 0x805a5948 */ 0xe3e10058  // -8.30108e+21f
+    /* 0x805a594c */ 0x80010064  // -9.19756e-41f
+    /* 0x805a5950 */ 0xcbe10050  // -2.94914e+07f
+    /* 0x805a5954 */ 0x83e1004c  // -1.32244e-36f
+    /* 0x805a5958 */ 0x83c10048  // -1.13436e-36f
+    /* 0x805a595c */ 0x83a10044  // -9.46279e-37f
+    /* 0x805a5960 */ 0x7c0803a6  // 2.82491e+36f
+    /* 0x805a5964 */ 0x38210060  // 3.83857e-05f
+    /* 0x805a5968 */ 0x4e800020  // 1.07375e+09f
+    /* 0x805a596c */ 0x38600000  // 5.34058e-05f
+    /* 0x805a5970 */ 0x4e800020  // 1.07375e+09f

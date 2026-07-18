@@ -1,12 +1,42 @@
 // sub_805a6118
 // Address: 0x805a6118
-// Size: 92 bytes (23 instructions)
+// Total size: 92 bytes (code: 92, data: 0)
+// Instructions: 23
 // Stack frame: 0x10
-// Symbol: N/A
 
 #include "types.h"
 
-// Disassembly:
+// Pseudocode:
+void func_805a6118(void) {
+    // stack: 0x10
+    // 6 FP ops
+
+    // prologue: sp -= 0x10
+    // save lr
+    *(u32*)(0x14(r1)) = r0
+    *(u32*)(0xc(r1)) = r31
+    r31 = r3
+    r12 = *(u32*)(0(r3))
+    r12 = *(u32*)(0x14(r12))
+    ctr = r12
+    call_indirect(ctr)
+    r4 = *(u32*)(0(r3))
+    r3 = *(u32*)(4(r31))
+    f0 = *(f32*)(0x14(r4))
+    r3 = *(u32*)(0x90(r3))
+    f1 = *(f32*)(0x10(r4))
+    f2 = *(f32*)(0xc(r4))
+    *(f32*)(0x64(r3)) = f2
+    *(f32*)(0x68(r3)) = f1
+    *(f32*)(0x6c(r3)) = f0
+    r31 = saved_r31
+    r0 = *(u32*)(0x14(r1))
+    lr = r0
+    // epilogue: restore sp
+    return
+}
+
+// === Raw Disassembly ===
     /* 0x805a6118 */ stwu r1, -0x10(r1)
     /* 0x805a611c */ mflr r0
     /* 0x805a6120 */ stw r0, 0x14(r1)

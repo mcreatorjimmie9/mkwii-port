@@ -1,12 +1,66 @@
 // sub_805a6174
 // Address: 0x805a6174
-// Size: 188 bytes (47 instructions)
+// Total size: 188 bytes (code: 188, data: 0)
+// Instructions: 47
 // Stack frame: 0x40
-// Symbol: N/A
 
 #include "types.h"
 
-// Disassembly:
+// Pseudocode:
+void func_805a6174(void) {
+    // stack: 0x40
+    // 2 calls, 25 FP ops
+
+    // prologue: sp -= 0x40
+    // save lr
+    *(u32*)(0x44(r1)) = r0
+    *(u32*)(0x3c(r1)) = r31
+    r31 = r3
+    r12 = *(u32*)(0(r3))
+    r12 = *(u32*)(0x14(r12))
+    ctr = r12
+    call_indirect(ctr)
+    r6 = *(u32*)(0(r3))
+    r4 = r1 + 20
+    r5 = r1 + 32
+    f0 = *(f32*)(0x34(r6))
+    f1 = *(f32*)(0x30(r6))
+    f2 = *(f32*)(0x2c(r6))
+    *(f32*)(0x20(r1)) = f2
+    *(f32*)(0x24(r1)) = f1
+    *(f32*)(0x28(r1)) = f0
+    r6 = *(u32*)(0(r3))
+    r3 = r1 + 8
+    f0 = *(f32*)(0x40(r6))
+    f1 = *(f32*)(0x3c(r6))
+    f2 = *(f32*)(0x38(r6))
+    *(f32*)(0x14(r1)) = f2
+    *(f32*)(0x18(r1)) = f1
+    *(f32*)(0x1c(r1)) = f0
+    sub_80516c60()
+    f1 = *(f32*)(8(r1))
+    f0 = *(f32*)(0xc(r1))
+    f1 = f1 * f1
+    f2 = *(f32*)(0x10(r1))
+    f0 = f0 * f0
+    f2 = f2 * f2
+    f0 = f1 + f0
+    f1 = f2 + f0
+    sub_80555bf8()
+    /* lis r3, 0 */
+    *(f32*)(0x44(r31)) = f1
+    f0 = *(f32*)(0(r3))
+    *(f32*)(0x40(r31)) = f0
+    *(f32*)(0x3c(r31)) = f0
+    *(f32*)(0x38(r31)) = f0
+    r31 = saved_r31
+    r0 = *(u32*)(0x44(r1))
+    lr = r0
+    // epilogue: restore sp
+    return
+}
+
+// === Raw Disassembly ===
     /* 0x805a6174 */ stwu r1, -0x40(r1)
     /* 0x805a6178 */ mflr r0
     /* 0x805a617c */ stw r0, 0x44(r1)
