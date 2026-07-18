@@ -1,0 +1,37 @@
+// Decompiled from StaticR.rel
+// Address: 0x80581034
+// Size: 116 bytes (29 instructions)
+// Stack frame: 0x10
+// Calls: 0x805907d4, 0x805b4e74
+
+void sub_80581034(r3 /* param */, r4 /* param */, r5 /* param */) {
+
+    // mflr r0
+    // stw r0, 0x14(r1)
+    // stw r31, 0xc(r1)
+    // mr r31, r3
+    // lwz r5, 0(r3)
+    // lwz r4, 4(r5)
+    // lwz r0, 0xc(r4)
+    r0 = r0 & 0x00010000; /* rlwinm */
+    if (cr0 == 0)
+        goto L_80581094;
+    // lwz r4, 4(r5)
+    // lwz r0, 0xc(r4)
+    r0 = r0 & 0x00000000; /* rlwinm */
+    // stw r0, 0xc(r4)
+    sub_0x805907d4();
+    // lwz r12, 0(r3)
+    // lis r4, 0
+    // lfs f1, 0(r4)
+    // li r4, 0x1a5
+    // lwz r12, 0xe0(r12)
+    // mtctr r12
+    // bctrl 
+    // lwz r3, 0x260(r31)
+    sub_0x805b4e74();
+L_80581094:
+    // lwz r0, 0x14(r1)
+    // lwz r31, 0xc(r1)
+    // mtlr r0
+}

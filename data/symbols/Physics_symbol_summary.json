@@ -1,0 +1,91 @@
+{
+  "batch": "Physics_batch_1",
+  "generated": "2025-06-18",
+  "total_functions": 50,
+  "named_functions": 50,
+  "unnamed_functions": 4,
+  "confidence_breakdown": {
+    "certain": 23,
+    "likely": 0,
+    "uncertain": 4,
+    "guess": 23
+  },
+  "sources_used": {
+    "mkw_structures_player_h": {
+      "count": 23,
+      "description": "Exact PAL address matches from SeekyCt/mkw-structures player.h comment annotations"
+    },
+    "dolphin_symbols": {
+      "count": 0,
+      "description": "File not present (data/symbols/dolphin_symbols.json does not exist)"
+    },
+    "gecko_codes": {
+      "count": 0,
+      "description": "No matching addresses found in gecko_codes.json for the 0x8056xxxx-0x8057xxxx range"
+    },
+    "global_map": {
+      "count": 0,
+      "description": "File not present (data/symbols/global_map.json does not exist)"
+    },
+    "code_analysis": {
+      "count": 27,
+      "description": "Pseudocode pattern analysis: linked list operations, vtable calls, virtual destructor patterns, effect spawning with type IDs"
+    }
+  },
+  "classes_identified": {
+    "PlayerTrick": {
+      "methods_found": 8,
+      "addresses": [
+        "0x80575a44", "0x80575aa8", "0x80575b38", "0x80575d7c",
+        "0x80575ee8", "0x8057616c", "0x805763e4", "0x805764fc", "0x805766b8"
+      ],
+      "source": "mkw-structures player.h (certain)"
+    },
+    "PlayerTrickBike": {
+      "methods_found": 4,
+      "addresses": ["0x80576758", "0x8057689c", "0x80576994", "0x80576afc"],
+      "source": "mkw-structures player.h (certain)"
+    },
+    "PlayerSub10": {
+      "methods_found": 8,
+      "addresses": [
+        "0x80577fc4", "0x8057829c", "0x805784d4", "0x805788dc",
+        "0x8057a140", "0x8057a8b4", "0x8057ab68", "0x8057b9bc", "0x8057c3d4"
+      ],
+      "source": "mkw-structures player.h (certain)"
+    },
+    "PlayerBoost": {
+      "methods_found": 1,
+      "addresses": ["0x8057811c"],
+      "source": "mkw-structures player.h (certain)"
+    },
+    "EffectGroup (unknown class)": {
+      "methods_found": 23,
+      "confidence": "guess",
+      "description": "27 functions in 0x8056731c-0x805685b4 range operate on a global linked-list collection. Pattern: template-based effect spawning with type IDs 0-6, list CRUD operations, and 4 identical virtual destructors. Likely a physics particle/effect manager but class name unconfirmed.",
+      "addresses": [
+        "0x8056731c", "0x80567514", "0x80567594", "0x805675f8",
+        "0x80567648", "0x8056774c", "0x805677cc", "0x805678b4",
+        "0x80567920", "0x80567978", "0x805679d0", "0x80567b58",
+        "0x80567bac", "0x80567c10", "0x80567c88", "0x80567d00",
+        "0x80567fac", "0x80567fec", "0x8056802c", "0x8056806c",
+        "0x805680ac", "0x8056819c", "0x80568284", "0x8056836c",
+        "0x80568454", "0x80568504", "0x805685b4"
+      ]
+    }
+  },
+  "key_discoveries": [
+    "23 of 50 functions (46%) have exact PAL address matches in mkw-structures player.h, providing certain names",
+    "The 27 functions at 0x8056731c-0x805685b4 form a cohesive group managing a global linked-list collection, likely a physics particle/effect system",
+    "7 effect spawner variants (0x805680ac-0x805685b4) call a shared template creator (0x805679d0) with different type IDs (0, 1, 3, 4, 5, 6, or param)",
+    "4 identical virtual destructors (0x80567fac, 0x80567fec, 0x8056802c, 0x8056806c) belong to unknown small classes within the effect system",
+    "The effect spawners save/restore position data at object offsets 0x18/0x1c and load target position from 0x100/0x104",
+    "PlayerSub10::update (0x805788dc) is the largest function at 4304 bytes with 1076 instructions, serving as the main physics update loop"
+  ],
+  "address_range_coverage": {
+    "0x8056731c-0x805685b4": "EffectGroup system (27 functions, guess confidence)",
+    "0x80575a44-0x80576afc": "PlayerTrick + PlayerTrickBike (13 functions, certain)",
+    "0x80577fc4-0x805784d4": "PlayerSub10 ctor + PlayerBoost dtor + setTurnParams + init (4 functions, certain)",
+    "0x805788dc-0x8057c3d4": "PlayerSub10 update + core physics (6 functions, certain)"
+  }
+}

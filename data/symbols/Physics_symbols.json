@@ -1,0 +1,302 @@
+[
+  {
+    "address": "0x8056731c",
+    "name": "EffectGroup_cleanup",
+    "confidence": "guess",
+    "source": "Code analysis: linked list traversal with vtable 0x14/0x0c/0x10 calls on nodes, flag checks at offset 0x44, node removal pattern"
+  },
+  {
+    "address": "0x80567514",
+    "name": "EffectGroup_reset",
+    "confidence": "guess",
+    "source": "Code analysis: clears 2 list entries (loop cmplwi 2), zeroes slots at 0x18/0x20, sets flag bit 3 at 0x44"
+  },
+  {
+    "address": "0x80567594",
+    "name": "EffectGroup_update",
+    "confidence": "guess",
+    "source": "Code analysis: checks global ptr != null, calls two sub-functions then vtable 0x18 method on result, sets global flag to 1"
+  },
+  {
+    "address": "0x805675f8",
+    "name": "EffectGroup_setEntryByIndex",
+    "confidence": "guess",
+    "source": "Code analysis: takes index in r4, computes r4*0xc offset, looks up entry via list function, stores r4 at offset 0x14"
+  },
+  {
+    "address": "0x80567648",
+    "name": "EffectGroup_tryInsert",
+    "confidence": "guess",
+    "source": "Code analysis: bounds-checks value from offset 0x68, validates against array count, calls vtable 0x18 on both sides, stores to array via indexed write"
+  },
+  {
+    "address": "0x8056774c",
+    "name": "EffectGroup_setActive",
+    "confidence": "guess",
+    "source": "Code analysis: looks up entry from global list, sets field at offset 0x14 to 1 (active flag)"
+  },
+  {
+    "address": "0x805677cc",
+    "name": "EffectGroup_addToList",
+    "confidence": "guess",
+    "source": "Code analysis: stores r3 into global at 0x28, bounds-checks offset 0x68, inserts into array via vtable 0x18, sets bit 1 at offset 0x40 on success"
+  },
+  {
+    "address": "0x805678b4",
+    "name": "EffectGroup_findFreeSlot",
+    "confidence": "guess",
+    "source": "Code analysis: loops up to 3 times (li r29, 3), calls sub_0x000565a0 on each iteration, searches global list via allocator"
+  },
+  {
+    "address": "0x80567920",
+    "name": "EffectGroup_findByType",
+    "confidence": "guess",
+    "source": "Code analysis: iterates calling sub_0x00056338 (different from findFreeSlot's sub_0x000565a0), searches global list"
+  },
+  {
+    "address": "0x80567978",
+    "name": "EffectGroup_findByIndex",
+    "confidence": "guess",
+    "source": "Code analysis: iterates calling sub_0x0005646c (third variant of search function), searches global list"
+  },
+  {
+    "address": "0x805679d0",
+    "name": "EffectEntry_createFromTemplate",
+    "confidence": "guess",
+    "source": "Code analysis: reads 0x50-byte template from global (offsets 0x48-0x58), adjusts 12 floats by +/- offset, creates structured data entry"
+  },
+  {
+    "address": "0x80567b58",
+    "name": "EffectEntry_init",
+    "confidence": "guess",
+    "source": "Code analysis: stores r4 at offset 4, allocates via r4*4 index, stores result at offset 8, calls vtable 0x14 destructor-like init"
+  },
+  {
+    "address": "0x80567bac",
+    "name": "EffectGroup_globalInit",
+    "confidence": "guess",
+    "source": "Code analysis: initializes global struct at offset 0x0, clears fields at 0x38/0x2c/0x44, calls external sub_0x0004eecc"
+  },
+  {
+    "address": "0x80567c10",
+    "name": "EffectGroup_tryAddEntry",
+    "confidence": "guess",
+    "source": "Code analysis: conditional list insertion — checks r3 != 0, r31 > 0, clears entry and calls allocator"
+  },
+  {
+    "address": "0x80567c88",
+    "name": "EffectGroup_addEntryWithCallback",
+    "confidence": "guess",
+    "source": "Code analysis: stores r4 at offset 4, checks r5 != 0, allocates via r4*4, calls vtable 0x14 with 5 args"
+  },
+  {
+    "address": "0x80567d00",
+    "name": "EffectGroup_spawnEffect",
+    "confidence": "guess",
+    "source": "Code analysis: large function (684 bytes) creating physics effect objects with position data at offsets 0x100/0x104, manages two sub-allocations, reads KCL-style data with 0xc stride, handles position offsets via paired doubles"
+  },
+  {
+    "address": "0x80567fac",
+    "name": "unknown_0x80567fac",
+    "confidence": "uncertain",
+    "source": "Code analysis: virtual destructor pattern (check r3!=null, r4>0, call allocator) — identical structure to PlayerBoost_dtor at 0x8057811c"
+  },
+  {
+    "address": "0x80567fec",
+    "name": "unknown_0x80567fec",
+    "confidence": "uncertain",
+    "source": "Code analysis: virtual destructor pattern — identical to 0x80567fac"
+  },
+  {
+    "address": "0x8056802c",
+    "name": "unknown_0x8056802c",
+    "confidence": "uncertain",
+    "source": "Code analysis: virtual destructor pattern — identical to 0x80567fac"
+  },
+  {
+    "address": "0x8056806c",
+    "name": "unknown_0x8056806c",
+    "confidence": "uncertain",
+    "source": "Code analysis: virtual destructor pattern — identical to 0x80567fac"
+  },
+  {
+    "address": "0x805680ac",
+    "name": "EffectGroup_spawnType_param",
+    "confidence": "guess",
+    "source": "Code analysis: calls EffectEntry_createFromTemplate with r5 param, saves/restores position at 0x18/0x1c, loads target from 0x100/0x104, calls vtable 0xc and 0x18"
+  },
+  {
+    "address": "0x8056819c",
+    "name": "EffectGroup_spawnType1",
+    "confidence": "guess",
+    "source": "Code analysis: calls EffectEntry_createFromTemplate with type=1, otherwise identical pattern to 0x805680ac"
+  },
+  {
+    "address": "0x80568284",
+    "name": "EffectGroup_spawnType4",
+    "confidence": "guess",
+    "source": "Code analysis: calls EffectEntry_createFromTemplate with type=4, otherwise identical pattern to 0x805680ac"
+  },
+  {
+    "address": "0x8056836c",
+    "name": "EffectGroup_spawnType6",
+    "confidence": "guess",
+    "source": "Code analysis: calls EffectEntry_createFromTemplate with type=6, otherwise identical pattern to 0x805680ac"
+  },
+  {
+    "address": "0x80568454",
+    "name": "EffectGroup_spawnType_withObj",
+    "confidence": "guess",
+    "source": "Code analysis: calls EffectEntry_createFromTemplate with r6 param, sets r30 at offset 0 (object ptr), calls vtable 0xc then separate object at 0x6c vtable 0x18"
+  },
+  {
+    "address": "0x80568504",
+    "name": "EffectGroup_spawnType3",
+    "confidence": "guess",
+    "source": "Code analysis: calls EffectEntry_createFromTemplate with type=3, sets r30 at offset 0, same dual-vtable pattern as 0x80568454"
+  },
+  {
+    "address": "0x805685b4",
+    "name": "EffectGroup_spawnType5",
+    "confidence": "guess",
+    "source": "Code analysis: calls EffectEntry_createFromTemplate with type=5, sets r30 at offset 0, same dual-vtable pattern as 0x80568454"
+  },
+  {
+    "address": "0x80575a44",
+    "name": "PlayerTrick::PlayerTrick",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 90"
+  },
+  {
+    "address": "0x80575aa8",
+    "name": "PlayerTrick::~PlayerTrick",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 84"
+  },
+  {
+    "address": "0x80575b38",
+    "name": "PlayerTrick::updateNext",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 91"
+  },
+  {
+    "address": "0x80575d7c",
+    "name": "PlayerTrick::tryStart",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 92"
+  },
+  {
+    "address": "0x80575ee8",
+    "name": "PlayerTrick::start",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 85"
+  },
+  {
+    "address": "0x8057616c",
+    "name": "PlayerTrick::startInner",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 86"
+  },
+  {
+    "address": "0x805763e4",
+    "name": "PlayerTrick::update",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 93"
+  },
+  {
+    "address": "0x805764fc",
+    "name": "PlayerTrick::updateRot",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 88"
+  },
+  {
+    "address": "0x805766b8",
+    "name": "PlayerTrick::end",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 94"
+  },
+  {
+    "address": "0x80576758",
+    "name": "PlayerTrickBike::start",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 121"
+  },
+  {
+    "address": "0x8057689c",
+    "name": "PlayerTrickBike::startInner",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 122"
+  },
+  {
+    "address": "0x80576994",
+    "name": "PlayerTrickBike::updateRot",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 123"
+  },
+  {
+    "address": "0x80576afc",
+    "name": "PlayerTrickBike::~PlayerTrickBike",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 120"
+  },
+  {
+    "address": "0x80577fc4",
+    "name": "PlayerSub10::PlayerSub10",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 163"
+  },
+  {
+    "address": "0x8057811c",
+    "name": "PlayerBoost::~PlayerBoost",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 28"
+  },
+  {
+    "address": "0x8057829c",
+    "name": "PlayerSub10::setTurnParams",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 144"
+  },
+  {
+    "address": "0x805784d4",
+    "name": "PlayerSub10::init",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 164"
+  },
+  {
+    "address": "0x805788dc",
+    "name": "PlayerSub10::update",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 165"
+  },
+  {
+    "address": "0x8057a140",
+    "name": "PlayerSub10::updateDir",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 167"
+  },
+  {
+    "address": "0x8057a8b4",
+    "name": "PlayerSub10::updateTurn",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 152"
+  },
+  {
+    "address": "0x8057ab68",
+    "name": "PlayerSub10::updateVehicleSpeed",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 153"
+  },
+  {
+    "address": "0x8057b9bc",
+    "name": "PlayerSub10::updateAcceleration",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 168"
+  },
+  {
+    "address": "0x8057c3d4",
+    "name": "PlayerSub10::updateOffroad",
+    "confidence": "certain",
+    "source": "mkw-structures player.h line 169"
+  }
+]
