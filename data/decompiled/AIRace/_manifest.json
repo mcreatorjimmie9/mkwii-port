@@ -1,0 +1,540 @@
+{
+  "module": "AIRace",
+  "source": "StaticR.rel",
+  "text_offset": 216,
+  "base_address": "0x8051289C",
+  "function_count": 59,
+  "functions": [
+    {
+      "name": "__ct__Q25Enemy2AIFb",
+      "clean_name": "AI::<ctor>",
+      "address": "0x00215C28",
+      "absolute_address": "0x807284C4",
+      "size_bytes": 128,
+      "instruction_count": 32,
+      "output_file": "0x807284C4.c"
+    },
+    {
+      "name": "__dt__Q25Enemy2AIFv",
+      "clean_name": "AI::<dtor>",
+      "address": "0x00215CD4",
+      "absolute_address": "0x80728570",
+      "size_bytes": 124,
+      "instruction_count": 31,
+      "output_file": "0x80728570.c"
+    },
+    {
+      "name": "init__Q25Enemy2AIFv",
+      "clean_name": "init__Q25Enemy2AIFv",
+      "address": "0x00215D5C",
+      "absolute_address": "0x807285F8",
+      "size_bytes": 136,
+      "instruction_count": 34,
+      "output_file": "0x807285F8.c"
+    },
+    {
+      "name": "update__Q25Enemy2AIFv",
+      "clean_name": "update__Q25Enemy2AIFv",
+      "address": "0x00215E04",
+      "absolute_address": "0x807286A0",
+      "size_bytes": 36,
+      "instruction_count": 9,
+      "output_file": "0x807286A0.c"
+    },
+    {
+      "name": "getStick__Q25Enemy2AIFv",
+      "clean_name": "getStick__Q25Enemy2AIFv",
+      "address": "0x00215E50",
+      "absolute_address": "0x807286EC",
+      "size_bytes": 24,
+      "instruction_count": 6,
+      "output_file": "0x807286EC.c"
+    },
+    {
+      "name": "isCPU__Q25Enemy2AIFv",
+      "clean_name": "isCPU__Q25Enemy2AIFv",
+      "address": "0x00215E98",
+      "absolute_address": "0x80728734",
+      "size_bytes": 56,
+      "instruction_count": 14,
+      "output_file": "0x80728734.c"
+    },
+    {
+      "name": "isRealLocal__Q25Enemy2AIFv",
+      "clean_name": "isRealLocal__Q25Enemy2AIFv",
+      "address": "0x00215EDC",
+      "absolute_address": "0x80728778",
+      "size_bytes": 60,
+      "instruction_count": 15,
+      "output_file": "0x80728778.c"
+    },
+    {
+      "name": "isRealLocalAndCPU__Q25Enemy2AIFv",
+      "clean_name": "isRealLocalAndCPU__Q25Enemy2AIFv",
+      "address": "0x00215F1C",
+      "absolute_address": "0x807287B8",
+      "size_bytes": 36,
+      "instruction_count": 9,
+      "output_file": "0x807287B8.c"
+    },
+    {
+      "name": "isAICPU__Q25Enemy2AIFv",
+      "clean_name": "isAICPU__Q25Enemy2AIFv",
+      "address": "0x00215F84",
+      "absolute_address": "0x80728820",
+      "size_bytes": 4,
+      "instruction_count": 1,
+      "output_file": "0x80728820.c"
+    },
+    {
+      "name": "isGhost__Q25Enemy2AIFv",
+      "clean_name": "isGhost__Q25Enemy2AIFv",
+      "address": "0x00215F88",
+      "absolute_address": "0x80728824",
+      "size_bytes": 68,
+      "instruction_count": 17,
+      "output_file": "0x80728824.c"
+    },
+    {
+      "name": "isSameTeam__Q25Enemy2AIFPQ25Enemy2AI",
+      "clean_name": "isSameTeam__Q25Enemy2AIFPQ25Enemy2AI",
+      "address": "0x00215FCC",
+      "absolute_address": "0x80728868",
+      "size_bytes": 16,
+      "instruction_count": 4,
+      "output_file": "0x80728868.c"
+    },
+    {
+      "name": "endRace__Q25Enemy2AIFv",
+      "clean_name": "endRace__Q25Enemy2AIFv",
+      "address": "0x00215FF4",
+      "absolute_address": "0x80728890",
+      "size_bytes": 8,
+      "instruction_count": 2,
+      "output_file": "0x80728890.c"
+    },
+    {
+      "name": "onOutOfBounds__Q25Enemy2AIFRCQ26System17MapdataJugemPoint",
+      "clean_name": "onOutOfBounds__Q25Enemy2AIFRCQ26System17MapdataJugemPoint",
+      "address": "0x00215FFC",
+      "absolute_address": "0x80728898",
+      "size_bytes": 16,
+      "instruction_count": 4,
+      "output_file": "0x80728898.c"
+    },
+    {
+      "name": "forceRecalculation__Q25Enemy2AIFb",
+      "clean_name": "forceRecalculation__Q25Enemy2AIFb",
+      "address": "0x00216010",
+      "absolute_address": "0x807288AC",
+      "size_bytes": 8,
+      "instruction_count": 2,
+      "output_file": "0x807288AC.c"
+    },
+    {
+      "name": "handleBump__Q25Enemy2AIFRCQ23EGG8Vector3fRCQ25Enemy2AI",
+      "clean_name": "handleBump__Q25Enemy2AIFRCQ23EGG8Vector3fRCQ25Enemy2AI",
+      "address": "0x00216018",
+      "absolute_address": "0x807288B4",
+      "size_bytes": 8,
+      "instruction_count": 2,
+      "output_file": "0x807288B4.c"
+    },
+    {
+      "name": "isOnGround__Q25Enemy2AIFv",
+      "clean_name": "isOnGround__Q25Enemy2AIFv",
+      "address": "0x00216134",
+      "absolute_address": "0x807289D0",
+      "size_bytes": 20,
+      "instruction_count": 5,
+      "output_file": "0x807289D0.c"
+    },
+    {
+      "name": "isAllWheelsCollision__Q25Enemy2AIFv",
+      "clean_name": "isAllWheelsCollision__Q25Enemy2AIFv",
+      "address": "0x00216148",
+      "absolute_address": "0x807289E4",
+      "size_bytes": 20,
+      "instruction_count": 5,
+      "output_file": "0x807289E4.c"
+    },
+    {
+      "name": "isDriftingOnGround__Q25Enemy2AIFv",
+      "clean_name": "isDriftingOnGround__Q25Enemy2AIFv",
+      "address": "0x0021615C",
+      "absolute_address": "0x807289F8",
+      "size_bytes": 20,
+      "instruction_count": 5,
+      "output_file": "0x807289F8.c"
+    },
+    {
+      "name": "isHopping__Q25Enemy2AIFv",
+      "clean_name": "isHopping__Q25Enemy2AIFv",
+      "address": "0x00216170",
+      "absolute_address": "0x80728A0C",
+      "size_bytes": 20,
+      "instruction_count": 5,
+      "output_file": "0x80728A0C.c"
+    },
+    {
+      "name": "isAutoDrift__Q25Enemy2AIFv",
+      "clean_name": "isAutoDrift__Q25Enemy2AIFv",
+      "address": "0x00216184",
+      "absolute_address": "0x80728A20",
+      "size_bytes": 20,
+      "instruction_count": 5,
+      "output_file": "0x80728A20.c"
+    },
+    {
+      "name": "isInBullet__Q25Enemy2AIFv",
+      "clean_name": "isInBullet__Q25Enemy2AIFv",
+      "address": "0x00216198",
+      "absolute_address": "0x80728A34",
+      "size_bytes": 20,
+      "instruction_count": 5,
+      "output_file": "0x80728A34.c"
+    },
+    {
+      "name": "__ct__Q25Enemy13AIControlBaseFRCQ25Enemy6AIInfo",
+      "clean_name": "AIControlBase::Enemy6AIInfo::<ctor>",
+      "address": "0x002199E8",
+      "absolute_address": "0x8072C284",
+      "size_bytes": 184,
+      "instruction_count": 46,
+      "output_file": "0x8072C284.c"
+    },
+    {
+      "name": "__dt__Q25Enemy13AIControlBaseFv",
+      "clean_name": "AIControlBase::<dtor>",
+      "address": "0x00219B64",
+      "absolute_address": "0x8072C400",
+      "size_bytes": 400,
+      "instruction_count": 100,
+      "output_file": "0x8072C400.c"
+    },
+    {
+      "name": "init__Q25Enemy13AIControlBaseFv",
+      "clean_name": "init__Q25Enemy13AIControlBaseFv",
+      "address": "0x00219D34",
+      "absolute_address": "0x8072C5D0",
+      "size_bytes": 308,
+      "instruction_count": 77,
+      "output_file": "0x8072C5D0.c"
+    },
+    {
+      "name": "initAfterManager__Q25Enemy13AIControlBaseFv",
+      "clean_name": "initAfterManager__Q25Enemy13AIControlBaseFv",
+      "address": "0x00219E68",
+      "absolute_address": "0x8072C704",
+      "size_bytes": 140,
+      "instruction_count": 35,
+      "output_file": "0x8072C704.c"
+    },
+    {
+      "name": "onOutOfBoundsInner__Q25Enemy13AIControlBaseFRCQ26System17MapdataJugemPoint",
+      "clean_name": "onOutOfBoundsInner__Q25Enemy13AIControlBaseFRCQ26System17MapdataJugemPoint",
+      "address": "0x00219EF4",
+      "absolute_address": "0x8072C790",
+      "size_bytes": 64,
+      "instruction_count": 16,
+      "output_file": "0x8072C790.c"
+    },
+    {
+      "name": "onForceRecalculation__Q25Enemy13AIControlBaseFRCQ23EGG8Vector3f",
+      "clean_name": "onForceRecalculation__Q25Enemy13AIControlBaseFRCQ23EGG8Vector3f",
+      "address": "0x00219F34",
+      "absolute_address": "0x8072C7D0",
+      "size_bytes": 8,
+      "instruction_count": 2,
+      "output_file": "0x8072C7D0.c"
+    },
+    {
+      "name": "onPlayerGoal__Q25Enemy13AIControlBaseFv",
+      "clean_name": "onPlayerGoal__Q25Enemy13AIControlBaseFv",
+      "address": "0x00219F3C",
+      "absolute_address": "0x8072C7D8",
+      "size_bytes": 8,
+      "instruction_count": 2,
+      "output_file": "0x8072C7D8.c"
+    },
+    {
+      "name": "onCpuGoal__Q25Enemy13AIControlBaseFv",
+      "clean_name": "onCpuGoal__Q25Enemy13AIControlBaseFv",
+      "address": "0x00219F44",
+      "absolute_address": "0x8072C7E0",
+      "size_bytes": 8,
+      "instruction_count": 2,
+      "output_file": "0x8072C7E0.c"
+    },
+    {
+      "name": "setStartDashTypeToKart__Q25Enemy13AIControlBaseFv",
+      "clean_name": "setStartDashTypeToKart__Q25Enemy13AIControlBaseFv",
+      "address": "0x00219F5C",
+      "absolute_address": "0x8072C7F8",
+      "size_bytes": 92,
+      "instruction_count": 23,
+      "output_file": "0x8072C7F8.c"
+    },
+    {
+      "name": "setBasicDriveInfo___Q25Enemy13AIControlBaseFRCQ25Enemy9DriveInfo",
+      "clean_name": "setBasicDriveInfo___Q25Enemy13AIControlBaseFRCQ25Enemy9DriveInfo",
+      "address": "0x00219FC8",
+      "absolute_address": "0x8072C864",
+      "size_bytes": 68,
+      "instruction_count": 17,
+      "output_file": "0x8072C864.c"
+    },
+    {
+      "name": "doUpdate___Q25Enemy13AIControlBaseFRCQ25Enemy9DriveInfo",
+      "clean_name": "doUpdate___Q25Enemy13AIControlBaseFRCQ25Enemy9DriveInfo",
+      "address": "0x0021A1BC",
+      "absolute_address": "0x8072CA58",
+      "size_bytes": 224,
+      "instruction_count": 56,
+      "output_file": "0x8072CA58.c"
+    },
+    {
+      "name": "setDoNotSelectBackward__Q25Enemy13AIControlBaseFv",
+      "clean_name": "setDoNotSelectBackward__Q25Enemy13AIControlBaseFv",
+      "address": "0x00217E58",
+      "absolute_address": "0x8072A6F4",
+      "size_bytes": 4,
+      "instruction_count": 1,
+      "output_file": "0x8072A6F4.c"
+    },
+    {
+      "name": "getAIProbability__Q25Enemy13AIControlBaseFv",
+      "clean_name": "getAIProbability__Q25Enemy13AIControlBaseFv",
+      "address": "0x00217E60",
+      "absolute_address": "0x8072A6FC",
+      "size_bytes": 8,
+      "instruction_count": 2,
+      "output_file": "0x8072A6FC.c"
+    },
+    {
+      "name": "setBattleType__Q25Enemy13AIControlBaseFv",
+      "clean_name": "setBattleType__Q25Enemy13AIControlBaseFv",
+      "address": "0x00218214",
+      "absolute_address": "0x8072AAB0",
+      "size_bytes": 4,
+      "instruction_count": 1,
+      "output_file": "0x8072AAB0.c"
+    },
+    {
+      "name": "isAllStopAfterGoal__Q25Enemy13AIControlBaseFv",
+      "clean_name": "isAllStopAfterGoal__Q25Enemy13AIControlBaseFv",
+      "address": "0x0021A4D8",
+      "absolute_address": "0x8072CD74",
+      "size_bytes": 8,
+      "instruction_count": 2,
+      "output_file": "0x8072CD74.c"
+    },
+    {
+      "name": "setAIRankTopOfPlayer__Q25Enemy13AIControlBaseFv",
+      "clean_name": "setAIRankTopOfPlayer__Q25Enemy13AIControlBaseFv",
+      "address": "0x0021A4E0",
+      "absolute_address": "0x8072CD7C",
+      "size_bytes": 4,
+      "instruction_count": 1,
+      "output_file": "0x8072CD7C.c"
+    },
+    {
+      "name": "getAIRank__Q25Enemy13AIControlBaseFv",
+      "clean_name": "getAIRank__Q25Enemy13AIControlBaseFv",
+      "address": "0x0021A4EC",
+      "absolute_address": "0x8072CD88",
+      "size_bytes": 8,
+      "instruction_count": 2,
+      "output_file": "0x8072CD88.c"
+    },
+    {
+      "name": "onRaceStart__Q25Enemy13AIControlBaseFv",
+      "clean_name": "onRaceStart__Q25Enemy13AIControlBaseFv",
+      "address": "0x0021A4F4",
+      "absolute_address": "0x8072CD90",
+      "size_bytes": 4,
+      "instruction_count": 1,
+      "output_file": "0x8072CD90.c"
+    },
+    {
+      "name": "__ct__Q25Enemy16AIAirtimeTrackerFRCQ25Enemy6AIInfo",
+      "clean_name": "AIAirtimeTracker::Enemy6AIInfo::<ctor>",
+      "address": "0x0021A29C",
+      "absolute_address": "0x8072CB38",
+      "size_bytes": 36,
+      "instruction_count": 9,
+      "output_file": "0x8072CB38.c"
+    },
+    {
+      "name": "init__Q25Enemy16AIAirtimeTrackerFl",
+      "clean_name": "init__Q25Enemy16AIAirtimeTrackerFl",
+      "address": "0x0021A300",
+      "absolute_address": "0x8072CB9C",
+      "size_bytes": 4,
+      "instruction_count": 1,
+      "output_file": "0x8072CB9C.c"
+    },
+    {
+      "name": "update__Q25Enemy16AIAirtimeTrackerFv",
+      "clean_name": "update__Q25Enemy16AIAirtimeTrackerFv",
+      "address": "0x0021A328",
+      "absolute_address": "0x8072CBC4",
+      "size_bytes": 28,
+      "instruction_count": 7,
+      "output_file": "0x8072CBC4.c"
+    },
+    {
+      "name": "__ct__Q25Enemy12AIPowAvoiderFRCQ25Enemy6AIInfo",
+      "clean_name": "AIPowAvoider::Enemy6AIInfo::<ctor>",
+      "address": "0x0021A38C",
+      "absolute_address": "0x8072CC28",
+      "size_bytes": 12,
+      "instruction_count": 3,
+      "output_file": "0x8072CC28.c"
+    },
+    {
+      "name": "init__Q25Enemy12AIPowAvoiderFv",
+      "clean_name": "init__Q25Enemy12AIPowAvoiderFv",
+      "address": "0x0021A3E0",
+      "absolute_address": "0x8072CC7C",
+      "size_bytes": 12,
+      "instruction_count": 3,
+      "output_file": "0x8072CC7C.c"
+    },
+    {
+      "name": "update__Q25Enemy12AIPowAvoiderFv",
+      "clean_name": "update__Q25Enemy12AIPowAvoiderFv",
+      "address": "0x0021A3EC",
+      "absolute_address": "0x8072CC88",
+      "size_bytes": 164,
+      "instruction_count": 41,
+      "output_file": "0x8072CC88.c"
+    },
+    {
+      "name": "isSameTeam__Q25Enemy12AIPowAvoiderFl",
+      "clean_name": "isSameTeam__Q25Enemy12AIPowAvoiderFl",
+      "address": "0x0021A490",
+      "absolute_address": "0x8072CD2C",
+      "size_bytes": 48,
+      "instruction_count": 12,
+      "output_file": "0x8072CD2C.c"
+    },
+    {
+      "name": "update__Q25Enemy8AIEngineFPCQ26System24MapdataEnemyPathAccessor",
+      "clean_name": "update__Q25Enemy8AIEngineFPCQ26System24MapdataEnemyPathAccessor",
+      "address": "0x002222C4",
+      "absolute_address": "0x80734B60",
+      "size_bytes": 16,
+      "instruction_count": 4,
+      "output_file": "0x80734B60.c"
+    },
+    {
+      "name": "forceRecalculation__Q25Enemy8AIEngineFb",
+      "clean_name": "forceRecalculation__Q25Enemy8AIEngineFb",
+      "address": "0x002222D4",
+      "absolute_address": "0x80734B70",
+      "size_bytes": 8,
+      "instruction_count": 2,
+      "output_file": "0x80734B70.c"
+    },
+    {
+      "name": "endRace__Q25Enemy8AIEngineFv",
+      "clean_name": "endRace__Q25Enemy8AIEngineFv",
+      "address": "0x002222DC",
+      "absolute_address": "0x80734B78",
+      "size_bytes": 12,
+      "instruction_count": 3,
+      "output_file": "0x80734B78.c"
+    },
+    {
+      "name": "__ct__Q25Enemy12AIEngineBikeFRCQ25Enemy2AI",
+      "clean_name": "AIEngineBike::Enemy2AI::<ctor>",
+      "address": "0x00222E00",
+      "absolute_address": "0x8073569C",
+      "size_bytes": 132,
+      "instruction_count": 33,
+      "output_file": "0x8073569C.c"
+    },
+    {
+      "name": "__ct__Q25Enemy12AIEngineKartFRCQ25Enemy2AI",
+      "clean_name": "AIEngineKart::Enemy2AI::<ctor>",
+      "address": "0x00222EF0",
+      "absolute_address": "0x8073578C",
+      "size_bytes": 32,
+      "instruction_count": 8,
+      "output_file": "0x8073578C.c"
+    },
+    {
+      "name": "avoidPow__Q25Enemy14AITrickHandlerFv",
+      "clean_name": "avoidPow__Q25Enemy14AITrickHandlerFv",
+      "address": "0x00224F44",
+      "absolute_address": "0x807377E0",
+      "size_bytes": 16,
+      "instruction_count": 4,
+      "output_file": "0x807377E0.c"
+    },
+    {
+      "name": "allowTricking__Q25Enemy14AITrickHandlerFv",
+      "clean_name": "allowTricking__Q25Enemy14AITrickHandlerFv",
+      "address": "0x00224F54",
+      "absolute_address": "0x807377F0",
+      "size_bytes": 64,
+      "instruction_count": 16,
+      "output_file": "0x807377F0.c"
+    },
+    {
+      "name": "shouldTrick__Q25Enemy14AITrickHandlerFv",
+      "clean_name": "shouldTrick__Q25Enemy14AITrickHandlerFv",
+      "address": "0x00224F94",
+      "absolute_address": "0x80737830",
+      "size_bytes": 176,
+      "instruction_count": 44,
+      "output_file": "0x80737830.c"
+    },
+    {
+      "name": "calc__Q25Enemy14AITrickHandlerFv",
+      "clean_name": "calc__Q25Enemy14AITrickHandlerFv",
+      "address": "0x0022509C",
+      "absolute_address": "0x80737938",
+      "size_bytes": 16,
+      "instruction_count": 4,
+      "output_file": "0x80737938.c"
+    },
+    {
+      "name": "update__Q25Enemy14AITrickHandlerFv",
+      "clean_name": "update__Q25Enemy14AITrickHandlerFv",
+      "address": "0x002250B0",
+      "absolute_address": "0x8073794C",
+      "size_bytes": 248,
+      "instruction_count": 62,
+      "output_file": "0x8073794C.c"
+    },
+    {
+      "name": "setInputState__Q26System6KPadAIFPQ26System18KPadRaceInputState",
+      "clean_name": "setInputState__Q26System6KPadAIFPQ26System18KPadRaceInputState",
+      "address": "0x000115F8",
+      "absolute_address": "0x80523E94",
+      "size_bytes": 16,
+      "instruction_count": 4,
+      "output_file": "0x80523E94.c"
+    },
+    {
+      "name": "__ct__Q26System6KPadAIFv",
+      "clean_name": "KPadAI::<ctor>",
+      "address": "0x000130EC",
+      "absolute_address": "0x80525988",
+      "size_bytes": 60,
+      "instruction_count": 15,
+      "output_file": "0x80525988.c"
+    },
+    {
+      "name": "calcInner__Q26System16KPadAIControllerFPQ26System18KPadRaceInputStatePQ26System16KPadUIInputState",
+      "clean_name": "calcInner__Q26System16KPadAIControllerFPQ26System18KPadRaceInputStatePQ26System16KPadUIInputState",
+      "address": "0x000146A4",
+      "absolute_address": "0x80526F40",
+      "size_bytes": 76,
+      "instruction_count": 19,
+      "output_file": "0x80526F40.c"
+    }
+  ]
+}

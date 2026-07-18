@@ -1,0 +1,363 @@
+{
+  "module": "RaceEngine",
+  "description": "Race state machine, race flow, lap counting, countdown, race timer",
+  "rel_base": "0x8051289c",
+  "text_file_offset": "0x00d4",
+  "function_count": 50,
+  "address_range": {
+    "min": "0x80533558",
+    "max": "0x807f1db8"
+  },
+  "functions": [
+    {
+      "name": "Racedata_initCredits",
+      "address": "0x80533558",
+      "text_offset": "0x020cbc",
+      "size": 3188,
+      "file": "0x80533558.c"
+    },
+    {
+      "name": "RacedataFactory_packRacedataRecord",
+      "address": "0x8058f018",
+      "text_offset": "0x07c77c",
+      "size": 2204,
+      "file": "0x8058f018.c"
+    },
+    {
+      "name": "init__Q26System10RaceConfigFv",
+      "address": "0x80530228",
+      "text_offset": "0x01d98c",
+      "size": 1772,
+      "file": "0x80530228.c"
+    },
+    {
+      "name": "Racedata_initAwards",
+      "address": "0x80532d4c",
+      "text_offset": "0x0204b0",
+      "size": 1704,
+      "file": "0x80532d4c.c"
+    },
+    {
+      "name": "Raceinfo_construct",
+      "address": "0x80534c88",
+      "text_offset": "0x0223ec",
+      "size": 1444,
+      "file": "0x80534c88.c"
+    },
+    {
+      "name": "RaceInfo_update",
+      "address": "0x8053569c",
+      "text_offset": "0x022e00",
+      "size": 1260,
+      "file": "0x8053569c.c"
+    },
+    {
+      "name": "RaceinfoPlayer_updateCheckpoint",
+      "address": "0x805372e0",
+      "text_offset": "0x024a44",
+      "size": 1044,
+      "file": "0x805372e0.c"
+    },
+    {
+      "name": "CtrlRaceTime_calcSelf",
+      "address": "0x807fa3a8",
+      "text_offset": "0x2e7b0c",
+      "size": 940,
+      "file": "0x807fa3a8.c"
+    },
+    {
+      "name": "RaceinfoPlayer_update",
+      "address": "0x805377ec",
+      "text_offset": "0x024f50",
+      "size": 916,
+      "file": "0x805377ec.c"
+    },
+    {
+      "name": "updateGpRankScore__Q26System17RaceManagerPlayerFv",
+      "address": "0x80538de0",
+      "text_offset": "0x026544",
+      "size": 908,
+      "file": "0x80538de0.c"
+    },
+    {
+      "name": "copyPrevPositions__Q36System10RaceConfig8ScenarioFv",
+      "address": "0x805316c8",
+      "text_offset": "0x01ee2c",
+      "size": 776,
+      "file": "0x805316c8.c"
+    },
+    {
+      "name": "Raceinfo_initGamemode",
+      "address": "0x80534670",
+      "text_offset": "0x021dd4",
+      "size": 768,
+      "file": "0x80534670.c"
+    },
+    {
+      "name": "RacedataHandler_processInputs",
+      "address": "0x8058d680",
+      "text_offset": "0x07ade4",
+      "size": 764,
+      "file": "0x8058d680.c"
+    },
+    {
+      "name": "Raceinfo_getInitialPosAndRotForPlayer",
+      "address": "0x805387c4",
+      "text_offset": "0x025f28",
+      "size": 748,
+      "file": "0x805387c4.c"
+    },
+    {
+      "name": "initRace__Q26System10RaceConfigFv",
+      "address": "0x805327ac",
+      "text_offset": "0x01ff10",
+      "size": 744,
+      "file": "0x805327ac.c"
+    },
+    {
+      "name": "initRace__Q36System10RaceConfig8ScenarioFPQ36System10RaceConfig8Scenario",
+      "address": "0x80532078",
+      "text_offset": "0x01f7dc",
+      "size": 712,
+      "file": "0x80532078.c"
+    },
+    {
+      "name": "RaceinfoPlayer_endLap",
+      "address": "0x80536ea0",
+      "text_offset": "0x024604",
+      "size": 704,
+      "file": "0x80536ea0.c"
+    },
+    {
+      "name": "RaceinfoPlayer_construct",
+      "address": "0x805363c0",
+      "text_offset": "0x023b24",
+      "size": 700,
+      "file": "0x805363c0.c"
+    },
+    {
+      "name": "copy__Q36System10RaceConfig8ScenarioFRCQ36System10RaceConfig8Scenario",
+      "address": "0x80532a94",
+      "text_offset": "0x0201f8",
+      "size": 696,
+      "file": "0x80532a94.c"
+    },
+    {
+      "name": "CtrlRaceTime_refresh",
+      "address": "0x807fa9a8",
+      "text_offset": "0x2e810c",
+      "size": 680,
+      "file": "0x807fa9a8.c"
+    },
+    {
+      "name": "initControllers__Q36System10RaceConfig8ScenarioFUc",
+      "address": "0x805319d0",
+      "text_offset": "0x01f134",
+      "size": 672,
+      "file": "0x805319d0.c"
+    },
+    {
+      "name": "TimeAttackBackPage_onReady",
+      "address": "0x8063b8b0",
+      "text_offset": "0x129014",
+      "size": 548,
+      "file": "0x8063b8b0.c"
+    },
+    {
+      "name": "CtrlRaceTime_initSelf",
+      "address": "0x807fa154",
+      "text_offset": "0x2e78b8",
+      "size": 504,
+      "file": "0x807fa154.c"
+    },
+    {
+      "name": "clear__Q26System10RaceConfigFv",
+      "address": "0x8053093c",
+      "text_offset": "0x01e0a0",
+      "size": 492,
+      "file": "0x8053093c.c"
+    },
+    {
+      "name": "postInitControllers__Q36System10RaceConfig8ScenarioFPQ36System10RaceConfig8Scenario",
+      "address": "0x80531210",
+      "text_offset": "0x01e974",
+      "size": 456,
+      "file": "0x80531210.c"
+    },
+    {
+      "name": "TimeAttackBackPage_onActivate",
+      "address": "0x8063b488",
+      "text_offset": "0x128bec",
+      "size": 420,
+      "file": "0x8063b488.c"
+    },
+    {
+      "name": "computePlayerCounts__Q36System10RaceConfig8ScenarioFRUcRUcRUc",
+      "address": "0x80531c70",
+      "text_offset": "0x01f3d4",
+      "size": 412,
+      "file": "0x80531c70.c"
+    },
+    {
+      "name": "createInstance__Q26System10RaceConfigFv",
+      "address": "0x80532340",
+      "text_offset": "0x01faa4",
+      "size": 400,
+      "file": "0x80532340.c"
+    },
+    {
+      "name": "initCompetitionSettings__Q36System10RaceConfig8ScenarioFv",
+      "address": "0x80531ef4",
+      "text_offset": "0x01f658",
+      "size": 388,
+      "file": "0x80531ef4.c"
+    },
+    {
+      "name": "initPlayers__Q36System10RaceConfig8ScenarioFUc",
+      "address": "0x8053154c",
+      "text_offset": "0x01ecb0",
+      "size": 380,
+      "file": "0x8053154c.c"
+    },
+    {
+      "name": "TimeAttackSplitsPage_ct",
+      "address": "0x80857bcc",
+      "text_offset": "0x345330",
+      "size": 368,
+      "file": "0x80857bcc.c"
+    },
+    {
+      "name": "__ct__Q26System10RaceConfigFv",
+      "address": "0x80532644",
+      "text_offset": "0x01fda8",
+      "size": 360,
+      "file": "0x80532644.c"
+    },
+    {
+      "name": "TimeAttackBackPage_onRefocus",
+      "address": "0x8063b748",
+      "text_offset": "0x128eac",
+      "size": 360,
+      "file": "0x8063b748.c"
+    },
+    {
+      "name": "RaceinfoPlayer_init",
+      "address": "0x8053667c",
+      "text_offset": "0x023de0",
+      "size": 340,
+      "file": "0x8053667c.c"
+    },
+    {
+      "name": "RaceinfoPlayer_endRace",
+      "address": "0x80536cdc",
+      "text_offset": "0x024440",
+      "size": 320,
+      "file": "0x80536cdc.c"
+    },
+    {
+      "name": "setMii__Q36System10RaceConfig6PlayerFRCQ26System3Mii",
+      "address": "0x80533418",
+      "text_offset": "0x020b7c",
+      "size": 312,
+      "file": "0x80533418.c"
+    },
+    {
+      "name": "RaceinfoPlayer_getLapSplit",
+      "address": "0x80537c14",
+      "text_offset": "0x025378",
+      "size": 312,
+      "file": "0x80537c14.c"
+    },
+    {
+      "name": "appendParamFile__Q36System10RaceConfig8ScenarioFPQ26System10RaceConfig",
+      "address": "0x805342cc",
+      "text_offset": "0x021a30",
+      "size": 308,
+      "file": "0x805342cc.c"
+    },
+    {
+      "name": "TimeAttackBackPage_afterCalc",
+      "address": "0x8063b634",
+      "text_offset": "0x128d98",
+      "size": 276,
+      "file": "0x8063b634.c"
+    },
+    {
+      "name": "Raceinfo_init",
+      "address": "0x80535470",
+      "text_offset": "0x022bd4",
+      "size": 260,
+      "file": "0x80535470.c"
+    },
+    {
+      "name": "update__Q36System10RaceConfig8ScenarioFv",
+      "address": "0x80530c58",
+      "text_offset": "0x01e3bc",
+      "size": 256,
+      "file": "0x80530c58.c"
+    },
+    {
+      "name": "update__Q26System10RaceConfigFv",
+      "address": "0x805341cc",
+      "text_offset": "0x021930",
+      "size": 256,
+      "file": "0x805341cc.c"
+    },
+    {
+      "name": "clear__Q36System10RaceConfig8ScenarioFv",
+      "address": "0x80530b50",
+      "text_offset": "0x01e2b4",
+      "size": 252,
+      "file": "0x80530b50.c"
+    },
+    {
+      "name": "initRng__Q36System10RaceConfig8ScenarioFv",
+      "address": "0x80531e0c",
+      "text_offset": "0x01f570",
+      "size": 232,
+      "file": "0x80531e0c.c"
+    },
+    {
+      "name": "initGhost__Q36System10RaceConfig8ScenarioFUcSc",
+      "address": "0x805313d8",
+      "text_offset": "0x01eb3c",
+      "size": 228,
+      "file": "0x805313d8.c"
+    },
+    {
+      "name": "updateRating__Q26System10RaceConfigFUc",
+      "address": "0x80530d58",
+      "text_offset": "0x01e4bc",
+      "size": 224,
+      "file": "0x80530d58.c"
+    },
+    {
+      "name": "computeGpRank__Q36System10RaceConfig6PlayerCFv",
+      "address": "0x8052ffd8",
+      "text_offset": "0x01d73c",
+      "size": 216,
+      "file": "0x8052ffd8.c"
+    },
+    {
+      "name": "TimeAttackGamemode_canEndRace",
+      "address": "0x805381fc",
+      "text_offset": "0x025960",
+      "size": 212,
+      "file": "0x805381fc.c"
+    },
+    {
+      "name": "__dt__Q26System10RaceConfigFv",
+      "address": "0x80532520",
+      "text_offset": "0x01fc84",
+      "size": 188,
+      "file": "0x80532520.c"
+    },
+    {
+      "name": "CtrlRaceLap_load",
+      "address": "0x807f1db8",
+      "text_offset": "0x2df51c",
+      "size": 172,
+      "file": "0x807f1db8.c"
+    }
+  ]
+}

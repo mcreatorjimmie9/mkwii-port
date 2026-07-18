@@ -1,0 +1,363 @@
+{
+  "module": "ItemSystem",
+  "description": "Item spawning, item behavior, item roulette, item collision, item holder",
+  "rel_base": "0x8051289c",
+  "text_file_offset": "0x00d4",
+  "function_count": 50,
+  "address_range": {
+    "min": "0x807a14d4",
+    "max": "0x807ba064"
+  },
+  "functions": [
+    {
+      "name": "ItemObj_update",
+      "address": "0x807a14d4",
+      "text_offset": "0x28ec38",
+      "size": 2248,
+      "file": "0x807a14d4.c"
+    },
+    {
+      "name": "ItemHolderPlayer_update",
+      "address": "0x80799e10",
+      "text_offset": "0x287574",
+      "size": 2236,
+      "file": "0x80799e10.c"
+    },
+    {
+      "name": "PlayerSub18_checkItemCollision",
+      "address": "0x80574a64",
+      "text_offset": "0x0621c8",
+      "size": 1560,
+      "file": "0x80574a64.c"
+    },
+    {
+      "name": "ItemHolderItem_update",
+      "address": "0x80798958",
+      "text_offset": "0x2860bc",
+      "size": 1308,
+      "file": "0x80798958.c"
+    },
+    {
+      "name": "ItemSlotData_decideItem",
+      "address": "0x807bd914",
+      "text_offset": "0x2ab078",
+      "size": 1188,
+      "file": "0x807bd914.c"
+    },
+    {
+      "name": "ItemHolderPlayerb4_calcRotatingItemObjs",
+      "address": "0x807966d8",
+      "text_offset": "0x283e3c",
+      "size": 876,
+      "file": "0x807966d8.c"
+    },
+    {
+      "name": "ITEMHandler_importNewPackets",
+      "address": "0x80660224",
+      "text_offset": "0x14d988",
+      "size": 868,
+      "file": "0x80660224.c"
+    },
+    {
+      "name": "initItemObjProperties",
+      "address": "0x80792fe4",
+      "text_offset": "0x280748",
+      "size": 800,
+      "file": "0x80792fe4.c"
+    },
+    {
+      "name": "ItemHolderPlayerb4_use",
+      "address": "0x80793df8",
+      "text_offset": "0x28155c",
+      "size": 760,
+      "file": "0x80793df8.c"
+    },
+    {
+      "name": "ItemHolderItem_despawn",
+      "address": "0x80798450",
+      "text_offset": "0x285bb4",
+      "size": 648,
+      "file": "0x80798450.c"
+    },
+    {
+      "name": "createStaticInstance__Q23Net11ITEMHandlerFv",
+      "address": "0x8065e5d4",
+      "text_offset": "0x14bd38",
+      "size": 636,
+      "file": "0x8065e5d4.c"
+    },
+    {
+      "name": "ItemObjBlue_tryLockPlayer",
+      "address": "0x807b6a98",
+      "text_offset": "0x2a41fc",
+      "size": 608,
+      "file": "0x807b6a98.c"
+    },
+    {
+      "name": "PlayerSub10_activateMushroom",
+      "address": "0x805818c0",
+      "text_offset": "0x06f024",
+      "size": 600,
+      "file": "0x805818c0.c"
+    },
+    {
+      "name": "ItemObj_loadTeamsModel",
+      "address": "0x807a2868",
+      "text_offset": "0x28ffcc",
+      "size": 592,
+      "file": "0x807a2868.c"
+    },
+    {
+      "name": "ITEMHandler_construct",
+      "address": "0x8065e890",
+      "text_offset": "0x14bff4",
+      "size": 572,
+      "file": "0x8065e890.c"
+    },
+    {
+      "name": "ItemObjBlue_makeArray",
+      "address": "0x807adec8",
+      "text_offset": "0x29b62c",
+      "size": 564,
+      "file": "0x807adec8.c"
+    },
+    {
+      "name": "ItemHolder_construct",
+      "address": "0x8079b7c0",
+      "text_offset": "0x288f24",
+      "size": 516,
+      "file": "0x8079b7c0.c"
+    },
+    {
+      "name": "ItemObjBomb_loadModel",
+      "address": "0x807a762c",
+      "text_offset": "0x294d90",
+      "size": 508,
+      "file": "0x807a762c.c"
+    },
+    {
+      "name": "ItemRoulette_update",
+      "address": "0x807bc864",
+      "text_offset": "0x2a9fc8",
+      "size": 496,
+      "file": "0x807bc864.c"
+    },
+    {
+      "name": "PlayerSub10_activateMega",
+      "address": "0x80582ffc",
+      "text_offset": "0x070760",
+      "size": 456,
+      "file": "0x80582ffc.c"
+    },
+    {
+      "name": "ItemObjRed_makeArray",
+      "address": "0x807ac4d8",
+      "text_offset": "0x299c3c",
+      "size": 456,
+      "file": "0x807ac4d8.c"
+    },
+    {
+      "name": "ItemHolderPlayer_useBlooper",
+      "address": "0x807aa69c",
+      "text_offset": "0x297e00",
+      "size": 452,
+      "file": "0x807aa69c.c"
+    },
+    {
+      "name": "ItemObjBomb_makeArray",
+      "address": "0x807a66ac",
+      "text_offset": "0x293e10",
+      "size": 448,
+      "file": "0x807a66ac.c"
+    },
+    {
+      "name": "ItemHolderPlayer_init",
+      "address": "0x80799bc8",
+      "text_offset": "0x28732c",
+      "size": 432,
+      "file": "0x80799bc8.c"
+    },
+    {
+      "name": "ItemObj_checkPlayerCollision",
+      "address": "0x807a39bc",
+      "text_offset": "0x291120",
+      "size": 428,
+      "file": "0x807a39bc.c"
+    },
+    {
+      "name": "ItemHolder_checkPlayerCollision",
+      "address": "0x8079c194",
+      "text_offset": "0x2898f8",
+      "size": 420,
+      "file": "0x8079c194.c"
+    },
+    {
+      "name": "ItemObjBlue_loadModel",
+      "address": "0x807ae4f0",
+      "text_offset": "0x29bc54",
+      "size": 416,
+      "file": "0x807ae4f0.c"
+    },
+    {
+      "name": "ItemHolder_destroy",
+      "address": "0x8079b484",
+      "text_offset": "0x288be8",
+      "size": 412,
+      "file": "0x8079b484.c"
+    },
+    {
+      "name": "cancelBullet",
+      "address": "0x8059e600",
+      "text_offset": "0x08bd64",
+      "size": 388,
+      "file": "0x8059e600.c"
+    },
+    {
+      "name": "ItemHolder_initItemDirect",
+      "address": "0x8079c338",
+      "text_offset": "0x289a9c",
+      "size": 364,
+      "file": "0x8079c338.c"
+    },
+    {
+      "name": "ItemHolder_spawnDirect",
+      "address": "0x8079c614",
+      "text_offset": "0x289d78",
+      "size": 364,
+      "file": "0x8079c614.c"
+    },
+    {
+      "name": "ItemSlotData_scaleTableForPlayerCount",
+      "address": "0x807bd208",
+      "text_offset": "0x2aa96c",
+      "size": 352,
+      "file": "0x807bd208.c"
+    },
+    {
+      "name": "PlayerSub10_activateBullet",
+      "address": "0x80587d94",
+      "text_offset": "0x0754f8",
+      "size": 344,
+      "file": "0x80587d94.c"
+    },
+    {
+      "name": "ItemHolder_update",
+      "address": "0x8079bd38",
+      "text_offset": "0x28949c",
+      "size": 336,
+      "file": "0x8079bd38.c"
+    },
+    {
+      "name": "copyItemObjProperties",
+      "address": "0x80793364",
+      "text_offset": "0x280ac8",
+      "size": 316,
+      "file": "0x80793364.c"
+    },
+    {
+      "name": "ItemHolderItem_spawn",
+      "address": "0x807982ec",
+      "text_offset": "0x285a50",
+      "size": 292,
+      "file": "0x807982ec.c"
+    },
+    {
+      "name": "ItemHolder_spawnTc",
+      "address": "0x8079c780",
+      "text_offset": "0x289ee4",
+      "size": 288,
+      "file": "0x8079c780.c"
+    },
+    {
+      "name": "ItemObj_init",
+      "address": "0x807a070c",
+      "text_offset": "0x28de70",
+      "size": 220,
+      "file": "0x807a070c.c"
+    },
+    {
+      "name": "ITEMHandler_update",
+      "address": "0x8065ead0",
+      "text_offset": "0x14c234",
+      "size": 216,
+      "file": "0x8065ead0.c"
+    },
+    {
+      "name": "ItemHolderItem_initObjs",
+      "address": "0x807981b4",
+      "text_offset": "0x285918",
+      "size": 200,
+      "file": "0x807981b4.c"
+    },
+    {
+      "name": "ItemHolder_init",
+      "address": "0x8079bc7c",
+      "text_offset": "0x2893e0",
+      "size": 188,
+      "file": "0x8079bc7c.c"
+    },
+    {
+      "name": "ItemSlotData_checkSpawnTimer",
+      "address": "0x807bd868",
+      "text_offset": "0x2aafcc",
+      "size": 172,
+      "file": "0x807bd868.c"
+    },
+    {
+      "name": "ItemSlotData_updateTimers",
+      "address": "0x807bded4",
+      "text_offset": "0x2ab638",
+      "size": 168,
+      "file": "0x807bded4.c"
+    },
+    {
+      "name": "ItemObj_spawn",
+      "address": "0x807a0a38",
+      "text_offset": "0x28e19c",
+      "size": 164,
+      "file": "0x807a0a38.c"
+    },
+    {
+      "name": "ITEMHandler_getPlayerMode",
+      "address": "0x8065fa50",
+      "text_offset": "0x14d1b4",
+      "size": 160,
+      "file": "0x8065fa50.c"
+    },
+    {
+      "name": "ItemObjFib_makeArray",
+      "address": "0x807a9d90",
+      "text_offset": "0x2974f4",
+      "size": 152,
+      "file": "0x807a9d90.c"
+    },
+    {
+      "name": "ItemSlotTable_createInstance",
+      "address": "0x807bcc64",
+      "text_offset": "0x2aa3c8",
+      "size": 152,
+      "file": "0x807bcc64.c"
+    },
+    {
+      "name": "ITEMHandler_getPlayerStoredItem",
+      "address": "0x8065f704",
+      "text_offset": "0x14ce68",
+      "size": 148,
+      "file": "0x8065f704.c"
+    },
+    {
+      "name": "ItemHolderPlayer_destroy",
+      "address": "0x8079ba04",
+      "text_offset": "0x289168",
+      "size": 148,
+      "file": "0x8079ba04.c"
+    },
+    {
+      "name": "ItemHolderPlayer_useLightning",
+      "address": "0x807ba064",
+      "text_offset": "0x2a77c8",
+      "size": 136,
+      "file": "0x807ba064.c"
+    }
+  ]
+}
