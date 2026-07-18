@@ -1,0 +1,54 @@
+{
+  "module": "ItemSystem",
+  "description": "Item spawning, item behavior, item roulette, item collision, item holder",
+  "total_functions": 50,
+  "address_range": {
+    "min": "0x80574a64",
+    "max": "0x807bded4"
+  },
+  "confidence_breakdown": {
+    "certain": 50
+  },
+  "class_breakdown": {
+    "ItemHolder": 8,
+    "ITEMHandler": 6,
+    "ItemObj": 5,
+    "ItemHolderPlayer": 5,
+    "ItemHolderItem": 4,
+    "ItemSlotData": 4,
+    "(global/free function)": 3,
+    "ItemObjBlue": 3,
+    "PlayerSub10": 3,
+    "ItemHolderPlayerb4": 2,
+    "ItemObjBomb": 2,
+    "PlayerSub18": 1,
+    "ItemRoulette": 1,
+    "ItemObjRed": 1,
+    "ItemObjFib": 1,
+    "ItemSlotTable": 1
+  },
+  "category_breakdown": {
+    "update/calculation": 8,
+    "processing/handling": 7,
+    "other": 6,
+    "initialization": 11,
+    "activation/spawning": 10,
+    "termination": 4,
+    "constructors": 2,
+    "setters/copy": 2
+  },
+  "call_analysis": {
+    "total_call_references": 76,
+    "resolved_call_targets": 6,
+    "unresolved_call_targets": 70
+  },
+  "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols",
+  "cross_references": {
+    "seeky_mkw_structures": "racedata.h, raceinfo.h, player.h, itemhandler.h, itembehaviour.h, itemslotdata.h, eventhandler.h, rknetcontroller.h, inputdata.h",
+    "snailspeed3_module_symbols": "All 50 functions matched exactly",
+    "dolphin_symbols": "RMCP01 main DOL + REL module symbols (call target resolution)",
+    "gecko_codes": "Checked - no direct function-level matches in these address ranges",
+    "existing_decompiled": "data/decompiled/existing/src/net/ (naming patterns consistent)"
+  },
+  "notes": "All 50 functions have exact address matches in the snailspeed3/mkw decompilation project's StaticR.rel module symbols for RMCP01 (US region). Mangled C++ names are confirmed function signatures."
+}

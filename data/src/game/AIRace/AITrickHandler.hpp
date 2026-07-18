@@ -1,0 +1,33 @@
+#pragma once
+
+#include "game/AIRace/AIInfo.hpp"
+
+namespace Enemy {
+
+struct AITrickHandler {
+    AITrickHandler(AIInfo*);
+    virtual ~AITrickHandler();
+    virtual void vf_0x0C();
+    virtual void calc();
+    virtual void disableWheelie();
+    virtual void update();
+    void avoidPow();
+    bool allowTricking();
+    bool shouldTrick();
+
+    AIInfo* mpInfo;
+};
+
+struct AITrickHandlerBike: public AITrickHandler {
+    AITrickHandlerBike(AIInfo*);
+    virtual ~AITrickHandlerBike();
+    void vf_0x0C();
+    void calc();
+    void disableWheelie();
+    void calcWheelie();
+    virtual void update();
+
+    bool mbPerformWheelie;
+};
+
+} // namespace Enemy

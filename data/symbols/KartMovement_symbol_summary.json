@@ -1,0 +1,69 @@
+{
+  "module": "KartMovement",
+  "total_functions_in_manifest": 100,
+  "total_named": 100,
+  "total_unnamed": 0,
+  "previously_named": 50,
+  "newly_named_this_batch": 50,
+  "confidence_breakdown": {
+    "certain": 50,
+    "likely": 5,
+    "uncertain": 27,
+    "guess": 18
+  },
+  "class_distribution": {
+    "PlayerSub10": 9,
+    "KartMove": 6,
+    "PlayerKart": 1,
+    "KartSettings": 1,
+    "KartCollide": 1,
+    "KartState": 4,
+    "KartSub": 2,
+    "KartSus": 8,
+    "KartWheelPhysics": 12,
+    "WheelPhysicsHolder": 1,
+    "KartTire": 4,
+    "KartPhysics": 1,
+    "KartDynamics": 27,
+    "KartBody": 6,
+    "KartBodySub": 1,
+    "KartPhysicsSub": 16
+  },
+  "source_breakdown": {
+    "pre-existing_manifest": 50,
+    "code_analysis": 50
+  },
+  "naming_methodology": {
+    "mkw_structures_player_h": "Direct address match from annotated C++ header - highest confidence (certain)",
+    "dolphin_symbols": "Exact address match from symbol database (0 matches in this batch)",
+    "call_target_analysis": "Identified by which known functions are called (e.g., calls sub_805907c0 = getKartPosition)",
+    "field_access_patterns": "Identified by which struct offsets are read/written (e.g., 0x54/0x58/0x5c = position)",
+    "fpr_usage_analysis": "Heavy FPR usage = vector math/physics; GPR-only = data management/state",
+    "code_structure": "Function size, vtable dispatch patterns, constructor/destructor patterns, SIMD operations"
+  },
+  "key_findings": {
+    "kartDynamics_class": "KartDynamics class identified at 0x805a1aa4-0x805a6da8 range, with constructor at 0x805a26e0, main calc at 0x805a6da8 (8192B)",
+    "kartPhysicsSub_class": "KartPhysicsSub class identified at 0x805a5430-0x805a653c, with constructor at 0x805a5430, effect state management at 0x805a6498",
+    "kartBody_class": "KartBody class identified at 0x805a3b78-0x805a47a8, with destructor at 0x805a3b78, singleton factory at 0x805a3c10, constructor at 0x805a3c94",
+    "simd_physics_functions": "Multiple SIMD-heavy functions (0x805a4898, 0x805a4ae0, 0x805a4d5c, 0x805a4f34) are likely inlined KartDynamics calc methods with large physics data tables",
+    "debug_guards": "Functions 0x805a1df0 and 0x805a1e24 contain debug build guards checking global b68==0x1f",
+    "jmap_integration": "0x805a5f44 uses JMapInfo system (sub_806e3720) to create per-kart scene objects",
+    "collision_system": "Multiple functions call sub_805aa32c (BSP collision), sub_8078cfe0 (collision detection), and sub_80555bf8 (vec3 operations)",
+    "wheel_physics_chain": "KartWheelPhysics (0x8059b8f4-0x8059c3b0) and KartSusPhysics (0x8059c3bc-0x8059c760) form the wheel/suspension physics chain, connected by WheelPhysicsHolder_applySuspensions at 0x8059ca5c"
+  },
+  "address_ranges": {
+    "PlayerSub10_KartMove": "0x80580128 - 0x8058bc2c",
+    "PlayerKart": "0x80590ef4",
+    "KartSettings_KartCollide_KartState": "0x805954a8 - 0x80596b1c",
+    "KartSub": "0x80598230 - 0x80598460",
+    "KartSus": "0x8059aff0 - 0x8059b0bc",
+    "KartWheelPhysics": "0x8059b8f4 - 0x8059c3b0",
+    "KartSusPhysics": "0x8059c3bc - 0x8059c760",
+    "WheelPhysicsHolder": "0x8059ca5c",
+    "KartTire": "0x8059cf2c - 0x8059d050",
+    "KartPhysics": "0x805a1aa4",
+    "KartDynamics": "0x805a1df0 - 0x805a6da8",
+    "KartBody": "0x805a3b78 - 0x805a4838",
+    "KartPhysicsSub": "0x805a5430 - 0x805a653c"
+  }
+}

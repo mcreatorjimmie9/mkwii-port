@@ -1,0 +1,47 @@
+{
+  "module": "Collision",
+  "description": "",
+  "total_functions": 47,
+  "address_range": {
+    "min": "0x80570a54",
+    "max": "0x805bad24"
+  },
+  "confidence_breakdown": {
+    "certain": 47
+  },
+  "class_breakdown": {
+    "KartCollide": 13,
+    "PlayerSub18": 13,
+    "HitboxGroup": 8,
+    "Hitbox": 5,
+    "KartSusPhysics": 3,
+    "PlayerSub10": 2,
+    "KartWheelPhysics": 2,
+    "KartDynamics": 1
+  },
+  "category_breakdown": {
+    "constructors": 4,
+    "initialization": 9,
+    "update/calculation": 5,
+    "processing/handling": 19,
+    "destructors": 1,
+    "getters/predicates": 2,
+    "termination": 1,
+    "setters/copy": 5,
+    "other": 1
+  },
+  "call_analysis": {
+    "total_call_references": 69,
+    "resolved_call_targets": 1,
+    "unresolved_call_targets": 68
+  },
+  "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols",
+  "cross_references": {
+    "seeky_mkw_structures": "racedata.h, raceinfo.h, player.h, itemhandler.h, itembehaviour.h, itemslotdata.h, eventhandler.h, rknetcontroller.h, inputdata.h",
+    "snailspeed3_module_symbols": "All 47 functions matched exactly",
+    "dolphin_symbols": "RMCP01 main DOL + REL module symbols (call target resolution)",
+    "gecko_codes": "Checked - no direct function-level matches in these address ranges",
+    "existing_decompiled": "data/decompiled/existing/src/net/ (naming patterns consistent)"
+  },
+  "notes": "All 47 functions have exact address matches in the snailspeed3/mkw decompilation project's StaticR.rel module symbols for RMCP01 (US region). Mangled C++ names are confirmed function signatures."
+}

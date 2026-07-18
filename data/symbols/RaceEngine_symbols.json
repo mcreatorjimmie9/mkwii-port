@@ -1,0 +1,701 @@
+[
+  {
+    "address": "0x80533558",
+    "name": "Racedata_initCredits",
+    "mangled": "Racedata_initCredits",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80533558.c",
+    "size": 3188,
+    "class": "Racedata",
+    "calls": [
+      "0x805318b0"
+    ]
+  },
+  {
+    "address": "0x8058f018",
+    "name": "RacedataFactory_packRacedataRecord",
+    "mangled": "RacedataFactory_packRacedataRecord",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8058f018.c",
+    "size": 2204,
+    "class": "RacedataFactory",
+    "calls": [
+      "0x80555bf8",
+      "0x805907c0",
+      "0x80590810"
+    ]
+  },
+  {
+    "address": "0x80530228",
+    "name": "init__Q26System10RaceConfigFv",
+    "mangled": "init__Q26System10RaceConfigFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80530228.c",
+    "size": 1772,
+    "class": "RaceConfig"
+  },
+  {
+    "address": "0x80532d4c",
+    "name": "Racedata_initAwards",
+    "mangled": "Racedata_initAwards",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80532d4c.c",
+    "size": 1704,
+    "class": "Racedata"
+  },
+  {
+    "address": "0x80534c88",
+    "name": "Raceinfo_construct",
+    "mangled": "Raceinfo_construct",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80534c88.c",
+    "size": 1444,
+    "class": "Raceinfo",
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x8053569c",
+    "name": "RaceInfo_update",
+    "mangled": "RaceInfo_update",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8053569c.c",
+    "size": 1260,
+    "class": "RaceInfo",
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805372e0",
+    "name": "RaceinfoPlayer_updateCheckpoint",
+    "mangled": "RaceinfoPlayer_updateCheckpoint",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805372e0.c",
+    "size": 1044,
+    "class": "RaceinfoPlayer",
+    "calls": [
+      "0x8051af6c",
+      "0x80555bf8",
+      "0x80590144",
+      "0x80590cd8"
+    ]
+  },
+  {
+    "address": "0x807fa3a8",
+    "name": "CtrlRaceTime_calcSelf",
+    "mangled": "CtrlRaceTime_calcSelf",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807fa3a8.c",
+    "size": 940,
+    "class": "CtrlRaceTime",
+    "calls": [
+      "0x8051aeac",
+      "0x807f9cac"
+    ]
+  },
+  {
+    "address": "0x805377ec",
+    "name": "RaceinfoPlayer_update",
+    "mangled": "RaceinfoPlayer_update",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805377ec.c",
+    "size": 916,
+    "class": "RaceinfoPlayer"
+  },
+  {
+    "address": "0x80538de0",
+    "name": "updateGpRankScore__Q26System17RaceManagerPlayerFv",
+    "mangled": "updateGpRankScore__Q26System17RaceManagerPlayerFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80538de0.c",
+    "size": 908,
+    "class": "RaceManagerPlayer",
+    "calls": [
+      "0x805299e0",
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805316c8",
+    "name": "copyPrevPositions__Q36System10RaceConfig8ScenarioFv",
+    "mangled": "copyPrevPositions__Q36System10RaceConfig8ScenarioFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805316c8.c",
+    "size": 776,
+    "class": "Scenario",
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x80534670",
+    "name": "Raceinfo_initGamemode",
+    "mangled": "Raceinfo_initGamemode",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80534670.c",
+    "size": 768,
+    "class": "Raceinfo",
+    "calls": [
+      "0x8053a03c",
+      "0x8053a064",
+      "0x80542528",
+      "0x80555bf8",
+      "0x80555cac",
+      "0x80555e14"
+    ]
+  },
+  {
+    "address": "0x8058d680",
+    "name": "RacedataHandler_processInputs",
+    "mangled": "RacedataHandler_processInputs",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8058d680.c",
+    "size": 764,
+    "class": "RacedataHandler"
+  },
+  {
+    "address": "0x805387c4",
+    "name": "Raceinfo_getInitialPosAndRotForPlayer",
+    "mangled": "Raceinfo_getInitialPosAndRotForPlayer",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805387c4.c",
+    "size": 748,
+    "class": "Raceinfo",
+    "calls": [
+      "0x80590144"
+    ]
+  },
+  {
+    "address": "0x805327ac",
+    "name": "initRace__Q26System10RaceConfigFv",
+    "mangled": "initRace__Q26System10RaceConfigFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805327ac.c",
+    "size": 744,
+    "class": "RaceConfig",
+    "calls": [
+      "0x8052fa38",
+      "0x8052fa40",
+      "0x8052fa50",
+      "0x8053014c",
+      "0x80530154",
+      "0x80530164",
+      "0x8053016c",
+      "0x80530378",
+      "0x80530380",
+      "0x80530a40",
+      "0x80532c38",
+      "0x80532c40",
+      "0x80532c48",
+      "0x80532c50",
+      "0x80532d88"
+    ]
+  },
+  {
+    "address": "0x80532078",
+    "name": "initRace__Q36System10RaceConfig8ScenarioFPQ36System10RaceConfig8Scenario",
+    "mangled": "initRace__Q36System10RaceConfig8ScenarioFPQ36System10RaceConfig8Scenario",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80532078.c",
+    "size": 712,
+    "class": "Scenario"
+  },
+  {
+    "address": "0x80536ea0",
+    "name": "RaceinfoPlayer_endLap",
+    "mangled": "RaceinfoPlayer_endLap",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80536ea0.c",
+    "size": 704,
+    "class": "RaceinfoPlayer"
+  },
+  {
+    "address": "0x805363c0",
+    "name": "RaceinfoPlayer_construct",
+    "mangled": "RaceinfoPlayer_construct",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805363c0.c",
+    "size": 700,
+    "class": "RaceinfoPlayer",
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x80532a94",
+    "name": "copy__Q36System10RaceConfig8ScenarioFRCQ36System10RaceConfig8Scenario",
+    "mangled": "copy__Q36System10RaceConfig8ScenarioFRCQ36System10RaceConfig8Scenario",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80532a94.c",
+    "size": 696,
+    "class": "Scenario",
+    "calls": [
+      "0x8052fa40",
+      "0x8053014c",
+      "0x80530154",
+      "0x80530164",
+      "0x8053016c",
+      "0x80530378",
+      "0x80530380",
+      "0x80531fe4",
+      "0x80532c40",
+      "0x80532c48",
+      "0x80532c50",
+      "0x80532d88"
+    ]
+  },
+  {
+    "address": "0x807fa9a8",
+    "name": "CtrlRaceTime_refresh",
+    "mangled": "CtrlRaceTime_refresh",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807fa9a8.c",
+    "size": 680,
+    "class": "CtrlRaceTime"
+  },
+  {
+    "address": "0x805319d0",
+    "name": "initControllers__Q36System10RaceConfig8ScenarioFUc",
+    "mangled": "initControllers__Q36System10RaceConfig8ScenarioFUc",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805319d0.c",
+    "size": 672,
+    "class": "Scenario",
+    "calls": [
+      "0x80530a48",
+      "0x80531208",
+      "0x80531644"
+    ],
+    "resolved_calls": [
+      {
+        "address": "0x80531208",
+        "name": "getPlayerType__Q36System10RaceConfig6PlayerCFv"
+      }
+    ]
+  },
+  {
+    "address": "0x8063b8b0",
+    "name": "TimeAttackBackPage_onReady",
+    "mangled": "TimeAttackBackPage_onReady",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8063b8b0.c",
+    "size": 548,
+    "class": "TimeAttackBackPage"
+  },
+  {
+    "address": "0x807fa154",
+    "name": "CtrlRaceTime_initSelf",
+    "mangled": "CtrlRaceTime_initSelf",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807fa154.c",
+    "size": 504,
+    "class": "CtrlRaceTime",
+    "calls": [
+      "0x807b55e0"
+    ]
+  },
+  {
+    "address": "0x8053093c",
+    "name": "clear__Q26System10RaceConfigFv",
+    "mangled": "clear__Q26System10RaceConfigFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8053093c.c",
+    "size": 492,
+    "class": "RaceConfig",
+    "calls": [
+      "0x8052f664",
+      "0x80538618"
+    ]
+  },
+  {
+    "address": "0x80531210",
+    "name": "postInitControllers__Q36System10RaceConfig8ScenarioFPQ36System10RaceConfig8Scenario",
+    "mangled": "postInitControllers__Q36System10RaceConfig8ScenarioFPQ36System10RaceConfig8Scenario",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80531210.c",
+    "size": 456,
+    "class": "Scenario",
+    "calls": [
+      "0x8051e514",
+      "0x8051e664",
+      "0x8051eb84",
+      "0x80526930",
+      "0x80555bf8"
+    ],
+    "resolved_calls": [
+      {
+        "address": "0x8051e514",
+        "name": "fn_1_BC78"
+      }
+    ]
+  },
+  {
+    "address": "0x8063b488",
+    "name": "TimeAttackBackPage_onActivate",
+    "mangled": "TimeAttackBackPage_onActivate",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8063b488.c",
+    "size": 420,
+    "class": "TimeAttackBackPage",
+    "calls": [
+      "0x805bc0dc",
+      "0x805bc68c",
+      "0x805bc6a4",
+      "0x805c0af4",
+      "0x805c0b34",
+      "0x805e0664",
+      "0x805e0a08",
+      "0x805e43f4",
+      "0x80611c68",
+      "0x80611d64",
+      "0x8063a028"
+    ],
+    "resolved_calls": [
+      {
+        "address": "0x805c0b34",
+        "name": "fn_1_AE298"
+      }
+    ]
+  },
+  {
+    "address": "0x80531c70",
+    "name": "computePlayerCounts__Q36System10RaceConfig8ScenarioFRUcRUcRUc",
+    "mangled": "computePlayerCounts__Q36System10RaceConfig8ScenarioFRUcRUcRUc",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80531c70.c",
+    "size": 412,
+    "class": "Scenario",
+    "calls": [
+      "0x8051e47c",
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x80532340",
+    "name": "createInstance__Q26System10RaceConfigFv",
+    "mangled": "createInstance__Q26System10RaceConfigFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80532340.c",
+    "size": 400,
+    "class": "RaceConfig"
+  },
+  {
+    "address": "0x80531ef4",
+    "name": "initCompetitionSettings__Q36System10RaceConfig8ScenarioFv",
+    "mangled": "initCompetitionSettings__Q36System10RaceConfig8ScenarioFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80531ef4.c",
+    "size": 388,
+    "class": "Scenario",
+    "calls": [
+      "0x8051e47c",
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x8053154c",
+    "name": "initPlayers__Q36System10RaceConfig8ScenarioFUc",
+    "mangled": "initPlayers__Q36System10RaceConfig8ScenarioFUc",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8053154c.c",
+    "size": 380,
+    "class": "Scenario"
+  },
+  {
+    "address": "0x80857bcc",
+    "name": "TimeAttackSplitsPage_ct",
+    "mangled": "TimeAttackSplitsPage_ct",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80857bcc.c",
+    "size": 368,
+    "class": "TimeAttackSplitsPage",
+    "calls": [
+      "0x80555bf8",
+      "0x805bc074",
+      "0x805dc968",
+      "0x805e398c",
+      "0x80612d08"
+    ]
+  },
+  {
+    "address": "0x80532644",
+    "name": "__ct__Q26System10RaceConfigFv",
+    "mangled": "__ct__Q26System10RaceConfigFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80532644.c",
+    "size": 360,
+    "class": "RaceConfig",
+    "calls": [
+      "0x8052f9c8",
+      "0x8052fa38",
+      "0x8052fa40",
+      "0x8053014c",
+      "0x80530154",
+      "0x80530164",
+      "0x8053016c",
+      "0x80530378",
+      "0x80530380",
+      "0x80530a40",
+      "0x80532c38",
+      "0x80532c40",
+      "0x80532c48",
+      "0x80532c50",
+      "0x80532d88"
+    ]
+  },
+  {
+    "address": "0x8063b748",
+    "name": "TimeAttackBackPage_onRefocus",
+    "mangled": "TimeAttackBackPage_onRefocus",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8063b748.c",
+    "size": 360,
+    "class": "TimeAttackBackPage",
+    "calls": [
+      "0x805bc6b4",
+      "0x808481c8"
+    ]
+  },
+  {
+    "address": "0x8053667c",
+    "name": "RaceinfoPlayer_init",
+    "mangled": "RaceinfoPlayer_init",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8053667c.c",
+    "size": 340,
+    "class": "RaceinfoPlayer"
+  },
+  {
+    "address": "0x80536cdc",
+    "name": "RaceinfoPlayer_endRace",
+    "mangled": "RaceinfoPlayer_endRace",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80536cdc.c",
+    "size": 320,
+    "class": "RaceinfoPlayer",
+    "calls": [
+      "0x805366d8"
+    ]
+  },
+  {
+    "address": "0x80533418",
+    "name": "setMii__Q36System10RaceConfig6PlayerFRCQ26System3Mii",
+    "mangled": "setMii__Q36System10RaceConfig6PlayerFRCQ26System3Mii",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80533418.c",
+    "size": 312,
+    "class": "Player"
+  },
+  {
+    "address": "0x80537c14",
+    "name": "RaceinfoPlayer_getLapSplit",
+    "mangled": "RaceinfoPlayer_getLapSplit",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80537c14.c",
+    "size": 312,
+    "class": "RaceinfoPlayer",
+    "calls": [
+      "0x80533c90"
+    ]
+  },
+  {
+    "address": "0x805342cc",
+    "name": "appendParamFile__Q36System10RaceConfig8ScenarioFPQ26System10RaceConfig",
+    "mangled": "appendParamFile__Q36System10RaceConfig8ScenarioFPQ26System10RaceConfig",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805342cc.c",
+    "size": 308,
+    "class": "Scenario",
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x8063b634",
+    "name": "TimeAttackBackPage_afterCalc",
+    "mangled": "TimeAttackBackPage_afterCalc",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8063b634.c",
+    "size": 276,
+    "class": "TimeAttackBackPage",
+    "calls": [
+      "0x80555bf8",
+      "0x805bc0dc",
+      "0x805bc68c",
+      "0x805bc6a4",
+      "0x805bc6b4",
+      "0x805e43f4",
+      "0x80848094",
+      "0x808481c8"
+    ]
+  },
+  {
+    "address": "0x80535470",
+    "name": "Raceinfo_init",
+    "mangled": "Raceinfo_init",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80535470.c",
+    "size": 260,
+    "class": "Raceinfo"
+  },
+  {
+    "address": "0x80530c58",
+    "name": "update__Q36System10RaceConfig8ScenarioFv",
+    "mangled": "update__Q36System10RaceConfig8ScenarioFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80530c58.c",
+    "size": 256,
+    "class": "Scenario",
+    "calls": [
+      "0x8051eb84",
+      "0x80526930",
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805341cc",
+    "name": "update__Q26System10RaceConfigFv",
+    "mangled": "update__Q26System10RaceConfigFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805341cc.c",
+    "size": 256,
+    "class": "RaceConfig",
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x80530b50",
+    "name": "clear__Q36System10RaceConfig8ScenarioFv",
+    "mangled": "clear__Q36System10RaceConfig8ScenarioFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80530b50.c",
+    "size": 252,
+    "class": "Scenario",
+    "calls": [
+      "0x805268f4"
+    ]
+  },
+  {
+    "address": "0x80531e0c",
+    "name": "initRng__Q36System10RaceConfig8ScenarioFv",
+    "mangled": "initRng__Q36System10RaceConfig8ScenarioFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80531e0c.c",
+    "size": 232,
+    "class": "Scenario"
+  },
+  {
+    "address": "0x805313d8",
+    "name": "initGhost__Q36System10RaceConfig8ScenarioFUcSc",
+    "mangled": "initGhost__Q36System10RaceConfig8ScenarioFUcSc",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805313d8.c",
+    "size": 228,
+    "class": "Scenario"
+  },
+  {
+    "address": "0x80530d58",
+    "name": "updateRating__Q26System10RaceConfigFUc",
+    "mangled": "updateRating__Q26System10RaceConfigFUc",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80530d58.c",
+    "size": 224,
+    "class": "RaceConfig"
+  },
+  {
+    "address": "0x8052ffd8",
+    "name": "computeGpRank__Q36System10RaceConfig6PlayerCFv",
+    "mangled": "computeGpRank__Q36System10RaceConfig6PlayerCFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8052ffd8.c",
+    "size": 216,
+    "class": "Player"
+  },
+  {
+    "address": "0x805381fc",
+    "name": "TimeAttackGamemode_canEndRace",
+    "mangled": "TimeAttackGamemode_canEndRace",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805381fc.c",
+    "size": 212,
+    "class": "TimeAttackGamemode",
+    "calls": [
+      "0x80516f18",
+      "0x80516f24"
+    ]
+  },
+  {
+    "address": "0x80532520",
+    "name": "__dt__Q26System10RaceConfigFv",
+    "mangled": "__dt__Q26System10RaceConfigFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80532520.c",
+    "size": 188,
+    "class": "RaceConfig"
+  },
+  {
+    "address": "0x807f1db8",
+    "name": "CtrlRaceLap_load",
+    "mangled": "CtrlRaceLap_load",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807f1db8.c",
+    "size": 172,
+    "class": "CtrlRaceLap",
+    "calls": [
+      "0x80613104"
+    ]
+  }
+]

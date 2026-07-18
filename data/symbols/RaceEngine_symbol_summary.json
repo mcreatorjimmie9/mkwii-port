@@ -1,0 +1,55 @@
+{
+  "module": "RaceEngine",
+  "description": "Race state machine, race flow, lap counting, countdown, race timer",
+  "total_functions": 50,
+  "address_range": {
+    "min": "0x8052ffd8",
+    "max": "0x80857bcc"
+  },
+  "confidence_breakdown": {
+    "certain": 50
+  },
+  "class_breakdown": {
+    "Scenario": 13,
+    "RaceConfig": 8,
+    "RaceinfoPlayer": 7,
+    "Raceinfo": 4,
+    "TimeAttackBackPage": 4,
+    "CtrlRaceTime": 3,
+    "Racedata": 2,
+    "Player": 2,
+    "RacedataFactory": 1,
+    "RaceInfo": 1,
+    "RaceManagerPlayer": 1,
+    "RacedataHandler": 1,
+    "TimeAttackSplitsPage": 1,
+    "TimeAttackGamemode": 1,
+    "CtrlRaceLap": 1
+  },
+  "category_breakdown": {
+    "initialization": 18,
+    "other": 8,
+    "constructors": 3,
+    "update/calculation": 10,
+    "setters/copy": 4,
+    "processing/handling": 1,
+    "termination": 3,
+    "activation/spawning": 1,
+    "getters/predicates": 1,
+    "destructors": 1
+  },
+  "call_analysis": {
+    "total_call_references": 117,
+    "resolved_call_targets": 3,
+    "unresolved_call_targets": 114
+  },
+  "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols",
+  "cross_references": {
+    "seeky_mkw_structures": "racedata.h, raceinfo.h, player.h, itemhandler.h, itembehaviour.h, itemslotdata.h, eventhandler.h, rknetcontroller.h, inputdata.h",
+    "snailspeed3_module_symbols": "All 50 functions matched exactly",
+    "dolphin_symbols": "RMCP01 main DOL + REL module symbols (call target resolution)",
+    "gecko_codes": "Checked - no direct function-level matches in these address ranges",
+    "existing_decompiled": "data/decompiled/existing/src/net/ (naming patterns consistent)"
+  },
+  "notes": "All 50 functions have exact address matches in the snailspeed3/mkw decompilation project's StaticR.rel module symbols for RMCP01 (US region). Mangled C++ names are confirmed function signatures."
+}

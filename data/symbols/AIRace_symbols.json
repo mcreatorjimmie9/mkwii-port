@@ -1,0 +1,624 @@
+[
+  {
+    "address": "0x807284c4",
+    "name": "__ct__Q25Enemy2AIFb",
+    "mangled": "__ct__Q25Enemy2AIFb",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807284C4.c",
+    "size": 128,
+    "class": "AI"
+  },
+  {
+    "address": "0x80728570",
+    "name": "__dt__Q25Enemy2AIFv",
+    "mangled": "__dt__Q25Enemy2AIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80728570.c",
+    "size": 124,
+    "class": "AI",
+    "calls": [
+      "0x8051cdd4"
+    ]
+  },
+  {
+    "address": "0x807285f8",
+    "name": "init__Q25Enemy2AIFv",
+    "mangled": "init__Q25Enemy2AIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807285F8.c",
+    "size": 136,
+    "class": "AI"
+  },
+  {
+    "address": "0x807286a0",
+    "name": "update__Q25Enemy2AIFv",
+    "mangled": "update__Q25Enemy2AIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807286A0.c",
+    "size": 36,
+    "class": "AI"
+  },
+  {
+    "address": "0x807286ec",
+    "name": "getStick__Q25Enemy2AIFv",
+    "mangled": "getStick__Q25Enemy2AIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807286EC.c",
+    "size": 24,
+    "class": "AI"
+  },
+  {
+    "address": "0x80728734",
+    "name": "isCPU__Q25Enemy2AIFv",
+    "mangled": "isCPU__Q25Enemy2AIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80728734.c",
+    "size": 56,
+    "class": "AI"
+  },
+  {
+    "address": "0x80728778",
+    "name": "isRealLocal__Q25Enemy2AIFv",
+    "mangled": "isRealLocal__Q25Enemy2AIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80728778.c",
+    "size": 60,
+    "class": "AI"
+  },
+  {
+    "address": "0x807287b8",
+    "name": "isRealLocalAndCPU__Q25Enemy2AIFv",
+    "mangled": "isRealLocalAndCPU__Q25Enemy2AIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807287B8.c",
+    "size": 36,
+    "class": "AI"
+  },
+  {
+    "address": "0x80728820",
+    "name": "isAICPU__Q25Enemy2AIFv",
+    "mangled": "isAICPU__Q25Enemy2AIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80728820.c",
+    "size": 4,
+    "class": "AI"
+  },
+  {
+    "address": "0x80728824",
+    "name": "isGhost__Q25Enemy2AIFv",
+    "mangled": "isGhost__Q25Enemy2AIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80728824.c",
+    "size": 68,
+    "class": "AI"
+  },
+  {
+    "address": "0x80728868",
+    "name": "isSameTeam__Q25Enemy2AIFPQ25Enemy2AI",
+    "mangled": "isSameTeam__Q25Enemy2AIFPQ25Enemy2AI",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80728868.c",
+    "size": 16,
+    "class": "AI"
+  },
+  {
+    "address": "0x80728890",
+    "name": "endRace__Q25Enemy2AIFv",
+    "mangled": "endRace__Q25Enemy2AIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80728890.c",
+    "size": 8,
+    "class": "AI"
+  },
+  {
+    "address": "0x80728898",
+    "name": "onOutOfBounds__Q25Enemy2AIFRCQ26System17MapdataJugemPoint",
+    "mangled": "onOutOfBounds__Q25Enemy2AIFRCQ26System17MapdataJugemPoint",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80728898.c",
+    "size": 16,
+    "class": "AI"
+  },
+  {
+    "address": "0x807288ac",
+    "name": "forceRecalculation__Q25Enemy2AIFb",
+    "mangled": "forceRecalculation__Q25Enemy2AIFb",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807288AC.c",
+    "size": 8,
+    "class": "AI"
+  },
+  {
+    "address": "0x807288b4",
+    "name": "handleBump__Q25Enemy2AIFRCQ23EGG8Vector3fRCQ25Enemy2AI",
+    "mangled": "handleBump__Q25Enemy2AIFRCQ23EGG8Vector3fRCQ25Enemy2AI",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807288B4.c",
+    "size": 8,
+    "class": "AI"
+  },
+  {
+    "address": "0x807289d0",
+    "name": "isOnGround__Q25Enemy2AIFv",
+    "mangled": "isOnGround__Q25Enemy2AIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807289D0.c",
+    "size": 20,
+    "class": "AI"
+  },
+  {
+    "address": "0x807289e4",
+    "name": "isAllWheelsCollision__Q25Enemy2AIFv",
+    "mangled": "isAllWheelsCollision__Q25Enemy2AIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807289E4.c",
+    "size": 20,
+    "class": "AI"
+  },
+  {
+    "address": "0x807289f8",
+    "name": "isDriftingOnGround__Q25Enemy2AIFv",
+    "mangled": "isDriftingOnGround__Q25Enemy2AIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807289F8.c",
+    "size": 20,
+    "class": "AI"
+  },
+  {
+    "address": "0x80728a0c",
+    "name": "isHopping__Q25Enemy2AIFv",
+    "mangled": "isHopping__Q25Enemy2AIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80728A0C.c",
+    "size": 20,
+    "class": "AI"
+  },
+  {
+    "address": "0x80728a20",
+    "name": "isAutoDrift__Q25Enemy2AIFv",
+    "mangled": "isAutoDrift__Q25Enemy2AIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80728A20.c",
+    "size": 20,
+    "class": "AI"
+  },
+  {
+    "address": "0x80728a34",
+    "name": "isInBullet__Q25Enemy2AIFv",
+    "mangled": "isInBullet__Q25Enemy2AIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80728A34.c",
+    "size": 20,
+    "class": "AI"
+  },
+  {
+    "address": "0x8072c284",
+    "name": "__ct__Q25Enemy13AIControlBaseFRCQ25Enemy6AIInfo",
+    "mangled": "__ct__Q25Enemy13AIControlBaseFRCQ25Enemy6AIInfo",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072C284.c",
+    "size": 184,
+    "class": "AIControlBase",
+    "calls": [
+      "0x805169a8"
+    ]
+  },
+  {
+    "address": "0x8072c400",
+    "name": "__dt__Q25Enemy13AIControlBaseFv",
+    "mangled": "__dt__Q25Enemy13AIControlBaseFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072C400.c",
+    "size": 400,
+    "class": "AIControlBase",
+    "calls": [
+      "0x8051682c"
+    ]
+  },
+  {
+    "address": "0x8072c5d0",
+    "name": "init__Q25Enemy13AIControlBaseFv",
+    "mangled": "init__Q25Enemy13AIControlBaseFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072C5D0.c",
+    "size": 308,
+    "class": "AIControlBase",
+    "calls": [
+      "0x8051665c"
+    ]
+  },
+  {
+    "address": "0x8072c704",
+    "name": "initAfterManager__Q25Enemy13AIControlBaseFv",
+    "mangled": "initAfterManager__Q25Enemy13AIControlBaseFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072C704.c",
+    "size": 140,
+    "class": "AIControlBase"
+  },
+  {
+    "address": "0x8072c790",
+    "name": "onOutOfBoundsInner__Q25Enemy13AIControlBaseFRCQ26System17MapdataJugemPoint",
+    "mangled": "onOutOfBoundsInner__Q25Enemy13AIControlBaseFRCQ26System17MapdataJugemPoint",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072C790.c",
+    "size": 64,
+    "class": "AIControlBase",
+    "calls": [
+      "0x8051649c"
+    ]
+  },
+  {
+    "address": "0x8072c7d0",
+    "name": "onForceRecalculation__Q25Enemy13AIControlBaseFRCQ23EGG8Vector3f",
+    "mangled": "onForceRecalculation__Q25Enemy13AIControlBaseFRCQ23EGG8Vector3f",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072C7D0.c",
+    "size": 8,
+    "class": "AIControlBase"
+  },
+  {
+    "address": "0x8072c7d8",
+    "name": "onPlayerGoal__Q25Enemy13AIControlBaseFv",
+    "mangled": "onPlayerGoal__Q25Enemy13AIControlBaseFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072C7D8.c",
+    "size": 8,
+    "class": "AIControlBase"
+  },
+  {
+    "address": "0x8072c7e0",
+    "name": "onCpuGoal__Q25Enemy13AIControlBaseFv",
+    "mangled": "onCpuGoal__Q25Enemy13AIControlBaseFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072C7E0.c",
+    "size": 8,
+    "class": "AIControlBase"
+  },
+  {
+    "address": "0x8072c7f8",
+    "name": "setStartDashTypeToKart__Q25Enemy13AIControlBaseFv",
+    "mangled": "setStartDashTypeToKart__Q25Enemy13AIControlBaseFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072C7F8.c",
+    "size": 92,
+    "class": "AIControlBase"
+  },
+  {
+    "address": "0x8072c864",
+    "name": "setBasicDriveInfo___Q25Enemy13AIControlBaseFRCQ25Enemy9DriveInfo",
+    "mangled": "setBasicDriveInfo___Q25Enemy13AIControlBaseFRCQ25Enemy9DriveInfo",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072C864.c",
+    "size": 68,
+    "class": "AIControlBase"
+  },
+  {
+    "address": "0x8072ca58",
+    "name": "doUpdate___Q25Enemy13AIControlBaseFRCQ25Enemy9DriveInfo",
+    "mangled": "doUpdate___Q25Enemy13AIControlBaseFRCQ25Enemy9DriveInfo",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072CA58.c",
+    "size": 224,
+    "class": "AIControlBase",
+    "calls": [
+      "0x805161d4"
+    ]
+  },
+  {
+    "address": "0x8072a6f4",
+    "name": "setDoNotSelectBackward__Q25Enemy13AIControlBaseFv",
+    "mangled": "setDoNotSelectBackward__Q25Enemy13AIControlBaseFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072A6F4.c",
+    "size": 4,
+    "class": "AIControlBase"
+  },
+  {
+    "address": "0x8072a6fc",
+    "name": "getAIProbability__Q25Enemy13AIControlBaseFv",
+    "mangled": "getAIProbability__Q25Enemy13AIControlBaseFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072A6FC.c",
+    "size": 8,
+    "class": "AIControlBase"
+  },
+  {
+    "address": "0x8072aab0",
+    "name": "setBattleType__Q25Enemy13AIControlBaseFv",
+    "mangled": "setBattleType__Q25Enemy13AIControlBaseFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072AAB0.c",
+    "size": 4,
+    "class": "AIControlBase"
+  },
+  {
+    "address": "0x8072cd74",
+    "name": "isAllStopAfterGoal__Q25Enemy13AIControlBaseFv",
+    "mangled": "isAllStopAfterGoal__Q25Enemy13AIControlBaseFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072CD74.c",
+    "size": 8,
+    "class": "AIControlBase"
+  },
+  {
+    "address": "0x8072cd7c",
+    "name": "setAIRankTopOfPlayer__Q25Enemy13AIControlBaseFv",
+    "mangled": "setAIRankTopOfPlayer__Q25Enemy13AIControlBaseFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072CD7C.c",
+    "size": 4,
+    "class": "AIControlBase"
+  },
+  {
+    "address": "0x8072cd88",
+    "name": "getAIRank__Q25Enemy13AIControlBaseFv",
+    "mangled": "getAIRank__Q25Enemy13AIControlBaseFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072CD88.c",
+    "size": 8,
+    "class": "AIControlBase"
+  },
+  {
+    "address": "0x8072cd90",
+    "name": "onRaceStart__Q25Enemy13AIControlBaseFv",
+    "mangled": "onRaceStart__Q25Enemy13AIControlBaseFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072CD90.c",
+    "size": 4,
+    "class": "AIControlBase"
+  },
+  {
+    "address": "0x8072cb38",
+    "name": "__ct__Q25Enemy16AIAirtimeTrackerFRCQ25Enemy6AIInfo",
+    "mangled": "__ct__Q25Enemy16AIAirtimeTrackerFRCQ25Enemy6AIInfo",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072CB38.c",
+    "size": 36,
+    "class": "AIAirtimeTracker"
+  },
+  {
+    "address": "0x8072cb9c",
+    "name": "init__Q25Enemy16AIAirtimeTrackerFl",
+    "mangled": "init__Q25Enemy16AIAirtimeTrackerFl",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072CB9C.c",
+    "size": 4,
+    "class": "AIAirtimeTracker"
+  },
+  {
+    "address": "0x8072cbc4",
+    "name": "update__Q25Enemy16AIAirtimeTrackerFv",
+    "mangled": "update__Q25Enemy16AIAirtimeTrackerFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072CBC4.c",
+    "size": 28,
+    "class": "AIAirtimeTracker"
+  },
+  {
+    "address": "0x8072cc28",
+    "name": "__ct__Q25Enemy12AIPowAvoiderFRCQ25Enemy6AIInfo",
+    "mangled": "__ct__Q25Enemy12AIPowAvoiderFRCQ25Enemy6AIInfo",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072CC28.c",
+    "size": 12,
+    "class": "AIPowAvoider"
+  },
+  {
+    "address": "0x8072cc7c",
+    "name": "init__Q25Enemy12AIPowAvoiderFv",
+    "mangled": "init__Q25Enemy12AIPowAvoiderFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072CC7C.c",
+    "size": 12,
+    "class": "AIPowAvoider"
+  },
+  {
+    "address": "0x8072cc88",
+    "name": "update__Q25Enemy12AIPowAvoiderFv",
+    "mangled": "update__Q25Enemy12AIPowAvoiderFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072CC88.c",
+    "size": 164,
+    "class": "AIPowAvoider",
+    "calls": [
+      "0x80512a74",
+      "0x80512c60",
+      "0x8051a8c0"
+    ]
+  },
+  {
+    "address": "0x8072cd2c",
+    "name": "isSameTeam__Q25Enemy12AIPowAvoiderFl",
+    "mangled": "isSameTeam__Q25Enemy12AIPowAvoiderFl",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8072CD2C.c",
+    "size": 48,
+    "class": "AIPowAvoider"
+  },
+  {
+    "address": "0x80734b60",
+    "name": "update__Q25Enemy8AIEngineFPCQ26System24MapdataEnemyPathAccessor",
+    "mangled": "update__Q25Enemy8AIEngineFPCQ26System24MapdataEnemyPathAccessor",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80734B60.c",
+    "size": 16,
+    "class": "AIEngine"
+  },
+  {
+    "address": "0x80734b70",
+    "name": "forceRecalculation__Q25Enemy8AIEngineFb",
+    "mangled": "forceRecalculation__Q25Enemy8AIEngineFb",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80734B70.c",
+    "size": 8,
+    "class": "AIEngine"
+  },
+  {
+    "address": "0x80734b78",
+    "name": "endRace__Q25Enemy8AIEngineFv",
+    "mangled": "endRace__Q25Enemy8AIEngineFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80734B78.c",
+    "size": 12,
+    "class": "AIEngine",
+    "calls": [
+      "0x8052aa94"
+    ]
+  },
+  {
+    "address": "0x8073569c",
+    "name": "__ct__Q25Enemy12AIEngineBikeFRCQ25Enemy2AI",
+    "mangled": "__ct__Q25Enemy12AIEngineBikeFRCQ25Enemy2AI",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8073569C.c",
+    "size": 132,
+    "class": "AIEngineBike"
+  },
+  {
+    "address": "0x8073578c",
+    "name": "__ct__Q25Enemy12AIEngineKartFRCQ25Enemy2AI",
+    "mangled": "__ct__Q25Enemy12AIEngineKartFRCQ25Enemy2AI",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8073578C.c",
+    "size": 32,
+    "class": "AIEngineKart"
+  },
+  {
+    "address": "0x807377e0",
+    "name": "avoidPow__Q25Enemy14AITrickHandlerFv",
+    "mangled": "avoidPow__Q25Enemy14AITrickHandlerFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807377E0.c",
+    "size": 16,
+    "class": "AITrickHandler"
+  },
+  {
+    "address": "0x807377f0",
+    "name": "allowTricking__Q25Enemy14AITrickHandlerFv",
+    "mangled": "allowTricking__Q25Enemy14AITrickHandlerFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807377F0.c",
+    "size": 64,
+    "class": "AITrickHandler"
+  },
+  {
+    "address": "0x80737830",
+    "name": "shouldTrick__Q25Enemy14AITrickHandlerFv",
+    "mangled": "shouldTrick__Q25Enemy14AITrickHandlerFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80737830.c",
+    "size": 176,
+    "class": "AITrickHandler"
+  },
+  {
+    "address": "0x80737938",
+    "name": "calc__Q25Enemy14AITrickHandlerFv",
+    "mangled": "calc__Q25Enemy14AITrickHandlerFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80737938.c",
+    "size": 16,
+    "class": "AITrickHandler"
+  },
+  {
+    "address": "0x8073794c",
+    "name": "update__Q25Enemy14AITrickHandlerFv",
+    "mangled": "update__Q25Enemy14AITrickHandlerFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8073794C.c",
+    "size": 248,
+    "class": "AITrickHandler"
+  },
+  {
+    "address": "0x80523e94",
+    "name": "setInputState__Q26System6KPadAIFPQ26System18KPadRaceInputState",
+    "mangled": "setInputState__Q26System6KPadAIFPQ26System18KPadRaceInputState",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80523E94.c",
+    "size": 16,
+    "class": "KPadAI",
+    "calls": [
+      "0x805128c4"
+    ]
+  },
+  {
+    "address": "0x80525988",
+    "name": "__ct__Q26System6KPadAIFv",
+    "mangled": "__ct__Q26System6KPadAIFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80525988.c",
+    "size": 60,
+    "class": "KPadAI"
+  },
+  {
+    "address": "0x80526f40",
+    "name": "calcInner__Q26System16KPadAIControllerFPQ26System18KPadRaceInputStatePQ26System16KPadUIInputState",
+    "mangled": "calcInner__Q26System16KPadAIControllerFPQ26System18KPadRaceInputStatePQ26System16KPadUIInputState",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80526F40.c",
+    "size": 76,
+    "class": "KPadAIController",
+    "calls": [
+      "0x80541550"
+    ]
+  }
+]

@@ -1,0 +1,585 @@
+[
+  {
+    "address": "0x80570a54",
+    "name": "__ct__Q24Kart11KartCollideFv",
+    "mangled": "__ct__Q24Kart11KartCollideFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80570A54.c",
+    "size": 8,
+    "class": "KartCollide"
+  },
+  {
+    "address": "0x80570b0c",
+    "name": "init__Q24Kart11KartCollideFv",
+    "mangled": "init__Q24Kart11KartCollideFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80570B0C.c",
+    "size": 84,
+    "class": "KartCollide"
+  },
+  {
+    "address": "0x80570bf4",
+    "name": "updateBbox__Q24Kart11KartCollideFv",
+    "mangled": "updateBbox__Q24Kart11KartCollideFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80570BF4.c",
+    "size": 88,
+    "class": "KartCollide",
+    "calls": [
+      "0x80757418"
+    ]
+  },
+  {
+    "address": "0x80570c4c",
+    "name": "processBody__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoRCQ24Kart6HitboxRCQ25Field7ColInfoPUl",
+    "mangled": "processBody__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoRCQ24Kart6HitboxRCQ25Field7ColInfoPUl",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80570C4C.c",
+    "size": 52,
+    "class": "KartCollide"
+  },
+  {
+    "address": "0x80570dbc",
+    "name": "processWheels__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoRCQ24Kart6HitboxRCQ25Field7ColInfoPUl",
+    "mangled": "processWheels__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoRCQ24Kart6HitboxRCQ25Field7ColInfoPUl",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80570DBC.c",
+    "size": 92,
+    "class": "KartCollide",
+    "calls": [
+      "0x8072f528"
+    ]
+  },
+  {
+    "address": "0x80570e18",
+    "name": "processMovingWater__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoPUl",
+    "mangled": "processMovingWater__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoPUl",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80570E18.c",
+    "size": 48,
+    "class": "KartCollide"
+  },
+  {
+    "address": "0x80570eec",
+    "name": "processFloor__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoRCQ24Kart6HitboxRCQ25Field7ColInfoPUlb",
+    "mangled": "processFloor__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoRCQ24Kart6HitboxRCQ25Field7ColInfoPUlb",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80570EEC.c",
+    "size": 792,
+    "class": "KartCollide",
+    "calls": [
+      "0x8051515c",
+      "0x80531bfc",
+      "0x80532184",
+      "0x8053244c",
+      "0x805327d0",
+      "0x80532ab0",
+      "0x805332f4",
+      "0x8053336c",
+      "0x80558640",
+      "0x8064f62c",
+      "0x806aa3b4",
+      "0x806ca1a8",
+      "0x80737f14",
+      "0x80757120"
+    ]
+  },
+  {
+    "address": "0x8057130c",
+    "name": "updateHitboxes__Q24Kart11KartCollideFv",
+    "mangled": "updateHitboxes__Q24Kart11KartCollideFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8057130C.c",
+    "size": 208,
+    "class": "KartCollide",
+    "calls": [
+      "0x80531c48"
+    ]
+  },
+  {
+    "address": "0x8057166c",
+    "name": "processWall__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoRCQ25Field7ColInfoPUl",
+    "mangled": "processWall__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoRCQ25Field7ColInfoPUl",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8057166C.c",
+    "size": 232,
+    "class": "KartCollide",
+    "calls": [
+      "0x80531ccc",
+      "0x80649a34"
+    ]
+  },
+  {
+    "address": "0x80571754",
+    "name": "checkNeighborhood__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoRCQ24Kart6HitboxRCQ25Field7ColInfo",
+    "mangled": "checkNeighborhood__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoRCQ24Kart6HitboxRCQ25Field7ColInfo",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80571754.c",
+    "size": 548,
+    "class": "KartCollide",
+    "calls": [
+      "0x8053191c",
+      "0x80531be4",
+      "0x80531ea8",
+      "0x80531ec0",
+      "0x80532a44",
+      "0x80532a68"
+    ]
+  },
+  {
+    "address": "0x80571978",
+    "name": "processCannon__Q24Kart11KartCollideFPUl",
+    "mangled": "processCannon__Q24Kart11KartCollideFPUl",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80571978.c",
+    "size": 128,
+    "class": "KartCollide",
+    "calls": [
+      "0x805316f8",
+      "0x80532820",
+      "0x80532844"
+    ]
+  },
+  {
+    "address": "0x805764d8",
+    "name": "__dt__Q24Kart11KartCollideFv",
+    "mangled": "__dt__Q24Kart11KartCollideFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805764D8.c",
+    "size": 64,
+    "class": "KartCollide"
+  },
+  {
+    "address": "0x80571cd8",
+    "name": "PlayerSub18_checkPlayerCollision",
+    "mangled": "PlayerSub18_checkPlayerCollision",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80571CD8.c",
+    "size": 2620,
+    "class": "PlayerSub18",
+    "calls": [
+      "0x80513380",
+      "0x8051ab30",
+      "0x8052256c",
+      "0x80531020",
+      "0x80531380",
+      "0x80531398",
+      "0x805313b4",
+      "0x80531644",
+      "0x80531660",
+      "0x80531670",
+      "0x80531848",
+      "0x80531924",
+      "0x805324c0",
+      "0x805324e4",
+      "0x8054aeec",
+      "0x8054b088",
+      "0x806a9c30",
+      "0x8076c334"
+    ]
+  },
+  {
+    "address": "0x80574a64",
+    "name": "PlayerSub18_checkItemCollision",
+    "mangled": "PlayerSub18_checkItemCollision",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80574A64.c",
+    "size": 84,
+    "class": "PlayerSub18",
+    "calls": [
+      "0x8052e224",
+      "0x8052e244",
+      "0x80550a2c"
+    ],
+    "resolved_calls": [
+      {
+        "address": "0x8052e244",
+        "name": "fn_1_1B9A8"
+      }
+    ]
+  },
+  {
+    "address": "0x80575108",
+    "name": "PlayerSub18_findCollision",
+    "mangled": "PlayerSub18_findCollision",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80575108.c",
+    "size": 304,
+    "class": "PlayerSub18",
+    "calls": [
+      "0x80524588",
+      "0x8052df50",
+      "0x8052df94"
+    ]
+  },
+  {
+    "address": "0x805755bc",
+    "name": "PlayerSub18_initHitboxes",
+    "mangled": "PlayerSub18_initHitboxes",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805755BC.c",
+    "size": 156,
+    "class": "PlayerSub18",
+    "calls": [
+      "0x8052dd7c",
+      "0x80733544"
+    ]
+  },
+  {
+    "address": "0x80575658",
+    "name": "PlayerSub18_handleNoopCollision",
+    "mangled": "PlayerSub18_handleNoopCollision",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80575658.c",
+    "size": 8,
+    "class": "PlayerSub18"
+  },
+  {
+    "address": "0x80575660",
+    "name": "PlayerSub18_handleBananaCollision",
+    "mangled": "PlayerSub18_handleBananaCollision",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80575660.c",
+    "size": 24,
+    "class": "PlayerSub18"
+  },
+  {
+    "address": "0x80575678",
+    "name": "PlayerSub18_handleShellCollision",
+    "mangled": "PlayerSub18_handleShellCollision",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80575678.c",
+    "size": 32,
+    "class": "PlayerSub18"
+  },
+  {
+    "address": "0x80575698",
+    "name": "PlayerSub18_handleBlueShellCollision",
+    "mangled": "PlayerSub18_handleBlueShellCollision",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80575698.c",
+    "size": 24,
+    "class": "PlayerSub18"
+  },
+  {
+    "address": "0x805756b0",
+    "name": "PlayerSub18_handleBombCollision",
+    "mangled": "PlayerSub18_handleBombCollision",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805756B0.c",
+    "size": 24,
+    "class": "PlayerSub18"
+  },
+  {
+    "address": "0x805756c8",
+    "name": "PlayerSub18_handleMushroomCollision",
+    "mangled": "PlayerSub18_handleMushroomCollision",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805756C8.c",
+    "size": 68,
+    "class": "PlayerSub18",
+    "calls": [
+      "0x8052dc70"
+    ]
+  },
+  {
+    "address": "0x8057570c",
+    "name": "PlayerSub18_handleStarCollision",
+    "mangled": "PlayerSub18_handleStarCollision",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8057570C.c",
+    "size": 56,
+    "class": "PlayerSub18"
+  },
+  {
+    "address": "0x80575744",
+    "name": "PlayerSub18_handleFibCollision",
+    "mangled": "PlayerSub18_handleFibCollision",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80575744.c",
+    "size": 360,
+    "class": "PlayerSub18",
+    "calls": [
+      "0x8052d5b4",
+      "0x8052e108"
+    ]
+  },
+  {
+    "address": "0x805b8c0c",
+    "name": "PlayerSub18_findCollisionInner",
+    "mangled": "PlayerSub18_findCollisionInner",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805B8C0C.c",
+    "size": 140,
+    "class": "PlayerSub18"
+  },
+  {
+    "address": "0x8057d5f0",
+    "name": "PlayerSub10_computeWallCollisionSpeedFactor",
+    "mangled": "PlayerSub10_computeWallCollisionSpeedFactor",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8057D5F0.c",
+    "size": 216,
+    "class": "PlayerSub10",
+    "calls": [
+      "0x80525fd0"
+    ]
+  },
+  {
+    "address": "0x8058681c",
+    "name": "PlayerSub10_doRespawn",
+    "mangled": "PlayerSub10_doRespawn",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8058681C.c",
+    "size": 112,
+    "class": "PlayerSub10",
+    "calls": [
+      "0x8051c3dc",
+      "0x8051c450"
+    ]
+  },
+  {
+    "address": "0x805ba430",
+    "name": "__ct__Q24Kart6HitboxFv",
+    "mangled": "__ct__Q24Kart6HitboxFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805BA430.c",
+    "size": 60,
+    "class": "Hitbox"
+  },
+  {
+    "address": "0x805ba46c",
+    "name": "reset__Q24Kart6HitboxFv",
+    "mangled": "reset__Q24Kart6HitboxFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805BA46C.c",
+    "size": 56,
+    "class": "Hitbox"
+  },
+  {
+    "address": "0x805ba4a4",
+    "name": "update__Q24Kart6HitboxFRCQ23EGG8Vector3fRCQ23EGG5QuatfRCQ23EGG8Vector3fff",
+    "mangled": "update__Q24Kart6HitboxFRCQ23EGG8Vector3fRCQ23EGG5QuatfRCQ23EGG8Vector3fff",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805BA4A4.c",
+    "size": 232,
+    "class": "Hitbox"
+  },
+  {
+    "address": "0x805ba640",
+    "name": "create__Q24Kart6HitboxFRCQ23EGG8Vector3ff",
+    "mangled": "create__Q24Kart6HitboxFRCQ23EGG8Vector3ff",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805BA640.c",
+    "size": 120,
+    "class": "Hitbox"
+  },
+  {
+    "address": "0x805ba6b8",
+    "name": "setScale__Q24Kart6HitboxFf",
+    "mangled": "setScale__Q24Kart6HitboxFf",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805BA6B8.c",
+    "size": 4,
+    "class": "Hitbox"
+  },
+  {
+    "address": "0x805ba7a4",
+    "name": "__ct__Q24Kart11HitboxGroupFv",
+    "mangled": "__ct__Q24Kart11HitboxGroupFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805BA7A4.c",
+    "size": 108,
+    "class": "HitboxGroup",
+    "calls": [
+      "0x80512908"
+    ]
+  },
+  {
+    "address": "0x805ba818",
+    "name": "reset__Q24Kart11HitboxGroupFv",
+    "mangled": "reset__Q24Kart11HitboxGroupFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805BA818.c",
+    "size": 156,
+    "class": "HitboxGroup"
+  },
+  {
+    "address": "0x805ba8c0",
+    "name": "setHitboxScale__Q24Kart11HitboxGroupFf",
+    "mangled": "setHitboxScale__Q24Kart11HitboxGroupFf",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805BA8C0.c",
+    "size": 72,
+    "class": "HitboxGroup"
+  },
+  {
+    "address": "0x805ba908",
+    "name": "createHitboxes__Q24Kart11HitboxGroupFl",
+    "mangled": "createHitboxes__Q24Kart11HitboxGroupFl",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805BA908.c",
+    "size": 32,
+    "class": "HitboxGroup"
+  },
+  {
+    "address": "0x805ba9a8",
+    "name": "initHitboxes__Q24Kart11HitboxGroupFPQ24Kart9BspHitboxPvl",
+    "mangled": "initHitboxes__Q24Kart11HitboxGroupFPQ24Kart9BspHitboxPvl",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805BA9A8.c",
+    "size": 452,
+    "class": "HitboxGroup"
+  },
+  {
+    "address": "0x805bab90",
+    "name": "setHitboxes__Q24Kart11HitboxGroupFPQ24Kart9BspHitbox",
+    "mangled": "setHitboxes__Q24Kart11HitboxGroupFPQ24Kart9BspHitbox",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805BAB90.c",
+    "size": 176,
+    "class": "HitboxGroup"
+  },
+  {
+    "address": "0x805bac44",
+    "name": "createSingleHitbox__Q24Kart11HitboxGroupFRCQ23EGG8Vector3ff",
+    "mangled": "createSingleHitbox__Q24Kart11HitboxGroupFRCQ23EGG8Vector3ff",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805BAC44.c",
+    "size": 188,
+    "class": "HitboxGroup"
+  },
+  {
+    "address": "0x805bad24",
+    "name": "computeCollisionLimits__Q24Kart11HitboxGroupFv",
+    "mangled": "computeCollisionLimits__Q24Kart11HitboxGroupFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805BAD24.c",
+    "size": 308,
+    "class": "HitboxGroup"
+  },
+  {
+    "address": "0x8059b9bc",
+    "name": "setBsp__Q24Kart16KartWheelPhysicsFv",
+    "mangled": "setBsp__Q24Kart16KartWheelPhysicsFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8059B9BC.c",
+    "size": 52,
+    "class": "KartWheelPhysics",
+    "calls": [
+      "0x807b90f4"
+    ]
+  },
+  {
+    "address": "0x8059bb78",
+    "name": "calcCollision__Q24Kart16KartWheelPhysicsFRCQ23EGG8Vector3fRCQ23EGG8Vector3f",
+    "mangled": "calcCollision__Q24Kart16KartWheelPhysicsFRCQ23EGG8Vector3fRCQ23EGG8Vector3f",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8059BB78.c",
+    "size": 1088,
+    "class": "KartWheelPhysics",
+    "calls": [
+      "0x80530a6c",
+      "0x80530ba4",
+      "0x80530e24",
+      "0x8057e12c",
+      "0x805f6074"
+    ]
+  },
+  {
+    "address": "0x8059c3bc",
+    "name": "__ct__Q24Kart14KartSusPhysicsFUlQ24Kart13KartWheelTypel",
+    "mangled": "__ct__Q24Kart14KartSusPhysicsFUlQ24Kart13KartWheelTypel",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8059C3BC.c",
+    "size": 128,
+    "class": "KartSusPhysics"
+  },
+  {
+    "address": "0x8059c43c",
+    "name": "reset__Q24Kart14KartSusPhysicsFv",
+    "mangled": "reset__Q24Kart14KartSusPhysicsFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8059C43C.c",
+    "size": 76,
+    "class": "KartSusPhysics"
+  },
+  {
+    "address": "0x8059c760",
+    "name": "calcCollision__Q24Kart14KartSusPhysicsFRCQ23EGG8Vector3fRCQ23EGG9Matrix34ff",
+    "mangled": "calcCollision__Q24Kart14KartSusPhysicsFRCQ23EGG8Vector3fRCQ23EGG9Matrix34ff",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8059C760.c",
+    "size": 16,
+    "class": "KartSusPhysics"
+  },
+  {
+    "address": "0x805b72ac",
+    "name": "setBspParams__Q24Kart12KartDynamicsFRCQ23EGG8Vector3fRCQ23EGG8Vector3fbf",
+    "mangled": "setBspParams__Q24Kart12KartDynamicsFRCQ23EGG8Vector3fRCQ23EGG8Vector3fbf",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805B72AC.c",
+    "size": 16,
+    "class": "KartDynamics"
+  },
+  {
+    "address": "0x805b9e10",
+    "name": "applySomeFloorMoment__Q24Kart11KartCollideFPQ24Kart12KartDynamicsPQ24Kart11HitboxGroupRCQ23EGG8Vector3fRCQ23EGG8Vector3fRCQ23EGG8Vector3fffbbb",
+    "mangled": "applySomeFloorMoment__Q24Kart11KartCollideFPQ24Kart12KartDynamicsPQ24Kart11HitboxGroupRCQ23EGG8Vector3fRCQ23EGG8Vector3fRCQ23EGG8Vector3fffbbb",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805B9E10.c",
+    "size": 1392,
+    "class": "KartCollide",
+    "calls": [
+      "0x8079aca0",
+      "0x807af43c"
+    ]
+  }
+]

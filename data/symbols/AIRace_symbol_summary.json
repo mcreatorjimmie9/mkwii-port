@@ -1,0 +1,49 @@
+{
+  "module": "AIRace",
+  "description": "",
+  "total_functions": 59,
+  "address_range": {
+    "min": "0x80523e94",
+    "max": "0x8073794c"
+  },
+  "confidence_breakdown": {
+    "certain": 59
+  },
+  "class_breakdown": {
+    "AI": 21,
+    "AIControlBase": 18,
+    "AITrickHandler": 5,
+    "AIPowAvoider": 4,
+    "AIAirtimeTracker": 3,
+    "AIEngine": 3,
+    "KPadAI": 2,
+    "AIEngineBike": 1,
+    "AIEngineKart": 1,
+    "KPadAIController": 1
+  },
+  "category_breakdown": {
+    "constructors": 7,
+    "destructors": 2,
+    "initialization": 5,
+    "update/calculation": 11,
+    "getters/predicates": 17,
+    "termination": 2,
+    "other": 5,
+    "processing/handling": 4,
+    "setters/copy": 6
+  },
+  "call_analysis": {
+    "total_call_references": 12,
+    "resolved_call_targets": 0,
+    "unresolved_call_targets": 12
+  },
+  "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols",
+  "cross_references": {
+    "seeky_mkw_structures": "racedata.h, raceinfo.h, player.h, itemhandler.h, itembehaviour.h, itemslotdata.h, eventhandler.h, rknetcontroller.h, inputdata.h",
+    "snailspeed3_module_symbols": "All 59 functions matched exactly",
+    "dolphin_symbols": "RMCP01 main DOL + REL module symbols (call target resolution)",
+    "gecko_codes": "Checked - no direct function-level matches in these address ranges",
+    "existing_decompiled": "data/decompiled/existing/src/net/ (naming patterns consistent)"
+  },
+  "notes": "All 59 functions have exact address matches in the snailspeed3/mkw decompilation project's StaticR.rel module symbols for RMCP01 (US region). Mangled C++ names are confirmed function signatures."
+}

@@ -1,0 +1,669 @@
+[
+  {
+    "address": "0x807a14d4",
+    "name": "ItemObj_update",
+    "mangled": "ItemObj_update",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807a14d4.c",
+    "size": 2248,
+    "class": "ItemObj"
+  },
+  {
+    "address": "0x80799e10",
+    "name": "ItemHolderPlayer_update",
+    "mangled": "ItemHolderPlayer_update",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80799e10.c",
+    "size": 2236,
+    "class": "ItemHolderPlayer",
+    "calls": [
+      "0x80656b2c",
+      "0x80656b38",
+      "0x80799848"
+    ]
+  },
+  {
+    "address": "0x80574a64",
+    "name": "PlayerSub18_checkItemCollision",
+    "mangled": "PlayerSub18_checkItemCollision",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80574a64.c",
+    "size": 1560,
+    "class": "PlayerSub18",
+    "calls": [
+      "0x805903f0",
+      "0x80590410",
+      "0x805b2bf8"
+    ]
+  },
+  {
+    "address": "0x80798958",
+    "name": "ItemHolderItem_update",
+    "mangled": "ItemHolderItem_update",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80798958.c",
+    "size": 1308,
+    "class": "ItemHolderItem"
+  },
+  {
+    "address": "0x807bd914",
+    "name": "ItemSlotData_decideItem",
+    "mangled": "ItemSlotData_decideItem",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807bd914.c",
+    "size": 1188,
+    "class": "ItemSlotData",
+    "calls": [
+      "0x807ba4b4",
+      "0x807bbc8c"
+    ]
+  },
+  {
+    "address": "0x807966d8",
+    "name": "ItemHolderPlayerb4_calcRotatingItemObjs",
+    "mangled": "ItemHolderPlayerb4_calcRotatingItemObjs",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807966d8.c",
+    "size": 876,
+    "class": "ItemHolderPlayerb4"
+  },
+  {
+    "address": "0x80660224",
+    "name": "ITEMHandler_importNewPackets",
+    "mangled": "ITEMHandler_importNewPackets",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80660224.c",
+    "size": 868,
+    "class": "ITEMHandler"
+  },
+  {
+    "address": "0x80792fe4",
+    "name": "initItemObjProperties",
+    "mangled": "initItemObjProperties",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80792fe4.c",
+    "size": 800,
+    "calls": [
+      "0x806643b0",
+      "0x80664af8",
+      "0x807937c4"
+    ]
+  },
+  {
+    "address": "0x80793df8",
+    "name": "ItemHolderPlayerb4_use",
+    "mangled": "ItemHolderPlayerb4_use",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80793df8.c",
+    "size": 760,
+    "class": "ItemHolderPlayerb4",
+    "calls": [
+      "0x80788f4c",
+      "0x8079c4a0",
+      "0x8079c848",
+      "0x8079d68c",
+      "0x807a0304"
+    ]
+  },
+  {
+    "address": "0x80798450",
+    "name": "ItemHolderItem_despawn",
+    "mangled": "ItemHolderItem_despawn",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80798450.c",
+    "size": 648,
+    "class": "ItemHolderItem",
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x8065e5d4",
+    "name": "createStaticInstance__Q23Net11ITEMHandlerFv",
+    "mangled": "createStaticInstance__Q23Net11ITEMHandlerFv",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8065e5d4.c",
+    "size": 636,
+    "class": "ITEMHandler",
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x807b6a98",
+    "name": "ItemObjBlue_tryLockPlayer",
+    "mangled": "ItemObjBlue_tryLockPlayer",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807b6a98.c",
+    "size": 608,
+    "class": "ItemObjBlue",
+    "calls": [
+      "0x80555bf8",
+      "0x807b72c8"
+    ]
+  },
+  {
+    "address": "0x805818c0",
+    "name": "PlayerSub10_activateMushroom",
+    "mangled": "PlayerSub10_activateMushroom",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x805818c0.c",
+    "size": 600,
+    "class": "PlayerSub10",
+    "calls": [
+      "0x80591838"
+    ]
+  },
+  {
+    "address": "0x807a2868",
+    "name": "ItemObj_loadTeamsModel",
+    "mangled": "ItemObj_loadTeamsModel",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807a2868.c",
+    "size": 592,
+    "class": "ItemObj",
+    "calls": [
+      "0x8079b740",
+      "0x807a0774",
+      "0x807af8ac"
+    ]
+  },
+  {
+    "address": "0x8065e890",
+    "name": "ITEMHandler_construct",
+    "mangled": "ITEMHandler_construct",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8065e890.c",
+    "size": 572,
+    "class": "ITEMHandler",
+    "calls": [
+      "0x8065f120"
+    ]
+  },
+  {
+    "address": "0x807adec8",
+    "name": "ItemObjBlue_makeArray",
+    "mangled": "ItemObjBlue_makeArray",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807adec8.c",
+    "size": 564,
+    "class": "ItemObjBlue"
+  },
+  {
+    "address": "0x8079b7c0",
+    "name": "ItemHolder_construct",
+    "mangled": "ItemHolder_construct",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8079b7c0.c",
+    "size": 516,
+    "class": "ItemHolder",
+    "calls": [
+      "0x80590144",
+      "0x80590cd8",
+      "0x807b5884"
+    ]
+  },
+  {
+    "address": "0x807a762c",
+    "name": "ItemObjBomb_loadModel",
+    "mangled": "ItemObjBomb_loadModel",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807a762c.c",
+    "size": 508,
+    "class": "ItemObjBomb",
+    "calls": [
+      "0x80555bf8",
+      "0x807a4184"
+    ]
+  },
+  {
+    "address": "0x807bc864",
+    "name": "ItemRoulette_update",
+    "mangled": "ItemRoulette_update",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807bc864.c",
+    "size": 496,
+    "class": "ItemRoulette",
+    "calls": [
+      "0x80555bf8",
+      "0x807bb060"
+    ]
+  },
+  {
+    "address": "0x80582ffc",
+    "name": "PlayerSub10_activateMega",
+    "mangled": "PlayerSub10_activateMega",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80582ffc.c",
+    "size": 456,
+    "class": "PlayerSub10",
+    "calls": [
+      "0x80590460",
+      "0x805907d8",
+      "0x805907f4",
+      "0x80590a84",
+      "0x80590aa0",
+      "0x80590e84",
+      "0x80591088",
+      "0x806a5d28",
+      "0x806a5ea4",
+      "0x80708a70",
+      "0x807cbb60"
+    ]
+  },
+  {
+    "address": "0x807ac4d8",
+    "name": "ItemObjRed_makeArray",
+    "mangled": "ItemObjRed_makeArray",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807ac4d8.c",
+    "size": 456,
+    "class": "ItemObjRed"
+  },
+  {
+    "address": "0x807aa69c",
+    "name": "ItemHolderPlayer_useBlooper",
+    "mangled": "ItemHolderPlayer_useBlooper",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807aa69c.c",
+    "size": 452,
+    "class": "ItemHolderPlayer"
+  },
+  {
+    "address": "0x807a66ac",
+    "name": "ItemObjBomb_makeArray",
+    "mangled": "ItemObjBomb_makeArray",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807a66ac.c",
+    "size": 448,
+    "class": "ItemObjBomb"
+  },
+  {
+    "address": "0x80799bc8",
+    "name": "ItemHolderPlayer_init",
+    "mangled": "ItemHolderPlayer_init",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80799bc8.c",
+    "size": 432,
+    "class": "ItemHolderPlayer",
+    "calls": [
+      "0x80656b2c",
+      "0x80799848"
+    ]
+  },
+  {
+    "address": "0x807a39bc",
+    "name": "ItemObj_checkPlayerCollision",
+    "mangled": "ItemObj_checkPlayerCollision",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807a39bc.c",
+    "size": 428,
+    "class": "ItemObj",
+    "calls": [
+      "0x805598b4"
+    ],
+    "resolved_calls": [
+      {
+        "address": "0x805598b4",
+        "name": "fn_1_47018"
+      }
+    ]
+  },
+  {
+    "address": "0x8079c194",
+    "name": "ItemHolder_checkPlayerCollision",
+    "mangled": "ItemHolder_checkPlayerCollision",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8079c194.c",
+    "size": 420,
+    "class": "ItemHolder",
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x807ae4f0",
+    "name": "ItemObjBlue_loadModel",
+    "mangled": "ItemObjBlue_loadModel",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807ae4f0.c",
+    "size": 416,
+    "class": "ItemObjBlue"
+  },
+  {
+    "address": "0x8079b484",
+    "name": "ItemHolder_destroy",
+    "mangled": "ItemHolder_destroy",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8079b484.c",
+    "size": 412,
+    "class": "ItemHolder",
+    "calls": [
+      "0x8055fe08"
+    ],
+    "resolved_calls": [
+      {
+        "address": "0x8055fe08",
+        "name": "fn_1_4D56C"
+      }
+    ]
+  },
+  {
+    "address": "0x8059e600",
+    "name": "cancelBullet",
+    "mangled": "cancelBullet",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8059e600.c",
+    "size": 388,
+    "calls": [
+      "0x80537f50",
+      "0x805907c0",
+      "0x80590a0c",
+      "0x80590d4c"
+    ]
+  },
+  {
+    "address": "0x8079c338",
+    "name": "ItemHolder_initItemDirect",
+    "mangled": "ItemHolder_initItemDirect",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8079c338.c",
+    "size": 364,
+    "class": "ItemHolder"
+  },
+  {
+    "address": "0x8079c614",
+    "name": "ItemHolder_spawnDirect",
+    "mangled": "ItemHolder_spawnDirect",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8079c614.c",
+    "size": 364,
+    "class": "ItemHolder"
+  },
+  {
+    "address": "0x807bd208",
+    "name": "ItemSlotData_scaleTableForPlayerCount",
+    "mangled": "ItemSlotData_scaleTableForPlayerCount",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807bd208.c",
+    "size": 352,
+    "class": "ItemSlotData",
+    "calls": [
+      "0x80555bf8",
+      "0x807ba4b4",
+      "0x807bb35c"
+    ]
+  },
+  {
+    "address": "0x80587d94",
+    "name": "PlayerSub10_activateBullet",
+    "mangled": "PlayerSub10_activateBullet",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80587d94.c",
+    "size": 344,
+    "class": "PlayerSub10"
+  },
+  {
+    "address": "0x8079bd38",
+    "name": "ItemHolder_update",
+    "mangled": "ItemHolder_update",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8079bd38.c",
+    "size": 336,
+    "class": "ItemHolder",
+    "calls": [
+      "0x80555bf8",
+      "0x8055f1e0"
+    ],
+    "resolved_calls": [
+      {
+        "address": "0x8055f1e0",
+        "name": "fn_1_4C944"
+      },
+      {
+        "address": "0x8055f1e0",
+        "name": "fn_1_4C944"
+      }
+    ]
+  },
+  {
+    "address": "0x80793364",
+    "name": "copyItemObjProperties",
+    "mangled": "copyItemObjProperties",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x80793364.c",
+    "size": 316
+  },
+  {
+    "address": "0x807982ec",
+    "name": "ItemHolderItem_spawn",
+    "mangled": "ItemHolderItem_spawn",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807982ec.c",
+    "size": 292,
+    "class": "ItemHolderItem",
+    "calls": [
+      "0x80798764",
+      "0x80798b94"
+    ]
+  },
+  {
+    "address": "0x8079c780",
+    "name": "ItemHolder_spawnTc",
+    "mangled": "ItemHolder_spawnTc",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8079c780.c",
+    "size": 288,
+    "class": "ItemHolder",
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x807a070c",
+    "name": "ItemObj_init",
+    "mangled": "ItemObj_init",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807a070c.c",
+    "size": 220,
+    "class": "ItemObj",
+    "calls": [
+      "0x807a3dbc"
+    ]
+  },
+  {
+    "address": "0x8065ead0",
+    "name": "ITEMHandler_update",
+    "mangled": "ITEMHandler_update",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8065ead0.c",
+    "size": 216,
+    "class": "ITEMHandler"
+  },
+  {
+    "address": "0x807981b4",
+    "name": "ItemHolderItem_initObjs",
+    "mangled": "ItemHolderItem_initObjs",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807981b4.c",
+    "size": 200,
+    "class": "ItemHolderItem"
+  },
+  {
+    "address": "0x8079bc7c",
+    "name": "ItemHolder_init",
+    "mangled": "ItemHolder_init",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8079bc7c.c",
+    "size": 188,
+    "class": "ItemHolder",
+    "calls": [
+      "0x8055f1c8",
+      "0x8055f1e0"
+    ],
+    "resolved_calls": [
+      {
+        "address": "0x8055f1c8",
+        "name": "fn_1_4C92C"
+      },
+      {
+        "address": "0x8055f1e0",
+        "name": "fn_1_4C944"
+      }
+    ]
+  },
+  {
+    "address": "0x807bd868",
+    "name": "ItemSlotData_checkSpawnTimer",
+    "mangled": "ItemSlotData_checkSpawnTimer",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807bd868.c",
+    "size": 172,
+    "class": "ItemSlotData"
+  },
+  {
+    "address": "0x807bded4",
+    "name": "ItemSlotData_updateTimers",
+    "mangled": "ItemSlotData_updateTimers",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807bded4.c",
+    "size": 168,
+    "class": "ItemSlotData",
+    "calls": [
+      "0x80555bf8",
+      "0x807ba4b4",
+      "0x807bc138"
+    ]
+  },
+  {
+    "address": "0x807a0a38",
+    "name": "ItemObj_spawn",
+    "mangled": "ItemObj_spawn",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807a0a38.c",
+    "size": 164,
+    "class": "ItemObj",
+    "calls": [
+      "0x80798d08",
+      "0x8079a1bc",
+      "0x8079ab3c",
+      "0x807a41d4",
+      "0x807a47c0",
+      "0x807a47c8"
+    ]
+  },
+  {
+    "address": "0x8065fa50",
+    "name": "ITEMHandler_getPlayerMode",
+    "mangled": "ITEMHandler_getPlayerMode",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8065fa50.c",
+    "size": 160,
+    "class": "ITEMHandler",
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x807a9d90",
+    "name": "ItemObjFib_makeArray",
+    "mangled": "ItemObjFib_makeArray",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807a9d90.c",
+    "size": 152,
+    "class": "ItemObjFib",
+    "calls": [
+      "0x8068f828",
+      "0x8078a188"
+    ]
+  },
+  {
+    "address": "0x807bcc64",
+    "name": "ItemSlotTable_createInstance",
+    "mangled": "ItemSlotTable_createInstance",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807bcc64.c",
+    "size": 152,
+    "class": "ItemSlotTable"
+  },
+  {
+    "address": "0x8065f704",
+    "name": "ITEMHandler_getPlayerStoredItem",
+    "mangled": "ITEMHandler_getPlayerStoredItem",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8065f704.c",
+    "size": 148,
+    "class": "ITEMHandler"
+  },
+  {
+    "address": "0x8079ba04",
+    "name": "ItemHolderPlayer_destroy",
+    "mangled": "ItemHolderPlayer_destroy",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x8079ba04.c",
+    "size": 148,
+    "class": "ItemHolderPlayer",
+    "calls": [
+      "0x8078849c"
+    ]
+  },
+  {
+    "address": "0x807ba064",
+    "name": "ItemHolderPlayer_useLightning",
+    "mangled": "ItemHolderPlayer_useLightning",
+    "confidence": "certain",
+    "source": "snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)",
+    "file": "0x807ba064.c",
+    "size": 136,
+    "class": "ItemHolderPlayer"
+  }
+]

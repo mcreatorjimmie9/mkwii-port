@@ -1,0 +1,1366 @@
+[
+  {
+    "address": "0x80580128",
+    "name": "PlayerSub10_cancelWheelie",
+    "mangled": "PlayerSub10_cancelWheelie",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "PlayerSub10",
+    "size": 4,
+    "calls": []
+  },
+  {
+    "address": "0x805814c8",
+    "name": "getMaxMtCharge__Kart8KartMove",
+    "mangled": "getMaxMtCharge__Q24Kart8KartMoveFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartMove",
+    "size": 12,
+    "calls": []
+  },
+  {
+    "address": "0x805814d4",
+    "name": "getMaxSmtCharge__Kart8KartMove",
+    "mangled": "getMaxSmtCharge__Q24Kart8KartMoveFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartMove",
+    "size": 12,
+    "calls": [
+      "0x807960a0"
+    ]
+  },
+  {
+    "address": "0x805814e0",
+    "name": "getAppliedHopStickX__Kart8KartMove",
+    "mangled": "getAppliedHopStickX__Q24Kart8KartMoveFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartMove",
+    "size": 44,
+    "calls": []
+  },
+  {
+    "address": "0x80583c08",
+    "name": "setScale__Kart8KartMove",
+    "mangled": "setScale__Q24Kart8KartMoveFQ23EGG8Vector3f",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartMove",
+    "size": 28,
+    "calls": []
+  },
+  {
+    "address": "0x80583f0c",
+    "name": "empty__Kart8KartMoveFl",
+    "mangled": "empty__Q24Kart8KartMoveFl",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartMove",
+    "size": 4,
+    "calls": []
+  },
+  {
+    "address": "0x805857cc",
+    "name": "clearBoost__Kart8KartMove",
+    "mangled": "clearBoost__Q24Kart8KartMoveFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartMove",
+    "size": 320,
+    "calls": [
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x80589a74",
+    "name": "PlayerSub10_updateWheelie",
+    "mangled": "PlayerSub10_updateWheelie",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "PlayerSub10",
+    "size": 4,
+    "calls": []
+  },
+  {
+    "address": "0x8058a24c",
+    "name": "PlayerSub10Bike_updateWheelie",
+    "mangled": "PlayerSub10Bike_updateWheelie",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "PlayerSub10",
+    "size": 4,
+    "calls": [
+      "indirect"
+    ]
+  },
+  {
+    "address": "0x8058a80c",
+    "name": "PlayerSub10Bike_getWheelieSoftSpeedLimitBonus",
+    "mangled": "PlayerSub10Bike_getWheelieSoftSpeedLimitBonus",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "PlayerSub10",
+    "size": 44,
+    "calls": [
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x8058a838",
+    "name": "PlayerSub10Bike_startWheelie",
+    "mangled": "PlayerSub10Bike_startWheelie",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "PlayerSub10",
+    "size": 116,
+    "calls": [
+      "0x80555bf4",
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x8058a8ac",
+    "name": "PlayerSub10Bike_cancelWheelie",
+    "mangled": "PlayerSub10Bike_cancelWheelie",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "PlayerSub10",
+    "size": 48,
+    "calls": [
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x8058ac80",
+    "name": "PlayerSub10Bike_tryStartWheelie",
+    "mangled": "PlayerSub10Bike_tryStartWheelie",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "PlayerSub10",
+    "size": 200,
+    "calls": [
+      "0x8052f248",
+      "0x8052f248"
+    ]
+  },
+  {
+    "address": "0x8058b4c8",
+    "name": "PlayerSub10Bike_checkWheelieSpeed",
+    "mangled": "PlayerSub10Bike_checkWheelieSpeed",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "PlayerSub10",
+    "size": 68,
+    "calls": [
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x8058bc2c",
+    "name": "PlayerSub10_checkWheelie",
+    "mangled": "PlayerSub10_checkWheelie",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "PlayerSub10",
+    "size": 8,
+    "calls": []
+  },
+  {
+    "address": "0x80590ef4",
+    "name": "PlayerKart_createTires",
+    "mangled": "PlayerKart_createTires",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "PlayerKart",
+    "size": 508,
+    "calls": [
+      "0x805a22e4"
+    ]
+  },
+  {
+    "address": "0x805954a8",
+    "name": "Kart12KartSettings",
+    "mangled": "__ct__Q24Kart12KartSettingsFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartSettings",
+    "size": 204,
+    "calls": [
+      "0x80590aac"
+    ]
+  },
+  {
+    "address": "0x8059648c",
+    "name": "Kart15KartCollideArea",
+    "mangled": "__ct__Q24Kart15KartCollideAreaFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartCollide",
+    "size": 240,
+    "calls": [
+      "0x8059148c",
+      "0x805899cc",
+      "0x805903ec",
+      "0x805b3c6c",
+      "0x80590774",
+      "0x805b3c6c",
+      "0x8059032c",
+      "0x805907bc",
+      "0x805849cc",
+      "0x8059478c"
+    ]
+  },
+  {
+    "address": "0x8059689c",
+    "name": "Kart9KartState",
+    "mangled": "__ct__Q24Kart9KartStateFPQ24Kart12KartSettings",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartState",
+    "size": 424,
+    "calls": [
+      "0x80590a9c",
+      "0x80590a9c",
+      "0x80590d38"
+    ]
+  },
+  {
+    "address": "0x80596a44",
+    "name": "init__Kart9KartState",
+    "mangled": "init__Q24Kart9KartStateFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartState",
+    "size": 56,
+    "calls": [
+      "0x80590cfc"
+    ]
+  },
+  {
+    "address": "0x80596a7c",
+    "name": "reset__Kart9KartState",
+    "mangled": "reset__Q24Kart9KartStateFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartState",
+    "size": 160,
+    "calls": [
+      "0x8059040c"
+    ]
+  },
+  {
+    "address": "0x80596b1c",
+    "name": "resetOob__Kart9KartState",
+    "mangled": "resetOob__Q24Kart9KartStateFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartState",
+    "size": 16,
+    "calls": [
+      "0x805907bc"
+    ]
+  },
+  {
+    "address": "0x80598230",
+    "name": "KartSub_createComponents",
+    "mangled": "KartSub_createComponents",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartSub",
+    "size": 560,
+    "calls": [
+      "0x805907bc",
+      "0x8059088c",
+      "0x8059024c",
+      "0x80788484",
+      "0x80590818",
+      "0x805907bc",
+      "0x8059156c",
+      "0x805907bc",
+      "0x80591560",
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x80598460",
+    "name": "KartSub_init",
+    "mangled": "KartSub_init",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartSub",
+    "size": 388,
+    "calls": [
+      "0x80590a9c",
+      "0x80590690",
+      "0x805916a4",
+      "0x805961bc",
+      "0x805945d4",
+      "indirect",
+      "0x80569880",
+      "0x80591658",
+      "0x805b7904",
+      "0x805907bc",
+      "0x8058496c",
+      "0x805917c4",
+      "0x8059174c",
+      "0x80590e98",
+      "indirect"
+    ]
+  },
+  {
+    "address": "0x8059aff0",
+    "name": "KartSus_ct",
+    "mangled": "KartSus_ct",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartSus",
+    "size": 72,
+    "calls": [
+      "0x805914fc",
+      "indirect"
+    ]
+  },
+  {
+    "address": "0x8059b048",
+    "name": "KartSus_init",
+    "mangled": "KartSus_init",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartSus",
+    "size": 116,
+    "calls": [
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x8059944c"
+    ]
+  },
+  {
+    "address": "0x8059b0bc",
+    "name": "KartSus_initPhysics",
+    "mangled": "KartSus_initPhysics",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartSus",
+    "size": 8,
+    "calls": []
+  },
+  {
+    "address": "0x8059b8f4",
+    "name": "Kart16KartWheelPhysics",
+    "mangled": "__ct__Q24Kart16KartWheelPhysicsFUll",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartWheelPhysics",
+    "size": 100,
+    "calls": [
+      "0x805665f0",
+      "0x805665f0",
+      "0x805665f0",
+      "0x805665f0",
+      "0x805635cc"
+    ]
+  },
+  {
+    "address": "0x8059b958",
+    "name": "init__Kart16KartWheelPhysics",
+    "mangled": "init__Q24Kart16KartWheelPhysicsFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartWheelPhysics",
+    "size": 100,
+    "calls": []
+  },
+  {
+    "address": "0x8059b9bc",
+    "name": "setBsp__Kart16KartWheelPhysics",
+    "mangled": "setBsp__Q24Kart16KartWheelPhysicsFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartWheelPhysics",
+    "size": 52,
+    "calls": [
+      "indirect",
+      "0x80842214"
+    ]
+  },
+  {
+    "address": "0x8059b9f0",
+    "name": "reset__Kart16KartWheelPhysics",
+    "mangled": "reset__Q24Kart16KartWheelPhysicsFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartWheelPhysics",
+    "size": 184,
+    "calls": [
+      "0x80566624",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x808569b0"
+    ]
+  },
+  {
+    "address": "0x8059baa8",
+    "name": "setColState__Kart16KartWheelPhysicsFffRCQ23EGG8Vector3f",
+    "mangled": "setColState__Q24Kart16KartWheelPhysicsFffRCQ23EGG8Vector3f",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartWheelPhysics",
+    "size": 208,
+    "calls": [
+      "indirect",
+      "0x805ba100",
+      "0x80568814",
+      "0x805669d0",
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x8059bb78",
+    "name": "calcCollision__Kart16KartWheelPhysics",
+    "mangled": "calcCollision__Q24Kart16KartWheelPhysicsFRCQ23EGG8Vector3fRCQ23EGG8Vector3f",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartWheelPhysics",
+    "size": 1088,
+    "calls": [
+      "0x80566294",
+      "indirect",
+      "0x805665f0",
+      "0x80566624",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x805b9d48",
+      "0x805ba100",
+      "0x80568814",
+      "0x805669d0",
+      "0x805b9e80",
+      "0x80566294",
+      "0x805665f0",
+      "0x80607408",
+      "0x80566624",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x805ba100",
+      "0x80568814",
+      "0x805669d0",
+      "0x80566294",
+      "0x805665f0",
+      "0x80566624",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x805ba100",
+      "0x805686cc",
+      "indirect",
+      "0x8067f350"
+    ]
+  },
+  {
+    "address": "0x8059bfb8",
+    "name": "calc__Kart16KartWheelPhysics",
+    "mangled": "calc__Q24Kart16KartWheelPhysicsFRCQ23EGG8Vector3fRCQ23EGG8Vector3f",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartWheelPhysics",
+    "size": 716,
+    "calls": [
+      "indirect",
+      "0x80566624",
+      "0x80566624",
+      "0x80566624",
+      "0x80566624",
+      "0x80555bf4",
+      "0x80566ecc",
+      "indirect",
+      "0x8056909c",
+      "0x80568284",
+      "0x80569104",
+      "0x805f8114",
+      "0x8056909c",
+      "0x80568284",
+      "0x80569104",
+      "0x805f8114",
+      "0x8056819c",
+      "0x80566ef8",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x805b0434",
+      "0x80555bf4",
+      "0x805b0434",
+      "0x80555bf4",
+      "0x805b3bf8",
+      "0x80555bf4",
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x8059c284",
+    "name": "updateEffectiveRadius__Kart16KartWheelPhysics",
+    "mangled": "updateEffectiveRadius__Q24Kart16KartWheelPhysicsFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartWheelPhysics",
+    "size": 36,
+    "calls": [
+      "indirect",
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x8059c2a8",
+    "name": "unk80599dc0__Kart16KartWheelPhysics",
+    "mangled": "unk80599dc0__Q24Kart16KartWheelPhysicsFRCQ23EGG8Vector3f",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartWheelPhysics",
+    "size": 236,
+    "calls": [
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x805b06fc",
+      "0x805b3c6c",
+      "0x80555bf4",
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x8059c394",
+    "name": "hasFloorCollision__Kart16KartWheelPhysicsC",
+    "mangled": "hasFloorCollision__Q24Kart16KartWheelPhysicsCFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartWheelPhysics",
+    "size": 16,
+    "calls": [
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x8059c3a4",
+    "name": "getCollisionFloorNrm__Kart16KartWheelPhysicsC",
+    "mangled": "getCollisionFloorNrm__Q24Kart16KartWheelPhysicsCFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartWheelPhysics",
+    "size": 12,
+    "calls": []
+  },
+  {
+    "address": "0x8059c3b0",
+    "name": "getKartCollisionInfo__Kart16KartWheelPhysicsC",
+    "mangled": "getKartCollisionInfo__Q24Kart16KartWheelPhysicsCFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartWheelPhysics",
+    "size": 12,
+    "calls": [
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x8059c3bc",
+    "name": "Kart14KartSusPhysics",
+    "mangled": "__ct__Q24Kart14KartSusPhysicsFUlQ24Kart13KartWheelTypel",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartSus",
+    "size": 128,
+    "calls": [
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x8059c43c",
+    "name": "reset__Kart14KartSusPhysics",
+    "mangled": "reset__Q24Kart14KartSusPhysicsFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartSus",
+    "size": 76,
+    "calls": []
+  },
+  {
+    "address": "0x8059c488",
+    "name": "init__Kart14KartSusPhysics",
+    "mangled": "init__Q24Kart14KartSusPhysicsFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartSus",
+    "size": 140,
+    "calls": []
+  },
+  {
+    "address": "0x8059c514",
+    "name": "setInitialState__Kart14KartSusPhysics",
+    "mangled": "setInitialState__Q24Kart14KartSusPhysicsFv",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartSus",
+    "size": 588,
+    "calls": [
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x805b0aac",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x8059c760",
+    "name": "calcCollision__Kart14KartSusPhysics",
+    "mangled": "calcCollision__Q24Kart14KartSusPhysicsFRCQ23EGG8Vector3fRCQ23EGG9Matrix34ff",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartSus",
+    "size": 640,
+    "calls": [
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x8059ca5c",
+    "name": "WheelPhysicsHolder_applySuspensions",
+    "mangled": "WheelPhysicsHolder_applySuspensions",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "WheelPhysicsHolder",
+    "size": 1104,
+    "calls": [
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4",
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x8059cf2c",
+    "name": "KartTire_ct",
+    "mangled": "KartTire_ct",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartTire",
+    "size": 108,
+    "calls": [
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x8059cf98",
+    "name": "KartTire_init",
+    "mangled": "KartTire_init",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartTire",
+    "size": 100,
+    "calls": [
+      "0x80555bf4"
+    ]
+  },
+  {
+    "address": "0x8059cffc",
+    "name": "KartTire_createPhysics",
+    "mangled": "KartTire_createPhysics",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartTire",
+    "size": 84,
+    "calls": [
+      "0x80555bf4",
+      "0x8059c0fc",
+      "0x805b3dfc"
+    ]
+  },
+  {
+    "address": "0x8059d050",
+    "name": "KartTire_initBsp",
+    "mangled": "KartTire_initBsp",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartTire",
+    "size": 8,
+    "calls": []
+  },
+  {
+    "address": "0x805a1aa4",
+    "name": "Kart11KartPhysicsFb",
+    "mangled": "__ct__Q24Kart11KartPhysicsFb",
+    "confidence": "certain",
+    "source": "Pre-existing name in manifest",
+    "class": "KartPhysics",
+    "size": 188,
+    "calls": [
+      "0x805aa8a8",
+      "0x8059024c",
+      "0x805aaa2c"
+    ]
+  },
+  {
+    "address": "0x805a1df0",
+    "name": "KartDynamics_debugGetParamY",
+    "mangled": "debugGetParamY__Q212KartDynamicsFv",
+    "confidence": "guess",
+    "source": "Code analysis: checks global b68==0x1f (debug scene), loads float from r4+4 (vec3 Y component)",
+    "class": "KartDynamics",
+    "size": 52,
+    "calls": []
+  },
+  {
+    "address": "0x805a1e24",
+    "name": "KartDynamics_debugGetField68",
+    "mangled": "debugGetField68__Q212KartDynamicsFv",
+    "confidence": "guess",
+    "source": "Code analysis: checks global b68==0x1f, loads float from self+0x68",
+    "class": "KartDynamics",
+    "size": 48,
+    "calls": []
+  },
+  {
+    "address": "0x805a1e54",
+    "name": "KartDynamics_toggleInvisibleFlag",
+    "mangled": "toggleInvisibleFlag__Q212KartDynamicsFv",
+    "confidence": "guess",
+    "source": "Code analysis: reads global race state b70/b74, checks input flags, toggles bit at self+0x340 (NOR with itself)",
+    "class": "KartDynamics",
+    "size": 176,
+    "calls": [
+      "0x80533d50"
+    ]
+  },
+  {
+    "address": "0x805a1f04",
+    "name": "KartDynamics_updatePositionAfterCollision",
+    "mangled": "updatePositionAfterCollision__Q212KartDynamicsFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: checks bit 0x1a at self+0x2c, checks race state, sets bit 0x20 at self+0x334, updates position at 0x64-0x78 using vec3 at 0xc4-0xcc and 0x138-0x140 with scale at 0x308",
+    "class": "KartDynamics",
+    "size": 424,
+    "calls": [
+      "0x80590438",
+      "0x80537f50",
+      "0x80590aa0",
+      "0x80720be4",
+      "0x80590aa0",
+      "0x80720be4"
+    ]
+  },
+  {
+    "address": "0x805a20ac",
+    "name": "KartDynamics_calcSpeedInternal",
+    "mangled": "calcSpeedInternal__Q212KartDynamicsFf",
+    "confidence": "guess",
+    "source": "Code analysis: 120B total (48B code, 72B data), SIMD comparison, float param, heavy data layout suggests un-inlined physics calc",
+    "class": "KartDynamics",
+    "size": 120,
+    "calls": []
+  },
+  {
+    "address": "0x805a2124",
+    "name": "KartDynamics_calcSteeringInternal",
+    "mangled": "calcSteeringInternal__Q212KartDynamicsFff",
+    "confidence": "guess",
+    "source": "Code analysis: 448B total (416B data, 32B code), SIMD xsmaddmsp, large data table suggests lookup-based steering calc",
+    "class": "KartDynamics",
+    "size": 448,
+    "calls": []
+  },
+  {
+    "address": "0x805a22e4",
+    "name": "KartDynamics_accumulateForce",
+    "mangled": "accumulateForce__Q212KartDynamicsFif",
+    "confidence": "uncertain",
+    "source": "Code analysis: r4*0x18 index into table, f3*f1 multiply, stores ptr at 0x14, adds to float at offset 8 - force/torque accumulation pattern",
+    "class": "KartDynamics",
+    "size": 416,
+    "calls": []
+  },
+  {
+    "address": "0x805a2484",
+    "name": "KartDynamics_calcTransformMatrix",
+    "mangled": "calcTransformMatrix__Q212KartDynamicsFRQ23EGG8Vector3f",
+    "confidence": "uncertain",
+    "source": "Code analysis: 96 FP ops, builds 3x4 matrix from pos 0x64-0x78, translates by vec3, calls vec3 cross product; tail code manages state at 0x334/0x33c/0x344",
+    "class": "KartDynamics",
+    "size": 604,
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805a26e0",
+    "name": "KartDynamics_ct",
+    "mangled": "__ct__Q212KartDynamicsFRCQ23EGG8Vector3fi",
+    "confidence": "likely",
+    "source": "Code analysis: stores vtable at offset 0, stores r4 at offset 4, zeroes offset 0x70, calls sub_805a2770 (initInternal) - classic constructor pattern",
+    "class": "KartDynamics",
+    "size": 80,
+    "calls": [
+      "0x805a2774"
+    ]
+  },
+  {
+    "address": "0x805a2730",
+    "name": "KartDynamics_initVec3Array",
+    "mangled": "initVec3Array__Q212KartDynamicsFi",
+    "confidence": "uncertain",
+    "source": "Code analysis: null-check on r3, r4 > 0 guard, calls sub_80555bf8 (EGG::Vector3f constructor) - array initialization",
+    "class": "KartDynamics",
+    "size": 64,
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805a2770",
+    "name": "KartDynamics_initInternal",
+    "mangled": "initInternal__Q212KartDynamicsFRCQ23EGG8Vector3fi",
+    "confidence": "uncertain",
+    "source": "Code analysis: allocates 0xC-byte element arrays, reads global at 0x128/0xf8/0x178, stores count at self+0x80 and array ptr at self+0xac, called from constructor",
+    "class": "KartDynamics",
+    "size": 348,
+    "calls": [
+      "0x805a2670",
+      "0x80555bf8",
+      "0x80555bf8",
+      "0x80555bf8",
+      "0x80555bf8",
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805a28cc",
+    "name": "KartDynamics_setupPhysics",
+    "mangled": "setupPhysics__Q212KartDynamicsFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: reads vehicle type at offset 0x9c, calls sub_80537ffc (vehicle param lookup), scales by 0x168, initializes offset 0x6c/0x70/0xb0",
+    "class": "KartDynamics",
+    "size": 572,
+    "calls": [
+      "0x80537ffc",
+      "0x80555bf8",
+      "0x806e346c",
+      "0x806e3720",
+      "0x80555bf8",
+      "0x80555bf8",
+      "0x80555bf8",
+      "0x806e35dc"
+    ]
+  },
+  {
+    "address": "0x805a2b08",
+    "name": "KartDynamics_updateSpeed",
+    "mangled": "updateSpeed__Q212KartDynamicsFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: 15 FP ops, reads velocity at 0x114, physics scale at 0x1fc, speed param at 0x344, position at 0x70-0x78 - speed update function",
+    "class": "KartDynamics",
+    "size": 124,
+    "calls": []
+  },
+  {
+    "address": "0x805a2b84",
+    "name": "KartDynamics_update",
+    "mangled": "update__Q212KartDynamicsFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: reads state u16 at 0x6c, checks bits 0x1d/0x1c, vtable dispatch at offset 0x18, reads s16 indices at 0x46/0x48 with float at 0x40 - main update loop",
+    "class": "KartDynamics",
+    "size": 628,
+    "calls": [
+      "0x80537f50",
+      "0x806e35dc",
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805a2df8",
+    "name": "KartDynamics_scaleAndTransformPoints",
+    "mangled": "scaleAndTransformPoints__Q212KartDynamicsFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: reads vec3 at 0x94/0x98/0x9c, scales by global physics float, transforms via mat3 at 0xc, iterates over array at 0xac",
+    "class": "KartDynamics",
+    "size": 260,
+    "calls": [
+      "0x80555bf8",
+      "0x80555bf8",
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805a2efc",
+    "name": "KartDynamics_transformSinglePoint",
+    "mangled": "transformSinglePoint__Q212KartDynamicsFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: reads vec3 at 0x94/0x98/0x9c, scales by global float, transforms to output via sub_80555bf8 - single point version",
+    "class": "KartDynamics",
+    "size": 92,
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805a2f58",
+    "name": "KartDynamics_copyPointsToArray",
+    "mangled": "copyPointsToArray__Q212KartDynamicsFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: iterates count from 0x80, copies vec3 from array at 0x8 to array at 0xac using sub_80555bf8 (vec3 copy)",
+    "class": "KartDynamics",
+    "size": 244,
+    "calls": [
+      "0x80555bf8",
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805a304c",
+    "name": "KartDynamics_physicsDataTable",
+    "mangled": "physicsDataTable__Q212KartDynamicsFv",
+    "confidence": "guess",
+    "source": "Code analysis: 2860B total (2844B embedded data, 16B code), stack frame 0x170, appears to be a physics parameter lookup table with SIMD operations",
+    "class": "KartDynamics",
+    "size": 2860,
+    "calls": []
+  },
+  {
+    "address": "0x805a3b78",
+    "name": "KartBody_dt",
+    "mangled": "__dt__Q29KartBodyFv",
+    "confidence": "likely",
+    "source": "Code analysis: nulls vtable ptr at offset 0, calls vtable[2] (destructor) on existing object, clears two arrays via sub_80555bf8 - classic destructor pattern",
+    "class": "KartBody",
+    "size": 152,
+    "calls": [
+      "0x80555bf8",
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805a3c10",
+    "name": "KartBody_createInstance",
+    "mangled": "createInstance__Q29KartBodyFv",
+    "confidence": "likely",
+    "source": "Code analysis: checks global singleton ptr, allocates 0x38 bytes via sub_80555bf8, calls constructor at 0x805a3c94, stores to global - singleton factory",
+    "class": "KartBody",
+    "size": 132,
+    "calls": [
+      "0x80555bf8",
+      "0x805a3c98"
+    ]
+  },
+  {
+    "address": "0x805a3c94",
+    "name": "KartBody_ct",
+    "mangled": "__ct__Q29KartBodyFv",
+    "confidence": "likely",
+    "source": "Code analysis: stores vtable at offset 0, initializes fields 0x24-0x2c, checks global b70/b74 (race state), allocates int arrays, calls sub_80542528 (effect lookup), 0x38 byte object",
+    "class": "KartBody",
+    "size": 2164,
+    "calls": [
+      "0x8059d264",
+      "0x80555bf8",
+      "0x8059d294",
+      "0x80555bf8",
+      "0x80555bf8",
+      "0x80542528",
+      "0x80542528",
+      "0x80555bf8",
+      "0x8059d540",
+      "0x80555bf8",
+      "0x8059d540",
+      "0x80533c90",
+      "0x80555bf8",
+      "0x8059d540",
+      "0x80555bf8",
+      "0x8059d540",
+      "0x80533c90",
+      "0x80555bf8",
+      "0x8059d540",
+      "0x80555bf8",
+      "0x8059d540",
+      "0x80533c90",
+      "0x80555bf8",
+      "0x8059d540",
+      "0x80555bf8",
+      "0x8059d540",
+      "0x805ba6c0",
+      "0x805ba92c",
+      "0x80555bf8",
+      "0x8054fe80"
+    ]
+  },
+  {
+    "address": "0x805a4508",
+    "name": "KartBodySub_ct",
+    "mangled": "__ct__Q213KartBodySubFiiPQ29KartBodyiiPvi",
+    "confidence": "uncertain",
+    "source": "Code analysis: stores vtable at offset 0, calls sub_805ba760 (scene init), stores second vtable at offset 4, allocates arrays via sub_80555bf8, 8-register parameter setup",
+    "class": "KartBodySub",
+    "size": 184,
+    "calls": [
+      "0x805ba760",
+      "0x80555bf8",
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805a45c0",
+    "name": "KartBody_createEffectObj",
+    "mangled": "createEffectObj__Q29KartBodyFiiiPvi",
+    "confidence": "uncertain",
+    "source": "Code analysis: allocates 0x360 or 0x348 byte objects based on online flag at b70, calls sub_8059d540 (init), stores vtable, indexes into arrays at 0x14/0x18",
+    "class": "KartBody",
+    "size": 488,
+    "calls": [
+      "0x80555bf8",
+      "0x8059d540",
+      "0x80555bf8",
+      "0x8059d540"
+    ]
+  },
+  {
+    "address": "0x805a47a8",
+    "name": "KartBody_countActiveEffects",
+    "mangled": "countActiveEffects__Q29KartBodyCFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: iterates array at offset 0x18 (count from 0x20), checks bit 0x1c at offset 0x6c of each object's pointed-to data at 0x198, returns clz(total-active)/32",
+    "class": "KartBody",
+    "size": 144,
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805a4838",
+    "name": "KartBody_updateAudio",
+    "mangled": "updateAudio__Q29KartBodyFv",
+    "confidence": "guess",
+    "source": "Code analysis: calls sub_805bac44 (likely audio system), checks global state, calls sub_805504dc (sound player) and sub_8083d8bc (audio update)",
+    "class": "KartBody",
+    "size": 96,
+    "calls": [
+      "0x805bac44",
+      "0x805504dc",
+      "0x8083d8bc"
+    ]
+  },
+  {
+    "address": "0x805a4898",
+    "name": "KartDynamics_calcAngularVelocity",
+    "mangled": "calcAngularVelocity__Q212KartDynamicsFv",
+    "confidence": "guess",
+    "source": "Code analysis: 584B total (544B embedded data, 40B code), SIMD xscmpgedp/xsmsubasp operations, physics parameter table - angular velocity calculation",
+    "class": "KartDynamics",
+    "size": 584,
+    "calls": []
+  },
+  {
+    "address": "0x805a4ae0",
+    "name": "KartDynamics_calcLinearVelocity",
+    "mangled": "calcLinearVelocity__Q212KartDynamicsFv",
+    "confidence": "guess",
+    "source": "Code analysis: 636B total (604B embedded data, 32B code), SIMD xsmsubasp, physics data table - linear velocity calculation",
+    "class": "KartDynamics",
+    "size": 636,
+    "calls": []
+  },
+  {
+    "address": "0x805a4d5c",
+    "name": "KartDynamics_applyGravity",
+    "mangled": "applyGravity__Q212KartDynamicsFv",
+    "confidence": "guess",
+    "source": "Code analysis: 472B total (440B embedded data, 32B code), SIMD xsmaddmsp, large data table - gravity/acceleration calculation",
+    "class": "KartDynamics",
+    "size": 472,
+    "calls": []
+  },
+  {
+    "address": "0x805a4f34",
+    "name": "KartDynamics_applyFriction",
+    "mangled": "applyFriction__Q212KartDynamicsFv",
+    "confidence": "guess",
+    "source": "Code analysis: 680B total (648B embedded data, 32B code), SIMD xsmaddmsp, large data table - friction calculation",
+    "class": "KartDynamics",
+    "size": 680,
+    "calls": []
+  },
+  {
+    "address": "0x805a51dc",
+    "name": "KartDynamics_updateBothVelocities",
+    "mangled": "updateBothVelocities__Q212KartDynamicsFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: calls sub_805a5270 on self+0x00 and self+0x1c, embedded function does f2*f1+f0 accumulation - updates two velocity components",
+    "class": "KartDynamics",
+    "size": 436,
+    "calls": [
+      "0x805a5270",
+      "0x805a5270"
+    ]
+  },
+  {
+    "address": "0x805a5390",
+    "name": "KartDynamics_initVec3Array2",
+    "mangled": "initVec3Array2__Q212KartDynamicsFi",
+    "confidence": "guess",
+    "source": "Code analysis: null-check on r3, r4>0 guard, calls sub_80555bf8 (vec3 init) - identical pattern to 0x805a2730, second array init",
+    "class": "KartDynamics",
+    "size": 64,
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805a53d0",
+    "name": "KartDynamics_vec3InitWrapper",
+    "mangled": "vec3InitWrapper__Q212KartDynamicsFi",
+    "confidence": "guess",
+    "source": "Code analysis: same null-check+vec3-init pattern, 4 tail functions jump to 0x805a47a8/0x8059d9fc/0x8059d860/0x805a5390 with r3-0x88 adjustment - wrapper for multiple array types",
+    "class": "KartDynamics",
+    "size": 96,
+    "calls": [
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805a5430",
+    "name": "KartPhysicsSub_ct",
+    "mangled": "__ct__Q214KartPhysicsSubFPQ29KartBody",
+    "confidence": "likely",
+    "source": "Code analysis: initializes fields 0x00-0x51 (vtable, ptr, vec3 pairs, u8 flags, u16/u32 fields), allocates 0x38 bytes, calls sub_807417c8 (effect system init), stores at 0x28 - sub-object constructor",
+    "class": "KartPhysicsSub",
+    "size": 180,
+    "calls": [
+      "0x80555bf8",
+      "0x807417c8"
+    ]
+  },
+  {
+    "address": "0x805a54e4",
+    "name": "KartPhysicsSub_init",
+    "mangled": "init__Q214KartPhysicsSubFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: vtable dispatch at 0x14, copies float from 0x24 to 0x34, sets flag 0x51=1, calls sub_807100c0 and sub_805a5788 (position update), has 2 getter tail functions",
+    "class": "KartPhysicsSub",
+    "size": 152,
+    "calls": [
+      "0x807100c0",
+      "0x805a578c"
+    ]
+  },
+  {
+    "address": "0x805a557c",
+    "name": "KartPhysicsSub_calcWithEffect",
+    "mangled": "calcWithEffect__Q214KartPhysicsSubFv",
+    "confidence": "guess",
+    "source": "Code analysis: 404B total (308B embedded data, 96B code), vtable dispatch 0x14, checks flag at 0x51, reads effect count at offset 6, processes effect floats - effect-influenced physics calc",
+    "class": "KartPhysicsSub",
+    "size": 404,
+    "calls": []
+  },
+  {
+    "address": "0x805a5710",
+    "name": "KartPhysicsSub_updatePosition",
+    "mangled": "updatePosition__Q214KartPhysicsSubFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: calls sub_80590250 (getKartPosition), stores vec3 at 0x70/0x74/0x78, calls sub_80590a0c (getKartVelocity), adjusts Y by velocity delta",
+    "class": "KartPhysicsSub",
+    "size": 120,
+    "calls": [
+      "0x80590250",
+      "0x80590a0c"
+    ]
+  },
+  {
+    "address": "0x805a5788",
+    "name": "KartPhysicsSub_calcPosition",
+    "mangled": "calcPosition__Q214KartPhysicsSubFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: vtable dispatch at 0x14/0x18, gets position via sub_805907c0, stores at 0x54/0x58/0x5c, checks b68==0x22 (race state), adjusts position with FP math",
+    "class": "KartPhysicsSub",
+    "size": 492,
+    "calls": [
+      "0x805907c0",
+      "0x805907c0",
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805a5974",
+    "name": "KartPhysicsSub_updateAndCalcPosition",
+    "mangled": "updateAndCalcPosition__Q214KartPhysicsSubFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: similar to 0x805a5710 but adds vtable dispatch at 0x14, reads vec3 from object at 0x2c/0x30/0x34 and 0x38/0x3c/0x40, calls sub_805aa32c (collision check)",
+    "class": "KartPhysicsSub",
+    "size": 236,
+    "calls": [
+      "0x80590250",
+      "0x80590a0c",
+      "0x805a5a64"
+    ]
+  },
+  {
+    "address": "0x805a5a60",
+    "name": "KartPhysicsSub_calcCollision",
+    "mangled": "calcCollision__Q214KartPhysicsSubFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: 1252B total (908B data, 344B code), 50 FP ops, gets position, reads 0x80-0x88 (scale/rotation), transforms vec3 at 0x54-0x5c, calls sub_805aa32c (BSP collision)",
+    "class": "KartPhysicsSub",
+    "size": 1252,
+    "calls": [
+      "0x80555bf8",
+      "0x805907c0",
+      "0x805aa32c"
+    ]
+  },
+  {
+    "address": "0x805a5f44",
+    "name": "KartPhysicsSub_createJMapObj",
+    "mangled": "createJMapObj__Q214KartPhysicsSubFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: vtable dispatch, checks online flag (b68/0x25), calls sub_80590aa0 (getKartId) or reads from 0x8c/0x68, calls sub_806e3720 (JMapInfo search), stores result at 0x48, calls vtable 0x10/0x18 (init), sets 0x16=1",
+    "class": "KartPhysicsSub",
+    "size": 216,
+    "calls": [
+      "0x80590aa0",
+      "0x806e3720"
+    ]
+  },
+  {
+    "address": "0x805a601c",
+    "name": "KartPhysicsSub_calcAnimFrame",
+    "mangled": "calcAnimFrame__Q214KartPhysicsSubFv",
+    "confidence": "guess",
+    "source": "Code analysis: reads s16 at 0x46/0x48 (anim frame indices), looks up u16 in table at 0x8+0xc, double-precision int-to-float conversion (0x43300000 trick), calls vtable 0x18 with interpolated float - animation frame interpolation",
+    "class": "KartPhysicsSub",
+    "size": 176,
+    "calls": []
+  },
+  {
+    "address": "0x805a60cc",
+    "name": "KartPhysicsSub_getParam24",
+    "mangled": "getParam24__Q214KartPhysicsSubCFv",
+    "confidence": "guess",
+    "source": "Code analysis: vtable dispatch at 0x14, null-check result, copies float from offset 0x24 to offset 0x34 - simple parameter getter",
+    "class": "KartPhysicsSub",
+    "size": 76,
+    "calls": []
+  },
+  {
+    "address": "0x805a6118",
+    "name": "KartPhysicsSub_getRotation",
+    "mangled": "getRotation__Q214KartPhysicsSubCFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: vtable dispatch at 0x14, reads vec3 (euler angles) at 0xc/0x10/0x14 from result, stores at 0x64/0x68/0x6c (rotation matrix) - copies rotation to matrix",
+    "class": "KartPhysicsSub",
+    "size": 92,
+    "calls": []
+  },
+  {
+    "address": "0x805a6174",
+    "name": "KartPhysicsSub_calcDistanceSq",
+    "mangled": "calcDistanceSq__Q214KartPhysicsSubFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: vtable dispatch at 0x14, reads two vec3 sets at 0x2c-0x34 and 0x38-0x40, calls sub_80516c60 (vec3 subtraction), computes squared magnitude, stores distance at 0x44, zeros 0x38-0x40",
+    "class": "KartPhysicsSub",
+    "size": 188,
+    "calls": [
+      "0x80516c60",
+      "0x80555bf8"
+    ]
+  },
+  {
+    "address": "0x805a6230",
+    "name": "KartPhysicsSub_calcWithTable",
+    "mangled": "calcWithTable__Q214KartPhysicsSubFv",
+    "confidence": "guess",
+    "source": "Code analysis: 488B total (392B embedded data, 96B code), vtable dispatch at 0x14, reads count at offset 8, uses float at 0x34/0x44, large lookup table - table-driven physics calculation",
+    "class": "KartPhysicsSub",
+    "size": 488,
+    "calls": []
+  },
+  {
+    "address": "0x805a6418",
+    "name": "KartPhysicsSub_accumulateParam",
+    "mangled": "accumulateParam__Q214KartPhysicsSubFv",
+    "confidence": "guess",
+    "source": "Code analysis: 128B total (56B embedded data, 72B code), vtable dispatch at 0x14, reads float at 0xc, adds global float and 0x44 component, stores back at 0xc - accumulator",
+    "class": "KartPhysicsSub",
+    "size": 128,
+    "calls": []
+  },
+  {
+    "address": "0x805a6498",
+    "name": "KartPhysicsSub_manageEffectState",
+    "mangled": "manageEffectState__Q214KartPhysicsSubFs",
+    "confidence": "uncertain",
+    "source": "Code analysis: state machine at 0x4c (1=active, 0=inactive), manages flag at 0x50, calls vtable 0x14, sub_805190c8 (effect creation), sub_80518ff0 (effect lookup by id), stores result at offset 8",
+    "class": "KartPhysicsSub",
+    "size": 164,
+    "calls": [
+      "0x805190c8",
+      "0x80518ff0"
+    ]
+  },
+  {
+    "address": "0x805a653c",
+    "name": "KartPhysicsSub_calcCollisionResponse",
+    "mangled": "calcCollisionResponse__Q214KartPhysicsSubFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: vtable dispatch at 0x18/0x14, checks object type (3=special, 6=bullet bill), calls sub_8078cfe0 (collision system), FP math with position offsets 0x64/0x68 and 0x30/0x34",
+    "class": "KartPhysicsSub",
+    "size": 604,
+    "calls": [
+      "0x8078cfe0",
+      "0x80555bf8",
+      "0x807b5774"
+    ]
+  },
+  {
+    "address": "0x805a6798",
+    "name": "KartDynamics_initAllFields",
+    "mangled": "initAllFields__Q212KartDynamicsFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: 1552B, calls sub_805a5434 (sub-ctor), initializes 8 pairs of vec3/ptr fields at 0x70-0x9c (4 bytes ptr + 0xC vec3 each), reads from global address table - bulk field initialization",
+    "class": "KartDynamics",
+    "size": 1552,
+    "calls": [
+      "0x805a5434"
+    ]
+  },
+  {
+    "address": "0x805a6da8",
+    "name": "KartDynamics_calc",
+    "mangled": "calc__Q212KartDynamicsFv",
+    "confidence": "uncertain",
+    "source": "Code analysis: 8192B total (1304B code, 6888B data), 18 calls, 56 FP ops, 38 branches, multiple embedded sub-functions including vec3 inits, null-checks, and a complex update loop with JMapInfo access at 0x805ba75c - main physics calculation",
+    "class": "KartDynamics",
+    "size": 8192,
+    "calls": [
+      "0x80555bf8",
+      "0x80555bf8",
+      "0x80555bf8",
+      "0x805a7694",
+      "0x805a2434",
+      "0x805a578c",
+      "0x80590250",
+      "0x80590a0c",
+      "0x805a5a64",
+      "0x80555bf8",
+      "0x805a7694",
+      "0x805a8534",
+      "0x80590250",
+      "0x80518bfc",
+      "0x805190c8",
+      "0x80518ff0",
+      "0x805a2434",
+      "0x805a7694"
+    ]
+  }
+]
