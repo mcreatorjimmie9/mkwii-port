@@ -1,0 +1,830 @@
+[
+  {
+    "address": "0x8056731c",
+    "name": "sub_8056731c",
+    "size": 504,
+    "instructions": 126,
+    "calls": [
+      "0x80564d6c",
+      "0x80565bf4",
+      "0x80565bf4",
+      "0x805649b0",
+      "0x80565bf4",
+      "0x80564a04",
+      "0x80565ac8"
+    ],
+    "called_by": [],
+    "section_offset": "0x054a80",
+    "file_offset": "0x054b58"
+  },
+  {
+    "address": "0x80567514",
+    "name": "sub_80567514",
+    "size": 128,
+    "instructions": 32,
+    "calls": [
+      "0x80565bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x054c78",
+    "file_offset": "0x054d50"
+  },
+  {
+    "address": "0x80567594",
+    "name": "sub_80567594",
+    "size": 100,
+    "instructions": 25,
+    "calls": [
+      "0x80565de0",
+      "0x80565f5c"
+    ],
+    "called_by": [],
+    "section_offset": "0x054cf8",
+    "file_offset": "0x054dd0"
+  },
+  {
+    "address": "0x805675f8",
+    "name": "sub_805675f8",
+    "size": 80,
+    "instructions": 20,
+    "calls": [
+      "0x80565bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x054d5c",
+    "file_offset": "0x054e34"
+  },
+  {
+    "address": "0x80567648",
+    "name": "sub_80567648",
+    "size": 260,
+    "instructions": 65,
+    "calls": [
+      "0x80565bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x054dac",
+    "file_offset": "0x054e84"
+  },
+  {
+    "address": "0x8056774c",
+    "name": "sub_8056774c",
+    "size": 128,
+    "instructions": 32,
+    "calls": [
+      "0x80565bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x054eb0",
+    "file_offset": "0x054f88"
+  },
+  {
+    "address": "0x805677cc",
+    "name": "sub_805677cc",
+    "size": 232,
+    "instructions": 58,
+    "calls": [
+      "0x80565bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x054f30",
+    "file_offset": "0x055008"
+  },
+  {
+    "address": "0x805678b4",
+    "name": "sub_805678b4",
+    "size": 108,
+    "instructions": 27,
+    "calls": [
+      "0x80568e3c",
+      "0x80565bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x055018",
+    "file_offset": "0x0550f0"
+  },
+  {
+    "address": "0x80567920",
+    "name": "sub_80567920",
+    "size": 88,
+    "instructions": 22,
+    "calls": [
+      "0x80568bd4",
+      "0x80565bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x055084",
+    "file_offset": "0x05515c"
+  },
+  {
+    "address": "0x80567978",
+    "name": "sub_80567978",
+    "size": 88,
+    "instructions": 22,
+    "calls": [
+      "0x80568d08",
+      "0x80565bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x0550dc",
+    "file_offset": "0x0551b4"
+  },
+  {
+    "address": "0x805679d0",
+    "name": "sub_805679d0",
+    "size": 392,
+    "instructions": 98,
+    "calls": [
+      "0x80565bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x055134",
+    "file_offset": "0x05520c"
+  },
+  {
+    "address": "0x80567b58",
+    "name": "sub_80567b58",
+    "size": 84,
+    "instructions": 21,
+    "calls": [
+      "0x80565bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x0552bc",
+    "file_offset": "0x055394"
+  },
+  {
+    "address": "0x80567bac",
+    "name": "sub_80567bac",
+    "size": 100,
+    "instructions": 25,
+    "calls": [
+      "0x80561768"
+    ],
+    "called_by": [],
+    "section_offset": "0x055310",
+    "file_offset": "0x0553e8"
+  },
+  {
+    "address": "0x80567c10",
+    "name": "sub_80567c10",
+    "size": 120,
+    "instructions": 30,
+    "calls": [
+      "0x80565bf4",
+      "0x80565bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x055374",
+    "file_offset": "0x05544c"
+  },
+  {
+    "address": "0x80567c88",
+    "name": "sub_80567c88",
+    "size": 120,
+    "instructions": 30,
+    "calls": [
+      "0x80565bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x0553ec",
+    "file_offset": "0x0554c4"
+  },
+  {
+    "address": "0x80567d00",
+    "name": "sub_80567d00",
+    "size": 684,
+    "instructions": 171,
+    "calls": [
+      "0x80565bf4",
+      "0x80565bf4",
+      "0x80565bf4",
+      "0x8056931c",
+      "0x80565bf4",
+      "0x8056931c"
+    ],
+    "called_by": [],
+    "section_offset": "0x055464",
+    "file_offset": "0x05553c"
+  },
+  {
+    "address": "0x80567fac",
+    "name": "sub_80567fac",
+    "size": 64,
+    "instructions": 16,
+    "calls": [
+      "0x80565bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x055710",
+    "file_offset": "0x0557e8"
+  },
+  {
+    "address": "0x80567fec",
+    "name": "sub_80567fec",
+    "size": 64,
+    "instructions": 16,
+    "calls": [
+      "0x80565bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x055750",
+    "file_offset": "0x055828"
+  },
+  {
+    "address": "0x8056802c",
+    "name": "sub_8056802c",
+    "size": 64,
+    "instructions": 16,
+    "calls": [
+      "0x80565bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x055790",
+    "file_offset": "0x055868"
+  },
+  {
+    "address": "0x8056806c",
+    "name": "sub_8056806c",
+    "size": 64,
+    "instructions": 16,
+    "calls": [
+      "0x80565bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x0557d0",
+    "file_offset": "0x0558a8"
+  },
+  {
+    "address": "0x805680ac",
+    "name": "sub_805680ac",
+    "size": 240,
+    "instructions": 60,
+    "calls": [
+      "0x805679d0"
+    ],
+    "called_by": [],
+    "section_offset": "0x055810",
+    "file_offset": "0x0558e8"
+  },
+  {
+    "address": "0x8056819c",
+    "name": "sub_8056819c",
+    "size": 232,
+    "instructions": 58,
+    "calls": [
+      "0x805679d0"
+    ],
+    "called_by": [],
+    "section_offset": "0x055900",
+    "file_offset": "0x0559d8"
+  },
+  {
+    "address": "0x80568284",
+    "name": "sub_80568284",
+    "size": 232,
+    "instructions": 58,
+    "calls": [
+      "0x805679d0"
+    ],
+    "called_by": [],
+    "section_offset": "0x0559e8",
+    "file_offset": "0x055ac0"
+  },
+  {
+    "address": "0x8056836c",
+    "name": "sub_8056836c",
+    "size": 232,
+    "instructions": 58,
+    "calls": [
+      "0x805679d0"
+    ],
+    "called_by": [],
+    "section_offset": "0x055ad0",
+    "file_offset": "0x055ba8"
+  },
+  {
+    "address": "0x80568454",
+    "name": "sub_80568454",
+    "size": 176,
+    "instructions": 44,
+    "calls": [
+      "0x805679d0"
+    ],
+    "called_by": [],
+    "section_offset": "0x055bb8",
+    "file_offset": "0x055c90"
+  },
+  {
+    "address": "0x80568504",
+    "name": "sub_80568504",
+    "size": 176,
+    "instructions": 44,
+    "calls": [
+      "0x805679d0"
+    ],
+    "called_by": [],
+    "section_offset": "0x055c68",
+    "file_offset": "0x055d40"
+  },
+  {
+    "address": "0x805685b4",
+    "name": "sub_805685b4",
+    "size": 176,
+    "instructions": 44,
+    "calls": [
+      "0x805679d0"
+    ],
+    "called_by": [],
+    "section_offset": "0x055d18",
+    "file_offset": "0x055df0"
+  },
+  {
+    "address": "0x80575a44",
+    "name": "PlayerTrick_ctor",
+    "size": 100,
+    "instructions": 25,
+    "calls": [
+      "0x805701cc",
+      "0x80575bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x0631a8",
+    "file_offset": "0x063280"
+  },
+  {
+    "address": "0x80575aa8",
+    "name": "PlayerTrick_dtor",
+    "size": 64,
+    "instructions": 16,
+    "calls": [
+      "0x80575bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x06320c",
+    "file_offset": "0x0632e4"
+  },
+  {
+    "address": "0x80575b38",
+    "name": "PlayerTrick_updateNext",
+    "size": 308,
+    "instructions": 77,
+    "calls": [
+      "0x80570434",
+      "0x8057088c"
+    ],
+    "called_by": [],
+    "section_offset": "0x06329c",
+    "file_offset": "0x063374"
+  },
+  {
+    "address": "0x80575d7c",
+    "name": "PlayerTrick_tryStart",
+    "size": 364,
+    "instructions": 91,
+    "calls": [
+      "0x805714a8",
+      "0x8057148c",
+      "0x8057148c",
+      "0x8057148c",
+      "0x80570e00"
+    ],
+    "called_by": [],
+    "section_offset": "0x0634e0",
+    "file_offset": "0x0635b8"
+  },
+  {
+    "address": "0x80575ee8",
+    "name": "PlayerTrick_start",
+    "size": 304,
+    "instructions": 76,
+    "calls": [
+      "0x80576230",
+      "0x80570a80",
+      "0x805707f0",
+      "0x80571084",
+      "0x80571480",
+      "0x80571480",
+      "0x80571834"
+    ],
+    "called_by": [],
+    "section_offset": "0x06364c",
+    "file_offset": "0x063724"
+  },
+  {
+    "address": "0x8057616c",
+    "name": "PlayerTrick_startInner",
+    "size": 196,
+    "instructions": 49,
+    "calls": [
+      "0x80576460"
+    ],
+    "called_by": [],
+    "section_offset": "0x0638d0",
+    "file_offset": "0x0639a8"
+  },
+  {
+    "address": "0x805763e4",
+    "name": "PlayerTrick_update",
+    "size": 280,
+    "instructions": 70,
+    "calls": [
+      "0x80575b38",
+      "0x80575c6c"
+    ],
+    "called_by": [],
+    "section_offset": "0x063b48",
+    "file_offset": "0x063c20"
+  },
+  {
+    "address": "0x805764fc",
+    "name": "PlayerTrick_updateRot",
+    "size": 392,
+    "instructions": 98,
+    "calls": [
+      "0x80575bf4",
+      "0x80575bf4",
+      "0x805703ec",
+      "0x8057c788"
+    ],
+    "called_by": [],
+    "section_offset": "0x063c60",
+    "file_offset": "0x063d38"
+  },
+  {
+    "address": "0x805766b8",
+    "name": "PlayerTrick_end",
+    "size": 160,
+    "instructions": 40,
+    "calls": [
+      "0x805703ec",
+      "0x8057c910",
+      "0x80571090"
+    ],
+    "called_by": [],
+    "section_offset": "0x063e1c",
+    "file_offset": "0x063ef4"
+  },
+  {
+    "address": "0x80576758",
+    "name": "PlayerTrickBike_start",
+    "size": 324,
+    "instructions": 81,
+    "calls": [
+      "0x80576230",
+      "0x80570a80",
+      "0x805707f0",
+      "0x80571084",
+      "0x80571480",
+      "0x80571480",
+      "0x80571834"
+    ],
+    "called_by": [],
+    "section_offset": "0x063ebc",
+    "file_offset": "0x063f94"
+  },
+  {
+    "address": "0x8057689c",
+    "name": "PlayerTrickBike_startInner",
+    "size": 248,
+    "instructions": 62,
+    "calls": [
+      "0x80576460",
+      "0x80576460"
+    ],
+    "called_by": [],
+    "section_offset": "0x064000",
+    "file_offset": "0x0640d8"
+  },
+  {
+    "address": "0x80576994",
+    "name": "PlayerTrickBike_updateRot",
+    "size": 360,
+    "instructions": 90,
+    "calls": [
+      "0x80575bf4",
+      "0x80575bf4",
+      "0x80575bf4",
+      "0x80575bf4",
+      "0x805703ec",
+      "0x8057c788"
+    ],
+    "called_by": [],
+    "section_offset": "0x0640f8",
+    "file_offset": "0x0641d0"
+  },
+  {
+    "address": "0x80576afc",
+    "name": "PlayerTrickBike_dtor",
+    "size": 64,
+    "instructions": 16,
+    "calls": [
+      "0x80575bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x064260",
+    "file_offset": "0x064338"
+  },
+  {
+    "address": "0x80577fc4",
+    "name": "PlayerSub10_ctor",
+    "size": 344,
+    "instructions": 86,
+    "calls": [
+      "0x805701cc",
+      "0x805701cc",
+      "0x805701cc"
+    ],
+    "called_by": [],
+    "section_offset": "0x065728",
+    "file_offset": "0x065800"
+  },
+  {
+    "address": "0x8057811c",
+    "name": "PlayerBoost_dtor",
+    "size": 64,
+    "instructions": 16,
+    "calls": [
+      "0x80575bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x065880",
+    "file_offset": "0x065958"
+  },
+  {
+    "address": "0x8057829c",
+    "name": "setTurnParams",
+    "size": 568,
+    "instructions": 142,
+    "calls": [
+      "0x80570cd4",
+      "0x80570a50",
+      "0x80570adc",
+      "0x80574cf0",
+      "0x80571078",
+      "0x80571468",
+      "0x805710cc",
+      "0x8057c7e4",
+      "0x805710e4",
+      "0x8057cbbc",
+      "0x80571090",
+      "0x80570d60",
+      "0x80579f6c",
+      "0x80571658",
+      "0x80577964",
+      "0x8058040c",
+      "0x805716a4"
+    ],
+    "called_by": [],
+    "section_offset": "0x065a00",
+    "file_offset": "0x065ad8"
+  },
+  {
+    "address": "0x805784d4",
+    "name": "PlayerSub10_init",
+    "size": 1032,
+    "instructions": 258,
+    "calls": [
+      "0x805708b4",
+      "0x80575bf4",
+      "0x80575ae8",
+      "0x8057559c",
+      "0x80570f18"
+    ],
+    "called_by": [],
+    "section_offset": "0x065c38",
+    "file_offset": "0x065d10"
+  },
+  {
+    "address": "0x805788dc",
+    "name": "PlayerSub10_update",
+    "size": 4304,
+    "instructions": 1076,
+    "calls": [
+      "0x80575bf4",
+      "0x80579a50",
+      "0x80570a9c",
+      "0x8058040c",
+      "0x805806b8",
+      "0x80570a9c",
+      "0x805807bc",
+      "0x8057d398",
+      "0x80572530",
+      "0x80577f4c",
+      "0x80580a9c",
+      "0x80575d24",
+      "0x805807d4",
+      "0x80578a6c",
+      "0x80570e80",
+      "0x805807f0",
+      "0x80580a9c",
+      "0x80575ea0",
+      "0x80580a80",
+      "0x8057bb5c",
+      "0x80571084",
+      "0x80580a9c",
+      "0x805807d4",
+      "0x80578c08",
+      "0x80580a9c",
+      "0x80575ea0",
+      "0x8058045c",
+      "0x80580a9c",
+      "0x8057fd18",
+      "0x8057a140",
+      "0x80571658",
+      "0x80577490",
+      "0x80573b88",
+      "0x8057c3d4",
+      "0x8057dc44",
+      "0x8057160c",
+      "0x80574d98",
+      "0x80579da8",
+      "0x8057572c",
+      "0x8057d398",
+      "0x80572530",
+      "0x80571c90",
+      "0x80577f4c",
+      "0x80580a9c",
+      "0x80575d24",
+      "0x805807d4",
+      "0x80578a6c",
+      "0x80580e80",
+      "0x805807f0",
+      "0x80580a9c",
+      "0x80575ea0",
+      "0x80580a80",
+      "0x8057bb5c",
+      "0x80581084",
+      "0x80580a9c",
+      "0x805807d4",
+      "0x80578c08",
+      "0x80580a9c",
+      "0x80575ea0",
+      "0x8058045c",
+      "0x80580a9c",
+      "0x8057fd18",
+      "0x805763e4",
+      "0x80579fe4",
+      "0x8057e0dc",
+      "0x8057a140",
+      "0x80573b88",
+      "0x8057c3d4",
+      "0x8057dc44",
+      "0x805728cc",
+      "0x80578e64",
+      "0x80580e80",
+      "0x80581084",
+      "0x80580e98",
+      "0x80581084",
+      "0x80580e80",
+      "0x80580e98",
+      "0x80581090",
+      "0x80581090",
+      "0x8058040c",
+      "0x8058040c",
+      "0x805810a8",
+      "0x80580a9c",
+      "0x80575f64",
+      "0x805807d4",
+      "0x805807a4",
+      "0x80578378",
+      "0x80574f48",
+      "0x80574f48",
+      "0x805808b4",
+      "0x80581078",
+      "0x8058106c",
+      "0x805807d4",
+      "0x80574f48",
+      "0x805807d4",
+      "0x80574e74",
+      "0x805813e8",
+      "0x8058160c",
+      "0x80581824",
+      "0x80574d98",
+      "0x80576fe8",
+      "0x80571b1c",
+      "0x8057b9bc",
+      "0x8057c69c",
+      "0x80576ed0",
+      "0x80575bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x066040",
+    "file_offset": "0x066118"
+  },
+  {
+    "address": "0x8057a140",
+    "name": "updateDir",
+    "size": 1908,
+    "instructions": 477,
+    "calls": [
+      "0x8058040c",
+      "0x80575bf4",
+      "0x80575bf4",
+      "0x80575bf4",
+      "0x8057a328",
+      "0x80575bf4",
+      "0x8057a328",
+      "0x80575d7c",
+      "0x80575bf4",
+      "0x8057954c",
+      "0x80575bf4",
+      "0x80575bf4"
+    ],
+    "called_by": [],
+    "section_offset": "0x0678a4",
+    "file_offset": "0x06797c"
+  },
+  {
+    "address": "0x8057a8b4",
+    "name": "updateTurn",
+    "size": 692,
+    "instructions": 173,
+    "calls": [
+      "0x805808b4",
+      "0x805808b4",
+      "0x805806a4"
+    ],
+    "called_by": [],
+    "section_offset": "0x068018",
+    "file_offset": "0x0680f0"
+  },
+  {
+    "address": "0x8057ab68",
+    "name": "updateVehicleSpeed",
+    "size": 1216,
+    "instructions": 304,
+    "calls": [
+      "0x80577f4c",
+      "0x8058040c",
+      "0x80577f4c",
+      "0x8058088c",
+      "0x805807a4",
+      "0x8057a1c8",
+      "0x8057b868",
+      "0x8057b868",
+      "0x8057b868",
+      "0x8057b868",
+      "0x80580e00",
+      "0x805808b4",
+      "0x805808b4"
+    ],
+    "called_by": [],
+    "section_offset": "0x0682cc",
+    "file_offset": "0x0683a4"
+  },
+  {
+    "address": "0x8057b9bc",
+    "name": "updateAcceleration",
+    "size": 2584,
+    "instructions": 646,
+    "calls": [
+      "0x80580d48",
+      "0x80580d48",
+      "0x8058040c",
+      "0x80575bf4",
+      "0x8057954c",
+      "0x80575bf4",
+      "0x80575bf4",
+      "0x8058040c",
+      "0x80581658",
+      "0x80581090",
+      "0x805806a4",
+      "0x8057b108",
+      "0x8058148c",
+      "0x8058148c",
+      "0x8057b2a0",
+      "0x8058088c",
+      "0x80575bf4",
+      "0x80577f4c",
+      "0x8057b028",
+      "0x805754f4",
+      "0x8058040c",
+      "0x80581084",
+      "0x80581090",
+      "0x80581090"
+    ],
+    "called_by": [],
+    "section_offset": "0x069120",
+    "file_offset": "0x0691f8"
+  },
+  {
+    "address": "0x8057c3d4",
+    "name": "updateOffroad",
+    "size": 532,
+    "instructions": 133,
+    "calls": [
+      "0x8058085c",
+      "0x8058085c",
+      "0x8058085c",
+      "0x8058085c",
+      "0x8058085c",
+      "0x805808b4",
+      "0x805767bc",
+      "0x8058088c"
+    ],
+    "called_by": [],
+    "section_offset": "0x069b38",
+    "file_offset": "0x069c10"
+  }
+]
