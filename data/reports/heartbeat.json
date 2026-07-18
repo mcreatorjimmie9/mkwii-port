@@ -1,0 +1,20 @@
+{
+  "timestamp": "1970-01-01T00:00:00Z",
+  "cycle": 0,
+  "phase": "init",
+  "status": "initialized",
+  "totals": {
+    "functions_total": 0,
+    "decompiled": 0,
+    "symbolized": 0,
+    "reconstructed": 0,
+    "compiling": 0,
+    "tested_passing": 0
+  },
+  "modules_completed": [],
+  "modules_in_progress": {},
+  "milestone": null,
+  "open_issues": 0,
+  "budget_pct": 0,
+  "next_action": "phase:ingest"
+}

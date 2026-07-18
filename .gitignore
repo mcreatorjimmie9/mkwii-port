@@ -1,0 +1,39 @@
+# Original game binaries — NEVER committed (hosted on copyparty)
+*.dol
+*.rel
+*.szs
+*.brres
+*.brmdl
+*.brmta
+*.brsha
+*.brsar
+*.brstm
+*.breft
+*.brfnt
+*.brea
+*.brlan
+*.arc
+*.bzl
+*.yaz0
+*.bin
+*.img
+*.bnr
+*.tmd
+*.tik
+
+# Ghidra project files (local only)
+*.gpr
+*.rep
+ghidra_*
+
+# Temp files
+*.tmp
+*.bak
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db

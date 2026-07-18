@@ -1,0 +1,18 @@
+{
+  "copyparty_base": "https://142.169.46.167:3923/mkwii/DATA",
+  "curl_flags": "-k -s --connect-timeout 30",
+  "note": "Self-signed cert: always use curl -k",
+  "files": {
+    "main_dol": "https://142.169.46.167:3923/mkwii/DATA/sys/main.dol",
+    "staticr_rel": "https://142.169.46.167:3923/mkwii/DATA/files/rel/StaticR.rel",
+    "tracks_dir": "https://142.169.46.167:3923/mkwii/DATA/files/Race/",
+    "karts_dir": "https://142.169.46.167:3923/mkwii/DATA/files/Scene/Model/Kart/",
+    "models_dir": "https://142.169.46.167:3923/mkwii/DATA/files/Scene/Model/",
+    "ui_dir": "https://142.169.46.167:3923/mkwii/DATA/files/Scene/UI/",
+    "sound_dir": "https://142.169.46.167:3923/mkwii/DATA/files/sound/",
+    "demo_dir": "https://142.169.46.167:3923/mkwii/DATA/files/Demo/",
+    "boot_dir": "https://142.169.46.167:3923/mkwii/DATA/files/Boot/",
+    "system_dir": "https://142.169.46.167:3923/mkwii/DATA/sys/",
+    "contents_dir": "https://142.169.46.167:3923/mkwii/DATA/files/contents/"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "modules": [
+    {"name": "Physics",      "file": "StaticR.rel", "priority": "p0", "reason": "core gameplay feel"},
+    {"name": "RaceEngine",   "file": "StaticR.rel", "priority": "p0", "reason": "race state machine"},
+    {"name": "KartMovement", "file": "StaticR.rel", "priority": "p0", "reason": "input -> physics pipeline"},
+    {"name": "ItemSystem",   "file": "StaticR.rel", "priority": "p1", "reason": "item behavior"},
+    {"name": "AIRace",       "file": "StaticR.rel", "priority": "p1", "reason": "opponent AI"},
+    {"name": "Rendering",    "file": "StaticR.rel", "priority": "p1", "reason": "GX draw calls"},
+    {"name": "Collision",    "file": "StaticR.rel", "priority": "p1", "reason": "track collision"},
+    {"name": "SDK_Bridge",   "file": "main.dol",    "priority": "p1", "reason": "platform shims need SDK signatures"},
+    {"name": "AudioEngine",  "file": "StaticR.rel", "priority": "p2", "reason": "AX audio calls"},
+    {"name": "UI",           "file": "StaticR.rel", "priority": "p2", "reason": "menus, HUD"},
+    {"name": "Network",      "file": "StaticR.rel", "priority": "p2", "reason": "NWFC online play"},
+    {"name": "SaveData",     "file": "StaticR.rel", "priority": "p3", "reason": "save file I/O"},
+    {"name": "SDK_nw4r",     "file": "main.dol",    "priority": "p3", "reason": "Nintendo library internals"}
+  ]
+}
