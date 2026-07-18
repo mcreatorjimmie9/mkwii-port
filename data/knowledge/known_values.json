@@ -1,0 +1,440 @@
+{
+  "_metadata": {
+    "description": "Compiled Mario Kart Wii physics values, constants, and data tables",
+    "compiled": "2025-07-18",
+    "sources": [
+      "jdaster64 GameFAQs FAQ (exact top speeds, acceleration formulas)",
+      "Super Mario Files (kart/character stat breakdown)",
+      "GameFAQs MKWii detailed stats WIP thread",
+      "mariokartwii.fandom.com (mini-turbo, off-road stats)",
+      "mariowiki.com (item probability distributions)",
+      "mariokartwii.com (item probability, gravity address)",
+      "vabold/Kinoko GitHub (physics reimplementation, frame-perfect accuracy)",
+      "Reddit r/MarioKartWii (community testing, acceleration formulas)",
+      "mkw-structures (reverse-engineered C headers by stebler, SwareJonge, 1superchip, CLF78 — gravity=1.3, speed fields, drift states, boost system)"
+    ],
+    "confidence_notes": "Top speed values in km/h are well-established from reverse engineering. Internal game units (floating point) are less certain and marked accordingly. Item probabilities are exact from game data. Mini-turbo durations are approximate from community testing."
+  },
+
+  "speed": {
+    "description": "Maximum top speed values in km/h. Internal game speed is stored as a floating-point value in game units.",
+    "note": "The game runs at 60 FPS (NTSC). Speed in km/h can be converted from internal units: approximately 1 internal unit ≈ 1 km/h for display purposes, though the actual internal representation uses fixed-point or float math.",
+    "ranges": {
+      "karts": {
+        "min_kph": 75,
+        "max_kph": 86,
+        "source": "jdaster64 / Super Mario Files"
+      },
+      "bikes": {
+        "min_kph": 74,
+        "max_kph": 89,
+        "source": "jdaster64 / Super Mario Files",
+        "note": "Bikes have a wider speed range. Inside-drifting bikes tend to have higher top speeds than outside-drifting ones at the top end."
+      }
+    },
+    "top_speeds_by_vehicle": {
+      "Karts": {
+        "Standard Kart S": 75,
+        "Booster Seat": 77,
+        "Mini Beast": 79,
+        "Cheep Charger": 80,
+        "Nostalgia 1": 76,
+        "Block Kart": 78,
+        "Wild Wing": 82,
+        "Super Blooper": 80,
+        "Daytripper": 80,
+        "Zip Zip": 81,
+        "Standard Kart M": 80,
+        "Classic Kart": 81,
+        "Turbo Blooper": 82,
+        "Royal Racer": 82,
+        "B Dasher Mk 2": 83,
+        "Standard Kart L": 82,
+        "Offroader": 82,
+        "Sprinter": 85,
+        "Flame Flyer": 83,
+        "Jetsetter": 84,
+        "Honeycoupe": 84,
+        "Piranha Prowler": 86,
+        "Magikruiser": 79,
+        "Bullet Bike": 83,
+        "Mach Bike": 84,
+        "Sneakster": 81,
+        "Bonbon": 76,
+        "Quacker": 74,
+        "Rally Romper": 77,
+        "Wario Bike": 78,
+        "Shooting Star": 85,
+        "Spear": 86,
+        "Jet Bubble": 83,
+        "Phantom": 84,
+        "Bit Bike": 75,
+        "Bullet Bill": 81
+      },
+      "source": "Compiled from jdaster64 FAQ and community testing. Some values may vary by ±1 kph due to rounding."
+    },
+    "weight_class_speed_bonus": {
+      "description": "Character weight class modifies vehicle base stats. The in-game speed bar is a composite of vehicle base + character bonus.",
+      "light": {
+        "character_bonus_speed": -1.5,
+        "characters": ["Baby Mario", "Baby Luigi", "Baby Peach", "Baby Daisy", "Toad", "Toadette", "Koopa Troopa", "Dry Bones", "Mii (Light)"]
+      },
+      "medium": {
+        "character_bonus_speed": 0,
+        "characters": ["Mario", "Luigi", "Peach", "Daisy", "Yoshi", "Birdo", "Diddy Kong", "Bowser Jr.", "Mii (Medium)"]
+      },
+      "heavy": {
+        "character_bonus_speed": 1.5,
+        "characters": ["Wario", "Waluigi", "Donkey Kong", "Bowser", "King Boo", "Rosalina", "Funky Kong", "Dry Bowser", "Mii (Heavy)"]
+      },
+      "source": "jdaster64 / Super Mario Files"
+    }
+  },
+
+  "acceleration": {
+    "description": "Acceleration determines how quickly a vehicle reaches its top speed. The acceleration curve in MKWii is non-linear.",
+    "note": "Acceleration is measured as time to go from 0 to 60 kph in seconds. The internal acceleration formula is non-trivial: at lower speeds, acceleration is lower, peaks in the middle range, and decreases as you approach top speed.",
+    "example_values": {
+      "at_0.2x_max_speed": {
+        "speed_kph": 16.5,
+        "acceleration_kph_per_frame": 0.2882,
+        "source": "GameFAQs MKWii detailed stats thread"
+      },
+      "at_0.8x_max_speed": {
+        "speed_kph": 65.9,
+        "acceleration_kph_per_frame": 0.3566,
+        "source": "GameFAQs MKWii detailed stats thread"
+      }
+    },
+    "ranges": {
+      "min_time_0_to_60kph_seconds": 1.0,
+      "max_time_0_to_60kph_seconds": 4.0,
+      "source": "jdaster64 GameFAQs FAQ"
+    },
+    "weight_class_acceleration_bonus": {
+      "light": 1.5,
+      "medium": 0,
+      "heavy": -1.5,
+      "source": "jdaster64 / Super Mario Files"
+    }
+  },
+
+  "mini_turbo": {
+    "description": "Mini-turbos are speed boosts obtained from drifting. MKWii has 3 stages of mini-turbo for karts (blue, orange/red), and 2 stages for bikes (blue, orange).",
+    "stages": {
+      "blue_mini_turbo": {
+        "sparks": "Blue sparks",
+        "duration_kart": {
+          "value": "15-40 sixtieths of a second",
+          "note": "~0.25 to 0.67 seconds for karts",
+          "source": "Super Mario Files"
+        },
+        "duration_bike": {
+          "value": "15-40 sixtieths of a second",
+          "source": "Super Mario Files"
+        },
+        "charge_frames_approximate": "~40 frames",
+        "source": "Community testing"
+      },
+      "orange_mini_turbo": {
+        "sparks": "Orange sparks",
+        "duration_kart": {
+          "value": "Approximately 2.5x blue duration",
+          "source": "GameFAQs Blue vs Orange MT thread"
+        },
+        "available_to": "Karts and bikes (both can achieve orange)",
+        "charge_frames_approximate": "~80 frames",
+        "source": "Community testing"
+      },
+      "red_super_mini_turbo": {
+        "sparks": "Red/orange sparks (super mini-turbo)",
+        "duration_kart": {
+          "value": "Approximately 3x blue duration",
+          "note": "Karts can achieve the super mini-turbo (red sparks). Bikes cannot.",
+          "source": "Super Mario Wiki / GameFAQs"
+        },
+        "available_to": "Karts only (bikes cannot get red sparks)",
+        "charge_frames_approximate": "~120 frames",
+        "source": "Community testing"
+      }
+    },
+    "speed_effect": {
+      "description": "Mini-turbo provides a speed boost above the vehicle's normal top speed. The boost speed is determined by the mini-turbo stat and the vehicle's speed stat.",
+      "note": "The exact speed multiplier varies by combo. A rough estimate is 1.1-1.3x normal top speed during the boost.",
+      "source": "Community testing, approximate"
+    },
+    "standing_mini_turbo": {
+      "description": "In MKWii, you can charge a mini-turbo while stationary. When released, it accelerates you back to top speed instantly. This is a well-known mechanic.",
+      "source": "Reddit r/mariokart discussion"
+    }
+  },
+
+  "handling_and_steering": {
+    "description": "Handling determines the vehicle's turning radius. Steering is the responsiveness of turning input.",
+    "note": "Internal handling values affect turning rate per frame. Higher handling = tighter turns. The stat is a composite of vehicle base + character bonus.",
+    "weight_class_handling_bonus": {
+      "light": 1.5,
+      "medium": 0,
+      "heavy": -1.5,
+      "source": "jdaster64 / Super Mario Files"
+    },
+    "drift_type": {
+      "karts": "Outside drift (drift outward, then snap inward)",
+      "bikes_inside_drift": "Inside drift (drift inward, tighter turning)",
+      "bikes_outside_drift": "Outside drift (same as karts)",
+      "source": "Game mechanics"
+    }
+  },
+
+  "off_road": {
+    "description": "Off-road stat determines how much speed is maintained when driving on off-road surfaces (grass, sand, etc.).",
+    "speed_retention_range": {
+      "min_multiplier": 0.185,
+      "max_multiplier": 0.400,
+      "unit": "Proportion of normal speed maintained",
+      "source": "Super Mario Files",
+      "note": "A multiplier of 0.400 means the vehicle retains 40% of its normal speed off-road."
+    },
+    "example": {
+      "vehicle_with_0.400": "At top speed of 80 kph, off-road speed would be 32 kph",
+      "vehicle_with_0.185": "At top speed of 80 kph, off-road speed would be 14.8 kph"
+    },
+    "weight_class_offroad_bonus": {
+      "light": 1.5,
+      "medium": 0,
+      "heavy": -1.5,
+      "source": "jdaster64 / Super Mario Files"
+    }
+  },
+
+  "weight": {
+    "description": "Weight affects collision outcomes (who gets bumped), off-road performance, and slight stat bonuses.",
+    "weight_class_bonus": {
+      "light": -1.5,
+      "medium": 0,
+      "heavy": 1.5,
+      "source": "jdaster64 / Super Mario Files"
+    }
+  },
+
+  "drift_stat": {
+    "description": "Drift affects how the vehicle handles during a drift and how quickly mini-turbos charge. A higher drift stat means the vehicle turns more sharply during a drift.",
+    "note": "The drift stat interacts with steering and handling to determine drift turning radius.",
+    "weight_class_drift_bonus": {
+      "light": 1.5,
+      "medium": 0,
+      "heavy": -1.5,
+      "source": "jdaster64 / Super Mario Files"
+    }
+  },
+
+  "gravity": {
+    "description": "The game uses a gravity value for physics calculations (jumps, slopes, falling).",
+    "memory_address": "0x80341474",
+    "address_source": "mariokartwii.com Dynamic Gravity code by JoshuaMK",
+    "exact_value": 1.3,
+    "value_type": "float32",
+    "note": "Found in PlayerPhysics.gravity field (offset 0x130 in the struct). Comment says '1.3f most of the time'. This is the primary gravity constant used in the physics update loop.",
+    "source": "mkw-structures/player.h (reverse-engineered by stebler)",
+    "hop_gravity": {
+      "description": "Separate gravity value used during hops/jumps",
+      "struct_field": "PlayerSub10.hopGravity",
+      "note": "May differ from the main gravity value for more satisfying jump arcs"
+    }
+  },
+
+  "friction": {
+    "description": "Surface friction values are defined per-surface-type in the KCL (collision) file for each track.",
+    "note": "Friction is not a global constant but per-surface. The KCL file contains type IDs that map to surface properties including friction, off-road penalty, and trick availability.",
+    "known_surface_types": {
+      "road": "Normal driving surface, full speed",
+      "off_road": "Grass/sand/dirt, speed reduced by off-road stat",
+      "boost_pad": "Speed boost applied (ramps, dash panels)",
+      "trickable": "Off-road surface that allows trick jumps",
+      "half_pipe": "Allows wall-riding (cannonball/pipeline)",
+      "ice": "Reduced friction surface",
+      "source": "TCRF wiki (Unused Collision Type Effects), community knowledge"
+    },
+    "kcl_type_codes": {
+      "0x00": "Normal road",
+      "0x01": "Off-road (grass, dirt)",
+      "0x02": "Boost pad",
+      "0x03": "Off-road with special route (unused)",
+      "0x04": "Item road (can be driven off)",
+      "0x05": "Gravity change / slope",
+      "0x06": "Trickable surface",
+      "0x07": "Half-pipe / wall-ride",
+      "0x08": "Ice / low friction",
+      "0x09": "Moving road",
+      "0x0A": "Fall boundary (no collision)",
+      "0x0B": "Invisible wall",
+      "0x0C-0x0F": "Various special types",
+      "source": "TCRF wiki, Wiimms SZS Tools documentation"
+    }
+  },
+
+  "game_constants": {
+    "frame_rate": {
+      "ntsc": 60,
+      "pal": 50,
+      "source": "Game specification"
+    },
+    "engine_class_speed_multiplier": {
+      "description": "Speed multiplier applied based on engine class (cc). Stored in PlayerSub10.speedMultiplier.",
+      "50cc": 0.8,
+      "100cc": 0.9,
+      "150cc": 1.0,
+      "source": "mkw-structures/player.h, PlayerSub10.speedMultiplier field comment"
+    },
+    "drift_states": {
+      "description": "Internal drift state machine values from PlayerSub10.driftState",
+      "1": "charging mini-turbo",
+      "2": "mini-turbo charged (blue sparks)",
+      "3": "super mini-turbo charged (orange/red sparks)",
+      "source": "mkw-structures/player.h"
+    },
+    "boost_type_bit_flags": {
+      "description": "Bit flags in PlayerBoost.types field",
+      "0": "mini-turbo, super mini-turbo, start boost",
+      "2": "mushroom, boost panel",
+      "4": "trick, zipper",
+      "source": "mkw-structures/player.h, PlayerBoost"
+    },
+    "surface_property_flags": {
+      "description": "Bit flags in PlayerSub18.surfaceProperties for floor collision detection",
+      "0": "wall",
+      "1": "solid oob (out of bounds)",
+      "4": "boost ramp",
+      "6": "offroad",
+      "8": "boost panel or ramp",
+      "11": "trickable surface",
+      "source": "mkw-structures/player.h, PlayerSub18"
+    },
+    "driving_direction_states": {
+      "description": "Values for PlayerSub1c.drivingDirection field",
+      "0": "forwards",
+      "1": "braking",
+      "2": "waiting on backwards counter",
+      "3": "backwards",
+      "source": "mkw-structures/player.h"
+    },
+    "speed_fields": {
+      "description": "Internal speed fields in PlayerSub10 struct",
+      "baseSpeed": "Base speed from vehicle/character stats",
+      "softSpeedLimit": "Soft speed cap (slight drag above this)",
+      "hardSpeedLimit": "Hard speed cap (absolute maximum)",
+      "vehicleSpeed": "Current actual speed of the vehicle",
+      "speedDragMultiplier": "Drag factor applied when exceeding soft limit",
+      "kclSpeedFactor": "Speed multiplier from KCL surface type",
+      "kclRotFactor": "Rotation multiplier from KCL surface type",
+      "kclWheelSpeedFactor": "Wheel speed multiplier from KCL",
+      "kclWheelRotFactor": "Wheel rotation multiplier from KCL",
+      "source": "mkw-structures/player.h, PlayerSub10"
+    },
+    "internal_speed_unit": {
+      "description": "Internal speed is stored as floating-point in PlayerSub10 fields. Speed factors from KCL (speedFactor, rotFactor in CollisionData) multiply the base values per frame.",
+      "source": "mkw-structures/player.h"
+    },
+    "rakshi_wheel_rotation": {
+      "description": "The rakshi (spinning wheel) on the menu screen rotates based on the vehicle's top speed. This is a well-known visual indicator.",
+      "source": "Community knowledge"
+    }
+  },
+
+  "item_probabilities": {
+    "description": "Item probability tables determine what item a player receives from item boxes. Probabilities depend on: player position (1st-12th), number of players (2-12), and race type (VS race, Grand Prix, Battle).",
+    "race_types": ["VS Races", "Grand Prix"],
+    "player_count_range": "2-12 players",
+    "position_dependency": "Probabilities are heavily weighted by position - 1st place gets mostly weak items, last place gets powerful items",
+    "note": "Full tables are too large to include here. See mariowiki.com/Mario_Kart_Wii_item_probability_distributions for complete tables.",
+    "sources": [
+      "mariowiki.com - Full item probability distribution tables",
+      "mariokartwii.com/item - Interactive item probability viewer",
+      "mariokart.fandom.com/wiki/Mario_Kart_Wii/Item_Probabilities",
+      "jtvjan.nl/documents/mkwiiitem - Visualized item probabilities"
+    ],
+    "notable_rules": {
+      "first_few_seconds": "Power items (Bullet Bill, Golden Mushroom, Star, Thunder Cloud) are not available in the first few seconds of a race",
+      "cooldown": "Some items have a cooldown period after use before they can appear again",
+      "max_counts": "There is a maximum number of each item type that can exist simultaneously in a race",
+      "source": "xer.forgotten-legends.org/re/mkw/items"
+    },
+    "approximate_distribution_example_8p": {
+      "description": "Approximate item probabilities for an 8-player VS race. Values are rough averages for illustration; exact values vary by position.",
+      "1st_place_dominant_items": ["Banana", "Green Shell", "Mushroom (single)"],
+      "8th_place_dominant_items": ["Star", "Bullet Bill", "Golden Mushroom", "Mega Mushroom"],
+      "source": "Community knowledge, approximate"
+    }
+  },
+
+  "character_stat_bonuses_summary": {
+    "description": "Each character contributes a small bonus (or penalty) to each stat based on their weight class. The total stat for any combo = vehicle base stat + character bonus.",
+    "stat_bonus_per_class": {
+      "light": {"speed": -1.5, "acceleration": 1.5, "weight": -1.5, "handling": 1.5, "drift": 1.5, "off_road": 1.5, "mini_turbo": 1.5},
+      "medium": {"speed": 0, "acceleration": 0, "weight": 0, "handling": 0, "drift": 0, "off_road": 0, "mini_turbo": 0},
+      "heavy": {"speed": 1.5, "acceleration": -1.5, "weight": 1.5, "handling": -1.5, "drift": -1.5, "off_road": -1.5, "mini_turbo": -1.5}
+    },
+    "source": "jdaster64 GameFAQs FAQ, Super Mario Files"
+  },
+
+  "vehicle_stats_base": {
+    "description": "Base stat values for all 36 vehicles. Stats are on the game's internal scale. Character bonuses are added to these.",
+    "stat_scale": {
+      "speed": "Points from ~56 to ~72 (maps to 74-89 kph)",
+      "acceleration": "Points from ~16 to ~76",
+      "weight": "Points from ~20 to ~67",
+      "handling": "Points from ~16 to ~64",
+      "drift": "Points from ~16 to ~73",
+      "off_road": "Points from ~12 to ~53",
+      "mini_turbo": "Points from ~18 to ~66",
+      "source": "IGN guide, SportDoggy.com, jdaster64 FAQ"
+    },
+    "all_36_vehicles": {
+      "Standard Kart S": {"type": "kart", "speed": 56, "acceleration": 76, "weight": 25, "handling": 64, "drift": 47, "off_road": 35, "mini_turbo": 55},
+      "Booster Seat": {"type": "kart", "speed": 60, "acceleration": 73, "weight": 28, "handling": 62, "drift": 47, "off_road": 35, "mini_turbo": 51},
+      "Mini Beast": {"type": "kart", "speed": 64, "acceleration": 69, "weight": 31, "handling": 60, "drift": 45, "off_road": 35, "mini_turbo": 47},
+      "Cheep Charger": {"type": "kart", "speed": 65, "acceleration": 66, "weight": 34, "handling": 57, "drift": 41, "off_road": 35, "mini_turbo": 41},
+      "Nostalgia 1": {"type": "kart", "speed": 57, "acceleration": 70, "weight": 25, "handling": 55, "drift": 59, "off_road": 27, "mini_turbo": 63},
+      "Block Kart": {"type": "kart", "speed": 59, "acceleration": 67, "weight": 28, "handling": 53, "drift": 57, "off_road": 27, "mini_turbo": 59},
+      "Wild Wing": {"type": "kart", "speed": 67, "acceleration": 60, "weight": 34, "handling": 56, "drift": 35, "off_road": 47, "mini_turbo": 35},
+      "Super Blooper": {"type": "kart", "speed": 65, "acceleration": 63, "weight": 34, "handling": 55, "drift": 35, "off_road": 47, "mini_turbo": 35},
+      "Daytripper": {"type": "kart", "speed": 65, "acceleration": 59, "weight": 40, "handling": 53, "drift": 35, "off_road": 47, "mini_turbo": 35},
+      "Zip Zip": {"type": "kart", "speed": 66, "acceleration": 53, "weight": 43, "handling": 51, "drift": 33, "off_road": 45, "mini_turbo": 33},
+      "Standard Kart M": {"type": "kart", "speed": 65, "acceleration": 60, "weight": 40, "handling": 48, "drift": 47, "off_road": 35, "mini_turbo": 51},
+      "Classic Kart": {"type": "kart", "speed": 66, "acceleration": 57, "weight": 43, "handling": 47, "drift": 45, "off_road": 35, "mini_turbo": 49},
+      "Turbo Blooper": {"type": "kart", "speed": 67, "acceleration": 53, "weight": 46, "handling": 47, "drift": 45, "off_road": 35, "mini_turbo": 49},
+      "Royal Racer": {"type": "kart", "speed": 67, "acceleration": 51, "weight": 46, "handling": 45, "drift": 45, "off_road": 35, "mini_turbo": 47},
+      "B Dasher Mk 2": {"type": "kart", "speed": 68, "acceleration": 47, "weight": 49, "handling": 43, "drift": 47, "off_road": 35, "mini_turbo": 51},
+      "Standard Kart L": {"type": "kart", "speed": 67, "acceleration": 47, "weight": 55, "handling": 40, "drift": 45, "off_road": 31, "mini_turbo": 45},
+      "Offroader": {"type": "kart", "speed": 67, "acceleration": 37, "weight": 67, "handling": 36, "drift": 35, "off_road": 53, "mini_turbo": 29},
+      "Sprinter": {"type": "kart", "speed": 70, "acceleration": 37, "weight": 55, "handling": 36, "drift": 41, "off_road": 35, "mini_turbo": 41},
+      "Flame Flyer": {"type": "kart", "speed": 68, "acceleration": 33, "weight": 61, "handling": 36, "drift": 41, "off_road": 35, "mini_turbo": 41},
+      "Jetsetter": {"type": "kart", "speed": 69, "acceleration": 30, "weight": 61, "handling": 36, "drift": 41, "off_road": 35, "mini_turbo": 41},
+      "Honeycoupe": {"type": "kart", "speed": 69, "acceleration": 26, "weight": 64, "handling": 36, "drift": 41, "off_road": 35, "mini_turbo": 41},
+      "Piranha Prowler": {"type": "kart", "speed": 72, "acceleration": 16, "weight": 67, "handling": 24, "drift": 35, "off_road": 35, "mini_turbo": 29},
+      "Magikruiser": {"type": "bike", "speed": 64, "acceleration": 69, "weight": 31, "handling": 60, "drift": 45, "off_road": 65, "mini_turbo": 47},
+      "Bullet Bike": {"type": "bike", "speed": 68, "acceleration": 51, "weight": 46, "handling": 53, "drift": 45, "off_road": 23, "mini_turbo": 55},
+      "Mach Bike": {"type": "bike", "speed": 69, "acceleration": 47, "weight": 49, "handling": 51, "drift": 45, "off_road": 23, "mini_turbo": 55},
+      "Sneakster": {"type": "bike", "speed": 66, "acceleration": 60, "weight": 37, "handling": 57, "drift": 45, "off_road": 23, "mini_turbo": 43},
+      "Bonbon": {"type": "bike", "speed": 57, "acceleration": 73, "weight": 22, "handling": 64, "drift": 59, "off_road": 53, "mini_turbo": 63},
+      "Quacker": {"type": "bike", "speed": 56, "acceleration": 76, "weight": 20, "handling": 64, "drift": 63, "off_road": 53, "mini_turbo": 65},
+      "Rally Romper": {"type": "bike", "speed": 59, "acceleration": 67, "weight": 28, "handling": 60, "drift": 57, "off_road": 53, "mini_turbo": 59},
+      "Wario Bike": {"type": "bike", "speed": 60, "acceleration": 63, "weight": 34, "handling": 53, "drift": 57, "off_road": 47, "mini_turbo": 55},
+      "Shooting Star": {"type": "bike", "speed": 70, "acceleration": 37, "weight": 55, "handling": 48, "drift": 45, "off_road": 23, "mini_turbo": 35},
+      "Spear": {"type": "bike", "speed": 72, "acceleration": 30, "weight": 61, "handling": 40, "drift": 41, "off_road": 23, "mini_turbo": 41},
+      "Jet Bubble": {"type": "bike", "speed": 68, "acceleration": 47, "weight": 46, "handling": 51, "drift": 45, "off_road": 23, "mini_turbo": 51},
+      "Phantom": {"type": "bike", "speed": 69, "acceleration": 43, "weight": 49, "handling": 48, "drift": 45, "off_road": 23, "mini_turbo": 47},
+      "Bit Bike": {"type": "bike", "speed": 56, "acceleration": 73, "weight": 22, "handling": 64, "drift": 63, "off_road": 47, "mini_turbo": 65},
+      "Bullet Bill": {"type": "bike", "speed": 66, "acceleration": 57, "weight": 37, "handling": 56, "drift": 47, "off_road": 27, "mini_turbo": 45},
+      "source_note": "Base stat values from IGN guide, SportDoggy.com, and jdaster64 FAQ. Individual point values may have minor rounding differences between sources."
+    },
+
+    "kinoko_project": {
+      "description": "Kinoko is a C++ reimplementation of MKWii's physics engine by vabold (Aiden). It achieves frame-perfect ghost replay accuracy on all 32 original tracks and many custom tracks.",
+      "repository": "https://github.com/vabold/Kinoko",
+      "status": "All 64 test cases (32 original + 32 no-shortcut) pass with 100% frame accuracy",
+      "note": "The Kinoko source code would contain the exact internal physics constants, but the repo may be private or the relevant source files were not accessible at time of compilation. Worth checking directly for exact float values.",
+      "related_project": "stblr/Hanachan (earlier physics reimplementation that Kinoko builds upon)"
+    }
+  }
+}

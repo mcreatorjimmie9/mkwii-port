@@ -1,0 +1,87 @@
+{
+  "scout": "1.2",
+  "task": "Tockdom Wiki Classes extraction",
+  "timestamp": "2025-07-18T00:00:00Z",
+  "total_classes": 465,
+  "classes_with_descriptions": 202,
+  "source": "Mixed: Tockdom wiki page structure + decompiled MKWii source code (headers)",
+  "wiki_page_status": {
+    "page_url": "https://wiki.tockdom.com/wiki/Classes",
+    "page_status": "Stub/Under Construction",
+    "page_last_modified": "2022-12-10",
+    "subpages_exist": false,
+    "note": "The Classes page on Tockdom is a stub that only defines the namespace structure (EGG, nw4r, RVL under main.dol; Kart, System, UI under StaticR.rel) but lists no actual classes. Subpages for each namespace do not exist (all return 404). Class data was extracted from the project's decompiled source code instead."
+  },
+  "key_namespaces": {
+    "main.dol": {
+      "EGG": 39,
+      "EGG::Audio": 2,
+      "EGG::Gfx": 1,
+      "EGG::Math": 5,
+      "EGG::Util": 2,
+      "nw4r::g3d": 14,
+      "nw4r::lyt": 0,
+      "nw4r::math": 13,
+      "nw4r::snd": 4,
+      "nw4r::ut": 22,
+      "RVL": 81,
+      "DWC": 0,
+      "GameSpy": 45,
+      "MSL": 6
+    },
+    "StaticR.rel": {
+      "Kart": 28,
+      "System": 93,
+      "UI": 14,
+      "Net": 25,
+      "Enemy": 41,
+      "Field": 11,
+      "Geo": 13,
+      "Geo2": 1,
+      "Util": 3
+    }
+  },
+  "module_breakdown": {
+    "main.dol": 228,
+    "StaticR.rel": 229,
+    "unknown": 8
+  },
+  "namespace_breakdown": {
+    "System": 93,
+    "RVL": 81,
+    "GameSpy": 45,
+    "Enemy": 41,
+    "EGG": 39,
+    "Kart": 28,
+    "Net": 25,
+    "nw4r::ut": 22,
+    "UI": 14,
+    "nw4r::g3d": 14,
+    "Geo": 13,
+    "nw4r::math": 13,
+    "Field": 11,
+    "MSL": 6,
+    "EGG::Math": 5,
+    "nw4r::snd": 4,
+    "Util": 3,
+    "EGG::Audio": 2,
+    "EGG::Util": 2,
+    "Unknown": 2,
+    "EGG::Gfx": 1,
+    "Geo2": 1
+  },
+  "findings": [
+    "The Tockdom Wiki Classes page (wiki.tockdom.com/wiki/Classes) is marked 'Under Construction' and contains NO actual class listings - only the namespace hierarchy",
+    "All 6 planned subpages (Classes/EGG, Classes/nw4r, Classes/RVL, Classes/Kart, Classes/System, Classes/UI) return 404",
+    "Class names are confirmed via: (1) Big Brain Academy: Wii Degree symbol map for EGG/nw4r, (2) Mario Kart 7 symbol map for shared classes, (3) UI::LayoutUIControl::getClassName() for UI controls",
+    "The 465 classes were extracted from the project's decompiled source code headers, cross-referenced with the Tockdom namespace structure",
+    "Key namespaces: EGG (Nintendo's EGG framework), nw4r (Nintendo's multimedia library), RVL (Revolution/Wii SDK), Kart (game-specific kart logic), System (game system management), UI (user interface)",
+    "The Classes page mentions that main.dol hosts library functions and StaticR.rel hosts game-specific logic",
+    "Name derivation note: Mario Kart Wii has no known symbol map, so names come from other Nintendo games' symbol maps"
+  ],
+  "files_generated": {
+    "raw_html": "data/knowledge/tockdom_classes/raw.html",
+    "classes_json": "data/knowledge/tockdom_classes/classes.json",
+    "summary_json": "data/knowledge/tockdom_classes/_summary.json"
+  }
+}

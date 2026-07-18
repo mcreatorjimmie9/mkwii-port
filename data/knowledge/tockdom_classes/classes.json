@@ -1,0 +1,3722 @@
+[
+  {
+    "namespace": "EGG",
+    "class": "Allocator",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggAllocator.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "Arg",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggDvdRipper.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "BaseSystem",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggSystem.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "ColorFader",
+    "description": "!< [vt+0x14]",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggColorFader.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "CoreControllerMgr",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggController.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "CpuGpMonitor",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggProcessMeter.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "CpuMonitor",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggProcessMeter.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "Display",
+    "description": "Display management class.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggDisplay.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "Disposer",
+    "description": "Object disposal/destruction utility. Handles use-after-free prevention.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggDisposer.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "DvdFile",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggDvdFile.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "DvdRipper",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggDvdRipper.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "ExpHeap",
+    "description": "Extended heap implementation (expandable memory allocator).",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggExpHeap.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "Fader",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggColorFader.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "File",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggFile.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "FileInfo",
+    "description": "sizeof=60,0x3C",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggArchive.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "GCControllerMgr",
+    "description": "[vt+0x08]",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggController.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "GPStatus",
+    "description": "!",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggGraphicsFifo.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "GpFuture",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggProcessMeter.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "GraphicsFifo",
+    "description": "Wrapper for GX Graphics fifo.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggGraphicsFifo.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "GroupSizeRecord",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggExpHeap.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "Heap",
+    "description": "Base heap class for memory management in EGG framework (from Big Brain Academy: Wii Degree symbol map).",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggHeap.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "HeapAllocArg",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggHeap.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "HeapErrorArg",
+    "description": "04",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggHeap.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "LZStreamDecomp",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggStreamDecomp.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "LowArchive",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggArchive.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "PerformanceView",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggProcessMeter.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "ProcessBar",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggProcessMeter.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "Scene",
+    "description": "Base scene class for the EGG scene management system.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggScene.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "SceneCreator",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggSceneManager.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "SceneManager",
+    "description": "Manages scene creation and transitions. [vt+0x08] @see SceneManager::createScene",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggSceneManager.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "StreamDecomp",
+    "description": "! @brief Interface for streamed decompression",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggStreamDecomp.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "TJob",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggTaskThread.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "TSystem",
+    "description": "[this+0x38]",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggSystem.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "TaskThread",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggTaskThread.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "Thread",
+    "description": "Thread abstraction for the EGG framework.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggThread.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "Video",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggVideo.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "Viewport",
+    "description": "assumed names",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggViewport.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "Xfb",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggXfb.hpp"
+  },
+  {
+    "namespace": "EGG",
+    "class": "XfbManager",
+    "description": "Source:",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/core/eggXfbManager.hpp"
+  },
+  {
+    "namespace": "EGG::Audio",
+    "class": "ArcPlayer",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/audio/eggAudioArcPlayerMgr.hpp"
+  },
+  {
+    "namespace": "EGG::Audio",
+    "class": "SimpleAudioMgr",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/audio/eggAudioMgr.hpp"
+  },
+  {
+    "namespace": "EGG::Gfx",
+    "class": "Fog",
+    "description": "Source:",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/gfx/eggFog.hpp"
+  },
+  {
+    "namespace": "EGG::Math",
+    "class": "BoundBox2f",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/math/eggBoundBox.hpp"
+  },
+  {
+    "namespace": "EGG::Math",
+    "class": "Math",
+    "description": "#define RAD2DEG(X) 57.2957795131f * X",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/math/eggMath.hpp"
+  },
+  {
+    "namespace": "EGG::Math",
+    "class": "Matrix34f_aligned8",
+    "description": "f32 tbl[3][4];",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/math/eggMatrix.hpp"
+  },
+  {
+    "namespace": "EGG::Math",
+    "class": "Quatf",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/math/eggQuat.hpp"
+  },
+  {
+    "namespace": "EGG::Math",
+    "class": "Vector2f",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/math/eggVector.hpp"
+  },
+  {
+    "namespace": "EGG::Util",
+    "class": "CntFile",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/util/eggCntFile.hpp"
+  },
+  {
+    "namespace": "EGG::Util",
+    "class": "Stream",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_egg/util/eggStream.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIAirtimeTracker",
+    "description": "lands on the ground after being airborne for 20 frames.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIControl.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIControlDemo",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIControl.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIEngineBike",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIEngine.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIEngineKart",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIEngine.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIInfo",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIInfo.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIItemRace",
+    "description": "Throw an item with stick on neutral position",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIItem.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AILookAtBattle",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AILookAt.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AILookAtDemo",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AILookAt.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AILookAtNextInfo",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AILookAt.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AILookAtUnused",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AILookAt.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIManagerEx",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIManager.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIParamSpeed",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AISpeed.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIPathHandler",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIPath.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIPathManager",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIPath.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIPathPoint",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIPath.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIPathPointInfo",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIPath.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIPowAvoider",
+    "description": "Current countdown time.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIControl.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIProbabilityBase",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIProbability.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIProbabilityBattle",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIProbability.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIProbabilityBattleBase",
+    "description": "Unknown vtable at 0x808CA060",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIProbability.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIProbabilityDemo",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIProbability.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIProbabilityRace",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIProbability.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIRank",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIRank.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIRankGroupBase",
+    "description": "The position rank of the human player at the start of the match - 1",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIRank.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIRankGroupBottom",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIRank.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIRankGroupMiddle",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIRank.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AIRankGroupTop",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIRank.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AISpeedBase",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AISpeed.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AISpeedBattle",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AISpeed.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AISpeedBossRace",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AISpeed.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AISpeedDemo",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AISpeed.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AISpeedRace",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AISpeed.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AITrickHandler",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AITrickHandler.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AITrickHandlerBike",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AITrickHandler.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "AITrickHandlerBikeUnused",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AITrickHandler.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "DriveInfo",
+    "description": "From ENPT Settings",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIPath.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "GoNextInfo",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIPath.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "InitArg",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIPath.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "PointParam",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AIPath.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "struct_101",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AILookAt.hpp"
+  },
+  {
+    "namespace": "Enemy",
+    "class": "struct_121",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/enemy/AITrickHandler.hpp"
+  },
+  {
+    "namespace": "Field",
+    "class": "ColInfo",
+    "description": "TU 0x807c2660",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/field/CollisionInfo.hpp"
+  },
+  {
+    "namespace": "Field",
+    "class": "ColInfoPartial",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/field/CollisionInfo.hpp"
+  },
+  {
+    "namespace": "Field",
+    "class": "CollisionEntry",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/field/CollisionEntries.hpp"
+  },
+  {
+    "namespace": "Field",
+    "class": "CourseColManager",
+    "description": "Manager for course KCL",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/field/CourseColManager.hpp"
+  },
+  {
+    "namespace": "Field",
+    "class": "CourseModel",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/field/CourseModel.hpp"
+  },
+  {
+    "namespace": "Field",
+    "class": "DrivableColInfo",
+    "description": "TODO: Split its own TU. Not well understood what this does",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/field/DrivableColInfo.hpp"
+  },
+  {
+    "namespace": "Field",
+    "class": "KCollisionHeader",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/field/KCollision.hpp"
+  },
+  {
+    "namespace": "Field",
+    "class": "KCollisionPrism",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/field/KCollision.hpp"
+  },
+  {
+    "namespace": "Field",
+    "class": "ObjColManager",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/field/ObjColManager.hpp"
+  },
+  {
+    "namespace": "Field",
+    "class": "RKGndCol",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/field/RKGndCol.hpp"
+  },
+  {
+    "namespace": "Field",
+    "class": "SoftWallColInfo",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/field/CollisionInfo.hpp"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "GHIBuffer",
+    "description": "clang-format off",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/ghttp/ghttpBuffer.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "GHIConnection",
+    "description": "Protocol.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/ghttp/ghttpConnection.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "GHIEncryptor",
+    "description": "[in/out]",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/ghttp/ghttpEncryption.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "GHIPostingState",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/ghttp/ghttpPost.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "GPICallbackData",
+    "description": "TYPES",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/GP/gpiCallback.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "GPIMessage",
+    "description": "TYPES",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/GP/gpiPeer.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "GPIOperation_s",
+    "description": "#define GPI_CONNECTING               1",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/GP/gpiOperation.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "GPIPeer_s",
+    "description": "A peer connection.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/GP/gpiPeer.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "GPIProfile",
+    "description": "Profile data.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/GP/gpiProfile.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "GPITransferID_s",
+    "description": "TYPES",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/GP/gpiTransfer.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "GTI2Buffer",
+    "description": "unreliable messages don't really have a message type, just the magic string",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/gt2/gt2Main.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "GTI2Connection",
+    "description": "set to true if the socket has already been",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/gt2/gt2Main.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "GTI2IncomingBufferMessage",
+    "description": "The buffer's bytes.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/gt2/gt2Main.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "GTI2OutgoingBufferMessage",
+    "description": "the length of the message",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/gt2/gt2Main.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "GTI2Socket",
+    "description": "the length of the message",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/gt2/gt2Main.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "RC4Context",
+    "description": "/////////////////////////////////////////////////////////////////////////////",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/common/gsRC4.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "SAKEInternal",
+    "description": "/////////////////////////////////////////////////////////////////////////////",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/sake/sakeMain.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "SAKERequestInternal",
+    "description": "/////////////////////////////////////////////////////////////////////////////",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/sake/sakeRequest.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "SHA1Context",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/common/gsSHA1.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "VECTOR",
+    "description": "------ Cross Plat Alignment macros ------------",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/common/gsPlatform.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_AddressMapping",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/natneg/NATify.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_GOACryptState",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/serverbrowsing/sb_crypt.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_GPIBuddyStatusInfo",
+    "description": "INCLUDES",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/GP/gpiProfile.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_GPIPeerOp",
+    "description": "TYPES",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/GP/gpiPeer.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_GPIPeerOpQueue",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/GP/gpiPeer.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_ICMPHeader",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/serverbrowsing/sb_internal.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_IPHeader",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/serverbrowsing/sb_internal.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_KeyInfo",
+    "description": "key information structure",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/serverbrowsing/sb_internal.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_NAT",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/natneg/NATify.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_SBKeyValuePair",
+    "description": "include ICMP support by default",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/serverbrowsing/sb_internal.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_SBQueryEngine",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/serverbrowsing/sb_internal.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_SBRefString",
+    "description": "a key/value pair",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/serverbrowsing/sb_internal.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_SBServer",
+    "description": "server object",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/serverbrowsing/sb_internal.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_SBServerFIFO",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/serverbrowsing/sb_internal.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_SBServerList",
+    "description": "keeps track of previous and current sorting information",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/serverbrowsing/sb_internal.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_ServerBrowser",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/serverbrowsing/sb_internal.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "_SortInfo",
+    "description": "keeps track of previous and current sorting information",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/serverbrowsing/sb_internal.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "gsLargeInt_s",
+    "description": "// size in values",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/common/gsLargeInt.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "gsSSL",
+    "description": "/////////////////////////////////////////////////////////////////////////////",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/common/gsSSL.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "gsSSLCipherSuiteDesc",
+    "description": "/////////////////////////////////////////////////////////////////////////////",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/common/gsSSL.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "gsSSLClientHelloMsg",
+    "description": "length of msg, limited to 2^14",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/common/gsSSL.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "gsSSLClientKeyExchangeMsg",
+    "description": "no standard methods, set to 1",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/common/gsSSL.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "gsSSLRecordHeaderMsg",
+    "description": "with serverpub",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/common/gsSSL.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "qr2_implementation_s",
+    "description": "allow maximum of 5 requests per IP/PORT",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/qr2/qr2.h"
+  },
+  {
+    "namespace": "GameSpy",
+    "class": "qr2_ipverify_info_s",
+    "description": "allowed outstanding queryies in those 4 seconds",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_gamespy/qr2/qr2.h"
+  },
+  {
+    "namespace": "Geo",
+    "class": "BaseGeoHitTableManager",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/geo/ObjectDirector.hpp"
+  },
+  {
+    "namespace": "Geo",
+    "class": "BoxColLeftPoint",
+    "description": "from all segments overlapping this x, the left most",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/geo/BoxColManager.hpp"
+  },
+  {
+    "namespace": "Geo",
+    "class": "BoxColRightPoint",
+    "description": "extern const float flt_808A47EC;",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/geo/BoxColManager.hpp"
+  },
+  {
+    "namespace": "Geo",
+    "class": "BoxColUnit",
+    "description": "An item inside a BoxColManager. A box described by its BoxColUnit::position and BoxColUnit::radius. @see BoxColManager for details",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/geo/BoxColUnit.hpp"
+  },
+  {
+    "namespace": "Geo",
+    "class": "Data",
+    "description": "! @brief sizeof=0x74",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/geo/ObjectParameter.hpp"
+  },
+  {
+    "namespace": "Geo",
+    "class": "GeoHitTableItemManager",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/geo/ObjectDirector.hpp"
+  },
+  {
+    "namespace": "Geo",
+    "class": "GeoHitTableItemObjManager",
+    "description": "sizeof=",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/geo/ObjectDirector.hpp"
+  },
+  {
+    "namespace": "Geo",
+    "class": "Header",
+    "description": "total number of elements.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/geo/ObjectParameter.hpp"
+  },
+  {
+    "namespace": "Geo",
+    "class": "ObjBase",
+    "description": "/ has its update function called each frame",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/geo/ObjBase.hpp"
+  },
+  {
+    "namespace": "Geo",
+    "class": "ObjDrivable",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/geo/ObjDrivable.hpp"
+  },
+  {
+    "namespace": "Geo",
+    "class": "ObjectDirector",
+    "description": "sizeof=",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/geo/ObjectDirector.hpp"
+  },
+  {
+    "namespace": "Geo",
+    "class": "ObjectParameter",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/geo/ObjectParameter.hpp"
+  },
+  {
+    "namespace": "Geo",
+    "class": "Parameter",
+    "description": "! @brief sizeof=0x74",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/geo/ObjectParameter.hpp"
+  },
+  {
+    "namespace": "Geo2",
+    "class": "ObjDrivableManager",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/geo2/ObjDrivableManager.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "BSP",
+    "description": "Wheel X axis rotation (0 in vanilla)",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/BSP.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "BspHitbox",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/BSP.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "BspWheel",
+    "description": "only collide with walls",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/BSP.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "Hitbox",
+    "description": "Represents a sphere hitbox",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartHitbox.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "HitboxGroup",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartHitbox.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "IKartCollide",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartCollide.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartAccessor",
+    "description": "Used outside of KartAccessor",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartObjectProxy.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartBody",
+    "description": "Main kart body class representing a kart entity in the game.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartBody.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartCollideArea",
+    "description": "0x80593fa4. Not understood well at all",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartCollide.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartCollideAreaBase",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartCollide.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartCollisionInfo",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartHitbox.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartDynamics",
+    "description": "Kart dynamics simulation including acceleration, deceleration, and drift mechanics.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartDynamics.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartDynamicsBike",
+    "description": "e.g. you can reach speeds higher than 120km/h in a mega",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartDynamics.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartDynamicsKart",
+    "description": "model scale for some reason affects max speed limit",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartDynamics.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartInput",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartInput.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartMove",
+    "description": "Handles kart movement and physics simulation during racing.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartMove.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartObjectProxy",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartObjectProxy.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartParam",
+    "description": "Parameters defining kart properties (speed, weight, etc.).",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartParam.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartPart",
+    "description": "Represents individual kart parts (body, wheels, glider).",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartPart.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartPhysics",
+    "description": "Physics calculations for kart behavior.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartPhysics.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartPhysicsEngine",
+    "description": "Core physics engine for kart simulation.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartPhysicsEngine.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartSettings",
+    "description": "Configuration and settings for kart behavior.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartSettings.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartState",
+    "description": "Tracks the current state of a kart (race position, item, etc.).",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartState.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartStats",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartParam.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartSusPhysics",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartWheelPhysics.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartWheel",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartWheel.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "KartWheelPhysics",
+    "description": "bsp max suspension travel after vehicle scale is applied",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartWheelPhysics.hpp"
+  },
+  {
+    "namespace": "Kart",
+    "class": "RotatingItemParams",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/kart/KartParam.hpp"
+  },
+  {
+    "namespace": "MSL",
+    "class": "DestructorChain",
+    "description": "",
+    "source": "tockdom",
+    "module": "unknown",
+    "file": "lib_MSL/include/global_destructor_chain.h"
+  },
+  {
+    "namespace": "MSL",
+    "class": "_FILE",
+    "description": "",
+    "source": "tockdom",
+    "module": "unknown",
+    "file": "lib_MSL/include/stdio.h"
+  },
+  {
+    "namespace": "MSL",
+    "class": "__eti_init_info",
+    "description": "",
+    "source": "tockdom",
+    "module": "unknown",
+    "file": "lib_MSL/include/__ppc_eabi_linker.h"
+  },
+  {
+    "namespace": "MSL",
+    "class": "__locale",
+    "description": "",
+    "source": "tockdom",
+    "module": "unknown",
+    "file": "lib_MSL/include/ctype.h"
+  },
+  {
+    "namespace": "MSL",
+    "class": "_loc_ctype_cmpt",
+    "description": "",
+    "source": "tockdom",
+    "module": "unknown",
+    "file": "lib_MSL/include/ctype.h"
+  },
+  {
+    "namespace": "MSL",
+    "class": "tm",
+    "description": "",
+    "source": "tockdom",
+    "module": "unknown",
+    "file": "lib_MSL/include/time.h"
+  },
+  {
+    "namespace": "Net",
+    "class": "DisconnectInfo",
+    "description": "sends user back to friend roster",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/DisconnectInfo.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "EVENTHandler",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/EVENT.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "EVENTPacket",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/EVENT.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "FriendInfo",
+    "description": "with a similar field in matchMakingInfo",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/FriendInfo.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "HEADERPacket",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/HEADER.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "ITEMHandler",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/ITEM.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "ITEMPacket",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/ITEM.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "LocalPlayerCountDWC",
+    "description": "reason this exists is since the local player count must be in the highest",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/NetManager.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "MatchMakingInfo",
+    "description": "byte to be passed off to DWC functions",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/NetManager.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "MiscPacketHandler",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/MiscPacketHandler.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "NetManager",
+    "description": "Network manager for online multiplayer communication.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/NetManager.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "PacketHolder",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/PacketHolder.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "RACEDATAPacket",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/RACEDATA.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "RACEHEADER1Data",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/RACEHEADER1.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "RACEHEADER1Handler",
+    "description": "different types?",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/RACEHEADER1.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "RACEHEADER1Packet",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/RACEHEADER1.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "RACEHEADER2Packet",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/RACEHEADER2.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "RACEPacketHolder",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/RACEPacketHolder.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "ROOMHandler",
+    "description": "4: Chat",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/ROOM.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "ROOMPacket",
+    "description": "Credits: https://wiki.tockdom.com/wiki/Network_Protocol/ROOM",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/ROOM.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "SELECTHandler",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/SELECT.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "SELECTPacket",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/SELECT.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "StatusData",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/FriendInfo.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "USERHandler",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/USER.hpp"
+  },
+  {
+    "namespace": "Net",
+    "class": "USERPacket",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/net/packets/USER.hpp"
+  },
+  {
+    "namespace": "RVL",
+    "class": "AXPB",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/ax/vpb.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "AXPBITDBUFFER",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/ax/vpb.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "AXSPB",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/ax/spb.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "AXVPB",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/ax/vpb.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "BssSection",
+    "description": "at 0x4",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/__ppc_eabi_init.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "CNTFileInfoNAND",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/cnt.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "CXUncompContextLZ",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/cx/cxLz.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "DPDObject",
+    "description": "Size: 0x7 (padded to 0x8)",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/wpad/wpad.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "DVDCommandBlock",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/dvd/dvd.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "DVDDir",
+    "description": "https://github.com/DarkRTA/rb3/blob/4ca788a7e7b5470eb54644a9bda318e675bcd4d3/src/sdk/RVL_SDK/revolution/dvd/dvd.h",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/dvd/dvdFs.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "DVDDirEntry",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/dvd/dvdFs.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "DVDDiskID",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/dvd/dvd.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "DVDFileInfo",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/dvd/dvd.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "ExtabIndexInfo",
+    "description": "at 0x4",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/__ppc_eabi_init.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "GXFifoObj",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/gx.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "GXRenderModeObj",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/gx.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "IPInterface",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/so/so.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "KPADStatus",
+    "description": "Size: 0x84",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/kpad/kpad.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "KPADUnifiedWpadStatus",
+    "description": "Size: 0x38",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/kpad/kpad.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "MEMAllocator",
+    "description": "0x00",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/mem/memAllocator.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "MEMAllocatorFunc",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/mem/memAllocator.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "MEM_Extent",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/mem/expHeap.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "MEMiExpHeapHead",
+    "description": "MEMiExpHeapHead is the extended heap header.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/mem/expHeap.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "MEMiExpHeapMBlockHead",
+    "description": "__cplusplus",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/mem/expHeap.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "MEMiExpMBlockList",
+    "description": "0x08",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/mem/expHeap.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "MEMiFrmHeapHead",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/mem/frmHeap.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "MEMiFrmHeapState",
+    "description": "__cplusplus",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/mem/frmHeap.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "MEMiHeapHead",
+    "description": "0x00",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/mem/memAllocator.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "MEMiUntHeapHead",
+    "description": "__cplusplus",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/mem/unitHeap.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "MEMiUntHeapMBlockHead",
+    "description": "__cplusplus",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/mem/unitHeap.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "NANDCB_UNK",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/nand/nand.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "NANDCommandBlock",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/nand/nand.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "NANDFileInfo",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/nand/nand.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "NANDStatus",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/nand/nand.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "NETSoSocket",
+    "description": "0x00",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/so/so.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "OSAlarm",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/osAlarm.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "OSAllocCell",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/osAlloc.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "OSAllocHeap",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/osAlloc.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "OSCalendarTime",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/os.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "OSContext",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/osContext.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "OSFontHeader",
+    "description": "Credit: GibHaltmannKill",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/osFont.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "OSMessageQueue",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/osMessage.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "OSModuleHeader",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/osLink.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "OSModuleInfo",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/osLink.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "OSModuleLink",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/osLink.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "OSModuleQueue",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/osLink.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "OSSemaphore",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/osSemaphore.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "OSShutdownFunctionInfo",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/osReset.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "OSShutdownFunctionQueue",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/osReset.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "OSThread",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/osThread.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "OSThreadQueue",
+    "description": "304",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/osThread.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "PADClampRegion",
+    "description": "0x04",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/pad/pad.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "PADStatus",
+    "description": "https://github.com/devkitPro/libogc/blob/bc4b778d558915aa40676e33514c4c9ba2af66b8/gc/ogc/pad.h#L46",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/pad/pad.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "RomSection",
+    "description": "BSS sections",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/os/__ppc_eabi_init.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "SCBtDeviceInfo",
+    "description": "at 0x0",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/sc/scapi.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "SCBtDeviceInfoArray",
+    "description": "at 0x0",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/sc/scapi.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "SCIdleModeInfo",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/sc/scapi.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "SOAddrInfo",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/so/so.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "SOHostEnt",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/so/so.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "SOInAddr",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/so/so.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "SOPollFD",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/so/so.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "SOSockAddr",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/so/so.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "SOSockAddrIn",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/so/so.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "SOSysWork",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/so/so.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "WPADCLStatus",
+    "description": "controller type",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/wpad/wpad.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "WPADFSStatus",
+    "description": "controller type",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/wpad/wpad.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "WPADInfo",
+    "description": "controller type",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/wpad/wpad.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "WPADStatus",
+    "description": "Size: 0x7 (padded to 0x8)",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/wpad/wpad.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "_GXColor",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/gx/gx.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "_GXData",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/gx/gx.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "_GXLightObj",
+    "description": "Credit: kiwi515",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/gx/gxLight.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "_GXTexObj",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/gx/gx.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "_GXTlutObj",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/gx/gx.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "_GXVtxAttrFmtList",
+    "description": "at 0x0",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/gx/gxAttr.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "_GXVtxDescList",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/gx/gxAttr.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "rvlArchive",
+    "description": "!",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/arc/rvlArchive.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "rvlArchiveEntry",
+    "description": "!   rvlArchiveFile.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/arc/rvlArchive.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "rvlArchiveFile",
+    "description": "!< 14 Total bytesize of nodes and strings.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/arc/rvlArchive.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "rvlArchiveFolderRange",
+    "description": "!< 0C Name of this entry in specific.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/arc/rvlArchive.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "rvlArchiveHeader",
+    "description": "In some cases (X << 8 >> 8) does not collapse to a mask.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/arc/binary_format.h"
+  },
+  {
+    "namespace": "RVL",
+    "class": "rvlArchiveNode",
+    "description": "expects",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_rvl/arc/binary_format.h"
+  },
+  {
+    "namespace": "System",
+    "class": "Addr",
+    "description": "//////// KPAD ////////////////////////",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/KPadController.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "AsyncDvdStatus",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/host_system/eggAsyncDvdStatus.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "CharacterVehicleChoice",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/Competition.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "CompetitionSettings",
+    "description": "Also known as \"KMT Scenario Entry\". See https://wiki.tockdom.com/wiki/Mission_Mode#mission_single.kmt",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/Competition.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "CompetitionWrapper",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/Competition.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "CourseDvdArchive",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/LocalizedArchive.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "CourseMap",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "Date",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/GhostFile.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "DrawModel",
+    "description": "Very preliminary",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RKResource.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "DvdArchive",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/DvdArchive.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "ElineControlManager",
+    "description": "TODO: TU 0x8052d46c-0x8052d96c",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/ElineControlManager.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "ElineController",
+    "description": "TODO: TU 0x8052d270-0x8052d46c",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/ElineController.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "GhostFile",
+    "description": "Handles ghost data file I/O for time trial ghosts.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/GhostFile.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "GhostFileGroup",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/GhostFile.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "HeapCollection",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/host_system/RKScene.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "InitScene",
+    "description": "Incorrect name, but is a placeholder for RaceConfigPlayer::appendParamFile",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/InitScene.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "JobContext",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/ResourceManager.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KPad",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/KPadController.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KPadAI",
+    "description": "[this+0xe4]",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/KPadController.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KPadAIController",
+    "description": "[this+0x94]",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/KPadController.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KPadController",
+    "description": "Base controller class for player input handling.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/KPadController.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KPadControllerInfo",
+    "description": "! @brief [vt+0x0c] Do nothing.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/KPadController.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KPadDirector",
+    "description": "Director for controller input management.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/KPadDirector.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KPadDummyController",
+    "description": "[this+0x90]",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/KPadController.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KPadGCController",
+    "description": "[this+0x918]",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/KPadController.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KPadGhostController",
+    "description": "[this+0x9c]",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/KPadController.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KPadPlayer",
+    "description": "[this+0xc4]",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/KPadController.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KPadRaceInputState",
+    "description": "//////// INPUT STATE /////////////////",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/KPadController.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KPadUIInputState",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/KPadController.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KPadWiiController",
+    "description": "[this+0x58]",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/KPadController.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KmgFile",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RaceManager.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KmgFileRaw",
+    "description": "TODO: Maybe defines/bitfield and not enum?",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RaceManager.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KmpSectionHeader",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "KrtFile",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RaceManager.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "LinkedCheckpoint",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataAccessorBase",
+    "description": "TODO: Cleanup",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataAreaAccessor",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataAreaBase",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataAreaBox",
+    "description": "Index in MapdataAreaAccessor array",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataAreaCylinder",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataCamera",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataCannonPoint",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataCheckPath",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataCheckPoint",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataEnemyPath",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataEnemyPoint",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataFileAccessor",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataGeoObj",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataItemPath",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataItemPoint",
+    "description": "Required padding",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataJugemPoint",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataMissionPoint",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataPointInfo",
+    "description": "have been moved just above the accessor classes due to vtable ordering",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataStage",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MapdataStartPoint",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "Mii",
+    "description": "Mii character data wrapper.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/Mii.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MiiId",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/Mii.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MovingMask",
+    "description": "currentBit is a 1 that rotates arounds the region defined by mask every frame. Could be slipstream related? Overall a weird timer which rotates a single bit around a u32",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RaceManager.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "MultiDvdArchive",
+    "description": "1 %s",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/MultiDvdArchive.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "ParameterFile",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/host_system/ParameterFile.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "Player",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RaceConfig.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "Point",
+    "description": "have been moved just above the accessor classes due to vtable ordering",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "RKBitField",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RKBitField.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "RKResource",
+    "description": "Very preliminary",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RKResource.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "RKSystem",
+    "description": "Main system class for the MKWii runtime. vtable @ 80270bf0.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/host_system/RKSystem.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "RaceConfigEx",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RaceConfig.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "RaceManager",
+    "description": "Core race management - handles race flow, timing, and game mode logic.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RaceManager.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "RaceManagerPlayer",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RaceManager.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "RaceMode",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RaceMode.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "RaceModeGrandPrix",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RaceMode.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "RaceSysDvdArchive",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/LocalizedArchive.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "Rating",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/Rating.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "RawCompetitionFile",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/Competition.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "RawGhostFile",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/GhostFile.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "RawMii",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/Mii.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "RawRKCO",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/Competition.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "ResourceManager",
+    "description": "Manages loading and caching of game resources.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/ResourceManager.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "RumbleManager",
+    "description": "Temporary definition",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/KPadDirector.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "S",
+    "description": "everything",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/ResourceManager.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "SData",
+    "description": "have been moved just above the accessor classes due to vtable ordering",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "Scenario",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RaceConfig.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "Settings",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RaceConfig.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "StringView",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/host_system/ParameterFile.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "SystemRipper",
+    "description": "sizeof=4352, vt at 0x54",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/host_system/SystemManager.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "T",
+    "description": "begrudging riidefi magic",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/ResourceManager.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "Time",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/GhostFile.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "TimerManager",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RaceManager.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "TimerManagerBase",
+    "description": "Maybe its own header file",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/RaceManager.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "UIDvdArchive",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/LocalizedArchive.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "Vec3",
+    "description": "NOTE: We cannot modify eggVector.hpp without the build failing",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/CourseMap.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "Whatever",
+    "description": "unknown structs",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/ResourceManager.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "Whatever2",
+    "description": "unknown structs",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/ResourceManager.hpp"
+  },
+  {
+    "namespace": "System",
+    "class": "unkStruct",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/system/Mii.hpp"
+  },
+  {
+    "namespace": "UI",
+    "class": "Block",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/ui/MessageGroup.hpp"
+  },
+  {
+    "namespace": "UI",
+    "class": "ControlGroup",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/ui/ControlGroup.hpp"
+  },
+  {
+    "namespace": "UI",
+    "class": "Deferred",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/ui/RTTI.hpp"
+  },
+  {
+    "namespace": "UI",
+    "class": "Element",
+    "description": "! Propagated down from the root (css \"fixed\")",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/ui/UIControl.hpp"
+  },
+  {
+    "namespace": "UI",
+    "class": "ElementPositionsArray",
+    "description": "// Positioning",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/ui/UIControl.hpp"
+  },
+  {
+    "namespace": "UI",
+    "class": "Entry",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/ui/MessageGroup.hpp"
+  },
+  {
+    "namespace": "UI",
+    "class": "Functor",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/ui/ControlGroup.hpp"
+  },
+  {
+    "namespace": "UI",
+    "class": "Header",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/ui/MessageGroup.hpp"
+  },
+  {
+    "namespace": "UI",
+    "class": "Inf",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/ui/MessageGroup.hpp"
+  },
+  {
+    "namespace": "UI",
+    "class": "MessageGroup",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/ui/MessageGroup.hpp"
+  },
+  {
+    "namespace": "UI",
+    "class": "Mid",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/ui/MessageGroup.hpp"
+  },
+  {
+    "namespace": "UI",
+    "class": "Page",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/ui/Page.hpp"
+  },
+  {
+    "namespace": "UI",
+    "class": "TypeInfo",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/ui/RTTI.hpp"
+  },
+  {
+    "namespace": "UI",
+    "class": "UIControl",
+    "description": "UI control base class. getClassName() method provides confirmed class names for UI controls.",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/ui/UIControl.hpp"
+  },
+  {
+    "namespace": "Unknown",
+    "class": "NonCopyable",
+    "description": "",
+    "source": "tockdom",
+    "module": "unknown",
+    "file": "include/rk_types.h"
+  },
+  {
+    "namespace": "Unknown",
+    "class": "ps_f32",
+    "description": "",
+    "source": "tockdom",
+    "module": "unknown",
+    "file": "include/decomp.h"
+  },
+  {
+    "namespace": "Util",
+    "class": "Random",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/util/Random.hpp"
+  },
+  {
+    "namespace": "Util",
+    "class": "StateBase",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/util/State.hpp"
+  },
+  {
+    "namespace": "Util",
+    "class": "StateSequencer",
+    "description": "",
+    "source": "tockdom",
+    "module": "StaticR.rel",
+    "file": "src/util/State.hpp"
+  },
+  {
+    "namespace": "nw4r::g3d",
+    "class": "Camera",
+    "description": "3D camera class for rendering scenes.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/g3d/g3d_camera.hpp"
+  },
+  {
+    "namespace": "nw4r::g3d",
+    "class": "CameraData",
+    "description": "Decompiled by kiwi515.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/g3d/g3d_camera.hpp"
+  },
+  {
+    "namespace": "nw4r::g3d",
+    "class": "Fog",
+    "description": "at 0x1A",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/g3d/g3d_fog.hpp"
+  },
+  {
+    "namespace": "nw4r::g3d",
+    "class": "FogData",
+    "description": "Decompiled by kiwi515.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/g3d/g3d_fog.hpp"
+  },
+  {
+    "namespace": "nw4r::g3d",
+    "class": "PostureInfo",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/g3d/g3d_camera.hpp"
+  },
+  {
+    "namespace": "nw4r::g3d",
+    "class": "ResBlockHeaderData",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/g3d/g3d_rescommon.hpp"
+  },
+  {
+    "namespace": "nw4r::g3d",
+    "class": "ResCommon",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/g3d/g3d_rescommon.hpp"
+  },
+  {
+    "namespace": "nw4r::g3d",
+    "class": "ResDicData",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/g3d/g3d_resdict.h"
+  },
+  {
+    "namespace": "nw4r::g3d",
+    "class": "ResDicNodeData",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/g3d/g3d_resdict.h"
+  },
+  {
+    "namespace": "nw4r::g3d",
+    "class": "ResFileData",
+    "description": "\"root\"",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/g3d/g3d_resfile.h"
+  },
+  {
+    "namespace": "nw4r::g3d",
+    "class": "ResFileHeaderData",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/g3d/g3d_resfile.h"
+  },
+  {
+    "namespace": "nw4r::g3d",
+    "class": "ResName",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/g3d/g3d_rescommon.hpp"
+  },
+  {
+    "namespace": "nw4r::g3d",
+    "class": "ResNameData",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/g3d/g3d_rescommon.hpp"
+  },
+  {
+    "namespace": "nw4r::g3d",
+    "class": "ResTopLevelDictData",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/g3d/g3d_resfile.h"
+  },
+  {
+    "namespace": "nw4r::math",
+    "class": "MTX33",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/math/mathTypes.hpp"
+  },
+  {
+    "namespace": "nw4r::math",
+    "class": "MTX34",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/math/mathTypes.hpp"
+  },
+  {
+    "namespace": "nw4r::math",
+    "class": "MTX44",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/math/mathTypes.hpp"
+  },
+  {
+    "namespace": "nw4r::math",
+    "class": "SinCosSample",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/math/mathTriangular.hpp"
+  },
+  {
+    "namespace": "nw4r::math",
+    "class": "VEC2",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/math/mathTypes.hpp"
+  },
+  {
+    "namespace": "nw4r::math",
+    "class": "VEC3",
+    "description": "forward decls",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/math/mathTypes.hpp"
+  },
+  {
+    "namespace": "nw4r::math",
+    "class": "_MTX33",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/math/mathTypes.hpp"
+  },
+  {
+    "namespace": "nw4r::math",
+    "class": "_MTX34",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/math/mathTypes.hpp"
+  },
+  {
+    "namespace": "nw4r::math",
+    "class": "_MTX44",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/math/mathTypes.hpp"
+  },
+  {
+    "namespace": "nw4r::math",
+    "class": "_VEC2",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/math/mathTypes.hpp"
+  },
+  {
+    "namespace": "nw4r::math",
+    "class": "_VEC3",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/math/mathTypes.hpp"
+  },
+  {
+    "namespace": "nw4r::math",
+    "class": "__MTX33",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/math/mathTypes.hpp"
+  },
+  {
+    "namespace": "nw4r::math",
+    "class": "__MTX34",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/math/mathTypes.hpp"
+  },
+  {
+    "namespace": "nw4r::snd",
+    "class": "FrameHeap",
+    "description": "Credit: kiwi515",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/snd/snd_frameHeap.hpp"
+  },
+  {
+    "namespace": "nw4r::snd",
+    "class": "SoundArchive",
+    "description": "Source:",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/snd/snd_sndArchive.hpp"
+  },
+  {
+    "namespace": "nw4r::snd",
+    "class": "SoundArchiveFileReader",
+    "description": "Credit: GibHaltmannKill",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/snd/snd_soundArchiveFile.hpp"
+  },
+  {
+    "namespace": "nw4r::snd",
+    "class": "SoundMemoryAllocatable",
+    "description": "https://github.com/kiwi515/ogws/blob/master/include/nw4r/snd/snd_SoundMemoryAllocatable.h",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/snd/snd_soundMemoryAllocatable.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "CharStrmReader",
+    "description": "Source:",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_CharStrmReader.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "CharWidths",
+    "description": "Source: https://github.com/kiwi515/ogws/blob/master/include/nw4r/ut/ut_Font.h",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_font.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "CharWriter",
+    "description": "Source:",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_charWriter.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "Color",
+    "description": "Source:",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/utColor.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "ColorMapping",
+    "description": "Source:",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_charWriter.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "FileInfoStreamPair",
+    "description": "Credit: kiwi515",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_dvdFileStream.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "FilePosition",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_fileStream.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "FileStream",
+    "description": "Source:",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_fileStream.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "Font",
+    "description": "Font rendering class from Nintendo's nw4r utility library.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_font.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "FontCodeMap",
+    "description": "at 0x4",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_resFontBase.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "FontInformation",
+    "description": "at 0x3",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_resFontBase.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "FontTextureGlyph",
+    "description": "at 0x8",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_resFontBase.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "FontWidth",
+    "description": "github.com/kiwi515/ogws/blob/master/include/nw4r/ut/ut_ResFontBase.h",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_resFontBase.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "Glyph",
+    "description": "Source:",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_glyph.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "List",
+    "description": "Unlike modern \"std::list\"-like structures, list nodes are directly inherited",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/utList.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "LoadingTexture",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_charWriter.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "Node",
+    "description": "! Bidirectional list node",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/utList.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "Polymorphic",
+    "description": "namespace detail",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_RTTI.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "RuntimeTypeInfo",
+    "description": "RTTI (Runtime Type Information) implementation.",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_RTTI.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "TextColor",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_charWriter.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "TextureFilter",
+    "description": "",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_charWriter.hpp"
+  },
+  {
+    "namespace": "nw4r::ut",
+    "class": "VertexColor",
+    "description": "Credit: GibHaltmannKill",
+    "source": "tockdom",
+    "module": "main.dol",
+    "file": "lib_nw4r/ut/ut_charWriter.hpp"
+  }
+]

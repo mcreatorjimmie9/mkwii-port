@@ -1,0 +1,259 @@
+{
+  "source": "https://github.com/SeekyCt/mkw-structures",
+  "copied_at": "2025-06-18",
+  "total_files": 15,
+  "total_header_files": 14,
+  "total_lines": 1837,
+  "files": [
+    "player.h",
+    "racedata.h",
+    "raceinfo.h",
+    "inputdata.h",
+    "rknetcontroller.h",
+    "selecthandler.h",
+    "roomhandler.h",
+    "eventhandler.h",
+    "itemslotdata.h",
+    "itemhandler.h",
+    "itembehaviour.h",
+    "miscpackethandler.h",
+    "random.h",
+    "userhandler.h",
+    "README.md"
+  ],
+  "key_classes": {
+    "PlayerHolder": {
+      "file": "player.h",
+      "description": "Contains most player-specific data during a race. The central per-player data structure.",
+      "size": "0x73f0+"
+    },
+    "Player": {
+      "file": "player.h",
+      "description": "Base player class with kart physics, movement, and state. PlayerBike is the bike variant."
+    },
+    "PlayerPhysics / PlayerPhysicsBike": {
+      "file": "player.h",
+      "description": "Handles kart/bike physics including speed, acceleration, steering, drifting, and surface interactions."
+    },
+    "PlayerBoost": {
+      "file": "player.h",
+      "description": "Manages boost state (mushroom, trick, start boost, etc.) with multiplier and speed limit."
+    },
+    "PlayerTrick / PlayerTrickBike": {
+      "file": "player.h",
+      "description": "Handles trick/stunt animations including flips, rotations, and boost ramp."
+    },
+    "PlayerSub10 / PlayerSub10Bike": {
+      "file": "player.h",
+      "description": "Player sub-structure (~0x10 size offset) with Remote and RealLocal variants. Contains additional movement state."
+    },
+    "PlayerSub14 / PlayerSub18 / PlayerSub1c": {
+      "file": "player.h",
+      "description": "Additional player sub-structures for item, wheelie, and other gameplay state."
+    },
+    "PlayerPointers": {
+      "file": "player.h",
+      "description": "Holds pointers to various player sub-objects and state."
+    },
+    "PlayerParams": {
+      "file": "player.h",
+      "description": "Stores kart/bike parameter data (from KartParam.bin and parts display params)."
+    },
+    "WheelPhysics / WheelPhysicsHolder": {
+      "file": "player.h",
+      "description": "Wheel physics and suspension. Wheel0 and Wheel1 are 3D object variants."
+    },
+    "CollisionData / Hitbox / HitboxGroup": {
+      "file": "player.h",
+      "description": "Collision detection data and hitbox management."
+    },
+    "StatsAndBsp / GpStats": {
+      "file": "player.h",
+      "description": "Stats tracking and BSP (Binary Space Partition) data."
+    },
+    "Racedata / RacedataMain": {
+      "file": "racedata.h",
+      "description": "Holds race setup info: game mode, character/vehicle selections, settings. Extends ParameterFile. Total size 0x73f0.",
+      "static_instance": "0x809bd728"
+    },
+    "RacedataScenario": {
+      "file": "racedata.h",
+      "description": "Contains 12 player entries, race settings, mission data, and ghost file pointer. Size 0xbf0."
+    },
+    "RacedataPlayer": {
+      "file": "racedata.h",
+      "description": "Per-player race data: vehicle/character ID, player type, team, score, rating. Size 0xf0."
+    },
+    "RacedataSettings": {
+      "file": "racedata.h",
+      "description": "Race settings struct: course ID, engine class, game mode, battle type, CPU mode, item mode, lap count, etc. Size 0x34."
+    },
+    "Raceinfo": {
+      "file": "raceinfo.h",
+      "description": "Stores live race info: player positions, lap times, race completion, stage (intro/countdown/race), timers.",
+      "static_instance": "0x809bd730"
+    },
+    "RaceinfoPlayer": {
+      "file": "raceinfo.h",
+      "description": "Per-player race state: position, lap, checkpoint, race completion fraction, battle score, frame counter, finish times. Size 0x54."
+    },
+    "Timer / TimerManager": {
+      "file": "raceinfo.h",
+      "description": "Race timing (minutes/seconds/ms) and timer management with 3 timer slots."
+    },
+    "RaceinfoRandom": {
+      "file": "raceinfo.h",
+      "description": "Extends Random for race-specific RNG."
+    },
+    "GmDataOnlineVs / GmDataOnlineVsPlayer": {
+      "file": "raceinfo.h",
+      "description": "Online VS mode-specific game data with position tracking and race finish times."
+    },
+    "InputData": {
+      "file": "inputdata.h",
+      "description": "Handles all controller inputs. 4 real controllers + 12 virtual. Total size 0x415c.",
+      "static_instance": "0x809bd70c"
+    },
+    "ControllerHolder / RealControllerHolder / VirtualControllerHolder": {
+      "file": "inputdata.h",
+      "description": "Per-controller input state: buttons, stick, triggers. Real controllers read hardware; virtual store remote player inputs."
+    },
+    "InputState": {
+      "file": "inputdata.h",
+      "description": "Raw and processed input: buttonActions, buttonRaw, stick X/Y, quantized stick, motion control. Size 0x18."
+    },
+    "RKNetController": {
+      "file": "rknetcontroller.h",
+      "description": "Main network controller: DWC integration, RACE packet handling, connection management, friend roster, VR/BR.",
+      "static_instance": "0x809c20d8"
+    },
+    "PacketHolder / SplitRACEPointers": {
+      "file": "rknetcontroller.h",
+      "description": "RACE packet buffer management: header, raceHeader1/2, roomSelect, racedata, user, item, event sections."
+    },
+    "SELECTHandler": {
+      "file": "selecthandler.h",
+      "description": "Handles SELECT packets for course voting, team/battle/CC decisions, and aid-to-player mapping.",
+      "static_instance": "0x809c2100"
+    },
+    "ROOMHandler": {
+      "file": "roomhandler.h",
+      "description": "Handles ROOM packets for room management (host/guest roles, register, chat, join messages).",
+      "static_instance": "0x809c20e0"
+    },
+    "EVENTHandler": {
+      "file": "eventhandler.h",
+      "description": "Handles EVENT packets for in-race events (item usage, hits, etc.). 24 send entries, 12*24 receive entries.",
+      "static_instance": "0x809c20f0"
+    },
+    "ITEMHandler": {
+      "file": "itemhandler.h",
+      "description": "Handles ITEM packets for item get/clear broadcasting.",
+      "static_instance": "0x809c20f8"
+    },
+    "USERHandler": {
+      "file": "userhandler.h",
+      "description": "Handles USER packets for player profile data exchange (Mii, VR/BR, etc.).",
+      "static_instance": "0x809c2108"
+    },
+    "MiscPacketHandler": {
+      "file": "miscpackethandler.h",
+      "description": "Handles RACEHEADER1/2, RACEDATA packets, lag frame processing, countdown timer, EVENT forwarding.",
+      "static_instance": "0x809c1f50"
+    },
+    "ItemSlotData": {
+      "file": "itemslotdata.h",
+      "description": "Processes ItemSlot.bin for item roulette probabilities. Manages spawn timers (lightning, blue shell, blooper, POW).",
+      "static_instance": "0x809c3670"
+    },
+    "ItemBehaviour": {
+      "file": "itembehaviour.h",
+      "description": "Describes how each item behaves (use type, object ID, item count, draggability). 19-entry table.",
+      "global_address": "0x809c36a0"
+    },
+    "Random": {
+      "file": "random.h",
+      "description": "Game's RNG class with next() and nextLimited() methods. Base for RaceinfoRandom."
+    }
+  },
+  "key_enums": [
+    "PlayerType (PLAYER_REAL_LOCAL, PLAYER_CPU, PLAYER_GHOST, PLAYER_REAL_ONLINE, PLAYER_NONE)",
+    "GameMode (GRAND_PRIX, VS_RACE, TIME_TRIAL, BATTLE, MISSION_TOURNAMENT, GHOST_RACE, PRIVATE_VS, PUBLIC_VS, PUBLIC_BATTLE, PRIVATE_BATTLE, AWARD, CREDITS)",
+    "EngineClass (CC_50, CC_100, CC_150, CC_BATTLE)",
+    "ItemMode (ITEMS_BALANCED, ITEMS_FRANTIC, ITEMS_STRATEGIC, ITEMS_NONE)",
+    "BattleType (BATTLE_BALLOON, BATTLE_COIN)",
+    "CpuMode (CPU_EASY, CPU_NORMAL, CPU_HARD, CPU_NONE)",
+    "Team (TEAM_RED, TEAM_BLUE)",
+    "TrickType (STUNT_TRICK_BASIC, BIKE_FLIP_TRICK_X_NOSE/TL, FLIP_TRICK_Y_LEFT/RIGHT, KART_FLIP_TRICK_Z, BIKE_SIDE_STUNT_TRICK)",
+    "TrickCategory (STUNT, SINGLE_FLIP, DOUBLE_FLIP)",
+    "ItemUseType (ITEMUSE_USE, ITEMUSE_FIRE, ITEMUSE_TAIL, ITEMUSE_CIRCLE)",
+    "EVENTEntryState (STATE_FREE, STATE_FULL, STATE_EXPIRED)",
+    "RKNetConnectionState (STATE_SHUTDOWN, LOGIN_START, LOGIN_AUTHORISED, LOGIN_FRIENDS_SYNCED, MATCHING, FAILED, ERROR)",
+    "RKNetSearchType (SEARCH_VS_WW, SEARCH_VS_REGIONAL, SEARCH_BT_WW, SEARCH_BT_REGIONAL)",
+    "ROOMRole (ROOM_HOST, ROOM_GUEST)",
+    "ROOMMessageType (ROOM_START, ROOM_REGISTER_FRIEND, ROOM_JOIN_MESSAGE, ROOM_CHAT_MESSAGE)",
+    "SELECTRoomType (SELECT_PUBLIC_VS, SELECT_PUBLIC_BATTLE, SELECT_FRIEND_VS, SELECT_FRIEND_BATTLE)"
+  ],
+  "key_structs": [
+    "Vec3 (float x, y, z) - 0xc",
+    "Quat (float x, y, z, w) - 0x10",
+    "Mat34 (float[3][4])",
+    "JumpPadProperties (minSpeed, maxSpeed, velY) - 0xc",
+    "TrickProperties (initialAngleDiff, minAngleDiff, etc.) - 0x10",
+    "SELECTPlayer (prevFinishPos, score, character, vehicle, trackVote, starRank) - 0x8",
+    "SELECTPacket - 0x38",
+    "EVENTPacket (entryHeaders[24], entryData[0xe0]) - 0xf8",
+    "EVENTEntry (timestamp, data[21], state, objectNumber, action, dataLength) - 0x20",
+    "ROOMPacket (messageType, param1, param2) - 0x4",
+    "RKNetFriend (statusData) - 0xc",
+    "ConnectionUserData (playersAtConsole) - 0x4",
+    "RKNetControllerSub - 0x58",
+    "ItemSlotTableHolder (columns, data) - 0x8",
+    "RacedataSettings - 0x34"
+  ],
+  "pal_address_summary": {
+    "description": "All addresses are for PAL version of the game",
+    "total_pal_addresses_found": 399,
+    "address_ranges": {
+      "0x8051xxxx-0x8055xxxx": "Race logic, player physics, RNG, timer",
+      "0x8057xxxx-0x8058xxxx": "Player boost, trick, kart movement functions",
+      "0x8065xxxx-0x8066xxxx": "Network handlers (RKNet, ROOM, SELECT, EVENT, ITEM, USER, MiscPacket)",
+      "0x807bxxxx": "Item slot data, item behaviour setup",
+      "0x808bxxxx": "vtable addresses (read-only data)",
+      "0x809bxxxx-0x809cxxxx": "Static instance pointers and global data"
+    },
+    "notable_static_instances": {
+      "InputData::sInstance": "0x809bd70c",
+      "Racedata::sInstance": "0x809bd728",
+      "Raceinfo::sInstance": "0x809bd730",
+      "MiscPacketHandler::sInstance": "0x809c1f50",
+      "RKNetController::sInstance": "0x809c20d8",
+      "ROOMHandler::sInstance": "0x809c20e0",
+      "EVENTHandler::sInstance": "0x809c20f0",
+      "ITEMHandler::sInstance": "0x809c20f8",
+      "SELECTHandler::sInstance": "0x809c2100",
+      "USERHandler::sInstance": "0x809c2108",
+      "ItemSlotData::sInstance": "0x809c3670",
+      "itemBehaviourTable": "0x809c36a0"
+    }
+  },
+  "importance_for_port": {
+    "critical": [
+      "PlayerHolder/Player - Core gameplay state, physics, movement",
+      "Racedata - Race configuration and player selections",
+      "Raceinfo - Live race state (positions, laps, timing)",
+      "InputData - Controller input processing"
+    ],
+    "high": [
+      "ItemSlotData - Item roulette/probability system",
+      "ItemBehaviour - Item behavior definitions",
+      "PlayerPhysics - Kart/bike physics simulation",
+      "PlayerParams - Vehicle parameter loading"
+    ],
+    "medium": [
+      "RKNetController - Online networking (if online support desired)",
+      "All network handlers (SELECT, ROOM, EVENT, ITEM, USER, MiscPacket)",
+      "Random - RNG system"
+    ]
+  }
+}

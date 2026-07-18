@@ -1,0 +1,244 @@
+{
+  "task": "SCOUT 1.7: Dolphin symbols for Mario Kart Wii",
+  "status": "SUCCESS",
+  "total_symbols": 54496,
+  "total_named_functions": 21681,
+  "regions_covered": {
+    "RMCE01": 4237,
+    "RMCJ01": 4237,
+    "RMCK01": 4282,
+    "RMCP01": 41740
+  },
+  "symbol_types": {
+    "function": 40886,
+    "label": 193,
+    "object": 13417
+  },
+  "sources": {
+    "riptl_wii_symbols": {
+      "url": "https://github.com/riptl/wii-symbols",
+      "description": "Auto-generated SDK function symbols by pattern-matching known Wii SDK object files against the DOL binary. Covers RVL (Revolution/OS), NW4R (Nintendo Wii libraries), RevoEX (extended libraries), RVLDWC (DWC online). ~4,250 symbols per region.",
+      "files_downloaded": [
+        "RMCP01.txt",
+        "RMCE01.txt",
+        "RMCJ01.txt",
+        "RMCK01.txt"
+      ],
+      "symbol_count_per_region": {
+        "RMCP01": 4251,
+        "RMCE01": 4237,
+        "RMCJ01": 4237,
+        "RMCK01": 4282
+      }
+    },
+    "snailspeed3_mkw_decomp": {
+      "url": "https://github.com/snailspeed3/mkw",
+      "description": "Active Mario Kart Wii decompilation project. config/RMCP01/symbols.txt contains 15,011 main DOL symbols with full type/size/scope info. config/RMCP01/module/symbols.txt contains 24,952 REL (dynamically loaded module) symbols with relative addresses. This is the most comprehensive symbol set available.",
+      "files_downloaded": [
+        "snailspeed3_RMCP01_symbols.txt",
+        "snailspeed3_RMCP01_module_symbols.txt"
+      ],
+      "main_dol_symbols": 15011,
+      "module_symbols": 24952
+    },
+    "seeky_mkw_structures": {
+      "url": "https://github.com/SeekyCt/mkw-structures",
+      "description": "Community-maintained pseudo-C++ documentation of MKWii structures, classes, and function signatures with addresses. Covers: racedata, player, raceinfo, itemhandler, itembehaviour, random, rknetcontroller, roomhandler, userhandler, selecthandler, eventhandler, itemslotdata, inputdata, miscpackethandler.",
+      "files_downloaded": [
+        "seeky_structures_racedata.h",
+        "seeky_structures_player.h",
+        "seeky_structures_raceinfo.h",
+        "seeky_structures_itemhandler.h",
+        "seeky_structures_itembehaviour.h",
+        "seeky_structures_random.h",
+        "seeky_structures_rknetcontroller.h",
+        "seeky_structures_roomhandler.h",
+        "seeky_structures_userhandler.h",
+        "seeky_structures_selecthandler.h",
+        "seeky_structures_eventhandler.h",
+        "seeky_structures_itemslotdata.h",
+        "seeky_structures_inputdata.h",
+        "seeky_structures_miscpackethandler.h"
+      ],
+      "structure_files_count": 14
+    },
+    "mkw_sp": {
+      "url": "https://github.com/mkw-sp/mkw-sp",
+      "description": "Mario Kart Wii Service Pack mod. Contains partial source code with some address definitions, plus a linker script. Useful for cross-referencing function signatures.",
+      "files_downloaded": [
+        "mkw-sp_RMC.ld"
+      ]
+    }
+  },
+  "alternative_sources_noted": {
+    "dolphin_totaldb_dsy": {
+      "url": "https://github.com/dolphin-emu/dolphin/blob/master/Data/Sys/totaldb.dsy",
+      "description": "Dolphin's built-in signature database (DSy format). Contains hash-based function signatures for Wii SDK functions. Not game-specific but useful for auto-detecting SDK functions in any Wii game.",
+      "note": "Not downloaded (large binary format, SDK-level only)"
+    },
+    "mariokartwii_com_forum": {
+      "url": "https://mariokartwii.com/showthread.php?tid=922",
+      "description": "Forum thread discussing the 4,251 symbol map (same as riptl/wii-symbols). References the riptl Gist and intns/mapdas tools."
+    },
+    "intns_mapdas": {
+      "url": "https://github.com/intns/mapdas",
+      "description": "Toolset for parsing Metrowerks .map files and Dolphin symbol maps. Can be used to generate new symbol maps from .map files."
+    },
+    "wiigeckocodes": {
+      "url": "https://wiigeckocodes.github.io/games/hacks/m/mariokartwii[RMCP01].html",
+      "description": "Gecko code database with many memory addresses used by cheat codes. Useful for finding specific game state addresses (not function symbols)."
+    },
+    "tockdom_wiki": {
+      "url": "http://wiki.tockdom.com/",
+      "description": "MKWii community wiki with game internals documentation, file format specs, and some address tables."
+    }
+  },
+  "sdk_namespaces_found": {
+    "MKWii/Game": 22180,
+    "SP": 156,
+    "EGG": 571,
+    "RKNet": 10
+  },
+  "per_region_type_breakdown": {
+    "RMCE01": {
+      "function": 4237
+    },
+    "RMCJ01": {
+      "function": 4237
+    },
+    "RMCK01": {
+      "function": 4282
+    },
+    "RMCP01": {
+      "function": 28130,
+      "label": 193,
+      "object": 13417
+    }
+  },
+  "files_saved": [
+    {
+      "filename": "RMCE01.txt",
+      "size_bytes": 239361,
+      "size_human": "239,361 bytes"
+    },
+    {
+      "filename": "RMCJ01.txt",
+      "size_bytes": 239509,
+      "size_human": "239,509 bytes"
+    },
+    {
+      "filename": "RMCK01.txt",
+      "size_bytes": 242406,
+      "size_human": "242,406 bytes"
+    },
+    {
+      "filename": "RMCP01.txt",
+      "size_bytes": 239955,
+      "size_human": "239,955 bytes"
+    },
+    {
+      "filename": "dolphin_symbols.json",
+      "size_bytes": 11323320,
+      "size_human": "11,323,320 bytes"
+    },
+    {
+      "filename": "mkw-sp_RMC.ld",
+      "size_bytes": 746,
+      "size_human": "746 bytes"
+    },
+    {
+      "filename": "seeky_structures_eventhandler.h",
+      "size_bytes": 2093,
+      "size_human": "2,093 bytes"
+    },
+    {
+      "filename": "seeky_structures_inputdata.h",
+      "size_bytes": 2939,
+      "size_human": "2,939 bytes"
+    },
+    {
+      "filename": "seeky_structures_itembehaviour.h",
+      "size_bytes": 1042,
+      "size_human": "1,042 bytes"
+    },
+    {
+      "filename": "seeky_structures_itemhandler.h",
+      "size_bytes": 988,
+      "size_human": "988 bytes"
+    },
+    {
+      "filename": "seeky_structures_itemslotdata.h",
+      "size_bytes": 2195,
+      "size_human": "2,195 bytes"
+    },
+    {
+      "filename": "seeky_structures_miscpackethandler.h",
+      "size_bytes": 2385,
+      "size_human": "2,385 bytes"
+    },
+    {
+      "filename": "seeky_structures_player.h",
+      "size_bytes": 25631,
+      "size_human": "25,631 bytes"
+    },
+    {
+      "filename": "seeky_structures_racedata.h",
+      "size_bytes": 4672,
+      "size_human": "4,672 bytes"
+    },
+    {
+      "filename": "seeky_structures_raceinfo.h",
+      "size_bytes": 3805,
+      "size_human": "3,805 bytes"
+    },
+    {
+      "filename": "seeky_structures_random.h",
+      "size_bytes": 308,
+      "size_human": "308 bytes"
+    },
+    {
+      "filename": "seeky_structures_rknetcontroller.h",
+      "size_bytes": 6393,
+      "size_human": "6,393 bytes"
+    },
+    {
+      "filename": "seeky_structures_roomhandler.h",
+      "size_bytes": 1380,
+      "size_human": "1,380 bytes"
+    },
+    {
+      "filename": "seeky_structures_selecthandler.h",
+      "size_bytes": 4009,
+      "size_human": "4,009 bytes"
+    },
+    {
+      "filename": "seeky_structures_userhandler.h",
+      "size_bytes": 1617,
+      "size_human": "1,617 bytes"
+    },
+    {
+      "filename": "snailspeed3_RMCP01_module_symbols.txt",
+      "size_bytes": 1651817,
+      "size_human": "1,651,817 bytes"
+    },
+    {
+      "filename": "snailspeed3_RMCP01_symbols.txt",
+      "size_bytes": 1098803,
+      "size_human": "1,098,803 bytes"
+    },
+    {
+      "filename": "snailspeed3_mkw_symbols.txt",
+      "size_bytes": 14,
+      "size_human": "14 bytes"
+    }
+  ],
+  "output_file": "dolphin_symbols.json",
+  "notes": [
+    "The snailspeed3/mkw symbols are by far the most comprehensive (39,963 symbols for RMCP01).",
+    "The riptl/wii-symbols cover 4 regions but only contain SDK-level function names (~4,250 each).",
+    "Module symbols (from REL files) use relative addresses and need base address adjustment at runtime.",
+    "Named (demangled C++) functions like nw4r::lyt::Draw*, EGG::*, RVL::* are the most valuable for reverse engineering.",
+    "The SeekyCt structure headers provide high-level class documentation that complements the raw symbol maps.",
+    "Addresses differ between regions: RMCP01 (US) and RMCJ01 (PAL) are close but RMCK01 (Korean) has more differences."
+  ]
+}

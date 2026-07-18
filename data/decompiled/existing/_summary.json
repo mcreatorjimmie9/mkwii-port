@@ -1,0 +1,217 @@
+{
+  "source_repo": "https://github.com/snailspeed3/mkw",
+  "repo_organization": "riidefi/mkw (snailspeed3 fork)",
+  "fetched_date": "2025-01-29",
+  "description": "A work-in-progress matching decompilation of Mario Kart Wii (PAL version RMCP01)",
+
+  "file_counts": {
+    "total_source_files": 673,
+    "cpp_files": 138,
+    "c_files": 135,
+    "hpp_files": 193,
+    "h_files": 207,
+    "by_category": {
+      "game_src": {
+        "path": "src/",
+        "total_files": 181,
+        "implementation_files": 72,
+        "submodules": {
+          "kart": { "files": 32, "description": "Kart physics, dynamics, movement, collision, suspension, wheels, hitbox, input, settings" },
+          "system": { "files": 36, "description": "RaceConfig, RaceManager, ResourceManager, KPadController/Director, GhostFile, CourseMap, CourseCheckpoints, DvdArchive, MultiDvdArchive, LocalizedArchive, Mii, Rating, NandUtil" },
+          "geo": { "files": 29, "description": "Game objects: ObjKuribo, ObjFloat, ObjSound, ObjSunDS, ObjTaimatsu, ObjKoopaFigure64, ObjOilSFC, BoxColManager/Unit, ObjectDirector/Factory/Parameter, MapObjSniper" },
+          "net": { "files": 23, "description": "NetManager, MiscPacketHandler, packet types: EVENT, ITEM, ROOM, SELECT, USER, RACEHEADER1/2, RACEDATA, PacketHolder" },
+          "ui": { "files": 15, "description": "UI system: Page, Section, SectionDirector, SectionAutogens, UIControl, ControlGroup, MessageGroup, RTTI" },
+          "enemy": { "files": 15, "description": "AI system: AI, AIControl, AIEngine, AIInfo, AIItem, AILookAt, AIManager, AIPath, AIProbability, AIRank, AISpeed, AITrickHandler" },
+          "field": { "files": 13, "description": "Course collision: CourseColManager, CourseModel, CollisionEntries, CollisionInfo, ObjColManager, RKGndCol, KCollision, DrivableColInfo" },
+          "host_system": { "files": 12, "description": "RKSystem, SystemManager, SystemResource, SceneCreatorStatic, ParameterFile" },
+          "geo2": { "files": 2, "description": "ObjDrivableManager" },
+          "util": { "files": 4, "description": "Random, State, ModuleSymbols" }
+        }
+      },
+      "lib_egg": {
+        "path": "lib/egg/",
+        "total_files": 89,
+        "implementation_files": 41,
+        "description": "Nintendo EGG middleware library (internal, C++)",
+        "submodules": {
+          "core": { "files": 58, "description": "eggHeap, eggExpHeap, eggUnitHeap, eggAllocator, eggSystem, eggVideo, eggDisplay, eggScene, eggSceneManager, eggThread, eggTaskThread, eggDvdFile, eggDvdRipper, eggCompress, eggDecomp, eggStreamDecomp, eggArchive, eggXfb, eggXfbManager, eggViewport, eggGraphicsFifo, eggAsyncDisplay, eggColorFader, eggProcessMeter, eggDisposer, eggTextureBuffer, g3d_scnrfl" },
+          "gfx": { "files": 14, "description": "eggFog, eggFogManager, eggIScnProc, eggLightManager, eggLightObject, eggScnRenderer" },
+          "math": { "files": 8, "description": "eggVector, eggQuat, eggMatrix, eggBoundBox, eggMath" },
+          "audio": { "files": 3, "description": "eggAudioArcPlayerMgr, eggAudioMgr" },
+          "util": { "files": 10, "description": "eggCntFile, eggEffect, eggEffectCreator, eggSaveBanner, eggStream" }
+        }
+      },
+      "lib_nw4r": {
+        "path": "lib/nw4r/",
+        "total_files": 55,
+        "implementation_files": 16,
+        "description": "NintendoWare 4 Revolution middleware (C++)",
+        "submodules": {
+          "g3d": { "files": 8, "description": "3D graphics: camera, fog, resdict, resfile, state" },
+          "lyt": { "files": 4, "description": "Layout system: init, textBox" },
+          "math": { "files": 8, "description": "Math: types, arithmetic, cast, constants, triangular" },
+          "snd": { "files": 7, "description": "Sound: dvdSoundArchive, frameHeap, sndArchive, soundArchiveFile, soundHeap, soundMemoryAllocatable" },
+          "ut": { "files": 26, "description": "Utilities: IOStream, fileStream, dvdFileStream, nandFileStream, List, LinkList, font, resFont, romFont, glyph, charWriter, color, lockedCache, RTTI, Inlines, binaryFileFormat, CharStrmReader" }
+        }
+      },
+      "lib_rvl": {
+        "path": "lib/rvl/",
+        "total_files": 146,
+        "implementation_files": 57,
+        "description": "Revolution SDK (Wii system libraries, C)",
+        "submodules": {
+          "os": { "files": 29, "description": "OS: memory, threads, alarms, interrupts, reset, arena, cache, context, error, mutex, alloc, font, message, RTC, semaphore, link, fatal" },
+          "gx": { "files": 16, "description": "Graphics: GX API (attributes, draw, fifo, geometry, light, misc, pixel, texture, transform, vert, perf, bump, framebuf, tev)" },
+          "ax": { "files": 17, "description": "Audio: AX API (alloc, aux, cl, comp, dspCode, out, prof, spb, vpb)" },
+          "axfx": { "files": 11, "description": "Audio effects: reverb (standard/hi, DPL2 variants)" },
+          "mem": { "files": 12, "description": "Memory: heap allocator, expHeap, frmHeap, unitHeap, list" },
+          "bte": { "files": 8, "description": "Bluetooth: BTE, GAP, L2CAP, RFCOMM, SDP" },
+          "arc": { "files": 3, "description": "Archive format handling" },
+          "si": { "files": 2, "description": "Serial Interface (controller communication)" },
+          "ipc": { "files": 2, "description": "Inter-Process Communication" },
+          "mtx": { "files": 4, "description": "Matrix math (vec, quat, mtx)" },
+          "tpl": { "files": 2, "description": "Texture format" },
+          "pad/kpad/wpad": { "files": 3, "description": "Controller input" },
+          "dvd": { "files": 3, "description": "DVD access" },
+          "cx": { "files": 3, "description": "Compression (LZ)" },
+          "ssl/db/sc/cnt/net/vi": { "files": 9, "description": "Various SDK headers (SSL, debug, card, content, network, video)" }
+        }
+      },
+      "lib_gamespy": {
+        "path": "lib/gamespy/",
+        "total_files": 133,
+        "implementation_files": 60,
+        "description": "GameSpy multiplayer SDK (C) - online multiplayer infrastructure"
+      },
+      "lib_MSL": {
+        "path": "lib/MSL/",
+        "total_files": 38,
+        "implementation_files": 15,
+        "description": "Metrowerks Standard Library (C runtime: stdio, stdlib, string, math, ctype, memory, etc.)"
+      },
+      "lib_runtime": {
+        "path": "lib/runtime/",
+        "total_files": 6,
+        "implementation_files": 6,
+        "description": "C++ runtime: __mem, __start, __ppc_eabi_init, eabi"
+      },
+      "lib_dwc": {
+        "path": "lib/dwc/",
+        "total_files": 9,
+        "implementation_files": 1,
+        "description": "Nintendo Wi-Fi Connection SDK"
+      },
+      "lib_rfl": {
+        "path": "lib/rfl/",
+        "total_files": 4,
+        "implementation_files": 2,
+        "description": "RFL library (icon, init)"
+      }
+    }
+  },
+
+  "decompilation_approach": "matching",
+  "decompilation_approach_details": {
+    "type": "exact binary matching (byte-for-byte)",
+    "compiler": "Metrowerks CodeWarrior for Embedded PowerPC (via wibo/wine on non-Windows)",
+    "build_system": "Ninja (generated by configure.py)",
+    "tools": [
+      "objdiff (for diffing compiled output vs original binary)",
+      "decomp.me (collaborative function matching)",
+      "Seeky's ppcdis (PowerPC disassembler for auto-generating ASM from binaries)",
+      "mkwutil (custom Python build/verify tooling)",
+      "Ghidra (for initial reverse engineering analysis)"
+    ],
+    "verification": "Builds main.dol and StaticR.rel; verifies byte-for-byte match against original PAL binaries",
+    "workflow": [
+      "1. Analyze target binary in Ghidra to understand function behavior",
+      "2. Create slice definitions (address ranges) for new TUs",
+      "3. Write C++ code that produces matching PPC assembly via decomp.me",
+      "4. Replace inline ASM stubs with matching C++ implementations",
+      "5. Use symbol renaming tools to tie references together",
+      "6. Build and verify binary match"
+    ]
+  },
+
+  "build_artifacts": {
+    "main_dol": {
+      "description": "Primary game executable (statically linked)",
+      "text_size_bytes": 2364076,
+      "decompiled_text_bytes": 455388,
+      "decompilation_progress_percent": 19.3,
+      "total_c_tus": 195,
+      "total_asm_stubs": 52
+    },
+    "staticr_rel": {
+      "description": "Dynamically linked game library",
+      "total_c_tus": 53,
+      "remaining_object_files": 13
+    }
+  },
+
+  "game_modules_decompiled": {
+    "kart_physics": {
+      "status": "partially_decompiled",
+      "files": ["KartDynamics.cpp", "KartPhysics.cpp", "KartPhysicsInstance.cpp", "KartMove.cpp", "KartCollide.cpp", "KartSus.cpp", "KartWheelPhysics.cpp", "KartHitbox.cpp", "KartState.cpp", "KartObjectProxy.cpp", "RKGeom.cpp", "KartSettings.cpp"],
+      "notes": "Core kart physics and dynamics partially decompiled"
+    },
+    "ai_system": {
+      "status": "partially_decompiled",
+      "files": ["AI.cpp", "AIControlDemo.cpp", "AITrickHandler.cpp"],
+      "notes": "Most AI files are header-only (stubs); AI.cpp and AITrickHandler.cpp have implementations"
+    },
+    "networking": {
+      "status": "partially_decompiled",
+      "files": ["NetManager.cpp", "MiscPacketHandler.cpp", "EVENT.cpp", "ITEM.cpp", "ROOM.cpp", "SELECT.cpp", "USER.cpp", "RACEHEADER1.cpp"],
+      "notes": "Network packet handling decompiled; GameSpy SDK provides underlying infrastructure"
+    },
+    "ui_system": {
+      "status": "partially_decompiled",
+      "files": ["Page.cpp", "Section.cpp", "SectionDirector.cpp", "SectionAutogens.cpp", "UIControl.cpp", "ControlGroup.cpp", "MessageGroup.cpp"],
+      "notes": "UI framework partially decompiled"
+    },
+    "course_collision": {
+      "status": "partially_decompiled",
+      "files": ["CourseColManager.cpp", "CourseModel.cpp", "CollisionEntries.cpp", "ObjColManager.cpp", "RKGndCol.cpp"],
+      "notes": "Course geometry and collision detection systems"
+    },
+    "system": {
+      "status": "largely_decompiled",
+      "files": ["RaceConfig.cpp", "RaceManager.cpp", "ResourceManager.cpp", "KPadController.cpp", "KPadDirector.cpp", "GhostFile.cpp", "CourseMap.cpp", "CourseCheckpoints.cpp", "DvdArchive.cpp", "MultiDvdArchive.cpp", "LocalizedArchive.cpp", "Mii.cpp", "Rating.cpp", "NandUtil.cpp", "ResourceManagerUnk80542868.cpp"],
+      "notes": "Best-decompiled game module; most system files have implementations"
+    },
+    "game_objects": {
+      "status": "partially_decompiled",
+      "files": ["ObjKuribo.cpp", "ObjFloat.cpp", "ObjSound.cpp", "ObjSunDS.cpp", "ObjSunDSManager.cpp", "ObjTaimatsu.cpp", "ObjKoopaFigure64.cpp", "ObjOilSFC.cpp", "BoxColManager.cpp", "BoxColUnit.cpp", "MapObjSniper.cpp", "ObjectDirector.cpp", "ObjectFactory.cpp", "ObjectParameter.cpp", "ObjDrivableManager.cpp"],
+      "notes": "Course object system with several object types decompiled"
+    },
+    "egg_library": {
+      "status": "substantially_decompiled",
+      "notes": "Core EGG middleware (heaps, system, display, scene, archive, thread, etc.) is well-decompiled"
+    },
+    "nw4r_library": {
+      "status": "partially_decompiled",
+      "notes": "NW4R utilities (ut/ module) well-decompiled; g3d, lyt, snd partially done"
+    },
+    "rvl_sdk": {
+      "status": "substantially_decompiled",
+      "notes": "Much of the Revolution SDK decompiled (OS, GX, AX, MEM, etc.)"
+    },
+    "gamespy_sdk": {
+      "status": "substantially_decompiled",
+      "notes": "Full GameSpy SDK decompiled (GP, ghttp, gt2, qr2, serverbrowsing, gstats, sake, etc.)"
+    }
+  },
+
+  "documentation_copied": [
+    "README.md",
+    "HACK.md (project structure, build system, decompilation workflow)",
+    "CONTRIBUTING.md (how to contribute, function matching tools)",
+    "glossary.md (sections, segments, SDA terminology)",
+    "LICENSE",
+    "configure.py (build script generator)",
+    "config/RMCP01/ (splits.txt, symbols.txt, config.yml, build.sha1)",
+    "config/RMCP01/module/ (module splits and symbols for StaticR.rel)",
+    "tools/ (build tooling: ninja_syntax, project, decompctx, apply_symbol_mappings, etc.)"
+  ]
+}

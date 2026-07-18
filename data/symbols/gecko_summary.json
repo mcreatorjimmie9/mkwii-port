@@ -1,0 +1,241 @@
+{
+  "total_codes_extracted": 219,
+  "direct_hex_addresses": 151,
+  "structure_offset_addresses": 68,
+  "extraction_date": "2026-07-18",
+  "regions_covered": {
+    "NTSC-U": 215,
+    "PAL": 4,
+    "cross_region": 0
+  },
+  "categories": {
+    "speed_physics": {
+      "count": 36,
+      "description": "Speed modifiers, gravity, terrain effects, slipstream, acceleration"
+    },
+    "items": {
+      "count": 36,
+      "description": "Item behavior, shell speeds, bomb timers, item slots, item giving"
+    },
+    "race_state": {
+      "count": 29,
+      "description": "Timer, countdown, lap count, race stage, checkpoints, position"
+    },
+    "visual_ui": {
+      "count": 27,
+      "description": "Color modifiers, HUD, Lakitu, sun effects, racer appearance"
+    },
+    "drift_miniturbo": {
+      "count": 17,
+      "description": "Mini turbo charge, drift state, wheelie, bike handling, boost"
+    },
+    "player_state": {
+      "count": 14,
+      "description": "Position, velocity, player type, character/vehicle IDs, VR/BR"
+    },
+    "vehicle_stats": {
+      "count": 11,
+      "description": "Max speed, weight, handling, acceleration, offroad, mini turbo stats"
+    },
+    "music_audio": {
+      "count": 11,
+      "description": "Music volume, music speed, engine volume, sound effects"
+    },
+    "save_data": {
+      "count": 10,
+      "description": "Unlock codes, VR/BR modifier, license data, Wii Wheel percentage"
+    },
+    "controller_input": {
+      "count": 9,
+      "description": "Button remapping, God's Controller, master button activators"
+    },
+    "misc": {
+      "count": 9,
+      "description": "Moon jump, no clip, kill-o-meter, MAC address, time freeze"
+    },
+    "track_modifiers": {
+      "count": 6,
+      "description": "Track-specific modifications, moving objects, Thwomps, traffic"
+    },
+    "network_online": {
+      "count": 4,
+      "description": "Online region, Mii names, globe location, EC20102 bypass"
+    }
+  },
+  "data_types": {
+    "u32": 75,
+    "float": 67,
+    "u8": 16,
+    "pointer": 14,
+    "asm": 14,
+    "u16": 11,
+    "int16": 9,
+    "s32": 5,
+    "float[3]": 2,
+    "uint16": 2,
+    "uint32": 2,
+    "int16[6]": 1,
+    "s16": 1
+  },
+  "sources": {
+    "wiigeckocodes_github": "https://wiigeckocodes.github.io/games/hacks/m/mariokartwii[RMCE01].html",
+    "mkwii_com_portal": "https://mkwii.com/portal.php",
+    "mkwii_com_forum": "https://mkwii.com/ (various forum threads)",
+    "seeky_structures": "https://github.com/SeekyCt/mkw-structures (local copies in repo)",
+    "bullywiihacks": "https://bullywiihacks.forumotion.com/t3260-mario-kart-wii-codes"
+  },
+  "key_global_pointers": {
+    "Racedata_sInstance_NTSCU": "0x809B8F68",
+    "Racedata_sInstance_PAL": "0x809BD728",
+    "Raceinfo_sInstance_PAL": "0x809BD730",
+    "PlayerHolder_sInstance_PAL": "0x809C18F8",
+    "VehicleStatsBase_NTSCU": "0x809BE0F8",
+    "ItemDataPointer": "0x809BD118",
+    "PlayerStatePointer": "0x809BD110"
+  },
+  "high_value_addresses_count": 55,
+  "high_value_address_examples": [
+    {
+      "address": "0x809BE384",
+      "type": "float",
+      "description": "Max Speed (vehicle stat)",
+      "category": "vehicle_stats"
+    },
+    {
+      "address": "0x809BE108",
+      "type": "float",
+      "description": "Weight (vehicle stat)",
+      "category": "vehicle_stats"
+    },
+    {
+      "address": "0x809BE114",
+      "type": "float",
+      "description": "Turn/Handling (vehicle stat)",
+      "category": "vehicle_stats"
+    },
+    {
+      "address": "0x809BE11C",
+      "type": "float",
+      "description": "Acceleration (vehicle stat)",
+      "category": "vehicle_stats"
+    },
+    {
+      "address": "0x809BE12C",
+      "type": "float",
+      "description": "Offroad speed factor",
+      "category": "vehicle_stats"
+    },
+    {
+      "address": "0x809BE14C",
+      "type": "float",
+      "description": "Drift/Handling stat",
+      "category": "vehicle_stats"
+    },
+    {
+      "address": "0x809BE150",
+      "type": "float",
+      "description": "Drift Handling (vehicle stat)",
+      "category": "vehicle_stats"
+    },
+    {
+      "address": "0x809BE174",
+      "type": "float",
+      "description": "Offroad (2nd factor)",
+      "category": "vehicle_stats"
+    },
+    {
+      "address": "0x809BE160",
+      "type": "float",
+      "description": "Offroad (3rd factor)",
+      "category": "vehicle_stats"
+    },
+    {
+      "address": "0x809BE167",
+      "type": "u8",
+      "description": "Mini Turbo Duration",
+      "category": "vehicle_stats"
+    },
+    {
+      "address": "0x805A2B4C",
+      "type": "float",
+      "description": "Maximum speed modifier (ASM hook point)",
+      "category": "speed_physics"
+    },
+    {
+      "address": "0x8088D550",
+      "type": "float",
+      "description": "Reverse speed (NTSC-U)",
+      "category": "speed_physics"
+    },
+    {
+      "address": "0x80590400",
+      "type": "float",
+      "description": "Gravity (NTSC-U, JoshuaMK)",
+      "category": "speed_physics"
+    },
+    {
+      "address": "0x80596C24",
+      "type": "float",
+      "description": "Gravity (PAL, JoshuaMK)",
+      "category": "speed_physics"
+    },
+    {
+      "address": "0x808B1C80",
+      "type": "float",
+      "description": "Gravity modifier (Hamster35000vr)",
+      "category": "speed_physics"
+    },
+    {
+      "address": "0x80531130",
+      "type": "u32",
+      "description": "Timer freeze (NTSC-U)",
+      "category": "speed_physics"
+    },
+    {
+      "address": "0x80531158",
+      "type": "u32",
+      "description": "Speed display float upper (speedometer)",
+      "category": "speed_physics"
+    },
+    {
+      "address": "0x80531164",
+      "type": "u16",
+      "description": "Speed display km/h read (speedometer)",
+      "category": "speed_physics"
+    },
+    {
+      "address": "0x80531174",
+      "type": "u32",
+      "description": "Speed display zero (speedometer)",
+      "category": "speed_physics"
+    },
+    {
+      "address": "0x8057B244",
+      "type": "float",
+      "description": "Blooper ink speed penalty (No Blooper Effect)",
+      "category": "speed_physics"
+    }
+  ],
+  "notable_code_creators": [
+    "Anarion",
+    "Sgt.Ghost",
+    "Bully@Wiiplaza",
+    "mdmwii",
+    "Volderbeek",
+    "toonlink444",
+    "Nutmeg",
+    "NinARM1",
+    "XeR",
+    "Hamster35000vr",
+    "dexter0",
+    "Cross1955",
+    "hetoan2",
+    "James0x57",
+    "MrBean",
+    "456",
+    "Toadette Hack Fan",
+    "JoshuaMK",
+    "Seeky",
+    "stebler"
+  ]
+}

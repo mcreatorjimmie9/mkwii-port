@@ -1,0 +1,146 @@
+{
+  "_metadata": {
+    "description": "Summary of documented Wii file formats for the MKWii PC port project",
+    "compiled": "2025-07-18"
+  },
+  "formats": {
+    "szs": {
+      "status": "WELL_DOCUMENTED",
+      "confidence": "HIGH",
+      "file": "formats/szs.md",
+      "description": "YAZ0-compressed U8 archive — primary container for all MKWii game assets",
+      "key_details": {
+        "magic_yaz0": "\"Yaz0\" (0x59617330)",
+        "magic_u8": "0x55AA382D (\"U.8-\")",
+        "yaz0_header_size": "16 bytes",
+        "u8_header_size": "32 bytes (0x20)",
+        "node_size": "12 bytes each",
+        "data_alignment": "0x40 bytes"
+      },
+      "parsing_tools": ["Wiimms SZS Tools (wszst)", "BrawlBox/BrawlCrate", "CTools", "libWiiPy (Python)", "brres (Rust crate)"],
+      "critical_for": "All game asset loading — tracks, models, UI, sounds, fonts"
+    },
+    "brres": {
+      "status": "WELL_DOCUMENTED",
+      "confidence": "HIGH",
+      "file": "formats/brres.md",
+      "description": "Binary Revolution Resource — 3D asset container (models, textures, animations)",
+      "key_details": {
+        "magic": "\"bres\"",
+        "header_size": "16 bytes (0x10)",
+        "sub_formats": ["MDL0 (models)", "TEX0 (textures)", "CHR0 (skeletal anim)", "SRT0 (texture transform anim)", "PAT0 (texture swap anim)", "SHP0 (shape morph)", "SCN0 (scene/lighting)", "PLT0 (palettes)"],
+        "texture_formats": ["I4", "I8", "IA4", "IA8", "RGB565", "RGB5A3", "RGBA32", "C4", "C8", "C14X2", "CMPR (DXT1-like)"],
+        "brres_version_mkwii": "0x0008 or 0x000B"
+      },
+      "parsing_tools": ["BrawlBox/BrawlCrate", "BRRESViewer", "Wiimms SZS Tools", "brres (Rust crate)", "Noesis", "CTools"],
+      "critical_for": "Track models, vehicle models, character models, item models, textures, animations"
+    },
+    "kmp": {
+      "status": "MODERATELY_DOCUMENTED",
+      "confidence": "MEDIUM",
+      "file": "formats/kmp.md",
+      "description": "Course description file — defines track gameplay data",
+      "key_details": {
+        "magic": "\"RKMD\"",
+        "section_header_size": "8 bytes",
+        "sections": ["KTPJ (header)", "KCPO (checkpoints)", "KNIT (item routes)", "KTP (start positions)", "AREA (special zones)", "CAME (camera paths)", "POTI (point paths)", "JGPT (Lakitu routes)", "CPHY (course physics)", "CNPT (cannon points)", "MSPT (mission points)", "RPKT (replay data)", "CHECK (checkpoint links)", "GOBJ (global objects)"]
+      },
+      "parsing_tools": ["KMP Editor (hlorenzi)", "Wiimms SZS Tools (wkmpt)", "CTools"],
+      "critical_for": "All track gameplay — spawns, routes, checkpoints, objects, physics zones",
+      "gaps": [
+        "Exact per-entry field layouts not fully documented for all sections",
+        "GOBJ object parameter meanings vary by object type",
+        "CPHY physics zone parameters need more detail"
+      ]
+    },
+    "brsar": {
+      "status": "MODERATELY_DOCUMENTED",
+      "confidence": "MEDIUM",
+      "file": "formats/brsar.md",
+      "description": "Sound archive container + BRSTM individual audio files",
+      "key_details": {
+        "brsar_magic": "\"RSAR\"",
+        "brstm_magic": "\"RSTM\"",
+        "brstm_header_size": "64 bytes",
+        "audio_codec": "Nintendo DSP-ADPCM",
+        "sample_rates": ["32000", "44100", "48000 Hz"],
+        "key_brsar_sections": ["SMBL/Symb (symbols)", "INFO (file refs)", "FILE (audio data)", "WAVE (wave metadata)"]
+      },
+      "parsing_tools": ["BrawlBox/BrawlCrate", "VGMStream", "BRSTM Converter", "brawltools/BrawlLib"],
+      "critical_for": "All game audio — BGM, SFX, voice, ambient sounds",
+      "gaps": [
+        "Exact BRSAR section layouts need more documentation",
+        "Sound grouping and sequencing structure not fully documented",
+        "DSP-ADPCM coefficient table needs verification"
+      ]
+    },
+    "brfnt": {
+      "status": "MODERATELY_DOCUMENTED",
+      "confidence": "MEDIUM",
+      "file": "formats/brfnt.md",
+      "description": "Bitmap font file format (BRFNT) and effect texture format (BREFT)",
+      "key_details": {
+        "brfnt_magic": "\"RFNT\"",
+        "breft_magic": "\"REFT\"",
+        "brfnt_header_size": "20 bytes (0x14)",
+        "key_sections": ["TGLP (glyph textures)", "CWDH (width data)", "CINF (character mapping)", "FINF (font info)"],
+        "encodings": ["ASCII", "Shift-JIS", "custom codepages"]
+      },
+      "parsing_tools": ["BrawlBox/BrawlCrate", "Wiimms SZS Tools", "Switch-Toolbox", "CTools"],
+      "critical_for": "All in-game text rendering, UI text",
+      "gaps": [
+        "Full CINF mapping structure needs more detail",
+        "BREFT format is less documented than BRFNT"
+      ]
+    }
+  },
+  "formats_not_yet_documented": [
+    {
+      "format": "KCL (Collision)",
+      "extension": ".kcl",
+      "description": "Triangle-based collision mesh for tracks. Defines surface types (road, off-road, boost, etc.). Critical for physics.",
+      "priority": "HIGH",
+      "known_tools": ["Wiimms SZS Tools (wkmcl)", "CTools"]
+    },
+    {
+      "format": "BRANM / Animation data",
+      "extension": ".brlan (in BRRES)",
+      "description": "Layout/animation data, referenced by UI and effects",
+      "priority": "MEDIUM",
+      "known_tools": ["BrawlBox/BrawlCrate"]
+    },
+    {
+      "format": "BRLYT / Layout",
+      "extension": ".brlyt (in BRRES)",
+      "description": "UI layout definition — positions, sizes, and hierarchy of UI elements",
+      "priority": "MEDIUM",
+      "known_tools": ["BrawlBox/BrawlCrate", "Layout editors"]
+    },
+    {
+      "format": "BRTPA / Material",
+      "extension": "Within BRRES (MDL0)",
+      "description": "Material/shader definitions for 3D models",
+      "priority": "MEDIUM",
+      "known_tools": ["BrawlBox/BrawlCrate"]
+    },
+    {
+      "format": "DOL (Main executable)",
+      "extension": ".dol",
+      "description": "PowerPC executable containing game code, physics engine, etc.",
+      "priority": "HIGH",
+      "known_tools": ["Ghidra", "Dolphin debugger", "objdump"]
+    },
+    {
+      "format": "REL (Relocatable module)",
+      "extension": ".rel",
+      "description": "Dynamically linked libraries loaded by the DOL",
+      "priority": "MEDIUM",
+      "known_tools": ["Ghidra", "Dolphin debugger"]
+    }
+  ],
+  "parsing_priority_recommendation": {
+    "immediate": ["SZS (YAZ0+U8)", "BRRES (at least MDL0+TEX0 extraction)", "KMP (at least KTP+GOBJ+CHECK+KCPO)"],
+    "soon": ["KCL (collision for physics)", "BRSAR/BRSTM (audio playback)"],
+    "later": ["BRFNT (font rendering)", "BREFT (effects)", "BRANM/BRLYT (UI)"]
+  }
+}

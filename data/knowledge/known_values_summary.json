@@ -1,0 +1,101 @@
+{
+  "_metadata": {
+    "description": "Summary of compiled MKWii physics values and data availability",
+    "compiled": "2025-07-18"
+  },
+  "data_categories": {
+    "speed": {
+      "status": "WELL_DOCUMENTED",
+      "confidence": "HIGH",
+      "notes": "Exact km/h values for all 36 vehicles well-established from reverse engineering. Internal floating-point values need extraction from game RAM or Kinoko source.",
+      "key_values": ["75-86 kph (karts)", "74-89 kph (bikes)", "Character bonus: ±1.5 points"]
+    },
+    "acceleration": {
+      "status": "PARTIALLY_DOCUMENTED",
+      "confidence": "MEDIUM",
+      "notes": "Non-linear acceleration curve documented at sample points. Full formula requires disassembly or Kinoko source. 0-60kph times available.",
+      "key_values": ["0.2882 kph/frame at 0.2x max", "0.3566 kph/frame at 0.8x max", "1.0-4.0s for 0-60kph"]
+    },
+    "mini_turbo": {
+      "status": "PARTIALLY_DOCUMENTED",
+      "confidence": "MEDIUM",
+      "notes": "Blue, orange, and red stages documented. Duration in 60ths of a second. Exact boost speed multiplier not precisely known. Bikes lack red stage.",
+      "key_values": ["Blue: 15-40/60s (karts)", "Orange: ~2.5x blue duration", "Red: ~3x blue (karts only)"]
+    },
+    "handling_steering": {
+      "status": "BASICALLY_DOCUMENTED",
+      "confidence": "MEDIUM",
+      "notes": "Stat point values known. Actual turning rate per frame not precisely documented. Drift types (inside/outside) well understood.",
+      "key_values": ["Inside drift vs outside drift", "Character bonus: ±1.5"]
+    },
+    "off_road": {
+      "status": "WELL_DOCUMENTED",
+      "confidence": "HIGH",
+      "notes": "Speed retention multiplier range well established.",
+      "key_values": ["0.185-0.400 speed retention"]
+    },
+    "gravity": {
+      "status": "RESOLVED",
+      "confidence": "HIGH",
+      "notes": "Exact value found in reverse-engineered PlayerPhysics struct: gravity = 1.3f (float32). Also a separate hopGravity field exists for hop/jump physics.",
+      "key_values": ["gravity = 1.3 (float32)", "Address: 0x80341474", "hopGravity: separate field in PlayerSub10"]
+    },
+    "friction": {
+      "status": "PARTIALLY_DOCUMENTED",
+      "confidence": "MEDIUM",
+      "notes": "Per-surface type defined in KCL files, not global constants. KCL type codes documented. Exact friction coefficients per type not widely published.",
+      "key_values": ["KCL type codes 0x00-0x0F", "Per-surface in KCL files"]
+    },
+    "item_probabilities": {
+      "status": "FULLY_DOCUMENTED",
+      "confidence": "HIGH",
+      "notes": "Complete probability tables available for all player counts and positions. Multiple verified sources.",
+      "key_values": ["Full tables at mariowiki.com", "Interactive at mariokartwii.com", "Visualized at jtvjan.nl"]
+    }
+  },
+  "gaps_requiring_further_work": [
+    "Extract exact mini-turbo speed boost multiplier per combo (PlayerBoost.multiplier field)",
+    "Document exact friction coefficients for each KCL surface type (kclSpeedFactor values)",
+    "Document the full acceleration curve formula (PlayerSub10.updateAcceleration at 0x8057b9bc)",
+    "Extract internal speed unit conversion factor (internal units to km/h)",
+    "Document trick boost speed values (PlayerZipper struct at 0x90)",
+    "Document mushroom/star/bullet bill speed multiplier (PlayerBoost.acceleration/speedLimit)",
+    "Document slope physics (uphill/downhill speed effects, how floor normal affects speed)",
+    "Document collision/bump physics (mass-based knockback from PlayerSub18)",
+    "Extract hopGravity value (separate from main gravity)",
+    "Obtain Kinoko source code for cross-verification of all constants",
+    "Document KartParam.bin and BikePartsDispParam.bin stat tables for exact internal stat values"
+  ],
+  "best_reference_projects": [
+    {
+      "name": "mkw-structures",
+      "url": "file://data/knowledge/mkw_structures/README.md",
+      "description": "Reverse-engineered C++ headers for MKWii classes (PlayerPhysics, PlayerSub10, PlayerBoost, etc.). Source of gravity=1.3 and internal state machine constants."
+    },
+    {
+      "name": "Kinoko",
+      "url": "https://github.com/vabold/Kinoko",
+      "description": "Frame-perfect MKWii physics reimplementation in C++. Primary source for exact internal constants."
+    },
+    {
+      "name": "jdaster64 FAQ",
+      "url": "https://gamefaqs.gamespot.com/wii/942008-mario-kart-wii/faqs/64637",
+      "description": "Comprehensive stat guide with exact top speeds and acceleration values."
+    },
+    {
+      "name": "Super Mario Files",
+      "url": "https://supermariofiles.wordpress.com/2013/04/20/kartcharacter-stats-mkwii-edition",
+      "description": "Detailed stat breakdown with exact km/h speeds and mini-turbo durations."
+    },
+    {
+      "name": "Wiimms SZS Tools",
+      "url": "https://szs.wiimm.de/",
+      "description": "Command-line tools for SZS/U8/BRRES/KMP files with extensive format documentation."
+    },
+    {
+      "name": "Mario Wiki Item Probabilities",
+      "url": "https://www.mariowiki.com/Mario_Kart_Wii_item_probability_distributions",
+      "description": "Complete item probability distribution tables."
+    }
+  ]
+}
