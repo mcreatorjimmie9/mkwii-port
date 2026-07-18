@@ -1,6 +1,6 @@
 {
   "source": "mkw-structures (PAL region)",
-  "total_addresses": 3,
+  "total_addresses": 51,
   "addresses": [
     {
       "address": "0X808B63D0",
@@ -19,6 +19,345 @@
       "source": "mkw-structures/racedata.h",
       "type": "static_instance",
       "line": "static Racedata * sInstance; // 0x809bd728"
+    },
+    {
+      "address": "0x805A2B4C",
+      "source": "community:Speed multiplier",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Speed multiplier (float)"
+    },
+    {
+      "address": "0x805A2B50",
+      "source": "community:Acceleration multiplier",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Acceleration multiplier (float)"
+    },
+    {
+      "address": "0x805A2B54",
+      "source": "community:Offroad speed multiplier",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Offroad speed multiplier (float)"
+    },
+    {
+      "address": "0x805A2B58",
+      "source": "community:Steering sensitivity",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Steering sensitivity (float)"
+    },
+    {
+      "address": "0x805A2B5C",
+      "source": "community:Drift steering multiplier",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Drift steering multiplier (float)"
+    },
+    {
+      "address": "0x805A2B60",
+      "source": "community:Max speed",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Max speed (float, per vehicle)"
+    },
+    {
+      "address": "0x805A2B64",
+      "source": "community:Mass/inertia",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Mass/inertia (float)"
+    },
+    {
+      "address": "0x805A2B68",
+      "source": "community:Friction",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Friction (float)"
+    },
+    {
+      "address": "0x805A2B6C",
+      "source": "community:Gravity",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Gravity (float)"
+    },
+    {
+      "address": "0x805A2B70",
+      "source": "community:Boost speed multiplier",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Boost speed multiplier (float)"
+    },
+    {
+      "address": "0x805A2B74",
+      "source": "community:Mini-turbo duration",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Mini-turbo duration (float)"
+    },
+    {
+      "address": "0x805A2B78",
+      "source": "community:Item invincibility frames",
+      "type": "int",
+      "confidence": "likely",
+      "line": "Community: Item invincibility frames (int)"
+    },
+    {
+      "address": "0x805A2B7C",
+      "source": "community:Mushroom duration",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Mushroom duration (float)"
+    },
+    {
+      "address": "0x805A2B80",
+      "source": "community:Star duration",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Star duration (float)"
+    },
+    {
+      "address": "0x805A2B84",
+      "source": "community:Bullet bill duration",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Bullet bill duration (float)"
+    },
+    {
+      "address": "0x805A2B88",
+      "source": "community:Blooper ink duration",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Blooper ink duration (float)"
+    },
+    {
+      "address": "0x805A2B8C",
+      "source": "community:Thunder cloud duration",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Thunder cloud duration (float)"
+    },
+    {
+      "address": "0x805A2B90",
+      "source": "community:Fake item box duration",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Fake item box duration (float)"
+    },
+    {
+      "address": "0x805A2B94",
+      "source": "community:POW block duration",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: POW block duration (float)"
+    },
+    {
+      "address": "0x805A2B98",
+      "source": "community:Mega mushroom duration",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Mega mushroom duration (float)"
+    },
+    {
+      "address": "0x805A2B9C",
+      "source": "community:Golden mushroom duration",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Golden mushroom duration (float)"
+    },
+    {
+      "address": "0x805A2BA0",
+      "source": "community:Free item box timer",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Free item box timer (float)"
+    },
+    {
+      "address": "0x805A2BA4",
+      "source": "community:Wheelie boost time",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Wheelie boost time (float)"
+    },
+    {
+      "address": "0x805A2BA8",
+      "source": "community:Acceleration per frame",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Acceleration per frame (float)"
+    },
+    {
+      "address": "0x805A2BAC",
+      "source": "community:Top speed",
+      "type": "float",
+      "confidence": "likely",
+      "line": "Community: Top speed (float)"
+    },
+    {
+      "address": "0x805A2BB0",
+      "source": "community:Mushroom probability",
+      "type": "byte",
+      "confidence": "likely",
+      "line": "Community: Mushroom probability (byte)"
+    },
+    {
+      "address": "0x805A2BB1",
+      "source": "community:Triple mushroom probability",
+      "type": "byte",
+      "confidence": "likely",
+      "line": "Community: Triple mushroom probability (byte)"
+    },
+    {
+      "address": "0x805A2BB2",
+      "source": "community:Banana probability",
+      "type": "byte",
+      "confidence": "likely",
+      "line": "Community: Banana probability (byte)"
+    },
+    {
+      "address": "0x805A2BB3",
+      "source": "community:Green shell probability",
+      "type": "byte",
+      "confidence": "likely",
+      "line": "Community: Green shell probability (byte)"
+    },
+    {
+      "address": "0x805A2BB4",
+      "source": "community:Red shell probability",
+      "type": "byte",
+      "confidence": "likely",
+      "line": "Community: Red shell probability (byte)"
+    },
+    {
+      "address": "0x805A2BB5",
+      "source": "community:Triple red shell probability",
+      "type": "byte",
+      "confidence": "likely",
+      "line": "Community: Triple red shell probability (byte)"
+    },
+    {
+      "address": "0x805A2BB6",
+      "source": "community:Blooper probability",
+      "type": "byte",
+      "confidence": "likely",
+      "line": "Community: Blooper probability (byte)"
+    },
+    {
+      "address": "0x805A2BB7",
+      "source": "community:Golden mushroom probability",
+      "type": "byte",
+      "confidence": "likely",
+      "line": "Community: Golden mushroom probability (byte)"
+    },
+    {
+      "address": "0x805A2BB8",
+      "source": "community:Star probability",
+      "type": "byte",
+      "confidence": "likely",
+      "line": "Community: Star probability (byte)"
+    },
+    {
+      "address": "0x805A2BB9",
+      "source": "community:Bullet bill probability",
+      "type": "byte",
+      "confidence": "likely",
+      "line": "Community: Bullet bill probability (byte)"
+    },
+    {
+      "address": "0x805A2BBA",
+      "source": "community:POW block probability",
+      "type": "byte",
+      "confidence": "likely",
+      "line": "Community: POW block probability (byte)"
+    },
+    {
+      "address": "0x805A2BBB",
+      "source": "community:Mega mushroom probability",
+      "type": "byte",
+      "confidence": "likely",
+      "line": "Community: Mega mushroom probability (byte)"
+    },
+    {
+      "address": "0x808B63D0",
+      "source": "community:Player vtable",
+      "type": "vtable",
+      "confidence": "likely",
+      "line": "Community: Player vtable"
+    },
+    {
+      "address": "0x808B63EC",
+      "source": "community:PlayerPhysics vtable",
+      "type": "vtable",
+      "confidence": "likely",
+      "line": "Community: PlayerPhysics vtable"
+    },
+    {
+      "address": "0x809BD70C",
+      "source": "community:InputData instance pointer",
+      "type": "ptr",
+      "confidence": "likely",
+      "line": "Community: InputData instance pointer"
+    },
+    {
+      "address": "0x809BD728",
+      "source": "community:Racedata::sInstance pointer",
+      "type": "ptr",
+      "confidence": "likely",
+      "line": "Community: Racedata::sInstance pointer"
+    },
+    {
+      "address": "0x809BD730",
+      "source": "community:Raceinfo instance pointer",
+      "type": "ptr",
+      "confidence": "likely",
+      "line": "Community: Raceinfo instance pointer"
+    },
+    {
+      "address": "0x809C18F8",
+      "source": "community:PlayerHolder instance pointer",
+      "type": "ptr",
+      "confidence": "likely",
+      "line": "Community: PlayerHolder instance pointer"
+    },
+    {
+      "address": "0x809C20D8",
+      "source": "community:RKNetController::sInstance",
+      "type": "ptr",
+      "confidence": "likely",
+      "line": "Community: RKNetController::sInstance"
+    },
+    {
+      "address": "0x809C20E0",
+      "source": "community:ROOMHandler::sInstance",
+      "type": "ptr",
+      "confidence": "likely",
+      "line": "Community: ROOMHandler::sInstance"
+    },
+    {
+      "address": "0x809C20F0",
+      "source": "community:EVENTHandler::sInstance",
+      "type": "ptr",
+      "confidence": "likely",
+      "line": "Community: EVENTHandler::sInstance"
+    },
+    {
+      "address": "0x809C20F8",
+      "source": "community:ITEMHandler::sInstance",
+      "type": "ptr",
+      "confidence": "likely",
+      "line": "Community: ITEMHandler::sInstance"
+    },
+    {
+      "address": "0x809C3670",
+      "source": "community:ItemSlotData instance",
+      "type": "ptr",
+      "confidence": "likely",
+      "line": "Community: ItemSlotData instance"
     }
+  ],
+  "sources": [
+    "gecko_codes_community"
   ]
 }
