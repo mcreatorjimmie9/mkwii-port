@@ -472,11 +472,11 @@ public:
     u32   mTokenExpiry;      // 0x18
     u32   mFriendCode;       // 0x1C
     u8    mPlayerName[12];   // 0x20
-    u16   mCountryCode;      // 0x2C
-    u16   mRegionCode;       // 0x2E
-    u32   mIsGuest;          // 0x30
-    KeyExchange mKeyExchange; // 0x34
-    u32   _pad74[2];         // 0x74
+    u32   mCountryCode;      // 0x2C
+    u32   mRegionCode;       // 0x30
+    u32   mIsGuest;          // 0x34
+    KeyExchange mKeyExchange; // 0x38
+    u32   _pad78[2];         // 0x78
 };
 
 // ============================================================
@@ -658,7 +658,7 @@ public:
 // tracks, and prepare for the race. The host controls
 // room settings; clients sync via the host.
 //
-// Layout (~0x200 bytes):
+// Layout (~0x1A4 bytes):
 //   0x00  vtable
 //   0x04  mState           — room state
 //   0x08  mRoomId          — server-assigned room ID
@@ -667,15 +667,15 @@ public:
 //   0x14  mMaxPlayers      — maximum players allowed
 //   0x18  mPlayerIds[12]   — player IDs for each slot
 //   0x48  mPlayerNames[12] — display names (4 bytes each)
-//   0x78  mPlayerReady[12] — ready flags
-//   0x84  mSelectedCourse  — voted course ID
-//   0x88  mSelectedCC      — voted engine class (50/100/150)
-//   0x8C  mVoteMask        — bitmask of players who voted
-//   0x90  mRoomType        — public/private/custom
-//   0x94  mRoomPassword    — room password hash
-//   0x98  mTeamMode        — team race flag
-//   0x9C  mCountdownTimer  — countdown to race start
-//   0xA0  _padA0[64]       — reserved
+//   0x78  mPlayerReady[12] — ready flags (1 byte each)
+//   0x88  mSelectedCourse  — voted course ID
+//   0x8C  mSelectedCC      — voted engine class (50/100/150)
+//   0x90  mVoteMask        — bitmask of players who voted
+//   0x94  mRoomType        — public/private/custom
+//   0x98  mRoomPassword    — room password hash
+//   0x9C  mTeamMode        — team race flag
+//   0xA0  mCountdownTimer  — countdown to race start
+//   0xA4  _padA4[64]       — reserved
 //
 // Maps functions: 0x805a9740 – 0x805abd3c
 // ============================================================
@@ -763,15 +763,16 @@ public:
     u32    mMaxPlayers;             // 0x14
     u32    mPlayerIds[12];          // 0x18
     u32    mPlayerNames[12];        // 0x48
-    u32    mPlayerReady[12];        // 0x78
-    u32    mSelectedCourse;         // 0x84
-    u32    mSelectedCC;             // 0x88
-    u32    mVoteMask;               // 0x8C
-    RoomType mRoomType;             // 0x90
-    u32    mRoomPassword;           // 0x94
-    u32    mTeamMode;               // 0x98
-    u32    mCountdownTimer;         // 0x9C
-    u32    _padA0[64];              // 0xA0
+    u8     mPlayerReady[12];        // 0x78 — one byte per player
+    u8     _pad84;                  // 0x84 — padding to align mSelectedCourse
+    u32    mSelectedCourse;         // 0x88
+    u32    mSelectedCC;             // 0x8C
+    u32    mVoteMask;               // 0x90
+    RoomType mRoomType;             // 0x94
+    u32    mRoomPassword;           // 0x98
+    u32    mTeamMode;               // 0x9C
+    u32    mCountdownTimer;         // 0xA0
+    u32    _padA4[64];              // 0xA4
 };
 
 // ============================================================

@@ -874,11 +874,11 @@ bool ArchiveMgr::mount(const char* mountPoint, Archive* archive) {
     if (mMountedCount >= MAX_MOUNT_POINTS) return false;
 
     for (u32 i = 0; i < MAX_MOUNT_POINTS; i++) {
-        if (!mMounts[i].inUse) {
+        if (!mMounts[i].archive) {
             __builtin_strncpy(mMounts[i].path, mountPoint, sizeof(mMounts[i].path) - 1);
             mMounts[i].path[sizeof(mMounts[i].path) - 1] = '\0';
             mMounts[i].archive = archive;
-            mMounts[i].inUse = 1;
+            // inUse is implicit: archive != nullptr
             mMountedCount++;
             archive->addRef();
             return true;
@@ -891,11 +891,8 @@ bool ArchiveMgr::mount(const char* mountPoint, Archive* archive) {
 void ArchiveMgr::unmount(const char* mountPoint) {
     if (!mountPoint) return;
     for (u32 i = 0; i < MAX_MOUNT_POINTS; i++) {
-        if (mMounts[i].inUse && __builtin_strcmp(mMounts[i].path, mountPoint) == 0) {
-            if (mMounts[i].archive) {
-                mMounts[i].archive->release();
-            }
-            mMounts[i].inUse = 0;
+        if (mMounts[i].archive != nullptr && __builtin_strcmp(mMounts[i].path, mountPoint) == 0) {
+            mMounts[i].archive->release();
             mMounts[i].path[0] = '\0';
             mMounts[i].archive = nullptr;
             mMountedCount--;
@@ -908,7 +905,7 @@ void ArchiveMgr::unmount(const char* mountPoint) {
 Archive* ArchiveMgr::findArchive(const char* mountPoint) const {
     if (!mountPoint) return nullptr;
     for (u32 i = 0; i < MAX_MOUNT_POINTS; i++) {
-        if (mMounts[i].inUse && __builtin_strcmp(mMounts[i].path, mountPoint) == 0) {
+        if (mMounts[i].archive != nullptr && __builtin_strcmp(mMounts[i].path, mountPoint) == 0) {
             return mMounts[i].archive;
         }
     }
@@ -943,9 +940,8 @@ BurstArchive* ArchiveMgr::mountBurst(const char* mountPoint, const char* path,
 void ArchiveMgr::unmount(Archive* archive) {
     if (!archive) return;
     for (u32 i = 0; i < MAX_MOUNT_POINTS; i++) {
-        if (mMounts[i].inUse && mMounts[i].archive == archive) {
+        if (mMounts[i].archive == archive) {
             archive->release();
-            mMounts[i].inUse = 0;
             mMounts[i].path[0] = '\0';
             mMounts[i].archive = nullptr;
             mMountedCount--;
@@ -957,11 +953,10 @@ void ArchiveMgr::unmount(Archive* archive) {
 // @addr 0x804c24f0 — clear all archives
 void ArchiveMgr::clearAll() {
     for (u32 i = 0; i < MAX_MOUNT_POINTS; i++) {
-        if (mMounts[i].inUse) {
-            if (mMounts[i].archive) {
-                mMounts[i].archive->release();
-            }
-            mMounts[i].inUse = 0;
+        if (mMounts[i].archive) {
+            mMounts[i].archive->release();
+            mMounts[i].path[0] = '\0';
+            mMounts[i].archive = nullptr;
         }
     }
     mMountedCount = 0;

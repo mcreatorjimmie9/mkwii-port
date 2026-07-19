@@ -57,7 +57,7 @@ public:
 // Each light entry is 0x30 bytes. The light manager holds an array of these.
 //
 // Key address: 0x804a14a8 — initializes an array of LightEntry
-//   - Clears position (0x0C-0x14), direction (0x18-0x20), color (0x24-0x2C)
+//   - Clears position (0x08-0x10), direction (0x14-0x1C), color (0x20-0x28)
 //   - Sets scale = m_scaleFactor * entry.mtx[0][0] at offset 0x04
 // ============================================================================
 
@@ -65,18 +65,16 @@ class LightEntry {
 public:
     u32 m_vtableOrPtr;    // 0x00
     f32 m_scale;          // 0x04 — scale = mtx[0][0] * manager.scaleFactor
-    f32 m_pad08;          // 0x08
-    f32 m_posX;           // 0x0C — light position X
-    f32 m_posY;           // 0x10 — light position Y
-    f32 m_posZ;           // 0x14 — light position Z
-    f32 m_pad18;          // 0x18
-    f32 m_dirX;           // 0x1C — light direction X
-    f32 m_dirY;           // 0x20 — light direction Y
-    f32 m_dirZ;           // 0x24 — light direction Z
-    f32 m_pad28;          // 0x28
-    f32 m_colR;           // 0x2C — light color R
-    f32 m_colG;           // 0x30
-    f32 m_colB;           // 0x34
+    f32 m_posX;           // 0x08 — light position X
+    f32 m_posY;           // 0x0C — light position Y
+    f32 m_posZ;           // 0x10 — light position Z
+    f32 m_dirX;           // 0x14 — light direction X
+    f32 m_dirY;           // 0x18 — light direction Y
+    f32 m_dirZ;           // 0x1C — light direction Z
+    f32 m_colR;           // 0x20 — light color R
+    f32 m_colG;           // 0x24
+    f32 m_colB;           // 0x28
+    u32 m_pad2C;          // 0x2C — padding / alpha
 
     LightEntry() { std::memset(this, 0, sizeof(*this)); }
 };
@@ -102,12 +100,13 @@ class LightManager {
 public:
     u32 m_flags;            // 0x00
     GxStateBlock m_state;   // 0x04 (0x80 bytes)
-    // gap to 0x44
-    u32 m_pad44;            // 0x44
-    LightEntry* m_lights;   // 0x46 (aligned to 4)
-    u32 m_pad4A;
-    f32 m_scaleFactor;      // 0x4A (or 0x4C depending on alignment)
-    u32 m_state2;           // 0x4C/0x50
+    // gap to 0x84 (after GxStateBlock)
+    u32 m_pad84;            // 0x84
+    u32 m_pad88;            // 0x88
+    LightEntry* m_lights;   // 0x8C (4-byte aligned pointer)
+    u32 m_pad90;
+    f32 m_scaleFactor;      // 0x94
+    u32 m_state2;           // 0x98
 
     LightManager() { std::memset(this, 0, sizeof(*this)); }
 

@@ -28,7 +28,7 @@ class MemoryProfiler;
 // Used by BlockAllocator to track allocated and free memory
 // blocks in a doubly-linked intrusive list.
 //
-// Layout (~0x20 bytes):
+// Layout (~0x1C bytes):
 //   0x00  mPrev           — previous block in list
 //   0x04  mNext           — next block in list
 //   0x08  mStart          — start address of the block's data

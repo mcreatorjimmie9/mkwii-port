@@ -357,9 +357,9 @@ private:
     static ArchiveMgr* sInstance;
 
     struct MountEntry {
-        char  path[64];      // mount point path
-        Archive* archive;    // associated archive
-        u8    inUse;         // entry is active
+        char  path[60];      // mount point path (60 bytes for Wii 64-byte entry)
+        Archive* archive;    // associated archive (null = entry not in use)
+        u8    _pad3C[3];     // padding to 64 bytes total
     };
 
     MountEntry mMounts[MAX_MOUNT_POINTS]; // 0x04

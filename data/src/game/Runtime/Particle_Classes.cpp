@@ -291,7 +291,7 @@ void Emitter::setLifetimeRange(f32 minLife, f32 maxLife) {
 
 void Emitter::setName(const s8* name) {
     // @addr 0x80543340
-    // Store name pointer in pad area at offset 0x08 (after the two f32s)
+    // Store name pointer in pad area (m_pad6C + 8 = absolute 0x74 on Wii)
     void** padPtr = reinterpret_cast<void**>(m_pad6C);
     padPtr[2] = const_cast<s8*>(name);
 }

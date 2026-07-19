@@ -64,18 +64,20 @@ protected:
 //
 // Layout:
 //   0x00  vtable
-//   0x04  mHeap          — heap this thread was allocated from
-//   0x08  mStackBase     — base of the thread's stack
-//   0x0C  mStackSize     — stack size in bytes
-//   0x10  mPriority      — OS thread priority
-//   0x14  mOspThread     — pointer to embedded OS thread (at +0x40)
-//   0x18  mMsgQueue      — OS message queue (embedded)
-//   0x28  mIsRunning     — thread running flag
-//   0x2C  mIsDone        — thread completion flag
-//   0x30  mThreadHandle  — OS thread reference
-//   0x34  ...            (OS thread struct is embedded here)
-//   0x40  mOspThreadStorage[0xC8] — actual OSThread struct (200 bytes)
-// Total: ~0x108
+//   0x04  mDisposerID    (inherited from Disposer)
+//   0x08  mNextDisposer  (inherited from Disposer)
+//   0x0C  mPrevDisposer  (inherited from Disposer)
+//   0x10  mHeap          — heap this thread was allocated from
+//   0x14  mStackBase     — base of the thread's stack
+//   0x18  mStackSize     — stack size in bytes
+//   0x1C  mPriority      — OS thread priority
+//   0x20  mState         — thread running flag (State enum)
+//   0x24  mMsgQueue      — OS message queue (embedded, 0x20 bytes)
+//   0x44  mMesgBuffer    — heap-allocated OSMessage buffer
+//   0x48  mMesgCount     — number of messages in queue
+//   0x4C  mOspThreadPtr  — pointer to embedded OS thread
+//   0x50  mOspThreadStorage[0xC8] — actual OSThread struct (200 bytes)
+// Total: ~0x118
 //
 // Key virtuals:
 //   vtable[0]  destructor
@@ -208,12 +210,12 @@ protected:
 // Layout:
 //   0x00  vtable
 //   0x04  mDisposerID    (inherited from Disposer)
-//   0x08  mNextDisposer  (inherited)
-//   0x0C  mPrevDisposer  (inherited)
+//   0x08  mNextDisposer  (inherited from Disposer)
+//   0x0C  mPrevDisposer  (inherited from Disposer)
 //   0x10  mFlags         — actor state flags
-//   0x14  mCalcOrder     — order in calc phase
-//   0x18  mDrawOrder     — order in draw phase
-//   0x1C  mActorID       — unique actor identifier
+//   0x14  mCalcOrder     — order in calc phase (s16)
+//   0x16  mDrawOrder     — order in draw phase (s16)
+//   0x18  mActorID       — unique actor identifier
 //
 // Key virtuals:
 //   vtable[0]  ~Actor()

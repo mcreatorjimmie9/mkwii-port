@@ -66,10 +66,11 @@ namespace EGG {
 // Derived from: eggLightManager 0x8022a38c pattern (set vtable, counts, alloc)
 void LightManager::create() {
     m_flags = 0;
-    m_pad44 = 0;
+    m_pad84 = 0;
+    m_pad88 = 0;
     m_state.init();
     m_lights = nullptr;
-    m_pad4A = 0;
+    m_pad90 = 0;
     m_scaleFactor = 0.0f;
     m_state2 = 0;
     // Double-init of GxStateBlock observed in decompilation at 0x804a1434.
@@ -86,22 +87,20 @@ void LightManager::resetLights(s16 count) {
     m_state.init();
     for (s16 i = 0; i < count; i++) {
         LightEntry* entry = &m_lights[i];
-        // Zero position (0x0C-0x14 of LightEntry)
+        // Zero position (0x08-0x10 of LightEntry)
         entry->m_posX = 0.0f;
         entry->m_posY = 0.0f;
         entry->m_posZ = 0.0f;
-        // Zero direction (0x18-0x20)
+        // Zero direction (0x14-0x1C)
         entry->m_dirX = 0.0f;
         entry->m_dirY = 0.0f;
         entry->m_dirZ = 0.0f;
-        // Zero color (0x24-0x2C)
+        // Zero color (0x20-0x28)
         entry->m_colR = 0.0f;
         entry->m_colG = 0.0f;
         entry->m_colB = 0.0f;
         // Zero padding
-        entry->m_pad08 = 0.0f;
-        entry->m_pad18 = 0.0f;
-        entry->m_pad28 = 0.0f;
+        entry->m_pad2C = 0;
         // Apply scale factor from manager.
         // In the real LightManager, scale comes from the matrix transform
         // applied during calculation (eggLightObject 0x8022b9dc).
