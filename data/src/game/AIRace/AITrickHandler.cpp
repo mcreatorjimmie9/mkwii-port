@@ -26,7 +26,7 @@ void AITrickHandler::vf_0x0C() {}
 // Address: 0x807377E0
 // Size: 16 bytes, 4 instructions
 void AITrickHandler::avoidPow() {
-    mpInfo->mpInput->setTrick(System::KPadRaceInputState::UP_TRICK);
+    mpInfo->mpInput->setTrick(System::KPadRaceInputState_Tricks::UP_TRICK);
 }
 
 // allowTricking__Q25Enemy14AITrickHandlerFv
@@ -77,9 +77,9 @@ void AITrickHandler::update() {
     if (shouldTrick()) {
         System::KPadRaceInputState* input = mpInfo->mpInput;
 
-        const System::KPadRaceInputState::eTrick kartTricks[2] = {
-            System::KPadRaceInputState::UP_TRICK,
-            System::KPadRaceInputState::DOWN_TRICK
+        const int kartTricks[2] = {
+            System::KPadRaceInputState_Tricks::UP_TRICK,
+            System::KPadRaceInputState_Tricks::DOWN_TRICK
         };
 
         u32 rand = AIManager::getInstance()->getRandU32(ARRAY_COUNT(kartTricks));
@@ -132,11 +132,11 @@ void AITrickHandlerBike::calcWheelie() {
 
         if (pathHandler->mpCurrPointParam->shouldEndWheelie()) {
             mbPerformWheelie = false;
-            input->setTrick(System::KPadRaceInputState::DOWN_TRICK);
+            input->setTrick(System::KPadRaceInputState_Tricks::DOWN_TRICK);
         }
 
         if (mbPerformWheelie) {
-            input->setTrick(System::KPadRaceInputState::UP_TRICK);
+            input->setTrick(System::KPadRaceInputState_Tricks::UP_TRICK);
         }
     }
 }
@@ -148,11 +148,11 @@ void AITrickHandlerBike::update() {
     if (shouldTrick()) {
         System::KPadRaceInputState* input = mpInfo->mpInput;
 
-        const System::KPadRaceInputState::eTrick bikeTricks[4] = {
-            System::KPadRaceInputState::UP_TRICK,
-            System::KPadRaceInputState::DOWN_TRICK,
-            System::KPadRaceInputState::LEFT_TRICK,
-            System::KPadRaceInputState::RIGHT_TRICK,
+        const int bikeTricks[4] = {
+            System::KPadRaceInputState_Tricks::UP_TRICK,
+            System::KPadRaceInputState_Tricks::DOWN_TRICK,
+            System::KPadRaceInputState_Tricks::LEFT_TRICK,
+            System::KPadRaceInputState_Tricks::RIGHT_TRICK,
         };
 
         u32 rand = AIManager::getInstance()->getRandU32(ARRAY_COUNT(bikeTricks));

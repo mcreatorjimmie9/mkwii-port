@@ -23,6 +23,8 @@ public:
     T x, y, z;
     TVector3() : x(0), y(0), z(0) {}
     TVector3(T _x, T _y, T _z) : x(_x), y(_y), z(_z) {}
+    void set(T _x, T _y, T _z) { x = _x; y = _y; z = _z; }
+    void setZero() { x = y = z = 0; }
     static const TVector3 zero;
 };
 
@@ -56,7 +58,7 @@ inline f32 RadToDeg(f32 rad) { return rad * RAD_TO_DEG; }
 
 } // namespace EGG
 
-// Static member definitions (required for non-integral types in templates)
+// Static member definitions
 template<typename T>
 const EGG::TVector3<T> EGG::TVector3<T>::zero = EGG::TVector3<T>(T(0), T(0), T(0));
 

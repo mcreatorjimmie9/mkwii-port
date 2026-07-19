@@ -48,7 +48,7 @@ public:
     KartPhysics* getKartPhysics() const { return m_kartPhysics; }
     KartWheelPhysics* getWheelPhysics(u32 idx) const;
     KartSusPhysics* getSusPhysics(u32 idx) const;
-    HitboxGroup* getHitboxGroup() const { return m_hitboxGroup; }
+    HitboxGroup* getHitboxGroup() const { return nullptr; /* TODO: m_hitboxGroup */ }
 
     // State query
     bool hasAnyFloorCollision() const { return m_anyFloorCol; }

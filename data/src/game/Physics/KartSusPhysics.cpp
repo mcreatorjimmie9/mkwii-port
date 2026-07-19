@@ -1,5 +1,14 @@
+// EGG::Heap allocator stub
+#include <types.h>
+namespace EGG {
+class Heap {
+public:
+    static void* alloc(u32 size) { return nullptr; /* TODO: real allocator */ }
+};
+}
+
 #include "KartSusPhysics.hpp"
-#include "KartWheelPhysics.hpp"
+// KartWheelPhysics.hpp is already included via KartSusPhysics.hpp
 #include <cstring>
 
 extern "C" {
@@ -43,6 +52,24 @@ void sub_8058989c();       // compose rear collision
 void sub_807bf168();       // collision reset (variant 1)
 void sub_807c5ad0();       // collision reset (variant 2)
 void sub_807c055c();       // finalize collision reset
+// 0x-prefixed variants (used in code)
+void sub_0x8058e844();
+void sub_0x805b6ea4();
+void sub_0x8058d40c();
+void sub_0x8058d4e0();
+void sub_0x8058ca68();
+void sub_0x8058989c();
+void sub_0x8056d2bc();
+void sub_0x8056c748();
+void sub_0x8056cad0();
+void sub_0x80584084();
+void sub_0x80584688();
+void sub_0x80590168();
+void sub_0x80590aac();
+void sub_0x807bf168();
+void sub_0x807c5ad0();
+void sub_0x80590178();
+void sub_0x807c055c();
 }
 
 // =============================================================================
@@ -101,8 +128,8 @@ void KartSusPhysics::init() {
     }
 
     // Create two collision response objects for front/rear
-    void* colObj1 = EGG::Heap::alloc(/* some size */);
-    void* colObj2 = EGG::Heap::alloc(/* some size */);
+    void* colObj1 = EGG::Heap::alloc(0x100);  // TODO: actual size
+    void* colObj2 = EGG::Heap::alloc(0x100);  // TODO: actual size
 
     // Initialize both collision objects
     // sub_80562b2c(colObj1, 0, 1) — front collision
@@ -144,8 +171,8 @@ void KartSusPhysics::init() {
     // Copy collision data pointer
     *reinterpret_cast<u32*>(reinterpret_cast<char*>(this) + 0x20) =
         *reinterpret_cast<u32*>(reinterpret_cast<char*>(mainWheel) + 0x1C);
-    *reinterpret_cast<u32*>(reinterpret_cast<char*>(this) + 0x34) =
-        reinterpret_cast<u32>(mainWheel);
+    *reinterpret_cast<uintptr_t*>(reinterpret_cast<char*>(this) + 0x34) =
+        reinterpret_cast<uintptr_t>(mainWheel);
 
     // ---- Set up suspension collision BSP ray ----
     u16 bspWIdx = *reinterpret_cast<u16*>(
@@ -301,7 +328,7 @@ void KartSusPhysics::init() {
         reinterpret_cast<char*>(this) + 0x78) = colObj5;
 
     // Final BSP collision setup
-    sub_80576c54(/* stateBuffer */, -1);
+    sub_80576c54();  // TODO: was (stateBuffer, -1)
 }
 
 // =============================================================================

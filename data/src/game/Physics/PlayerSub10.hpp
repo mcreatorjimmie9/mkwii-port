@@ -215,5 +215,8 @@ public:
 };
 // static_assert(sizeof(PlayerSub10) == 0x294);
 
+class PlayerSub10Remote : public PlayerSub10 { /* vtable 0x808b5d90 */ };
+class PlayerSub10RealLocal : public PlayerSub10 { /* vtable 0x808b5e78 */ };
+
 // PlayerSub10Bike is defined in PlayerSub10Bike.hpp
 // (included separately to avoid circular dependency)

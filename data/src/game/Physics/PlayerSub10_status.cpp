@@ -1,5 +1,66 @@
 #include "PlayerSub10.hpp"
 
+// Helper macros for safe pointer arithmetic
+#define PA_U8(b,o)  (*reinterpret_cast<u8*>(reinterpret_cast<char*>(b)+(o)))
+#define PA_S16(b,o) (*reinterpret_cast<s16*>(reinterpret_cast<char*>(b)+(o)))
+#define PA_U16(b,o) (*reinterpret_cast<u16*>(reinterpret_cast<char*>(b)+(o)))
+#define PA_U32(b,o) (*reinterpret_cast<u32*>(reinterpret_cast<char*>(b)+(o)))
+#define PA_F32(b,o) (*reinterpret_cast<f32*>(reinterpret_cast<char*>(b)+(o)))
+#define PA_PTR(b,o) (*reinterpret_cast<void**>(reinterpret_cast<char*>(b)+(o)))
+#define WA_U32(b,o,v) (*reinterpret_cast<u32*>(reinterpret_cast<char*>(b)+(o))=(v))
+#define PPTR(p) (*reinterpret_cast<void**>(p))
+
+extern "C" {
+void sub_getEffectGroup(void* p);
+void sub_getEffectGroup2(void* p, s32);
+void sub_getEffectGroup3(void* p);
+void sub_playEffectSound(void* p, s32);
+void sub_playCrushStartSound(void* p);
+void sub_playCrushSound(void* p, s32);
+void sub_playMegaSound(void* p, s32);
+void sub_playEffectSound2(void* p, s32);
+void sub_startEffect(void* p, s32, u32, u32);
+void sub_endDriftEffect(void* p, s32);
+void sub_clearAnim(void* p, s32);
+void sub_updateScaleAnim(void* p, f32);
+void sub_getBodyInfo(void* p);
+void sub_clearInk(void* p);
+void sub_updateInvisibility(void* p);
+void sub_endSquishSound(void* p, s32);
+void sub_startSquishSound(void* p, s32);
+void sub_startSquishEffect(void* p, s32);
+void sub_getSpeed(void* p);
+void sub_getScale(void* p);
+void sub_setScale(void* p, f32);
+void sub_setMegaScale(void* p, f32);
+void sub_triggerSound(void* p);
+void sub_setSoundAttr(void* p, s32, u32, u32);
+void sub_setSound2(void* p, s32, s32, s32);
+void sub_playSoundId(void* p, s32);
+void sub_getPhysicsInput(void* p);
+void sub_getPhysicsInput(void* p);
+void sub_triggerSound(void* p);
+void sub_setSound2(void* p, s32, s32, s32);
+void sub_playSoundId(void* p, s32);
+void sub_getScale(void* p);
+void sub_setScale(void* p, f32);
+void sub_playCrushSound(void* p, s32);
+void sub_playMegaSound(void* p, s32);
+void sub_playEffectSound2(void* p, s32);
+void sub_playItemSound(void* p, s32);
+void sub_updateScaleAnim(void* p, f32);
+void sub_clearInk(void* p);
+void sub_getBodyInfo(void* p);
+void sub_setMegaScale(void* p, f32);
+void sub_eggVec3Normalize(void*, const void*);
+void sub_updateInvisibility(void* p);
+void sub_startSquishSound(void* p, s32);
+void sub_startSquishEffect(void* p, s32);
+void sub_endSquishSound(void* p, s32);
+void sub_getSpeed(void* p);
+void sub_clearAnim(void* p, s32);
+}
+
 // ============================================================================
 // PlayerSub10 — Status Effects
 // Addresses 0x80580438 - 0x805819a8
@@ -70,9 +131,9 @@ void PlayerSub10::applyLightning() {
 
     // Look up player data from global
     void* global = *(void**)0;
-    void* pTable = *(void**)(0x68 + (u32)global);
-    void* playerData = *(void**)(tableIdx + (u32)pTable);
-    u8 bodyType = *(u8*)(0x20 + (u32)playerData);
+    void* pTable = PA_PTR(global, 0x68);
+    void* playerData = PA_PTR(pTable, tableIdx);
+    u8 bodyType = PA_U8(playerData, 0x20);
 
     // Check body type against exemption table
     // Types 3-10 are checked against mask 0xC1
@@ -91,12 +152,12 @@ void PlayerSub10::applyLightning() {
     } else if (bodyType != 0 && bodyType <= 0x0C) {
         // Normal body: lookup from character-specific table
         void* global2 = *(void**)0;
-        void* bodyTable = *(void**)(0x14 + (u32)global2);
-        u8 baseValue = *(u8*)(0x24 + (u32)bodyTable);
+        void* bodyTable = PA_PTR(global2, 0x14);
+        u8 baseValue = PA_U8(bodyTable, 0x24);
 
         s16 durationIdx = (s16)(bodyType + 0x0B) - (s16)baseValue;
         // Look up from duration table (array of s16)
-        s16 duration = *(s16*)(durationIdx * 2 + /* global table */);
+        s16 duration = 0; /* TODO: global table lookup */
         s16 frames = duration + 0x48; // base offset
 
         applyLightningEffect(frames, 0, 0);
@@ -115,11 +176,11 @@ void PlayerSub10::applyLightning() {
 void PlayerSub10::applyLightningByCharacter() {
     // Get character body type from kart
     sub_getBodyInfo(this);
-    u8 bodyType = *(u8*)(0xA4 + (u32)this);
+    u8 bodyType = PA_U8(this, 0xA4);
 
     // Same exemption logic as applyLightning
     void* global = *(void**)0;
-    void* pTable = *(void**)(0x68 + (u32)global);
+    void* pTable = PA_PTR(global, 0x68);
     u32 adjustedType = (u32)bodyType - 3;
     bool isExempt = false;
     if (adjustedType <= 7) {
@@ -133,10 +194,10 @@ void PlayerSub10::applyLightningByCharacter() {
         applyLightningEffect(0x1C2, 0, 0);
     } else if (bodyType != 0 && bodyType <= 0x0C) {
         void* global2 = *(void**)0;
-        void* bodyTable = *(void**)(0x14 + (u32)global2);
-        u8 baseValue = *(u8*)(0x24 + (u32)bodyTable);
+        void* bodyTable = PA_PTR(global2, 0x14);
+        u8 baseValue = PA_U8(bodyTable, 0x24);
         s16 durationIdx = (s16)(bodyType + 0x0B) - (s16)baseValue;
-        s16 duration = *(s16*)(durationIdx * 2 + /* global table */);
+        s16 duration = 0; /* TODO: global table lookup */
         s16 frames = duration + 0x48;
 
         applyLightningEffect(frames, 0, 0);
@@ -159,9 +220,9 @@ void PlayerSub10::resetLightningEffect() {
 
     // Look up player data, zero params at offset 0x50
     void* global = *(void**)0;
-    void* pTable = *(void**)(0x68 + (u32)global);
-    void* playerData = *(void**)(tableIdx + (u32)pTable);
-    *(u32*)(0x50 + (u32)playerData) = 0;
+    void* pTable = PA_PTR(global, 0x68);
+    void* playerData = PA_PTR(pTable, tableIdx);
+    PA_U32(playerData, 0x50) = 0;
 
     // Apply lightning with fixed long duration
     applyLightningEffect(0x264, 0, 1);
@@ -180,9 +241,9 @@ void PlayerSub10::resetLightningEffect2() {
     u32 tableIdx = playerIdx << 2;
 
     void* global = *(void**)0;
-    void* pTable = *(void**)(0x68 + (u32)global);
-    void* playerData = *(void**)(tableIdx + (u32)pTable);
-    *(u32*)(0x50 + (u32)playerData) = 0;
+    void* pTable = PA_PTR(global, 0x68);
+    void* playerData = PA_PTR(pTable, tableIdx);
+    PA_U32(playerData, 0x50) = 0;
 
     applyLightningEffect(0x264, 0, 1);
 }
@@ -196,7 +257,7 @@ void PlayerSub10::resetLightningEffect2() {
 // ============================================================================
 void PlayerSub10::applyLightningWithDuration(s16 duration, u8 unk0, u8 unk1) {
     void* global = *(void**)0;
-    u32 bodyTypeIdx = *(u32*)(0xB70 + (u32)global);
+    u32 bodyTypeIdx = PA_U32(global, 0xB70);
     u32 adjustedType = bodyTypeIdx - 3;
     bool isExempt = false;
     if (adjustedType <= 7) {
@@ -209,10 +270,10 @@ void PlayerSub10::applyLightningWithDuration(s16 duration, u8 unk0, u8 unk1) {
     if (isExempt) {
         applyLightningEffect(0x1C2, unk0, unk1);
     } else if (unk1 != 0 && unk1 <= 0x0C) {
-        void* bodyTable = *(void**)(0x14 + (u32)global);
-        u8 baseValue = *(u8*)(0x24 + (u32)bodyTable);
+        void* bodyTable = PA_PTR(global, 0x14);
+        u8 baseValue = PA_U8(bodyTable, 0x24);
         s16 durationIdx = (s16)(unk1 + 0x0B) - (s16)baseValue;
-        s16 tableDuration = *(s16*)(durationIdx * 2 + /* global table */);
+        s16 tableDuration = 0; /* TODO: global table lookup */
         s16 frames = tableDuration + 0x48;
         applyLightningEffect(frames, unk0, unk1);
     }
@@ -236,9 +297,9 @@ void PlayerSub10::applyLightningEffect(s16 frames, u8 unk0, u8 unk1) {
     bool blocked = false;
 
     // Check state flags for blocking
-    void* stateBase = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    u32 flags8 = *(u32*)(0x08 + (u32)stateBase);
-    u32 flagsC = *(u32*)(0x0C + (u32)stateBase);
+    void* stateBase = PA_PTR(PPTR(this->playerPointers), 0x04);
+    u32 flags8 = PA_U32(stateBase, 0x08);
+    u32 flagsC = PA_U32(stateBase, 0x0C);
 
     // Block if: bullet (bit 0), star/mega (bits 27,28), or special flags (0x20600000)
     if (flags8 & 0x102) blocked = true; // bits 1, 8
@@ -253,14 +314,14 @@ void PlayerSub10::applyLightningEffect(s16 frames, u8 unk0, u8 unk1) {
     if (flagsC & 0x08000000) {
         // Already has ink/gesso — handle specially
         // Clear the ink flag
-        *(u32*)(0x0C + (u32)stateBase) &= ~0x08000000;
+        PA_U32(stateBase, 0x0C) &= ~0x08000000;
 
         // Clear ink effect from global player data
         sub_getPhysicsInput(this);
         u32 pIdx = /* result */ 0;
         void* global = *(void**)0;
-        void* pTable = *(void**)(0x14 + (u32)global);
-        void* playerData = (void*)((u32)pTable + pIdx * 0x248);
+        void* pTable = PA_PTR(global, 0x14);
+        void* playerData = (reinterpret_cast<void*>(reinterpret_cast<char*>(pTable) + pIdx * 0x248));
         sub_clearInk(playerData);
 
         // Play deactivation sound
@@ -275,11 +336,11 @@ void PlayerSub10::applyLightningEffect(s16 frames, u8 unk0, u8 unk1) {
         sub_setMegaScale(this, 0.0f);
 
         // Clear mega started flag
-        if (field_0x196 == 0) {
+        if (0 /* TODO: field_0x196 */ == 0) {
             // Trigger trick end (effect group)
             sub_getEffectGroup(this->trick);
-            sub_getEffectGroup(this->trick, 1); // deactivate
-            field_0x196 = 1;
+            sub_getEffectGroup2(this->trick, 1); // deactivate
+            // TODO: field_0x196 = 1;
         }
 
         return; // r3 = 1
@@ -303,23 +364,23 @@ void PlayerSub10::applyLightningEffect(s16 frames, u8 unk0, u8 unk1) {
     sub_getPhysicsInput(this);
     u32 pIdx2 = /* result */ 0;
     void* global2 = *(void**)0;
-    void* pTable2 = *(void**)(0x14 + (u32)global2);
-    void* playerData2 = (void*)((u32)pTable2 + pIdx2 * 0x248);
+    void* pTable2 = PA_PTR(global2, 0x14);
+    void* playerData2 = (reinterpret_cast<void*>(reinterpret_cast<char*>(pTable2) + pIdx2 * 0x248));
     sub_playEffectSound(playerData2, 0x0C);
 
     // Play activation sound
     sub_triggerSound(this);
-    sub_setSound2(this, 0x0F, 1);
+    sub_setSound2(this, 0x0F, 1, 0);
 
     // Set star state flag (bit 7 of 0x0C)
-    *(u32*)(0x0C + (u32)stateBase) |= 0x80;
+    WA_U32(stateBase, 0x0C, PA_U32(stateBase, 0x0C) | 0x80);
 
     // Set shock timer (0x18C) to the given duration if longer
     if (frames > shockTimer) {
         shockTimer = frames;
         // Clear invincibility effect
         sub_getEffectGroup(this->trick);
-        sub_getEffectGroup(this->trick, 0); // deactivate
+        sub_getEffectGroup2(this->trick, 0); // deactivate
     }
 
     // Play sound based on which parameter is set
@@ -345,8 +406,8 @@ void PlayerSub10::applyLightningEffect(s16 frames, u8 unk0, u8 unk1) {
 // removing the star state flag.
 // ============================================================================
 void PlayerSub10::updateStar() {
-    void* stateBase = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    u32 flagsC = *(u32*)(0x0C + (u32)stateBase);
+    void* stateBase = PA_PTR(PPTR(this->playerPointers), 0x04);
+    u32 flagsC = PA_U32(stateBase, 0x0C);
 
     // Only update if star is active (flag bit 7 at 0x0C)
     if (!(flagsC & 0x80)) {
@@ -373,7 +434,7 @@ void PlayerSub10::updateStar() {
 
     // Star expired — deactivate
     // Clear star flag
-    *(u32*)(0x0C + (u32)stateBase) &= ~0x80;
+    PA_U32(stateBase, 0x0C) &= ~0x80;
 
     // Play deactivation sound
     sub_getScale(this);
@@ -384,7 +445,7 @@ void PlayerSub10::updateStar() {
 
     // Clear invincibility effect
     sub_getEffectGroup(this->trick);
-    sub_getEffectGroup(this->trick, 0); // deactivate
+    sub_getEffectGroup2(this->trick, 0); // deactivate
 }
 
 // ============================================================================
@@ -396,8 +457,8 @@ void PlayerSub10::updateStar() {
 // ============================================================================
 void PlayerSub10::deactivateStar(u8 resetScale) {
     // Clear star flag
-    void* stateBase = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    *(u32*)(0x0C + (u32)stateBase) &= ~0x80;
+    void* stateBase = PA_PTR(PPTR(this->playerPointers), 0x04);
+    PA_U32(stateBase, 0x0C) &= ~0x80;
 
     // Play deactivation sound
     sub_getScale(this);
@@ -408,7 +469,7 @@ void PlayerSub10::deactivateStar(u8 resetScale) {
 
     // Clear invincibility effect
     sub_getEffectGroup(this->trick);
-    sub_getEffectGroup(this->trick, 0);
+    sub_getEffectGroup2(this->trick, 0);
 
     // Optionally reset scale
     if (resetScale) {
@@ -430,8 +491,8 @@ void PlayerSub10::deactivateStar(u8 resetScale) {
 // ============================================================================
 void PlayerSub10::activateMegaVirtual() {
     // Set mega flag (bit 15 = 0x8000 at 0x0C)
-    void* stateBase = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    *(u32*)(0x0C + (u32)stateBase) |= 0x8000;
+    void* stateBase = PA_PTR(PPTR(this->playerPointers), 0x04);
+    WA_U32(stateBase, 0x0C, PA_U32(stateBase, 0x0C) | 0x8000);
 
     // Set mega timer from global default
     MegaTimer = 0; // lha r0, 0(r4) — from global
@@ -440,9 +501,9 @@ void PlayerSub10::activateMegaVirtual() {
     sub_getPhysicsInput(this);
     u32 pIdx = /* result */ 0;
     void* global = *(void**)0;
-    void* pTable = *(void**)(0x68 + (u32)global);
-    void* playerData = *(void**)(pIdx * 4 + (u32)pTable);
-    sub_playMegaSound(playerData); // 0x806acf84
+    void* pTable = PA_PTR(global, 0x68);
+    void* playerData = PA_PTR(pTable, pIdx * 4);
+    sub_playMegaSound(playerData, 0); // 0x806acf84
 
     // Set scale to mega scale
     sub_getScale(this);
@@ -458,26 +519,26 @@ void PlayerSub10::activateMegaVirtual() {
 
     // If player has ink — check and clear
     sub_getScale(this);
-    u8 hasEffect = *(u8*)(0xE0 + (u32)this);
+    u8 hasEffect = PA_U8(this, 0xE0);
     if (hasEffect) {
         void* global2 = *(void**)0;
         sub_playItemSound(this, 0); // some item clear sound
     }
 
     // If player has shock state (flag bit 7 at 0x0C) — clear it
-    u32 flagsC = *(u32*)(0x0C + (u32)stateBase);
+    u32 flagsC = PA_U32(stateBase, 0x0C);
     if (flagsC & 0x80) {
-        *(u32*)(0x0C + (u32)stateBase) &= ~0x80;
+        PA_U32(stateBase, 0x0C) &= ~0x80;
         sub_getScale(this);
         sub_playSoundId(this, 0x116); // star/shock end sound
         shockTimer = 0;
         sub_getEffectGroup(this->trick);
-        sub_getEffectGroup(this->trick, 0); // deactivate
+        sub_getEffectGroup2(this->trick, 0); // deactivate
     }
 
     // If player has crush state (flag bit 16 at 0x0C) — clear it
     if (flagsC & 0x10000) {
-        *(u32*)(0x0C + (u32)stateBase) &= ~0x10000;
+        PA_U32(stateBase, 0x0C) &= ~0x10000;
         sub_getScale(this);
         sub_playSoundId(this, 0x1A5); // crush end sound
         sub_getEffectGroup(this->trick);
@@ -489,10 +550,10 @@ void PlayerSub10::activateMegaVirtual() {
 
     // Set mega sound attribute
     sub_triggerSound(this);
-    sub_setSound2(this, 0x1B, 1);
+    sub_setSound2(this, 0x1B, 1, 0);
 
     // Clear mega started flag
-    field_0x196 = 0;
+    this->field_0x196 = 0;
 }
 
 // ============================================================================
@@ -505,15 +566,15 @@ void PlayerSub10::activateMegaVirtual() {
 // ============================================================================
 void PlayerSub10::startMega(u8 resetScale) {
     // Clear mega state flag
-    void* stateBase = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    *(u32*)(0x0C + (u32)stateBase) &= ~0x8000;
+    void* stateBase = PA_PTR(PPTR(this->playerPointers), 0x04);
+    PA_U32(stateBase, 0x0C) &= ~0x8000;
 
     // Clear scale effect on global player data
     sub_getPhysicsInput(this);
     u32 pIdx = /* result */ 0;
     void* global = *(void**)0;
-    void* pTable = *(void**)(0x14 + (u32)global);
-    void* playerData = (void*)((u32)pTable + pIdx * 0x248);
+    void* pTable = PA_PTR(global, 0x14);
+    void* playerData = (reinterpret_cast<void*>(reinterpret_cast<char*>(pTable) + pIdx * 0x248));
     sub_clearInk(playerData);
 
     // If resetScale: play deactivation sound
@@ -530,10 +591,10 @@ void PlayerSub10::startMega(u8 resetScale) {
     sub_setMegaScale(this, 0.0f);
 
     // Clear mega started flag
-    if (field_0x196 == 0) {
+    if (0 /* TODO: field_0x196 */ == 0) {
         sub_getEffectGroup(this->trick);
-        sub_getEffectGroup(this->trick, 1); // activate
-        field_0x196 = 1;
+        sub_getEffectGroup2(this->trick, 1); // activate
+        // TODO: field_0x196 = 1;
     }
 
     // If resetScale: zero someScale
@@ -550,8 +611,8 @@ void PlayerSub10::startMega(u8 resetScale) {
 // scale interpolation (growing on activation, shrinking on expiration).
 // ============================================================================
 void PlayerSub10::updateMega() {
-    void* stateBase = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    u32 flagsC = *(u32*)(0x0C + (u32)stateBase);
+    void* stateBase = PA_PTR(PPTR(this->playerPointers), 0x04);
+    u32 flagsC = PA_U32(stateBase, 0x0C);
 
     // Only update if mega is active (flag bit 15 at 0x0C)
     if (!(flagsC & 0x8000)) {
@@ -570,11 +631,11 @@ void PlayerSub10::updateMega() {
     if (timer > 0) {
         // Still active
         // Check if we should trigger the "almost done" effect
-        u8 megaStarted = field_0x196;
+        u8 megaStarted = 0 /* TODO: field_0x196 */;
         if (megaStarted == 0 && timer <= 0x19) { // 25 frames before end
-            field_0x196 = 1;
+            // TODO: field_0x196 = 1;
             sub_getEffectGroup(this->trick);
-            sub_getEffectGroup(this->trick, 1);
+            sub_getEffectGroup2(this->trick, 1);
         }
         // Shrink scale toward 1.0
         someScale = someScale + 1.0f; // table[0x3C]
@@ -582,14 +643,14 @@ void PlayerSub10::updateMega() {
     }
 
     // Mega expired — deactivate
-    *(u32*)(0x0C + (u32)stateBase) &= ~0x8000;
+    PA_U32(stateBase, 0x0C) &= ~0x8000;
 
     // Clear scale from global player data
     sub_getPhysicsInput(this);
     u32 pIdx = /* result */ 0;
     void* global = *(void**)0;
-    void* pTable = *(void**)(0x14 + (u32)global);
-    void* playerData = (void*)((u32)pTable + pIdx * 0x248);
+    void* pTable = PA_PTR(global, 0x14);
+    void* playerData = (reinterpret_cast<void*>(reinterpret_cast<char*>(pTable) + pIdx * 0x248));
     sub_clearInk(playerData);
 
     // Play deactivation sound
@@ -604,10 +665,10 @@ void PlayerSub10::updateMega() {
     sub_setMegaScale(this, 1.0f);
 
     // Clear mega started flag
-    if (field_0x196 == 0) {
+    if (0 /* TODO: field_0x196 */ == 0) {
         sub_getEffectGroup(this->trick);
-        sub_getEffectGroup(this->trick, 1);
-        field_0x196 = 1;
+        sub_getEffectGroup2(this->trick, 1);
+        // TODO: field_0x196 = 1;
     }
 }
 
@@ -624,8 +685,8 @@ void PlayerSub10::updateMega() {
 // ============================================================================
 void PlayerSub10::startCrush(s16 frames) {
     // Set crush flag (bit 0 at 0x0C)
-    void* stateBase = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    *(u32*)(0x0C + (u32)stateBase) |= 0x01;
+    void* stateBase = PA_PTR(PPTR(this->playerPointers), 0x04);
+    WA_U32(stateBase, 0x0C, PA_U32(stateBase, 0x0C) | 0x01);
 
     // Play crush start sound
     sub_getScale(this);
@@ -646,8 +707,8 @@ void PlayerSub10::startCrush(s16 frames) {
 // when expired.
 // ============================================================================
 void PlayerSub10::updateCrush() {
-    void* stateBase = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    u32 flagsC = *(u32*)(0x0C + (u32)stateBase);
+    void* stateBase = PA_PTR(PPTR(this->playerPointers), 0x04);
+    u32 flagsC = PA_U32(stateBase, 0x0C);
 
     // Only update if crush is active (flag bit 16 at 0x0C)
     if (!(flagsC & 0x10000)) {
@@ -663,13 +724,13 @@ void PlayerSub10::updateCrush() {
     }
 
     // Crush expired — check flag still set (might have been cleared elsewhere)
-    u32 flagsC2 = *(u32*)(0x0C + (u32)stateBase);
+    u32 flagsC2 = PA_U32(stateBase, 0x0C);
     if (!(flagsC2 & 0x10000)) {
         return;
     }
 
     // Clear crush flag
-    *(u32*)(0x0C + (u32)stateBase) &= ~0x10000;
+    PA_U32(stateBase, 0x0C) &= ~0x10000;
 
     // Play crush end sound
     sub_getScale(this);
@@ -687,15 +748,15 @@ void PlayerSub10::updateCrush() {
 // Immediately ends the crush effect, regardless of timer.
 // ============================================================================
 void PlayerSub10::endCrush() {
-    void* stateBase = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    u32 flagsC = *(u32*)(0x0C + (u32)stateBase);
+    void* stateBase = PA_PTR(PPTR(this->playerPointers), 0x04);
+    u32 flagsC = PA_U32(stateBase, 0x0C);
 
     if (!(flagsC & 0x10000)) {
         return;
     }
 
     // Clear crush flag
-    *(u32*)(0x0C + (u32)stateBase) &= ~0x10000;
+    PA_U32(stateBase, 0x0C) &= ~0x10000;
 
     // Play crush end sound
     sub_getScale(this);
@@ -719,8 +780,8 @@ void PlayerSub10::endCrush() {
 // spinout when invincibility expires while moving fast.
 // ============================================================================
 void PlayerSub10::updateInvincibility() {
-    void* stateBase = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    u32 flagsC = *(u32*)(0x0C + (u32)stateBase);
+    void* stateBase = PA_PTR(PPTR(this->playerPointers), 0x04);
+    u32 flagsC = PA_U32(stateBase, 0x0C);
 
     // Only update if invincibility is active (flag bit 18 at 0x0C)
     if (!(flagsC & 0x40000)) {
@@ -746,9 +807,9 @@ void PlayerSub10::updateInvincibility() {
 
     if (expired) {
         // Clear invincibility state
-        *(u32*)(0x0C + (u32)stateBase) &= ~0x40000; // bit 18
+        PA_U32(stateBase, 0x0C) &= ~0x40000; // bit 18
         // Also clear some other flags
-        *(u32*)(0x0C + (u32)stateBase) &= ~0x08;   // bit 3
+        PA_U32(stateBase, 0x0C) &= ~0x08;   // bit 3
 
         // Set spinout state
         sub_getScale(this); // get player index
@@ -765,28 +826,28 @@ void PlayerSub10::updateInvincibility() {
         s16 maxTimer = 0; // from global
         if (invTimer >= maxTimer) {
             // Clear invincibility flags and start spinout
-            void* stateBase2 = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-            *(u32*)(0x14 + (u32)stateBase2) &= ~0xFFFFDFFF; // clear bits 13-19
+            void* stateBase2 = PA_PTR(PPTR(this->playerPointers), 0x04);
+            PA_U32(stateBase2, 0x14) &= ~0xFFFFDFFF; // clear bits 13-19
             *(s16*)(0x21C + (u8*)this) = 0;
 
             // If forced drift flag not set: start spinout
-            u32 flags14 = *(u32*)(0x14 + (u32)stateBase2);
+            u32 flags14 = PA_U32(stateBase2, 0x14);
             if (!(flags14 & 0x08)) {
                 *(s16*)(0x234 + (u8*)this) = 0;
                 // Set spinout/ghost state
-                *(u32*)(0x08 + (u32)stateBase2) |= 0x02; // bit 1
+                WA_U32(stateBase2, 0x08, PA_U32(stateBase2, 0x08) | 0x02); // bit 1
             }
 
             // Play sound
             s32 soundId = 0x1A;
-            u32 flags14b = *(u32*)(0x14 + (u32)stateBase2);
+            u32 flags14b = PA_U32(stateBase2, 0x14);
             if (flags14b & 0x20) { // bit 5
                 soundId = 0x1B;
             }
             sub_setScale(this, soundId);
 
             // Increment some counter
-            void* stateBase3 = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
+            void* stateBase3 = PA_PTR(PPTR(this->playerPointers), 0x04);
             sub_updateInvisibility(this);
 
             // Check for ghost vanish counter
@@ -856,8 +917,8 @@ void PlayerSub10::updatePlayerScale() {
 // ============================================================================
 void PlayerSub10::startSquish(s16 frames) {
     // Set squish flag (bit 8 at 0x08)
-    void* stateBase = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    *(u32*)(0x08 + (u32)stateBase) |= 0x100;
+    void* stateBase = PA_PTR(PPTR(this->playerPointers), 0x04);
+    WA_U32(stateBase, 0x08, PA_U32(stateBase, 0x08) | 0x100);
 
     // Store squish timer
     *(s16*)(0x1A8 + (u8*)this) = frames;
@@ -876,22 +937,22 @@ void PlayerSub10::startSquish(s16 frames) {
 // ============================================================================
 void PlayerSub10::tryStartSquish() {
     // Check if already squishing (flag bit 3 at 0x14)
-    void* stateBase = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    u32 flags14 = *(u32*)(0x14 + (u32)stateBase);
+    void* stateBase = PA_PTR(PPTR(this->playerPointers), 0x04);
+    u32 flags14 = PA_U32(stateBase, 0x14);
     if (flags14 & 0x08) {
         return; // Already squishing
     }
 
     // Set squish state flags
-    *(u32*)(0x14 + (u32)stateBase) |= 0x01; // bit 0
-    *(u32*)(0x14 + (u32)stateBase) |= 0x80; // bit 7
+    WA_U32(stateBase, 0x14, PA_U32(stateBase, 0x14) | 0x01); // bit 0
+    WA_U32(stateBase, 0x14, PA_U32(stateBase, 0x14) | 0x80); // bit 7
 
     // Zero squish recovery timer
     *(s16*)(0x1AC + (u8*)this) = 0;
 
     // Check body type exemption (same as lightning)
     void* global = *(void**)0;
-    u32 bodyTypeIdx = *(u32*)(0xB70 + (u32)global);
+    u32 bodyTypeIdx = PA_U32(global, 0xB70);
     u32 adjustedType = bodyTypeIdx - 3;
     bool isExempt = false;
     if (adjustedType <= 7) {
@@ -904,7 +965,7 @@ void PlayerSub10::tryStartSquish() {
     if (isExempt) {
         // Exempt from squish — just do a brief flash
         // Set squish flag (bit 8 at 0x08)
-        *(u32*)(0x08 + (u32)stateBase) |= 0x100;
+        WA_U32(stateBase, 0x08, PA_U32(stateBase, 0x08) | 0x100);
 
         // Use default short duration
         s16 frames = 0; // lha r0, 0(r4) — from global
@@ -923,8 +984,8 @@ void PlayerSub10::tryStartSquish() {
 // (shrinking) and recovery (growing back) phases.
 // ============================================================================
 void PlayerSub10::updateSquish() {
-    void* stateBase = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    u32 flags8 = *(u32*)(0x08 + (u32)stateBase);
+    void* stateBase = PA_PTR(PPTR(this->playerPointers), 0x04);
+    u32 flags8 = PA_U32(stateBase, 0x08);
 
     // Active squish phase (flag bit 8 at 0x08)
     if (flags8 & 0x100) {
@@ -935,7 +996,7 @@ void PlayerSub10::updateSquish() {
 
         if (expired) {
             // Clear active squish flag
-            *(u32*)(0x08 + (u32)stateBase) &= ~0x100;
+            PA_U32(stateBase, 0x08) &= ~0x100;
         }
 
         // Update squish scale animation
@@ -947,15 +1008,15 @@ void PlayerSub10::updateSquish() {
     // Recovery phase (flag bit 1 at 0x14)
     // Check if we should enter recovery
     void* global = *(void**)0;
-    u32 globalFlag = *(u32*)(0xB78 + (u32)global);
+    u32 globalFlag = PA_U32(global, 0xB78);
     if (globalFlag != 0) {
         return; // Some global condition blocks recovery
     }
 
-    u32 flags14 = *(u32*)(0x14 + (u32)stateBase);
+    u32 flags14 = PA_U32(stateBase, 0x14);
     if (!(flags14 & 0x10000)) return; // bit 16 must be set
     if (flags14 & 0x08) return;     // bit 3 blocks
-    u32 flagsC = *(u32*)(0x0C + (u32)stateBase);
+    u32 flagsC = PA_U32(stateBase, 0x0C);
     if (flagsC & 0x10) return;      // boosting blocks
     if (flagsC & 0x6000) return;    // drift state blocks
 
@@ -967,9 +1028,9 @@ void PlayerSub10::updateSquish() {
     s16 maxTimer = 0; // from global
     if (recoveryTimer >= maxTimer) {
         // Recovery complete — set spinout state
-        u32 flagsC2 = *(u32*)(0x0C + (u32)stateBase);
+        u32 flagsC2 = PA_U32(stateBase, 0x0C);
         if (!(flagsC2 & 0x0C0000)) { // bits 18-19
-            *(u32*)(0x0C + (u32)stateBase) |= 0x04; // bit 2
+            WA_U32(stateBase, 0x0C, PA_U32(stateBase, 0x0C) | 0x04); // bit 2
         }
 
         // Play recovery sound
@@ -979,11 +1040,11 @@ void PlayerSub10::updateSquish() {
         *(s16*)(0x1AC + (u8*)this) = 0;
 
         // Clear squish state flags
-        *(u32*)(0x14 + (u32)stateBase) &= ~0x01; // bit 0
-        *(u32*)(0x14 + (u32)stateBase) &= ~0x80; // bit 7
+        PA_U32(stateBase, 0x14) &= ~0x01; // bit 0
+        PA_U32(stateBase, 0x14) &= ~0x80; // bit 7
 
         // Set recovery flag
-        *(u32*)(0x14 + (u32)stateBase) |= 0x02; // bit 1
+        WA_U32(stateBase, 0x14, PA_U32(stateBase, 0x14) | 0x02); // bit 1
     }
 }
 
@@ -995,8 +1056,8 @@ void PlayerSub10::updateSquish() {
 // ============================================================================
 void PlayerSub10::cancelSquish() {
     // Clear squish flag
-    void* stateBase = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    *(u32*)(0x08 + (u32)stateBase) &= ~0x100;
+    void* stateBase = PA_PTR(PPTR(this->playerPointers), 0x04);
+    PA_U32(stateBase, 0x08) &= ~0x100;
 
     // End squish animation (force end)
     sub_getScaleAnim(this, 1); // force end
@@ -1013,7 +1074,7 @@ void PlayerSub10::cancelSquish() {
 void PlayerSub10::applySquish() {
     // Check body type exemption
     void* global = *(void**)0;
-    u32 bodyTypeIdx = *(u32*)(0xB70 + (u32)global);
+    u32 bodyTypeIdx = PA_U32(global, 0xB70);
     u32 adjustedType = bodyTypeIdx - 3;
     bool isExempt = false;
     if (adjustedType <= 7) {
@@ -1028,8 +1089,8 @@ void PlayerSub10::applySquish() {
     }
 
     // Set squish flag
-    void* stateBase = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    *(u32*)(0x08 + (u32)stateBase) |= 0x100;
+    void* stateBase = PA_PTR(PPTR(this->playerPointers), 0x04);
+    WA_U32(stateBase, 0x08, PA_U32(stateBase, 0x08) | 0x100);
 
     // Use default duration
     s16 frames = 0; // lha r0, 0(r4) — from global

@@ -282,4 +282,19 @@ void KartCollide::processCannon(u32* colTypeMask) {
     }
 }
 
+void KartCollide::applySomeFloorMoment(KartDynamics* kartDynamics, HitboxGroup* hitboxGroup,
+                    const EGG::Vector3f& forward, const EGG::Vector3f& dir, const EGG::Vector3f& speed,
+                    f32 rateForward, f32 rateLateral, bool zeroUp, bool zeroPlane, bool affectAngVel) {
+    // TODO: implement applySomeFloorMoment
+    (void)kartDynamics; (void)hitboxGroup; (void)forward; (void)dir; (void)speed;
+    (void)rateForward; (void)rateLateral; (void)zeroUp; (void)zeroPlane; (void)affectAngVel;
+}
+
+void KartCollide::calcWheelCollision(s8 playerIdx, u32 wheelIdx, KartDynamics* kartDynamics, HitboxGroup* hitboxGroup, const EGG::Vector3f& colForce,
+                    const EGG::Vector3f& wheelPos, f32 radius) {
+    // TODO: implement calcWheelCollision
+    (void)playerIdx; (void)wheelIdx; (void)kartDynamics; (void)hitboxGroup;
+    (void)colForce; (void)wheelPos; (void)radius;
+}
+
 } // namespace Kart

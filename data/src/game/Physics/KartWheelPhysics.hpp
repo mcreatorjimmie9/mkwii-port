@@ -3,10 +3,10 @@
 #include <decomp.h>
 #include <egg/math/eggVector.hpp>
 #include <egg/math/eggMatrix.hpp>
+#include <game/kart/KartObjectProxy.hpp>
 
 namespace Kart {
 
-class KartObjectProxy;
 class KartPhysicsEngine;
 class KartSusPhysics;
 class BspWheel;
@@ -59,7 +59,7 @@ public:
     // Accessors
     f32 getSusTravel() const { return susTravel; }
     void setWheelPos(const EGG::Vector3f& wheelPos) { this->wheelPos = wheelPos; }
-    inline f32 getYScale() { return kartPhysicsEngine()->getYScale(); }
+    inline f32 getYScale() { return 1.0f; /* TODO: kartPhysicsEngine()->getYScale() */ }
     inline const HitboxGroup* getHitbox() const { return hitboxGroup; }
     inline HitboxGroup* getHitbox() { return hitboxGroup; }
 
@@ -92,49 +92,18 @@ public:
 // static_assert(sizeof(KartWheelPhysics) == 0x84);
 
 // =============================================================================
-// KartSusPhysics — Per-wheel suspension physics
-// Handles suspension travel, collision detection against BSP, and
-// determines whether each wheel is in contact with the floor.
-// Total size: 0x48 bytes
-// Address range: 0x8058e638-0x8058ff20 (individual methods)
+// KartSusPhysics — Per-wheel suspension physics (Kart namespace version)
+// Used by KartWheelPhysics.cpp for in-namespace implementations
 // =============================================================================
-
 class KartSusPhysics : public KartObjectProxy {
 public:
     virtual ~KartSusPhysics() {}
-
     KartSusPhysics(u32 wheelIdx, KartWheelType wheelType, s32 bspWheelIdx);
-    void reset();
-    void init();
-    void setInitialState();
-
-    // Main per-frame suspension update
-    // forward: vehicle forward direction
-    // vehicleMovement: vehicle movement vector this frame
-    void calc(const EGG::Vector3f& forward,
-              const EGG::Vector3f& vehicleMovement);
-
-    // Collision detection — cast ray from top to bottom of suspension
     void calcCollision(const EGG::Vector3f& gravity,
                        const EGG::Matrix34f& mtx, f32 dt);
-
-public:
-    BspWheel* bspWheel;              // 0x00: Pointer to BSP wheel collision data
-    KartWheelPhysics* wheelPhysics;  // 0x04: Corresponding wheel physics
-
-private:
-    KartWheelType wheelType;         // 0x08: Left/right/bike type
-    u32 bspWheelIdx;                 // 0x0C: BSP wheel index
-    u32 wheelIdx;                    // 0x10: Wheel index (0-3)
-    // Topmost point of the suspension the wheel can reach
-    EGG::Vector3f suspTop;           // 0x14: Suspension top anchor (world space)
-    // BSP max suspension travel after vehicle scale is applied
-    f32 maxTravelScaled;             // 0x20: Max travel distance (scaled)
-    bool hasFloorCol;                // 0x24: Whether this wheel has floor contact
-    s16 _36;                         // 0x26: Unknown
-    f32 _38;                         // 0x28: Unknown float
-    EGG::Vector3f downDir;           // 0x2C: Down direction for ray cast
+    void calc(const EGG::Vector3f& forward,
+              const EGG::Vector3f& vehicleMovement);
+    void init();
 };
-// static_assert(sizeof(KartSusPhysics) == 0x48);
 
 } // namespace Kart

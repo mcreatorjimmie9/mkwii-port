@@ -422,38 +422,44 @@ void PlayerSub10::updateStandstillBoostRot() {
     f32 turnRate = 0.0f;
 
     // Check if player has forced drift (bit 18 of state)
-    if (/* forcedDrift */) {
+    if (false /* TODO */
+) {
         // Check if online or not (global flag)
-        if (/* isOnline */) {
-            turnRate = -paramTable[0x5C] * paramTable[0x9C];
+        if (false /* TODO */
+) {
+            turnRate = -0.0f /* paramTable[0x5C] TODO */ * 0.0f /* paramTable[0x9C] TODO */;
         } else {
             // Compute turn rate from boost duration / max
-            turnRate = paramTable[0x4C] * interpolatedFactor;
+            turnRate = 0.0f /* paramTable[0x4C] TODO */ * 0.0f /* interpolatedFactor TODO */;
         }
         // Read turn rate from 0x284 (turn params) offset 0x0C
-    } else if (/* isAirborne or certain states */) {
+    } else if (false /* TODO */
+) {
         // No standstill rotation in air
     } else {
         // Normal standstill rotation from speed delta
-        f32 speedDelta = /* lastSpeed - currentSpeed */;
+        f32 speedDelta = 0.0f; /* TODO */
         // Clamp speedDelta
-        turnRate = speedDelta * paramTable[0x4C];
+        turnRate = speedDelta * 0.0f /* paramTable[0x4C] TODO */;
         // Apply additional factors for shock/mega states
-        if (/* shock state */) {
-            turnRate *= paramTable[0x50];
+        if (false /* TODO */
+) {
+            turnRate *= 0.0f /* paramTable[0x50] TODO */;
         }
-        if (/* bullet/mega state */) {
-            turnRate *= paramTable[0x1C];
+        if (false /* TODO */
+) {
+            turnRate *= 0.0f /* paramTable[0x1C] TODO */;
         }
     }
 
     // If on special floor (jump pad): multiply by floor param
     if (specialFloor & 0x100) {
         // Get special floor rotation factor
-        if (/* hasBoostRamp */) {
-            turnRate *= paramTable[0x18]; // rapid boost
+        if (false /* TODO */
+) {
+            turnRate *= 0.0f /* paramTable[0x18] TODO */; // rapid boost
         } else {
-            turnRate *= paramTable[0xA4]; // normal
+            turnRate *= 0.0f /* paramTable[0xA4] TODO */; // normal
         }
     }
 

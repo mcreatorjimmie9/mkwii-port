@@ -1,5 +1,26 @@
 #include "PlayerSub10.hpp"
 
+// Helper macros for safe pointer arithmetic (void* to char* + offset)
+#define PA_U8(b,o)  (*reinterpret_cast<u8*>(reinterpret_cast<char*>(b)+(o)))
+#define PA_S16(b,o) (*reinterpret_cast<s16*>(reinterpret_cast<char*>(b)+(o)))
+#define PA_U16(b,o) (*reinterpret_cast<u16*>(reinterpret_cast<char*>(b)+(o)))
+#define PA_U32(b,o) (*reinterpret_cast<u32*>(reinterpret_cast<char*>(b)+(o)))
+#define PA_F32(b,o) (*reinterpret_cast<f32*>(reinterpret_cast<char*>(b)+(o)))
+#define PA_PTR(b,o) (*reinterpret_cast<void**>(reinterpret_cast<char*>(b)+(o)))
+#define WA_U32(b,o,v) (*reinterpret_cast<u32*>(reinterpret_cast<char*>(b)+(o))=(v))
+#define PPTR(p) (*reinterpret_cast<void**>(p))
+
+extern "C" {
+void sub_getPhysicsInput(void* p);
+void sub_getScale(void* p);
+void sub_playBoostSound(void* p, s32);
+void sub_triggerSound(void* p);
+void sub_setSound2(void* p, s32, s32, s32);
+void sub_playSoundId(void* p, s32);
+void sub_setSoundAttr(void* p, s32, u32, u32);
+void sub_playStartBoostSound(void* p);
+}
+
 // ============================================================================
 // PlayerSub10 — Boost Activation & Management
 // Addresses 0x8057f090 - 0x80580b14
@@ -74,9 +95,9 @@ void PlayerSub10::activateBoostSlot(u32 type, s16 frames) {
     u32 pTableIdx = playerIdx << 2;
 
     // Look up boost duration from global parameter table
-    void* global = /* global at 0x00000000 */;
-    void* pTable = *(void**)(0x68 + (u32)global);
-    s16 paramFrames = *(s16*)(pTableIdx + (u32)pTable); // via lwzx
+    void* global = nullptr; // TODO: global at 0x00000000
+    void* pTable = PA_PTR(global, 0x68);
+    s16 paramFrames = PA_S16(pTable, pTableIdx); // via lwzx
 
     // Compute boost type bit and slot offset
     u16 typeBit = 1u << type;
@@ -106,13 +127,13 @@ void PlayerSub10::activateBoostSlot(u32 type, s16 frames) {
 
         // Set the boost multiplier from global table
         // multiplier at offset 0x124 = globalBoostTable[type]
-        f32 boostMult = *(f32*)(pTableIdx + (u32)global);
+        f32 boostMult = PA_F32(global, pTableIdx);
         boost.multiplier = boostMult;
 
         // --- Post-activation effects ---
         // Set player state flag bit 4 (boosting)
-        void* playerState = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-        *(u32*)(0x04 + (u32)playerState) |= 0x10;
+        void* playerState = PA_PTR(PPTR(this->playerPointers), 0x04);
+        WA_U32(playerState, 0x04, PA_U32(playerState, 0x04) | 0x10);
 
         // Play boost sound using current multiplier
         sub_getScale(this);
@@ -140,9 +161,9 @@ void PlayerSub10::activateBoostMushroomClean() {
     bool skipBoost = false;
 
     // Guard checks
-    void* state1 = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    u32 flags8 = *(u32*)(0x08 + (u32)state1);
-    u32 flagsC = *(u32*)(0x0C + (u32)state1);
+    void* state1 = PA_PTR(PPTR(this->playerPointers), 0x04);
+    u32 flags8 = PA_U32(state1, 0x08);
+    u32 flagsC = PA_U32(state1, 0x0C);
 
     // Block if bullet bill, star, or gesso
     if (flags8 & 0x08000000) skipBoost = true;  // bit 27
@@ -167,14 +188,14 @@ void PlayerSub10::activateBoostMushroomClean() {
     }
 
     // Set state flag for boost
-    void* ps = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    *(u32*)(0x08 + (u32)ps) |= 0x80; // bit 7
+    void* ps = PA_PTR(PPTR(this->playerPointers), 0x04);
+    WA_U32(ps, 0x08, PA_U32(ps, 0x08) | 0x80); // bit 7
 
     // Check if player has ink (state flag bit 28 at 0x0C)
-    u32 flagsC2 = *(u32*)(0x0C + (u32)state1);
+    u32 flagsC2 = PA_U32(state1, 0x0C);
     if (flagsC2 & 0x10000000) { // bit 28 — has ink
         // Clear ink flag
-        *(u32*)(0x0C + (u32)state1) &= ~0x10000000;
+        PA_U32(state1, 0x0C) &= ~0x10000000;
         // Clear blooperCharacterInk timer
         blooperCharacterInk = 0;
 
@@ -197,9 +218,9 @@ void PlayerSub10::activateMushroom() {
     bool skipBoost = false;
 
     // Same guard checks as activateBoostMushroomClean
-    void* state1 = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    u32 flags8 = *(u32*)(0x08 + (u32)state1);
-    u32 flagsC = *(u32*)(0x0C + (u32)state1);
+    void* state1 = PA_PTR(PPTR(this->playerPointers), 0x04);
+    u32 flags8 = PA_U32(state1, 0x08);
+    u32 flagsC = PA_U32(state1, 0x0C);
 
     if (flags8 & 0x08000000) skipBoost = true;
     if (!skipBoost && (flags8 & 0x10000000)) skipBoost = false;
@@ -219,18 +240,18 @@ void PlayerSub10::activateMushroom() {
     }
 
     // Set boost state flag
-    void* ps = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    *(u32*)(0x08 + (u32)ps) |= 0x80;
+    void* ps = PA_PTR(PPTR(this->playerPointers), 0x04);
+    WA_U32(ps, 0x08, PA_U32(ps, 0x08) | 0x80);
 
     // Play start-effect sound (type 3)
     sub_triggerSound(this);
-    sub_setSound2(this, 3, 1);
+    sub_setSound2(this, 3, 1, 0);
     // 0x807be818();
 
     // Check for ink cleanup (same as mushroom clean)
-    u32 flagsC2 = *(u32*)(0x0C + (u32)state1);
+    u32 flagsC2 = PA_U32(state1, 0x0C);
     if (flagsC2 & 0x10000000) {
-        *(u32*)(0x0C + (u32)state1) &= ~0x10000000;
+        PA_U32(state1, 0x0C) &= ~0x10000000;
         blooperCharacterInk = 0;
         sub_getPhysicsInput(this);
         // *(u8*)(0x10D + playerData) = 1;
@@ -240,7 +261,7 @@ void PlayerSub10::activateMushroom() {
     mushroomBoost2 = frames; // lha r0, 0(r3) — from global
 
     // Set state flag bit 10 (0x400) — mushroom active
-    *(u32*)(0x04 + (u32)ps) |= 0x400;
+    WA_U32(ps, 0x04, PA_U32(ps, 0x04) | 0x400);
 
     // Play mushroom use sound
     sub_playSoundId(this, 0x1A); // sound ID
@@ -257,9 +278,9 @@ void PlayerSub10::activateBoostStart() {
     bool skipBoost = false;
 
     // Guard checks
-    void* state1 = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    u32 flags8 = *(u32*)(0x08 + (u32)state1);
-    u32 flagsC = *(u32*)(0x0C + (u32)state1);
+    void* state1 = PA_PTR(PPTR(this->playerPointers), 0x04);
+    u32 flags8 = PA_U32(state1, 0x08);
+    u32 flagsC = PA_U32(state1, 0x0C);
 
     if (flags8 & 0x08000000) skipBoost = true;
     if (!skipBoost && (flags8 & 0x10000000)) skipBoost = false;
@@ -270,8 +291,8 @@ void PlayerSub10::activateBoostStart() {
     if (skipBoost) return;
 
     // Set start-boost flag (bit 15 = 0x8000)
-    void* ps = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    *(u32*)(0x04 + (u32)ps) |= 0x8000;
+    void* ps = PA_PTR(PPTR(this->playerPointers), 0x04);
+    WA_U32(ps, 0x04, PA_U32(ps, 0x04) | 0x8000);
 
     // Get default start boost duration
     s16 frames = 0; // lha r4, 0(r4) — from global
@@ -283,7 +304,7 @@ void PlayerSub10::activateBoostStart() {
     }
 
     // Set boost state flag
-    *(u32*)(0x08 + (u32)ps) |= 0x80;
+    WA_U32(ps, 0x08, PA_U32(ps, 0x08) | 0x80);
 
     // Play start boost sound
     sub_getScale(this);
@@ -295,13 +316,13 @@ void PlayerSub10::activateBoostStart() {
 
     // Play boost activation sound
     sub_triggerSound(this);
-    sub_setSound2(this, 4, 1);
+    sub_setSound2(this, 4, 1, 0);
     // 0x807cbb5c();
 
     // Check for ink cleanup
-    u32 flagsC2 = *(u32*)(0x0C + (u32)state1);
+    u32 flagsC2 = PA_U32(state1, 0x0C);
     if (flagsC2 & 0x10000000) {
-        *(u32*)(0x0C + (u32)state1) &= ~0x10000000;
+        PA_U32(state1, 0x0C) &= ~0x10000000;
         blooperCharacterInk = 0;
         sub_getPhysicsInput(this);
         // *(u8*)(0x10D + playerData) = 1;
@@ -321,9 +342,9 @@ void PlayerSub10::endTrick() {
     bool skipBoost = false;
 
     // Guard checks
-    void* state1 = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    u32 flags8 = *(u32*)(0x08 + (u32)state1);
-    u32 flagsC = *(u32*)(0x0C + (u32)state1);
+    void* state1 = PA_PTR(PPTR(this->playerPointers), 0x04);
+    u32 flags8 = PA_U32(state1, 0x08);
+    u32 flagsC = PA_U32(state1, 0x0C);
 
     if (flags8 & 0x08000000) skipBoost = true;
     if (!skipBoost && (flags8 & 0x10000000)) skipBoost = false;
@@ -335,16 +356,16 @@ void PlayerSub10::endTrick() {
 
     // Get trick boost duration from zipper object
     void* zipperObj = this->zipper; // 0x25C
-    u16 vehicleType = *(u16*)(0x14 + (u32)zipperObj);
+    u16 vehicleType = PA_U16(zipperObj, 0x14);
     // Look up from global table: duration = table[vehicleType * 6 + offset]
-    s16 frames = *(s16*)((vehicleType * 6) + /* global table base */);
+    s16 frames = 0 /* TODO: global table lookup */;
 
     // Activate trick boost (type 4)
     activateBoostSlot(4, frames);
 
     // Play trick boost sound
     sub_triggerSound(this);
-    sub_setSound2(this, 3, 1);
+    sub_setSound2(this, 3, 1, 0);
 }
 
 // ============================================================================
@@ -359,9 +380,9 @@ void PlayerSub10::activateZipperBoost() {
     bool skipBoost = false;
 
     // Guard checks
-    void* state1 = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    u32 flags8 = *(u32*)(0x08 + (u32)state1);
-    u32 flagsC = *(u32*)(0x0C + (u32)state1);
+    void* state1 = PA_PTR(PPTR(this->playerPointers), 0x04);
+    u32 flags8 = PA_U32(state1, 0x08);
+    u32 flagsC = PA_U32(state1, 0x0C);
 
     if (flags8 & 0x08000000) skipBoost = true;
     if (!skipBoost && (flags8 & 0x10000000)) skipBoost = false;
@@ -376,7 +397,7 @@ void PlayerSub10::activateZipperBoost() {
     if (flags8 & 0x00008000) { // bit 15 — boost ramp
         frames = *(s16*)(0x3A0 + /* global table */ + 0x0A); // alternate duration
     } else {
-        frames = *(s16*)(0x3A0 + /* global table */); // normal duration
+        frames = 0 /* TODO: global table[0x3A0] lookup */; // normal duration
     }
 
     // Activate zipper boost (type 4)
@@ -388,9 +409,9 @@ void PlayerSub10::activateZipperBoost() {
     }
 
     // Set boost state flags
-    void* ps = *(void**)(0x04 + (u32)*(void**)this->playerPointers);
-    *(u32*)(0x08 + (u32)ps) |= 0x80;  // bit 7 — boosting
-    *(u32*)(0x08 + (u32)ps) |= 0x2000; // bit 13 — zipper boost
+    void* ps = PA_PTR(PPTR(this->playerPointers), 0x04);
+    WA_U32(ps, 0x08, PA_U32(ps, 0x08) | 0x80);  // bit 7 — boosting
+    WA_U32(ps, 0x08, PA_U32(ps, 0x08) | 0x2000); // bit 13 — zipper boost
 
     // Zero MT charge and direction
     mtCharge = 0;
@@ -399,7 +420,7 @@ void PlayerSub10::activateZipperBoost() {
 
     // Play zipper sound
     sub_triggerSound(this);
-    sub_setSound2(this, 3, 1);
+    sub_setSound2(this, 3, 1, 0);
 }
 
 // ============================================================================

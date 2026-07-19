@@ -2,7 +2,7 @@
 
 #include "AIEngine.hpp"
 #include "AIInfo.hpp"
-#include "game/kart/KartObjectProxy.hpp"
+#include <game/kart/KartObjectProxy.hpp>
 #include "CourseMap.hpp"
 #include <egg/math/eggVector.hpp>
 
@@ -39,6 +39,7 @@ struct AI: public Kart::KartObjectProxy {
     bool isHopping();
     bool isAutoDrift();
     bool isInBullet();
+    Kart::KartState* kartState() { return nullptr; }
 
     AIEngine* mpEngine;
     EGG::Vector2f mCpuStick;

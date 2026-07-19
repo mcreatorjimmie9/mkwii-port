@@ -14,7 +14,6 @@ public:
     virtual f32 getWheelieSoftSpeedLimitBonus() override;      // 0x805894c0
     virtual void updateWheelie() override;                     // 0x80588434
     virtual void updateMtCharge() override;                    // 0x805887d8
-    virtual void updateSpecialFloor() override;                // 0x80587500
     virtual void startWheelie();                               // 0x8058966c
     virtual void cancelWheelieAlt();                           // 0x80588990
 

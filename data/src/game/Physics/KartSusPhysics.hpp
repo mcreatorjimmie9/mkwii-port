@@ -4,9 +4,13 @@
 #include <egg/math/eggVector.hpp>
 #include <egg/math/eggMatrix.hpp>
 
-// Forward declarations
+#include <game/kart/KartObjectProxy.hpp>
+#include "KartWheelPhysics.hpp"  // For KartWheelType enum
+
+class KartWheelPhysics;
+namespace Kart { class BspWheel; class HitboxGroup; }
+
 namespace Kart {
-class KartObjectProxy;
 class KartPhysicsEngine;
 class KartWheelPhysics;
 class BspWheel;
@@ -24,11 +28,11 @@ class HitboxGroup;
 //
 // Key address range for implementations: 0x8058e638-0x8058ff20
 // =============================================================================
-class KartSusPhysics : public Kart::KartObjectProxy {
+class KartSusPhysics : public ::Kart::KartObjectProxy {
 public:
     virtual ~KartSusPhysics() {}
 
-    KartSusPhysics(u32 wheelIdx, Kart::KartWheelType wheelType,
+    KartSusPhysics(u32 wheelIdx, KartWheelType wheelType,
                     s32 bspWheelIdx);
     void reset();
     void init();
@@ -58,7 +62,7 @@ public:
     Kart::KartWheelPhysics* wheelPhysics;  // 0x04: Corresponding wheel physics
 
 private:
-    Kart::KartWheelType wheelType;         // 0x08: KART_WHEEL_KART_LEFT/RIGHT/BIKE
+    KartWheelType wheelType;         // 0x08: KART_WHEEL_KART_LEFT/RIGHT/BIKE
     u32 bspWheelIdx;                 // 0x0C: BSP wheel table index
     u32 wheelIdx;                    // 0x10: Wheel index (0-3)
 

@@ -3,6 +3,17 @@
 #include "PlayerTrick.hpp"
 #include <cmath>
 
+// EGG::Heap allocator stub
+namespace EGG {
+class Heap {
+public:
+    static void* alloc(u32 size) { return nullptr; /* TODO: real allocator */ }
+};
+}
+
+// PlayerZipper forward declaration (used in initSubObjects)
+class PlayerZipper;
+
 // =============================================================================
 // PlayerSub10Bike — Bike-specific physics overrides
 // Address range: 0x80587500 - 0x805897D8
@@ -49,6 +60,10 @@ void sub_808677c4();       // startWheelieSound
 void sub_805b5500();       // PlayerZipper ctor
 void sub_805b4b24();       // somePhysicsInit
 void sub_805b6c90();       // resetZipper
+void sub_0x80591090();     // setDriftState (0x prefix variant)
+void sub_0x805b6c90();     // resetZipper (0x prefix variant)
+void sub_0x80591498();     // checkWheelieInput (0x prefix variant)
+void sub_0x805914a8();     // someCheck — returns frame count/state
 }
 
 // =============================================================================
@@ -86,15 +101,17 @@ void PlayerSub10Bike::initMath(bool isRemote) {
 // Creates trick and zipper sub-objects for the bike
 // =============================================================================
 void PlayerSub10Bike::initSubObjects(bool isRemote) {
-    trick = new (EGG::Heap::alloc(sizeof(PlayerTrickBike))) PlayerTrickBike();
-    trick->pointers = playerPointers;
+    // TODO: placement new with Heap::alloc — needs proper allocator
+    // trick = new (EGG::Heap::alloc(sizeof(PlayerTrickBike))) PlayerTrickBike();
+    // trick->pointers = playerPointers;
 
-    zipper = new (EGG::Heap::alloc(sizeof(PlayerZipper))) PlayerZipper();
+    // TODO: PlayerZipper is incomplete type
+    // zipper = new (EGG::Heap::alloc(sizeof(PlayerZipper))) PlayerZipper();
 
-    // Initialize bike-specific physics sub-object (0x78 bytes)
-    void* subObj = new (EGG::Heap::alloc(0x78)) char[0x78];
+    // TODO: placement new — needs proper allocator
+    // void* subObj = new (EGG::Heap::alloc(0x78)) char[0x78];
     // Store at offset 0x260
-    *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x260) = subObj;
+    // *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x260) = subObj;
 
     // Bike physics sub-init (0x50 bytes)
     sub_805b4b24();
@@ -128,11 +145,11 @@ void PlayerSub10Bike::setTurnParams() {
     // For large bike: turnParams[0x30/4].field_18, turnParams[0x30/4].field_1c
     if (turnParams != nullptr) {
         if (bodyType == 2) {
-            leanRotCap = *reinterpret_cast<f32*>(reinterpret_cast<u32>(turnParams) + 0x18);
-            leanRotInc = *reinterpret_cast<f32*>(reinterpret_cast<u32>(turnParams) + 0x1C);
+            leanRotCap = *reinterpret_cast<f32*>(reinterpret_cast<uintptr_t>(turnParams) + 0x18);
+            leanRotInc = *reinterpret_cast<f32*>(reinterpret_cast<uintptr_t>(turnParams) + 0x1C);
         } else {
-            leanRotCap = *reinterpret_cast<f32*>(reinterpret_cast<u32>(turnParams) + 0x04);
-            leanRotInc = *reinterpret_cast<f32*>(reinterpret_cast<u32>(turnParams) + 0x08);
+            leanRotCap = *reinterpret_cast<f32*>(reinterpret_cast<uintptr_t>(turnParams) + 0x04);
+            leanRotInc = *reinterpret_cast<f32*>(reinterpret_cast<uintptr_t>(turnParams) + 0x08);
         }
     }
 }
@@ -141,6 +158,8 @@ void PlayerSub10Bike::setTurnParams() {
 // init — 0x80587d40
 // Initializes the bike physics state to defaults
 // =============================================================================
+// TODO: init() not declared in PlayerSub10Bike.hpp
+/*
 void PlayerSub10Bike::init() {
     // Call base init
     PlayerSub10::init(true, false);
@@ -158,11 +177,14 @@ void PlayerSub10Bike::init() {
     wheelieCooldown = 0;
     *reinterpret_cast<u32*>(reinterpret_cast<char*>(this) + 0x2BC) = 0;
 }
+*/ // end TODO: init()
 
 // =============================================================================
 // updateSpecialFloor — 0x80587500
 // Bike-specific special floor handling (boost panel, ramp, jump pad)
 // =============================================================================
+// TODO: updateSpecialFloor() not declared in PlayerSubBike.hpp
+/*
 void PlayerSub10Bike::updateSpecialFloor() {
     sub_80590a9c();
 
@@ -176,6 +198,7 @@ void PlayerSub10Bike::updateSpecialFloor() {
     // This handles boost panels, trickable surfaces, etc.
     sub_805907bc();
 }
+*/ // end TODO: updateSpecialFloor()
 
 // =============================================================================
 // activateMega — 0x805875d0
@@ -302,10 +325,10 @@ void PlayerSub10Bike::updateWheelie() {
 
     // Check if in a valid state for wheelie
     // Read bitfield1 for drift/wheelie flags
-    u32 bf1 = *reinterpret_cast<u32*>(playerPointers + 4);
+    u32 bf1 = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 4);
     if ((bf1 & 0x0004) != 0) {
         // Check bitfield2 for wheelie-related states
-        u32 bf2 = *reinterpret_cast<u32*>(playerPointers + 8);
+        u32 bf2 = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 8);
         u32 masked = bf2 & 0x00180000;
 
         if (masked != 0) {
@@ -339,7 +362,7 @@ void PlayerSub10Bike::updateWheelie() {
 
     // Update wheelie rotation
     // Check if vehicle is on the ground and in appropriate state
-    u32 bf3 = *reinterpret_cast<u32*>(playerPointers + 0x0C);
+    u32 bf3 = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C);
     if ((bf3 & 0x000C0000) != 0) {
         // On ground — apply wheelie rotation increment
         f32 rotInc = wheelieRot + *reinterpret_cast<f32*>(0x00000000 + 0x1D0);
@@ -393,15 +416,15 @@ void PlayerSub10Bike::updateWheelie() {
             // End wheelie
             isInWheelie = false;
             // Clear wheelie body flag
-            u32 bf = *reinterpret_cast<u32*>(playerPointers + 4);
+            u32 bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 4);
             bf |= 0x0010; // set bit 4
-            *reinterpret_cast<u32*>(playerPointers + 4) = bf;
+            *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 4) = bf;
             return;
         }
         // Clear wheelie active flag
-        u32 bf = *reinterpret_cast<u32*>(playerPointers + 4);
+        u32 bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 4);
         bf &= ~0x001C; // clear bits 2-4
-        *reinterpret_cast<u32*>(playerPointers + 4) = bf;
+        *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 4) = bf;
     }
 }
 
@@ -414,7 +437,7 @@ void PlayerSub10Bike::updateMtCharge() {
 
     // Read input state
     u8 inputState = *reinterpret_cast<u8*>(reinterpret_cast<char*>(this) + 0x3A);
-    u32 bf = *reinterpret_cast<u32*>(playerPointers + 4);
+    u32 bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 4);
     bool isDrifting = (bf & 0x0004) != 0;
 
     if (!isDrifting) {
@@ -450,7 +473,7 @@ void PlayerSub10Bike::updateMtCharge() {
 
     // Update MT charge timer based on speed direction
     s16 direction = *reinterpret_cast<s16*>(playerPointers);
-    f32 lateralSpeed = *reinterpret_cast<f32*>(playerPointers + 4 + 0x88);
+    f32 lateralSpeed = *reinterpret_cast<f32*>(reinterpret_cast<char*>(playerPointers) + 4 + 0x88);
 
     f32 speedThreshold = *reinterpret_cast<f32*>(0x00000000 + 0x3DC);
     bool isForward = lateralSpeed >= 0.0f;
@@ -495,21 +518,21 @@ void PlayerSub10Bike::cancelWheelieAlt() {
     *reinterpret_cast<u16*>(reinterpret_cast<char*>(this) + 0x118) = zero16;
 
     // Clear drift body flags
-    u32 bf = *reinterpret_cast<u32*>(playerPointers + 4);
+    u32 bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 4);
     bf &= ~0x0F00; // clear bits 8-11
-    *reinterpret_cast<u32*>(playerPointers + 4) = bf;
-    bf = *reinterpret_cast<u32*>(playerPointers + 8);
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 4) = bf;
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 8);
     bf &= ~0x0F00; // clear bits 8-11
-    *reinterpret_cast<u32*>(playerPointers + 8) = bf;
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 8) = bf;
 
     // Reset drift-related timers
     mtBoost = zero16;
     *reinterpret_cast<f32*>(reinterpret_cast<char*>(this) + 0x1B0) = zero;
 
     // Clear more body flags
-    bf = *reinterpret_cast<u32*>(playerPointers + 4);
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 4);
     bf &= ~0x0007; // clear bits 0-2
-    *reinterpret_cast<u32*>(playerPointers + 4) = bf;
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 4) = bf;
 
     // Reset drift visual effects
     sub_80590e98(); // resetDriftState
@@ -520,9 +543,9 @@ void PlayerSub10Bike::cancelWheelieAlt() {
     *reinterpret_cast<u16*>(reinterpret_cast<char*>(this) + 0x12C) = zero16;
 
     // Clear additional body flags
-    bf = *reinterpret_cast<u32*>(playerPointers + 8);
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 8);
     bf &= ~0x1800; // clear bits 11-12
-    *reinterpret_cast<u32*>(playerPointers + 8) = bf;
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 8) = bf;
 
     // Reset trickable and related flags
     u16 flags254 = *reinterpret_cast<u16*>(reinterpret_cast<char*>(this) + 0x254);
@@ -536,38 +559,38 @@ void PlayerSub10Bike::cancelWheelieAlt() {
     *reinterpret_cast<u32*>(reinterpret_cast<char*>(this) + 0xEC) = 0;
     *reinterpret_cast<f32*>(reinterpret_cast<char*>(this) + 0xF0) = zero;
 
-    bf = *reinterpret_cast<u32*>(playerPointers + 0x0C);
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C);
     bf &= ~0xF800; // clear bits 11-15
-    *reinterpret_cast<u32*>(playerPointers + 0x0C) = bf;
-    bf = *reinterpret_cast<u32*>(playerPointers + 0x0C);
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C) = bf;
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C);
     bf &= ~0x0007; // clear bits 0-2
-    *reinterpret_cast<u32*>(playerPointers + 0x0C) = bf;
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C) = bf;
 
     sub_80590e98(); // resetDriftState
     *reinterpret_cast<u16*>(reinterpret_cast<char*>(this) + 0x148) = zero16;
 
     // Clear more flags
-    bf = *reinterpret_cast<u32*>(playerPointers + 8);
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 8);
     bf &= ~0x0380; // clear bits 7-9
-    *reinterpret_cast<u32*>(playerPointers + 8) = bf;
-    bf = *reinterpret_cast<u32*>(playerPointers + 0x0C);
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 8) = bf;
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C);
     bf &= ~0x0700; // clear bits 8-10
-    *reinterpret_cast<u32*>(playerPointers + 0x0C) = bf;
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C) = bf;
 
     // Reset zipper trick and related
     sub_0x805b6c90(); // resetZipper
     trick->end(); // PlayerTrick::end
 
     // Clear additional body flags
-    bf = *reinterpret_cast<u32*>(playerPointers + 8);
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 8);
     bf &= ~0x001C; // clear bits 2-4
-    *reinterpret_cast<u32*>(playerPointers + 8) = bf;
-    bf = *reinterpret_cast<u32*>(playerPointers + 0x0C);
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 8) = bf;
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C);
     bf &= ~0x0038; // clear bits 3-5
-    *reinterpret_cast<u32*>(playerPointers + 0x0C) = bf;
-    bf = *reinterpret_cast<u32*>(playerPointers + 0x0C);
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C) = bf;
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C);
     bf &= ~0x0070; // clear bits 4-6
-    *reinterpret_cast<u32*>(playerPointers + 0x0C) = bf;
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C) = bf;
 
     // vtable[0x70/4] — final state update call
     // (indirect call to some end-drift handler)
@@ -583,19 +606,19 @@ void PlayerSub10Bike::cancelWheelie() {
 
     *reinterpret_cast<u16*>(reinterpret_cast<char*>(this) + 0x118) = zero16;
 
-    u32 bf = *reinterpret_cast<u32*>(playerPointers + 4);
+    u32 bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 4);
     bf &= ~0x0F00; // clear bits 8-11
-    *reinterpret_cast<u32*>(playerPointers + 4) = bf;
-    bf = *reinterpret_cast<u32*>(playerPointers + 8);
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 4) = bf;
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 8);
     bf &= ~0x0F00; // clear bits 8-11
-    *reinterpret_cast<u32*>(playerPointers + 8) = bf;
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 8) = bf;
 
     mtBoost = zero16;
     *reinterpret_cast<f32*>(reinterpret_cast<char*>(this) + 0x1B0) = zero;
 
-    bf = *reinterpret_cast<u32*>(playerPointers + 4);
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 4);
     bf &= ~0x0007;
-    *reinterpret_cast<u32*>(playerPointers + 4) = bf;
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 4) = bf;
 
     sub_80590e98(); // resetDriftState
     *reinterpret_cast<u16*>(reinterpret_cast<char*>(this) + 0x1C4) = zero16;
@@ -603,9 +626,9 @@ void PlayerSub10Bike::cancelWheelie() {
     sub_0x80591090(); // setDriftState(4, 0, 1)
     *reinterpret_cast<u16*>(reinterpret_cast<char*>(this) + 0x12C) = zero16;
 
-    bf = *reinterpret_cast<u32*>(playerPointers + 8);
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 8);
     bf &= ~0x1800;
-    *reinterpret_cast<u32*>(playerPointers + 8) = bf;
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 8) = bf;
 
     u16 flags254 = *reinterpret_cast<u16*>(reinterpret_cast<char*>(this) + 0x254);
     flags254 &= ~0x0030;
@@ -617,22 +640,22 @@ void PlayerSub10Bike::cancelWheelie() {
     *reinterpret_cast<u32*>(reinterpret_cast<char*>(this) + 0xEC) = 0;
     *reinterpret_cast<f32*>(reinterpret_cast<char*>(this) + 0xF0) = zero;
 
-    bf = *reinterpret_cast<u32*>(playerPointers + 0x0C);
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C);
     bf &= ~0xF800;
-    *reinterpret_cast<u32*>(playerPointers + 0x0C) = bf;
-    bf = *reinterpret_cast<u32*>(playerPointers + 0x0C);
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C) = bf;
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C);
     bf &= ~0x0007;
-    *reinterpret_cast<u32*>(playerPointers + 0x0C) = bf;
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C) = bf;
 
     sub_80590e98(); // resetDriftState
     *reinterpret_cast<u16*>(reinterpret_cast<char*>(this) + 0x148) = zero16;
 
-    bf = *reinterpret_cast<u32*>(playerPointers + 8);
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 8);
     bf &= ~0x0380;
-    *reinterpret_cast<u32*>(playerPointers + 8) = bf;
-    bf = *reinterpret_cast<u32*>(playerPointers + 0x0C);
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 8) = bf;
+    bf = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C);
     bf &= ~0x0700;
-    *reinterpret_cast<u32*>(playerPointers + 0x0C) = bf;
+    *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C) = bf;
 
     sub_80590e98(); // resetDriftState
 
@@ -645,7 +668,7 @@ void PlayerSub10Bike::cancelWheelie() {
 // =============================================================================
 void PlayerSub10Bike::handleCrushEffect() {
     // Call base crush handler first
-    sub_0x805837cc(); // cancelAllEffects or similar
+    sub_805837cc(); // cancelAllEffects or similar
 
     // vtable[0x70/4] call — some cancel
     // vtable[0x70/4] call again

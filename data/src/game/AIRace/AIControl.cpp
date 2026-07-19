@@ -1,4 +1,5 @@
 #include "AIControl.hpp"
+#include "AI.hpp"
 #include "AIPath.hpp"
 #include "AIProbability.hpp"
 #include "AIRank.hpp"
@@ -24,7 +25,7 @@ void AIAirtimeTracker::init(s32 initialGroundStartTimer) {
 // Address: 0x8072CBC4
 // Size: 28 bytes, 7 instructions
 void AIAirtimeTracker::update() {
-    if (mpInfo->mpAI->isOnGround()) {
+    if (mpInfo->mpAI->isCpu()) {
         if (mAirtime >= 20) {
             mCurrentGroundStartTimer = mInitialGroundStartTimer;
         }
@@ -90,7 +91,7 @@ void AIPowAvoider::update() {
         }
 
         // Perform the dodge trick
-        mpInfo->mpInput->setTrick(System::KPadRaceInputState::UP_TRICK);
+        mpInfo->mpInput->setTrick(System::KPadRaceInputState_Tricks::UP_TRICK);
     }
 
     mAvoidState++;

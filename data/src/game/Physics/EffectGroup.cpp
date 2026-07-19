@@ -58,7 +58,7 @@ extern "C" {
     void sub_52114(void* list, void* node); // list remove/destroy (called in cleanup)
     void sub_52168(void* list, void* node); // another list operation (called in cleanup)
     void sub_524d0(void* node);            // node destroy (called in cleanup)
-    void sub_5322c(void* node);            // node release (called in cleanup)
+    void sub_5322c(void* node, s32 count);     // node release (called in cleanup)
     void sub_56a80(void* info);            // position calc helper (called in spawnEffect)
 
     // Sub-functions called in update()
@@ -108,7 +108,7 @@ void EffectGroup::cleanup() {
             }
 
             // Check if list at 0x20 has entries
-            if (*reinterpret_cast<u32*>(g + 0x20) == nullptr) {
+            if (*reinterpret_cast<u32*>(g + 0x20) == 0) {
                 sub_52114(reinterpret_cast<void*>(g + 0x0C), nullptr);
                 // Clear list at 0x18
                 *reinterpret_cast<u32*>(g + 0x18) = 0;
@@ -128,7 +128,7 @@ void EffectGroup::cleanup() {
                     continue;
                 }
 
-                if (*reinterpret_cast<u32*>(g + 0x20) == nullptr) {
+                if (*reinterpret_cast<u32*>(g + 0x20) == 0) {
                     sub_52168(reinterpret_cast<void*>(g + 0x0C), nullptr);
 
                     if ((*reinterpret_cast<u32*>(g + 0x44)) & 0x01) {

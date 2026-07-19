@@ -73,7 +73,7 @@ void AIEngine::onOutOfBounds(const System::MapdataJugemPoint& point) {
 // Size: 32 bytes, 8 instructions
 AIEngineKart::AIEngineKart(const AI& ai) : AIEngine(ai) {
     // Kart engine uses AITrickHandler (2 trick directions: up/down)
-    mpTrickHandler = new AITrickHandler(&mInfo);
+    mpTrickHandler = new AITrickHandler(mpInfo);
 }
 
 AIEngineKart::~AIEngineKart() {}
@@ -87,7 +87,7 @@ AIEngineKart::~AIEngineKart() {}
 // Size: 132 bytes, 33 instructions
 AIEngineBike::AIEngineBike(const AI& ai) : AIEngine(ai) {
     // Bike engine uses AITrickHandlerBike (4 trick directions + wheelie)
-    mpTrickHandler = new AITrickHandlerBike(&mInfo);
+    mpTrickHandler = new AITrickHandlerBike(mpInfo);
 }
 
 AIEngineBike::~AIEngineBike() {}
