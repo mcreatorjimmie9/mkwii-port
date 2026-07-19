@@ -150,20 +150,32 @@ set(ITEMSYSTEM_SOURCES
     data/src/game/ItemSystem/PlayerSub18.cpp
 )
 
-# --- AudioEngine (4 files) ---
+# --- AudioEngine (10 files) ---
 set(AUDIOENGINE_SOURCES
     data/src/game/AudioEngine/SoundPlayer.cpp
     data/src/game/AudioEngine/SoundArchive.cpp
     data/src/game/AudioEngine/SoundHandle.cpp
     data/src/game/AudioEngine/AxVoiceManager.cpp
+    data/src/game/AudioEngine/Sequencer.cpp
+    data/src/game/AudioEngine/MusicSeqPlayer.cpp
+    data/src/game/AudioEngine/StreamPlayer.cpp
+    data/src/game/AudioEngine/DSPManager.cpp
+    data/src/game/AudioEngine/Sound3D.cpp
+    data/src/game/AudioEngine/AudioBus.cpp
 )
 
-# --- Rendering (4 files) ---
+# --- Rendering (10 files) ---
 set(RENDERING_SOURCES
     data/src/game/Rendering/SceneGraph.cpp
     data/src/game/Rendering/CourseObj.cpp
     data/src/game/Rendering/CourseObjAdvanced.cpp
     data/src/game/Rendering/TexAnim.cpp
+    data/src/game/Rendering/GXDisplayList.cpp
+    data/src/game/Rendering/Material.cpp
+    data/src/game/Rendering/LightManager.cpp
+    data/src/game/Rendering/Camera.cpp
+    data/src/game/Rendering/FogSystem.cpp
+    data/src/game/Rendering/ShadowManager.cpp
 )
 
 # --- Scene (10 files) ---
