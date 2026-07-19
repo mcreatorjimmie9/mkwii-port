@@ -1,63 +1,33 @@
 {
-  "last_update": "2026-07-19T01:45:00Z",
-  "phase": "Phase 5 — Function Classification and Unified Source Tree COMPLETE",
+  "timestamp": "2026-07-19T01:15:00Z",
+  "cycle": 7,
+  "phase": "Phase 4-5",
   "status": "in_progress",
   "ghidra_installed": true,
   "ghidra_version": "11.2.1",
-  "main_dol": {
-    "ghidra_functions_found": 54,
-    "ghidra_functions_decompiled": 54,
-    "notes": "Limited by DOL sparse memory layout. Phase 3 capstone output (1000+ functions) still primary."
+  "totals": {
+    "functions_total": 18444,
+    "decompiled": 11980,
+    "symbolized": 607,
+    "reconstructed": 21531,
+    "compiling_clean": 0,
+    "tested_passing": 0
   },
   "staticr_rel": {
-    "ghidra_functions_found": 11343,
-    "ghidra_functions_decompiled": 11343,
-    "total_c_code_bytes": 7799781,
-    "total_output_mb": 48,
-    "notes": "Full decompilation complete. Output in data/ghidra_staticr/ (48MB, too large for git)."
+    "ghidra_functions_found": 11378,
+    "bulk_decompiled": 11373,
+    "module_classification": {
+      "Rendering": 2088,
+      "KartMovement": 1893,
+      "Physics": 1870,
+      "RaceEngine": 1351,
+      "ItemSystem": 1331,
+      "AudioEngine": 1001,
+      "Collision": 862,
+      "AIRace": 754,
+      "UI": 223
+    }
   },
-  "phase5_classification": {
-    "script": "/home/z/my-project/scripts/classify_functions.py",
-    "total_classified": 11330,
-    "total_known_symbols_loaded": 601,
-    "known_symbol_exact_matches": 5,
-    "classification_method": "address_range",
-    "output_files": {
-      "classification_map": "data/reports/classification_map.json",
-      "source_tree": "src/modules/"
-    },
-    "module_distribution": {
-      "Runtime": 3827,
-      "UI": 2065,
-      "Scene": 1708,
-      "Rendering": 1130,
-      "Audio": 942,
-      "Data": 438,
-      "AIRace": 336,
-      "KartMovement": 268,
-      "Network": 171,
-      "RaceEngine": 168,
-      "Physics": 161,
-      "Collision": 83,
-      "ItemSystem": 33
-    },
-    "source_tree_modules": [
-      "Physics", "KartMovement", "Collision", "RaceEngine", "AIRace",
-      "ItemSystem", "Network", "UI", "Audio", "Rendering", "Scene",
-      "Runtime", "Data"
-    ],
-    "notes": "Most known symbols (from snailspeed3) reference addresses above 0x80780000, which is outside the Ghidra-decompiled range (0x80400000-0x80780000). Classification relies primarily on address range analysis."
-  },
-  "tools": {
-    "ghidra_headless": "/home/z/ghidra_11.2.1_PUBLIC/support/analyzeHeadless (JRE mode)",
-    "dol2elf": "/home/z/my-project/scripts/dol2elf.py",
-    "rel2elf": "/home/z/my-project/scripts/rel2elf.py",
-    "classify_functions": "/home/z/my-project/scripts/classify_functions.py"
-  },
-  "next_steps": [
-    "Phase 6: Module reconstruction — clean up generated names, resolve cross-references",
-    "Expand known symbol coverage by analyzing functions above 0x80780000",
-    "Cross-reference decompiled main.dol functions with StaticR functions",
-    "Begin type recovery for key classes (Player, KartDynamics, Racedata)"
-  ]
+  "modules_completed": ["Physics_initial", "KartMovement_initial", "RaceEngine_initial", "AIRace_initial", "Collision_initial", "ItemSystem_initial"],
+  "next_action": "Phase 5: GENESIS reconstruction for all modules"
 }
