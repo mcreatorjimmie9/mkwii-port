@@ -13,7 +13,7 @@
 // @param displayList The display list to free (may be null)
 // ============================================================================
 void SceneNode_Destroy(void* node, void* displayList) {
-    u8* obj = static_cast<u8*>(node);
+    u8* obj = reinterpret_cast<u8*>(node);
 
     // Set node's display list pointer to global base (signals "no list")
     *reinterpret_cast<void**>(obj) = sGlobalInstance;
@@ -26,7 +26,7 @@ void SceneNode_Destroy(void* node, void* displayList) {
         void* vtbl = *reinterpret_cast<void**>(displayList);
         typedef void (*DestroyFunc)(void*);
         auto destroyFn = reinterpret_cast<DestroyFunc>(
-            *reinterpret_cast<u32*>(static_cast<u8*>(vtbl) + 0x20));
+            *reinterpret_cast<u32*>(reinterpret_cast<u8*>(vtbl) + 0x20));
         destroyFn(displayList);
     }
 
@@ -61,7 +61,7 @@ void* SceneGroup_Create(u32 size) {
     }
 
     // Set display list pointer
-    *reinterpret_cast<void**>(static_cast<u8*>(group) + 0x10) = global;
+    *reinterpret_cast<void**>(reinterpret_cast<u8*>(group) + 0x10) = global;
 
     // Zero the group data
     memfill(group, 0, 4);
@@ -128,8 +128,8 @@ void DisplayList_GetDimensions(SceneGroup* group, u32 childIdx, u16* outHeight, 
 // @param count  Number of entries to copy
 // ============================================================================
 void DisplayList_CopyEntries(void* dst, u32 dstIdx, void* src, u32 count) {
-    u8* dstBytes = static_cast<u8*>(dst);
-    u8* srcBytes = static_cast<u8*>(src);
+    u8* dstBytes = reinterpret_cast<u8*>(dst);
+    u8* srcBytes = reinterpret_cast<u8*>(src);
 
     // Calculate source pointer: src + (dstIdx * 8)
     u8* srcPtr = srcBytes + (dstIdx << 3);
@@ -153,7 +153,7 @@ void DisplayList_CopyEntries(void* dst, u32 dstIdx, void* src, u32 count) {
 // ============================================================================
 void RenderGroup_CreateEntry(u16 index, void* dst) {
     void* global = sGlobalInstance;
-    u16 value = *reinterpret_cast<u16*>(static_cast<u8*>(global) + (index << 1));
+    u16 value = *reinterpret_cast<u16*>(reinterpret_cast<u8*>(global) + (index << 1));
 
     // Shift left by 16 and insert into destination
     u32 entry = static_cast<u32>(value) << 16;
@@ -178,7 +178,7 @@ void RenderGroup_CreateEntry(u16 index, void* dst) {
 // ============================================================================
 void DisplayList_BuildWithColor(void* dst, u32 count, void* src, void* colorData, u32 flags) {
     void* global = sGlobalInstance;
-    u16 colorValue = *reinterpret_cast<u16*>(static_cast<u8*>(global) + (count << 1));
+    u16 colorValue = *reinterpret_cast<u16*>(reinterpret_cast<u8*>(global) + (count << 1));
 
     // Combine color value with flags using rlwimi
     u32 combined = (colorValue << 16) | (flags & 0xFFFF);
@@ -204,8 +204,8 @@ void DisplayList_BuildWithColor(void* dst, u32 count, void* src, void* colorData
         }
 
         // Build entries at global + 0x90 with child data
-        void* entryBase = static_cast<u8*>(global) + 0x90;
-        memfill(entryBase, childSrc, childSize, dstCount);
+        void* entryBase = reinterpret_cast<u8*>(global) + 0x90;
+        memfill(entryBase, (int)(intptr_t)childSrc, childSize);
     }
 
     // Decompose the combined color value into per-channel values
@@ -241,7 +241,7 @@ void SceneNode_ResetChildren(SceneGroup* group) {
         if (child == nullptr) {
             break;
         }
-        *reinterpret_cast<u16*>(static_cast<u8*>(child) + 0x18) = 0;
+        *reinterpret_cast<u16*>(reinterpret_cast<u8*>(child) + 0x18) = 0;
     }
 }
 
@@ -315,119 +315,119 @@ void SceneNode_PropagateColor(SceneNode* node, u8 newColor) {
 
     // Get the node's current color priority
     void* nodeData = *reinterpret_cast<void**>(node);
-    s8 currentColor = static_cast<s8>(static_cast<u8*>(nodeData)[0x11]);
+    s8 currentColor = static_cast<s8>(reinterpret_cast<u8*>(nodeData)[0x11]);
 
     // If current color is non-zero, use it; otherwise use newColor
     if (currentColor != 0) {
-        static_cast<u8*>(node)[0x1C] = newColor;
+        reinterpret_cast<u8*>(node)[0x1C] = newColor;
     } else {
-        static_cast<u8*>(node)[0x1C] = static_cast<u8>(currentColor);
+        reinterpret_cast<u8*>(node)[0x1C] = static_cast<u8>(currentColor);
     }
 
     // Mark as dirty
-    u16 flags = *reinterpret_cast<u16*>(&static_cast<u8*>(node)[0x18]);
+    u16 flags = *reinterpret_cast<u16*>(&reinterpret_cast<u8*>(node)[0x18]);
     flags |= 1;
-    *reinterpret_cast<u16*>(&static_cast<u8*>(node)[0x18]) = flags;
+    *reinterpret_cast<u16*>(&reinterpret_cast<u8*>(node)[0x18]) = flags;
 
     // Level 1: Process children
     u32 childIdx = 0;
     while (true) {
         SceneNode* child = nullptr;
-        u16 childCount = *reinterpret_cast<u16*>(static_cast<u8*>(node) + 0x04);
+        u16 childCount = *reinterpret_cast<u16*>(reinterpret_cast<u8*>(node) + 0x04);
         if (childIdx < childCount) {
             child = *reinterpret_cast<SceneNode**>(
-                &static_cast<u8*>(node)[0x38])[childIdx];
+                &reinterpret_cast<u8*>(node)[0x38])[childIdx];
         }
 
         // Check if child is active (bit 0 of flags)
-        u16 childFlags = *reinterpret_cast<u16*>(static_cast<u8*>(child)[0x18]);
+        u16 childFlags = *reinterpret_cast<u16*>(reinterpret_cast<u8*>(child)[0x18]);
         if ((childFlags & 0x8000) != 0) {  // clrlwi. r0, r0, 0x1F — check top bit
             break;
         }
 
         // Propagate color to child
-        u8 childColor = static_cast<u8>(static_cast<u8*>(
+        u8 childColor = static_cast<u8>(reinterpret_cast<u8*>(
             *reinterpret_cast<void**>(child))[0x11]);
         if (childColor != 0) {
-            static_cast<u8*>(child)[0x1C] = static_cast<u8*>(node)[0x1C];
+            reinterpret_cast<u8*>(child)[0x1C] = reinterpret_cast<u8*>(node)[0x1C];
         } else {
-            static_cast<u8*>(child)[0x1C] = childColor;
+            reinterpret_cast<u8*>(child)[0x1C] = childColor;
         }
 
         childFlags |= 1;
-        *reinterpret_cast<u16*>(static_cast<u8*>(child)[0x18]) = childFlags;
+        *reinterpret_cast<u16*>(reinterpret_cast<u8*>(child)[0x18]) = childFlags;
 
         // Level 2: Process grandchildren
         u32 grandChildIdx = 0;
         while (true) {
             SceneNode* grandChild = nullptr;
-            u16 gcCount = *reinterpret_cast<u16*>(static_cast<u8*>(child) + 0x04);
+            u16 gcCount = *reinterpret_cast<u16*>(reinterpret_cast<u8*>(child) + 0x04);
             if (grandChildIdx < gcCount) {
                 grandChild = *reinterpret_cast<SceneNode**>(
-                    &static_cast<u8*>(child)[0x38])[grandChildIdx];
+                    &reinterpret_cast<u8*>(child)[0x38])[grandChildIdx];
             }
 
-            u16 gcFlags = *reinterpret_cast<u16*>(static_cast<u8*>(grandChild)[0x18]);
+            u16 gcFlags = *reinterpret_cast<u16*>(reinterpret_cast<u8*>(grandChild)[0x18]);
             if ((gcFlags & 0x8000) != 0) {
                 break;
             }
 
-            u8 gcColor = static_cast<u8>(static_cast<u8*>(
+            u8 gcColor = static_cast<u8>(reinterpret_cast<u8*>(
                 *reinterpret_cast<void**>(grandChild))[0x11]);
             if (gcColor != 0) {
-                static_cast<u8*>(grandChild)[0x1C] = static_cast<u8*>(child)[0x1C];
+                reinterpret_cast<u8*>(grandChild)[0x1C] = reinterpret_cast<u8*>(child)[0x1C];
             } else {
-                static_cast<u8*>(grandChild)[0x1C] = gcColor;
+                reinterpret_cast<u8*>(grandChild)[0x1C] = gcColor;
             }
 
             gcFlags |= 1;
-            *reinterpret_cast<u16*>(static_cast<u8*>(grandChild)[0x18]) = gcFlags;
+            *reinterpret_cast<u16*>(reinterpret_cast<u8*>(grandChild)[0x18]) = gcFlags;
 
             // Level 3: Process great-grandchildren
             u32 ggcIdx = 0;
             while (true) {
                 SceneNode* ggc = nullptr;
-                u16 ggcCount = *reinterpret_cast<u16*>(static_cast<u8*>(grandChild) + 0x04);
+                u16 ggcCount = *reinterpret_cast<u16*>(reinterpret_cast<u8*>(grandChild) + 0x04);
                 if (ggcIdx < ggcCount) {
                     ggc = *reinterpret_cast<SceneNode**>(
-                        &static_cast<u8*>(grandChild)[0x38])[ggcIdx];
+                        &reinterpret_cast<u8*>(grandChild)[0x38])[ggcIdx];
                 }
 
-                u16 ggcFlags = *reinterpret_cast<u16*>(static_cast<u8*>(ggc)[0x18]);
+                u16 ggcFlags = *reinterpret_cast<u16*>(reinterpret_cast<u8*>(ggc)[0x18]);
                 if ((ggcFlags & 0x8000) != 0) {
                     break;
                 }
 
-                u8 ggcColor = static_cast<u8>(static_cast<u8*>(
+                u8 ggcColor = static_cast<u8>(reinterpret_cast<u8*>(
                     *reinterpret_cast<void**>(ggc))[0x11]);
                 if (ggcColor != 0) {
-                    static_cast<u8*>(ggc)[0x1C] = static_cast<u8*>(grandChild)[0x1C];
+                    reinterpret_cast<u8*>(ggc)[0x1C] = reinterpret_cast<u8*>(grandChild)[0x1C];
                 } else {
-                    static_cast<u8*>(ggc)[0x1C] = ggcColor;
+                    reinterpret_cast<u8*>(ggc)[0x1C] = ggcColor;
                 }
 
                 ggcFlags |= 1;
-                *reinterpret_cast<u16*>(static_cast<u8*>(ggc)[0x18]) = ggcFlags;
+                *reinterpret_cast<u16*>(reinterpret_cast<u8*>(ggc)[0x18]) = ggcFlags;
 
-                ggc = static_cast<SceneNode*>(static_cast<u8*>(ggc) + 0x18);
+                ggc = static_cast<SceneNode*>(reinterpret_cast<u8*>(ggc) + 0x18);
                 ggcIdx++;
-                if (ggcIdx < *reinterpret_cast<u16*>(static_cast<u8*>(grandChild) + 0x04)) {
+                if (ggcIdx < *reinterpret_cast<u16*>(reinterpret_cast<u8*>(grandChild) + 0x04)) {
                     continue;
                 }
                 break;
             }
 
-            grandChild = static_cast<SceneNode*>(static_cast<u8*>(grandChild) + 0x18);
+            grandChild = static_cast<SceneNode*>(reinterpret_cast<u8*>(grandChild) + 0x18);
             grandChildIdx++;
-            if (grandChildIdx < *reinterpret_cast<u16*>(static_cast<u8*>(child) + 0x04)) {
+            if (grandChildIdx < *reinterpret_cast<u16*>(reinterpret_cast<u8*>(child) + 0x04)) {
                 continue;
             }
             break;
         }
 
-        node = static_cast<SceneNode*>(static_cast<u8*>(node) + 0x18);
+        node = static_cast<SceneNode*>(reinterpret_cast<u8*>(node) + 0x18);
         childIdx++;
-        if (childIdx < *reinterpret_cast<u16*>(static_cast<u8*>(node) + 0x04)) {
+        if (childIdx < *reinterpret_cast<u16*>(reinterpret_cast<u8*>(node) + 0x04)) {
             continue;
         }
         break;

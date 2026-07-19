@@ -35,7 +35,7 @@ void TexAnim_SaveFPR31() {
 // The "lis r5/r7/r10 + 0" pattern loads the global base pointer.
 // ============================================================================
 void TexAnim_Init_090(void* self) {
-    u8* obj = static_cast<u8*>(self);
+    u8* obj = reinterpret_cast<u8*>(self);
 
     // Read preserved fields before zeroing
     u8 flags_4C = obj[0x4C];
@@ -119,13 +119,13 @@ void TexAnim_Init_090(void* self) {
 // Sets up 3 sub-panes at offsets 0x94, 0x98, 0x9C with default values.
 // ============================================================================
 void TexAnim_Reset(void* self) {
-    u8* obj = static_cast<u8*>(self);
+    u8* obj = reinterpret_cast<u8*>(self);
 
     // Call vtable[0x38] — virtual init method
     void* vtbl = *reinterpret_cast<void**>(obj);
     typedef void (*InitFunc)(void*);
     auto initFn = reinterpret_cast<InitFunc>(
-        *reinterpret_cast<u32*>(static_cast<u8*>(vtbl) + 0x38));
+        *reinterpret_cast<u32*>(reinterpret_cast<u8*>(vtbl) + 0x38));
     initFn(self);
 
     // Read blend flags from offset 0x18 (via rlwinm 0 = no-op mask)
@@ -171,7 +171,7 @@ void TexAnim_Reset(void* self) {
 // Returns the total as a float using the integer-to-float bias trick.
 // ============================================================================
 f32 TexAnim_CalcTotalDuration(void* self) {
-    u8* obj = static_cast<u8*>(self);
+    u8* obj = reinterpret_cast<u8*>(self);
 
     // If animation is not active, return 0.0f
     if (obj[0xA6] == 0) {
@@ -183,22 +183,22 @@ f32 TexAnim_CalcTotalDuration(void* self) {
 
     // Iterate over sub-panes
     for (int i = 0; i < 4; i++) {
-        void** pane = *reinterpret_cast<void***>(&static_cast<u8*>(current)[0x94]);
+        void** pane = *reinterpret_cast<void***>(&reinterpret_cast<u8*>(current)[0x94]);
         if (pane == nullptr) {
             break;
         }
 
         void* vtbl = *reinterpret_cast<void**>(pane);
-        u32 paneFrameCount = *reinterpret_cast<u32*>(&static_cast<u8*>(pane)[0x08]);
+        u32 paneFrameCount = *reinterpret_cast<u32*>(&reinterpret_cast<u8*>(pane)[0x08]);
 
         // Call vtable[0x10] to get per-frame duration
         typedef u32 (*GetDurationFunc)(void*);
         auto fn = reinterpret_cast<GetDurationFunc>(
-            *reinterpret_cast<u32*>(static_cast<u8*>(vtbl) + 0x10));
+            *reinterpret_cast<u32*>(reinterpret_cast<u8*>(vtbl) + 0x10));
         u32 duration = fn(pane);
 
         totalFrames += duration * paneFrameCount;
-        current = static_cast<u8*>(current) + 4;
+        current = reinterpret_cast<u8*>(current) + 4;
     }
 
     /* WII_FIXED: verify — integer-to-float via 0x43300000 bias trick */
@@ -215,7 +215,7 @@ f32 TexAnim_CalcTotalDuration(void* self) {
 // Preserves the flags at offsets 0x3C, 0x54, 0x88, 0xBC.
 // ============================================================================
 void TexAnim_Init_0CC(void* self) {
-    u8* obj = static_cast<u8*>(self);
+    u8* obj = reinterpret_cast<u8*>(self);
 
     // Read preserved fields
     u8 flags_3C = obj[0x3C];
@@ -290,7 +290,7 @@ void TexAnim_Init_0CC(void* self) {
 // ============================================================================
 void TexAnim_CallVtable1C(void* subObj) {
     void* obj = *reinterpret_cast<void**>(subObj);
-    void* fn = *reinterpret_cast<void**>(static_cast<u8*>(obj) + 0x1C);
+    void* fn = *reinterpret_cast<void**>(reinterpret_cast<u8*>(obj) + 0x1C);
     // bctrl — indirect branch to vtable method
     // The actual call is: ((void(*)(void*))(vtbl[7]))(subObj);
     // Since we can't call the actual vtable, we just perform the lookup
@@ -306,8 +306,8 @@ void TexAnim_CallVtable1C(void* subObj) {
 f32 TexAnim_GetTexScaleY() {
     /* lis r31, 0; r31 = r31 + 0 */
     void* global = sGlobalInstance;
-    f32 scaleY = *reinterpret_cast<f32*>(static_cast<u8*>(global) + 0x48);
-    f32 scaleX = *reinterpret_cast<f32*>(static_cast<u8*>(global) + 0x4C);
+    f32 scaleY = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(global) + 0x48);
+    f32 scaleX = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(global) + 0x4C);
 
     // The function loads both but only appears to return f1 (scaleY from 0x48)
     // and passes f2 (scaleX from 0x4C) as unused second param
@@ -323,7 +323,7 @@ f32 TexAnim_GetTexScaleY() {
 // sub-tree recursively.
 // ============================================================================
 void TexAnim_DestroyNode(void* node) {
-    u8* obj = static_cast<u8*>(node);
+    u8* obj = reinterpret_cast<u8*>(node);
 
     // Call vtable[7] on child at offset 0x1C
     void* child = *reinterpret_cast<void**>(&obj[0x1C]);
@@ -358,8 +358,8 @@ void TexAnim_DestroyNode(void* node) {
 // If no children, calls the vtable destructor on the old child and frees.
 // ============================================================================
 void TexAnim_UnlinkNode(void* node, void* child) {
-    u8* obj = static_cast<u8*>(node);
-    u8* childObj = static_cast<u8*>(child);
+    u8* obj = reinterpret_cast<u8*>(node);
+    u8* childObj = reinterpret_cast<u8*>(child);
 
     u16 childCount = *reinterpret_cast<u16*>(&obj[0x0C]);
     if (childCount != 0) {
@@ -401,7 +401,7 @@ void TexAnim_UnlinkNode(void* node, void* child) {
 // @param flag2   Animation flag byte
 // ============================================================================
 void TexAnim_Validate(void* self, u32 texIdx, u8 flag1, u8 flag2) {
-    u8* obj = static_cast<u8*>(self);
+    u8* obj = reinterpret_cast<u8*>(self);
 
     // If already validated (offset 0x14 != 0), skip
     if (*reinterpret_cast<u32*>(&obj[0x14]) != 0) {
@@ -414,7 +414,7 @@ void TexAnim_Validate(void* self, u32 texIdx, u8 flag1, u8 flag2) {
     // Call vtable[8] (offset 0x20) on sub-object — init
     typedef void (*InitFunc)(void*);
     auto initFn = reinterpret_cast<InitFunc>(
-        *reinterpret_cast<u32*>(static_cast<u8*>(vtbl) + 0x20));
+        *reinterpret_cast<u32*>(reinterpret_cast<u8*>(vtbl) + 0x20));
     initFn(subObj);
 
     // Set tex coord index on pane at 0x08
@@ -425,7 +425,7 @@ void TexAnim_Validate(void* self, u32 texIdx, u8 flag1, u8 flag2) {
     // Call vtable[8] on pane — set tex index
     typedef void (*SetTexIdxFunc)(void*, u8);
     auto setTexFn = reinterpret_cast<SetTexIdxFunc>(
-        *reinterpret_cast<u32*>(static_cast<u8*>(paneVtbl) + 0x20));
+        *reinterpret_cast<u32*>(reinterpret_cast<u8*>(paneVtbl) + 0x20));
     setTexFn(pane, texIndex);
 
     // Call vtable[8] on color pane at 0x0C
@@ -433,7 +433,7 @@ void TexAnim_Validate(void* self, u32 texIdx, u8 flag1, u8 flag2) {
     void* colorVtbl = *reinterpret_cast<void**>(colorPane);
     typedef void (*SetFlagsFunc)(void*, u8);
     auto setFlagsFn = reinterpret_cast<SetFlagsFunc>(
-        *reinterpret_cast<u32*>(static_cast<u8*>(colorVtbl) + 0x20));
+        *reinterpret_cast<u32*>(reinterpret_cast<u8*>(colorVtbl) + 0x20));
     setFlagsFn(colorPane, flag2);
 
     // Calculate total frame count across all sub-panes
@@ -442,23 +442,23 @@ void TexAnim_Validate(void* self, u32 texIdx, u8 flag1, u8 flag2) {
     void* current = self;
 
     for (int i = 0; i < 4; i++) {
-        void** p = *reinterpret_cast<void***>(&static_cast<u8*>(current)[0x04]);
+        void** p = *reinterpret_cast<void***>(&reinterpret_cast<u8*>(current)[0x04]);
         if (p == nullptr) {
             break;
         }
 
-        u32 paneFrameCount = *reinterpret_cast<u32*>(&static_cast<u8*>(p)[0x08]);
+        u32 paneFrameCount = *reinterpret_cast<u32*>(&reinterpret_cast<u8*>(p)[0x08]);
         void* pVtbl = *reinterpret_cast<void**>(p);
 
         // Call vtable[0x10] to get duration
         typedef u32 (*GetDurFunc)(void*);
         auto getDur = reinterpret_cast<GetDurFunc>(
-            *reinterpret_cast<u32*>(static_cast<u8*>(pVtbl) + 0x10));
+            *reinterpret_cast<u32*>(reinterpret_cast<u8*>(pVtbl) + 0x10));
         u32 dur = getDur(p);
 
         totalFrames += dur * paneFrameCount;
         paneCount++;
-        current = static_cast<u8*>(current) + 4;
+        current = reinterpret_cast<u8*>(current) + 4;
     }
 
     // Check: totalFrames + 6 must not equal 0x276C (10092)
@@ -482,11 +482,11 @@ void TexAnim_Validate(void* self, u32 texIdx, u8 flag1, u8 flag2) {
 // to the appropriate offsets in the TexAnim structure.
 // ============================================================================
 void TexAnim_LoadFromResource(void* self, TexAnimResource* res) {
-    u8* obj = static_cast<u8*>(self);
+    u8* obj = reinterpret_cast<u8*>(self);
     void** subObjPtr = *reinterpret_cast<void***>(&obj[0x04]);
 
     // Copy resource data to sub-object's layer at 0x94
-    u8* dest = static_cast<u8*>(subObjPtr);
+    u8* dest = reinterpret_cast<u8*>(subObjPtr);
 
     *reinterpret_cast<u16*>(&dest[0x94]) = *reinterpret_cast<u16*>(&res[4]);  // texU
     *reinterpret_cast<u16*>(&dest[0x96]) = *reinterpret_cast<u16*>(&res[6]);  // texV
@@ -521,7 +521,7 @@ void TexAnim_LoadFromResource(void* self, TexAnimResource* res) {
 // 6. Shifting current frame data to "previous" frame positions
 // ============================================================================
 void TexAnim_AdvanceFrame(void* self, u32 param) {
-    u8* obj = static_cast<u8*>(self);
+    u8* obj = reinterpret_cast<u8*>(self);
 
     // --- Handle primary animation timer (offset 0x10/0x14/0x18) ---
     if (obj[0x20] != 0) {
@@ -588,7 +588,7 @@ void TexAnim_AdvanceFrame(void* self, u32 param) {
         void* vtbl = *reinterpret_cast<void**>(subObj);
         typedef void (*DrawFunc)(void*);
         auto drawFn = reinterpret_cast<DrawFunc>(
-            *reinterpret_cast<u32*>(static_cast<u8*>(vtbl) + 0x10));
+            *reinterpret_cast<u32*>(reinterpret_cast<u8*>(vtbl) + 0x10));
         drawFn(subObj);
     } else {
         obj[0xC6] = 0xFF;  // -1
@@ -598,18 +598,18 @@ advance_frame:
     // Check if we should load new frame data from resource
     // (global flag at 0x168C must be 0)
     void* global = sGlobalInstance;
-    if (global != nullptr && static_cast<u8*>(global)[0x168C] != 0) {
+    if (global != nullptr && reinterpret_cast<u8*>(global)[0x168C] != 0) {
         // Load from sub-object resource
         void** res = *reinterpret_cast<void***>(&obj[0x04]);
-        *reinterpret_cast<u16*>(&obj[0x2C]) = *reinterpret_cast<u16*>(&static_cast<u8*>(res)[8]);  // texU
-        *reinterpret_cast<u16*>(&obj[0x2E]) = *reinterpret_cast<u16*>(&static_cast<u8*>(res)[10]); // texV
-        *reinterpret_cast<f32*>(&obj[0x30]) = *reinterpret_cast<f32*>(&static_cast<u8*>(res)[12]); // scaleX
-        *reinterpret_cast<f32*>(&obj[0x34]) = *reinterpret_cast<f32*>(&static_cast<u8*>(res)[16]); // scaleY
-        obj[0x38] = static_cast<u8*>(res)[20]; // colorR
-        obj[0x39] = static_cast<u8*>(res)[21]; // colorG
-        obj[0x3A] = static_cast<u8*>(res)[22]; // colorB
-        obj[0x3B] = static_cast<u8*>(res)[23]; // colorA
-        obj[0x3C] = static_cast<u8*>(res)[24]; // flags
+        *reinterpret_cast<u16*>(&obj[0x2C]) = *reinterpret_cast<u16*>(&reinterpret_cast<u8*>(res)[8]);  // texU
+        *reinterpret_cast<u16*>(&obj[0x2E]) = *reinterpret_cast<u16*>(&reinterpret_cast<u8*>(res)[10]); // texV
+        *reinterpret_cast<f32*>(&obj[0x30]) = *reinterpret_cast<f32*>(&reinterpret_cast<u8*>(res)[12]); // scaleX
+        *reinterpret_cast<f32*>(&obj[0x34]) = *reinterpret_cast<f32*>(&reinterpret_cast<u8*>(res)[16]); // scaleY
+        obj[0x38] = reinterpret_cast<u8*>(res)[20]; // colorR
+        obj[0x39] = reinterpret_cast<u8*>(res)[21]; // colorG
+        obj[0x3A] = reinterpret_cast<u8*>(res)[22]; // colorB
+        obj[0x3B] = reinterpret_cast<u8*>(res)[23]; // colorA
+        obj[0x3C] = reinterpret_cast<u8*>(res)[24]; // flags
     } else {
         // Set to default values
         u8 flags = obj[0x3C];
@@ -626,7 +626,7 @@ advance_frame:
         obj[0x3C] = flags;
 
         // Check if animation is enabled (global flag at 0x4156)
-        if (global == nullptr || static_cast<u8*>(global)[0x4156] == 0) {
+        if (global == nullptr || reinterpret_cast<u8*>(global)[0x4156] == 0) {
             // Animation disabled — zero counters
             *reinterpret_cast<u16*>(&obj[0xC2]) = 0;
             *reinterpret_cast<u16*>(&obj[0xC4]) = 0;
@@ -670,7 +670,7 @@ advance_frame:
 
         // Check if resource has flag at offset 0x50
         void** res = *reinterpret_cast<void***>(&obj[0x04]);
-        if (static_cast<u8*>(res)[0x50] != 0) {
+        if (reinterpret_cast<u8*>(res)[0x50] != 0) {
             *reinterpret_cast<u16*>(&obj[0xC4]) += 1;
         } else {
             *reinterpret_cast<u16*>(&obj[0xC4]) = 0;
@@ -696,20 +696,20 @@ shift_frames:
 
     // Load new frame data from the sub-object at offset 0x08
     void** frameObj = *reinterpret_cast<void***>(&obj[0x08]);
-    *reinterpret_cast<u16*>(&obj[0x5C]) = *reinterpret_cast<u16*>(&static_cast<u8*>(frameObj)[0x20]); // texU
-    *reinterpret_cast<u16*>(&obj[0x5E]) = *reinterpret_cast<u16*>(&static_cast<u8*>(frameObj)[0x22]); // texV
-    *reinterpret_cast<f32*>(&obj[0x60]) = *reinterpret_cast<f32*>(&static_cast<u8*>(frameObj)[0x24]); // scaleX
-    *reinterpret_cast<f32*>(&obj[0x64]) = *reinterpret_cast<f32*>(&static_cast<u8*>(frameObj)[0x28]); // scaleY
-    *reinterpret_cast<f32*>(&obj[0x68]) = *reinterpret_cast<f32*>(&static_cast<u8*>(frameObj)[0x2C]); // ?
-    *reinterpret_cast<f32*>(&obj[0x6C]) = *reinterpret_cast<f32*>(&static_cast<u8*>(frameObj)[0x30]); // ?
-    obj[0x70] = static_cast<u8*>(frameObj)[0x34]; // colorR
-    obj[0x71] = static_cast<u8*>(frameObj)[0x35]; // colorG
-    *reinterpret_cast<f32*>(&obj[0x74]) = *reinterpret_cast<f32*>(&static_cast<u8*>(frameObj)[0x38]);
-    *reinterpret_cast<f32*>(&obj[0x78]) = *reinterpret_cast<f32*>(&static_cast<u8*>(frameObj)[0x3C]);
-    *reinterpret_cast<f32*>(&obj[0x7C]) = *reinterpret_cast<f32*>(&static_cast<u8*>(frameObj)[0x40]);
-    *reinterpret_cast<f32*>(&obj[0x80]) = *reinterpret_cast<f32*>(&static_cast<u8*>(frameObj)[0x44]);
-    *reinterpret_cast<f32*>(&obj[0x84]) = *reinterpret_cast<f32*>(&static_cast<u8*>(frameObj)[0x48]);
-    obj[0x88] = static_cast<u8*>(frameObj)[0x4C]; // flags
+    *reinterpret_cast<u16*>(&obj[0x5C]) = *reinterpret_cast<u16*>(&reinterpret_cast<u8*>(frameObj)[0x20]); // texU
+    *reinterpret_cast<u16*>(&obj[0x5E]) = *reinterpret_cast<u16*>(&reinterpret_cast<u8*>(frameObj)[0x22]); // texV
+    *reinterpret_cast<f32*>(&obj[0x60]) = *reinterpret_cast<f32*>(&reinterpret_cast<u8*>(frameObj)[0x24]); // scaleX
+    *reinterpret_cast<f32*>(&obj[0x64]) = *reinterpret_cast<f32*>(&reinterpret_cast<u8*>(frameObj)[0x28]); // scaleY
+    *reinterpret_cast<f32*>(&obj[0x68]) = *reinterpret_cast<f32*>(&reinterpret_cast<u8*>(frameObj)[0x2C]); // ?
+    *reinterpret_cast<f32*>(&obj[0x6C]) = *reinterpret_cast<f32*>(&reinterpret_cast<u8*>(frameObj)[0x30]); // ?
+    obj[0x70] = reinterpret_cast<u8*>(frameObj)[0x34]; // colorR
+    obj[0x71] = reinterpret_cast<u8*>(frameObj)[0x35]; // colorG
+    *reinterpret_cast<f32*>(&obj[0x74]) = *reinterpret_cast<f32*>(&reinterpret_cast<u8*>(frameObj)[0x38]);
+    *reinterpret_cast<f32*>(&obj[0x78]) = *reinterpret_cast<f32*>(&reinterpret_cast<u8*>(frameObj)[0x3C]);
+    *reinterpret_cast<f32*>(&obj[0x7C]) = *reinterpret_cast<f32*>(&reinterpret_cast<u8*>(frameObj)[0x40]);
+    *reinterpret_cast<f32*>(&obj[0x80]) = *reinterpret_cast<f32*>(&reinterpret_cast<u8*>(frameObj)[0x44]);
+    *reinterpret_cast<f32*>(&obj[0x84]) = *reinterpret_cast<f32*>(&reinterpret_cast<u8*>(frameObj)[0x48]);
+    obj[0x88] = reinterpret_cast<u8*>(frameObj)[0x4C]; // flags
 
     // Store the advance parameter
     obj[0xC6] = static_cast<u8>(param);
@@ -724,7 +724,7 @@ shift_frames:
 // and optionally reloads from a linked resource.
 // ============================================================================
 void TexAnim_SetFromCurrent(void* self, u32 param) {
-    u8* obj = static_cast<u8*>(self);
+    u8* obj = reinterpret_cast<u8*>(self);
 
     // Advance frame (with param=0 to reset)
     TexAnim_AdvanceFrame(self, param);
@@ -762,7 +762,7 @@ void TexAnim_SetFromCurrent(void* self, u32 param) {
 
     // If there's a linked resource at 0xE8, try to reload
     void** linkedRes = *reinterpret_cast<void***>(&obj[0xE8]);
-    if (linkedRes != nullptr && *reinterpret_cast<u32*>(&static_cast<u8*>(linkedRes)[0x14]) != 0) {
+    if (linkedRes != nullptr && *reinterpret_cast<u32*>(&reinterpret_cast<u8*>(linkedRes)[0x14]) != 0) {
         // Reload from linked resource
         u16 texU = *reinterpret_cast<u16*>(&obj[0x2C]);
         u8 r = obj[0x38];
