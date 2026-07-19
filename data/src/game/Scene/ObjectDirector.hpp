@@ -1,0 +1,114 @@
+#pragma once
+// ObjectDirector.hpp - 3D object management within a scene
+// Reconstructed from ObjectDirector_* functions (0x805b0028 - 0x805c0154)
+//
+// ObjectDirector manages the lifecycle, creation, destruction, and
+// per-frame update of 3D objects that exist within a scene. In MKWii,
+// this includes karts, item boxes, course decorations, etc.
+// It uses a linked-list / array-based object pool pattern.
+
+#include "rk_common.h"
+
+namespace Scene {
+
+// Forward declarations
+class SceneBase;
+
+// =============================================================================
+// ObjectDirector — Manages 3D scene objects
+//
+// Each object gets an ID, a type, and is arranged in spatial groups.
+// The director handles creation (create), validation (validate), and
+// per-frame calc/draw dispatching.
+// =============================================================================
+class ObjectDirector {
+public:
+    // Object lifecycle states (passed as param_4 in validate calls)
+    enum CreateFlag {
+        CREATE_DEFAULT = 0,
+        CREATE_DELAYED = 3,
+        CREATE_DEFERRED = 4,
+        CREATE_IMMEDIATE = 5,
+        CREATE_NO_INIT = 6,
+    };
+
+    // Color/priority override for special object types
+    static const u32 PRIORITY_OVERRIDE = 0x1A;
+
+    ObjectDirector();
+    ~ObjectDirector();
+
+    // Main lifecycle
+    void init(u32 maxObjects);
+    void calc(f32 dt);
+    void draw() const;
+
+    // Object management
+    u32 createObject(u32 typeId, void* initData, CreateFlag flag = CREATE_DEFAULT);
+    void destroyObject(u32 objectId);
+    void destroyAllObjects();
+
+    // Validation (assert-fail guards from decompiled code)
+    bool validateObject(u32 objectId) const;
+    bool validateObjectIndex(u32 index) const;
+    bool validateBufferSize(u32 size) const;
+
+    // Object lookup
+    u32 getObjectCount() const { return m_objectCount; }
+    u32 getMaxObjects() const { return m_maxObjects; }
+    void* getObject(u32 index) const;
+
+    // Group management
+    void addObjectToGroup(u32 objectId, u32 groupId);
+    u32 getGroupSize(u32 groupId) const;
+
+    // Visibility / culling
+    void setVisible(u32 objectId, bool visible);
+    bool isVisible(u32 objectId) const;
+
+    // Animation control
+    void setAnimationFrame(u32 objectId, u16 frame);
+    u16 getAnimationFrame(u32 objectId) const;
+
+    // Position / transform helpers (from 0x805b18fc, 0x805b1db4)
+    void setTransform(u32 objectId, const Vec3& position, const Vec3& rotation,
+                      const Vec3& scale);
+    void getTransform(u32 objectId, Vec3& position, Vec3& rotation,
+                      Vec3& scale) const;
+
+    // Color management (from 0x805b0c64, 0x805b0da0 — alpha fade)
+    void startColorFade(u32 objectId, u8 alpha, u8 delay);
+    void updateColorFade(u32 objectId, f32 dt);
+    void setColor(u32 objectId, u8 r, u8 g, u8 b, u8 a);
+
+    // Resource loading (from 0x805b3a08, 0x805b3a90 — transform calc)
+    void calculateWorldTransform(const Vec3& pos, const Vec3& scale,
+                                 Vec3* outWorldPos);
+
+private:
+    // Object entry stored in the pool
+    struct ObjectEntry {
+        void* instance;        // The actual object pointer
+        u32 typeId;            // Object type identifier
+        u16 animationFrame;    // Current animation frame
+        u16 flags;             // Visibility and state flags
+        Vec3 position;
+        Vec3 rotation;
+        Vec3 scale;
+        u8 colorR, colorG, colorB, colorA;
+        u8 fadeState;          // 0 = none, 1 = fading out, 2 = fading in
+        u16 fadeTimer;
+        u32 groupId;
+        bool active;
+    };
+
+    static const u32 MAX_OBJECTS_DEFAULT = 256;
+    static const u16 FADE_TIMER_INVALID = 0xFFFF;
+
+    ObjectEntry* m_objects;
+    u32 m_maxObjects;
+    u32 m_objectCount;
+    bool m_initialized;
+};
+
+} // namespace Scene
