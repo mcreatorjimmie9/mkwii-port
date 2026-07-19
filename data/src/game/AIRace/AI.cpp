@@ -42,7 +42,7 @@ void AI::init() {
     mFlags = 0;
 
     if (isTeamsEnabled()) {
-    // TODO: getPlayerIndex — needs proper method resolution
+    // TODO: getPlayerIdx — needs proper method resolution
 
     // TODO: if (team == System::BATTLE_TEAM_RED) {
     // TODO: team context reference
@@ -54,6 +54,10 @@ void AI::init() {
     // TODO: team context reference
     // TODO: team context reference
     // TODO: team context reference
+    }
+
+}
+
 // update__Q25Enemy2AIFv
 // Address: 0x807286A0
 // Size: 36 bytes, 9 instructions
@@ -87,7 +91,7 @@ const EGG::Vector2f& AI::getStick() const {
 // Address: 0x80728734
 // Size: 56 bytes, 14 instructions
 bool AI::isCPU() {
-    return System::RaceConfig::spInstance->mRaceScenario.getPlayerType(getPlayerIndex())
+    return System::RaceConfig::spInstance->mRaceScenario.getPlayerType(getPlayerIdx())
         == System::RaceConfig::Player::TYPE_CPU;
 }
 
@@ -95,7 +99,7 @@ bool AI::isCPU() {
 // Address: 0x80728778
 // Size: 60 bytes, 15 instructions
 bool AI::isRealLocal() {
-    return System::RaceConfig::spInstance->mRaceScenario.getPlayerType(getPlayerIndex())
+    return System::RaceConfig::spInstance->mRaceScenario.getPlayerType(getPlayerIdx())
         == System::RaceConfig::Player::TYPE_REAL_LOCAL;
 }
 
@@ -103,7 +107,7 @@ bool AI::isRealLocal() {
 // Address: 0x807287B8
 // Size: 36 bytes, 9 instructions
 bool AI::isRealLocalAndCPU() {
-    if (System::RaceConfig::spInstance->mRaceScenario.getPlayerType(getPlayerIndex())
+    if (System::RaceConfig::spInstance->mRaceScenario.getPlayerType(getPlayerIdx())
             == System::RaceConfig::Player::TYPE_REAL_LOCAL) {
         if (isCpu()) {
             return true;
@@ -124,7 +128,7 @@ bool AI::isAICPU() {
 // Address: 0x80728824
 // Size: 68 bytes, 17 instructions
 bool AI::isGhost() {
-    return System::RaceConfig::spInstance->mRaceScenario.getPlayerType(getPlayerIndex())
+    return System::RaceConfig::spInstance->mRaceScenario.getPlayerType(getPlayerIdx())
         == System::RaceConfig::Player::TYPE_GHOST;
 }
 

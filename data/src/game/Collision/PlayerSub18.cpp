@@ -70,7 +70,7 @@ void PlayerSub18::checkPlayerCollision(s32 playerCount, void* playerArray) {
 
         // Check distance between players
         EGG::Vector3f diff = myPos - otherPos;
-        f32 distSq = diff.lenSq();
+        f32 distSq = diff.squaredLength();
         f32 radiusSum = myBRadius + otherBRadius;
 
         if (distSq < radiusSum * radiusSum) {
@@ -115,7 +115,7 @@ void PlayerSub18::checkItemCollision() {
     // Get player info
     s32 playerIdx = playerPointers->getPlayerIdx();
     KartDynamics* dynamics = playerPointers->kartDynamics();
-    HitboxGroup* hGroup = playerPointers->hitboxGroup();
+    HitboxGroup* hGroup = (HitboxGroup*)playerPointers->hitboxGroup();
 
     if (hGroup == nullptr || hGroup->getHitboxCount() == 0) return;
 
@@ -134,7 +134,7 @@ s32 PlayerSub18::findCollision() {
     // Returns the item index if found, -1 otherwise
 
     KartDynamics* dynamics = playerPointers->kartDynamics();
-    HitboxGroup* hGroup = playerPointers->hitboxGroup();
+    HitboxGroup* hGroup = (HitboxGroup*)playerPointers->hitboxGroup();
 
     if (hGroup == nullptr || hGroup->getHitboxCount() == 0) {
         return -1;
@@ -154,7 +154,7 @@ void PlayerSub18::initHitboxes(BspHitbox* bspHitboxes) {
     // Initialize hitboxes from BSP data
     // Count enabled hitboxes and create them
     s32 wheelCount = playerPointers->getWheelCount();
-    HitboxGroup* hGroup = playerPointers->hitboxGroup();
+    HitboxGroup* hGroup = (HitboxGroup*)playerPointers->hitboxGroup();
     if (hGroup != nullptr && bspHitboxes != nullptr) {
         hGroup->initHitboxes(bspHitboxes, nullptr, wheelCount);
     }

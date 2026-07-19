@@ -120,7 +120,7 @@ void KartSusPhysics::init() {
     u32 bspBaseEntry = *reinterpret_cast<u32*>(
         reinterpret_cast<char*>(globalRaceInfo) + 0xB70);
     u32 bspBaseIdx = *reinterpret_cast<u32*>(
-        reinterpret_cast<char*>(playerObj + bodyType * 0xF0) + 0x38);
+        reinterpret_cast<u8*>(playerObj) + bodyType * 0xF0 + 0x38);
     u32 wheelCategory = bspBaseIdx - 3;
     u32 wheelType = 0;
     if (wheelCategory < 32) {
@@ -435,7 +435,7 @@ void KartSusPhysics::calc(const EGG::Vector3f& forward,
 // KartSusPhysics::resetQuaternions — 0x8058f860 (144 bytes)
 // Resets rotation/quaternion state, used after cannon/respawn
 // =============================================================================
-    // TODO: void KartSusPhysics::resetQuaternions() {
+    void KartSusPhysics::resetQuaternions() {
     // Check some pre-condition
     // TODO: KartSusPhysics constructor continuation
     // TODO: KartSusPhysics constructor continuation

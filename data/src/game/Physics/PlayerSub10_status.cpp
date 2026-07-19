@@ -29,6 +29,8 @@ void sub_updateInvisibility(void* p);
 void sub_endSquishSound(void* p, s32);
 void sub_startSquishSound(void* p, s32);
 void sub_startSquishEffect(void* p, s32);
+void sub_getScaleAnim(void* p, int);
+void sub_endSquishEffect(void* p, int);
 void sub_getSpeed(void* p);
 void sub_getScale(void* p);
 void sub_setScale(void* p, f32);
@@ -851,8 +853,8 @@ void PlayerSub10::updateInvincibility() {
             sub_updateInvisibility(this);
 
             // Check for ghost vanish counter
-            void* playerObj = *(void**)(0x00 + (u32)this->playerPointers);
-            u32* someCounter = *(u32**)(0x34 + (u32)playerObj);
+            void* playerObj = *(void**)(0x00 + (uintptr_t)this->playerPointers);
+            u32* someCounter = *(u32**)(0x34 + (uintptr_t)playerObj);
             if (someCounter && *someCounter) {
                 (*someCounter)++;
             }
@@ -884,7 +886,7 @@ void PlayerSub10::updatePlayerScale() {
 
     // Compute final megaScale (0x184) = baseScale / currentScale
     // If currentScale is zero, use raw scale from pose
-    f32 currentScale = /* computed from matrix */;
+    f32 currentScale = 1.0f; // TODO: computed from matrix
     if (currentScale != 0.0f) {
         megaScale = someScale / currentScale; // actual: baseScale / currentScale
     } else {
@@ -895,7 +897,7 @@ void PlayerSub10::updatePlayerScale() {
     f32 prevScale = *(f32*)(0x16C + (u8*)this);
     if (prevScale != 1.0f) {
         // Animate scale change
-        sub_updateScaleAnim(this, scale);
+        sub_updateScaleAnim(this, 1.0f); // TODO: was scale.x
     }
 
     // Clamp megaScale to valid range

@@ -64,21 +64,21 @@ void KartCollide::init() {
 }
 
 void KartCollide::updateBbox() {
-    this->boundingRadius = this->hitboxGroup()->getBoundingRadius() * this->kartMove()->hitboxScale();
+    this->boundingRadius = static_cast<HitboxGroup*>(this->hitboxGroup())->getBoundingRadius() * this->kartMove()->hitboxScale();
 }
 
-void KartCollide::processBody(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const Field::ColInfo& colInfo, u32* colTypeMask) {
+void KartCollide::processBody(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::Field::ColInfo& colInfo, u32* colTypeMask) {
     this->processMovingWater(kartColInfo, colTypeMask);
 
     bool hasWallCol;
-    if (Field::lookupCollisionEntry(colTypeMask, KCL_TYPE_PLAYER_WALL_CAT1)) {
-        u32 wallKclType = KCL_ATTRIBUTE_TYPE(Field::closestCollisionEntry->attribute);
-        u32 wallKclVariant = KCL_ATTRIBUTE_VARIANT(Field::closestCollisionEntry->attribute);
+    if (::Field::lookupCollisionEntry(colTypeMask, KCL_TYPE_PLAYER_WALL_CAT1)) {
+        u32 wallKclType = KCL_ATTRIBUTE_TYPE(::Field::closestCollisionEntry->attribute);
+        u32 wallKclVariant = KCL_ATTRIBUTE_VARIANT(::Field::closestCollisionEntry->attribute);
 
-        if (Field::lookupCollisionEntry(colTypeMask, KCL_TYPE_PLAYER_WALL_CAT2)) {
+        if (::Field::lookupCollisionEntry(colTypeMask, KCL_TYPE_PLAYER_WALL_CAT2)) {
             kartColInfo.wallKclType = wallKclType;
             kartColInfo.wallKclVariant = wallKclVariant;
-            if ((Field::closestCollisionEntry->attribute & KCL_SOFT_WALL_MASK) != 0) {
+            if ((::Field::closestCollisionEntry->attribute & KCL_SOFT_WALL_MASK) != 0) {
                 kartColInfo.flags |= COL_FLAG_SOFT_WALL;
             }
         }
@@ -95,15 +95,15 @@ void KartCollide::processBody(KartCollisionInfo& kartColInfo, const Hitbox& hitb
     this->processCannon(colTypeMask);
 }
 
-void KartCollide::processWheels(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const Field::ColInfo& colInfo, u32* colTypeMask) {
+void KartCollide::processWheels(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::Field::ColInfo& colInfo, u32* colTypeMask) {
     this->processMovingWater(kartColInfo, colTypeMask);
     this->processFloor(kartColInfo, hitbox, colInfo, colTypeMask, true);
 }
 
 void KartCollide::processMovingWater(KartCollisionInfo& kartColInfo, u32* colTypeMask) {
-    if (Field::lookupCollisionEntry(colTypeMask, KCL_MOVING_WATER_MASK)) {
+    if (::Field::lookupCollisionEntry(colTypeMask, KCL_MOVING_WATER_MASK)) {
         kartState()->set(KART_FLAG_STICKY_ROAD);
-        s32 variant = KCL_ATTRIBUTE_VARIANT(Field::closestCollisionEntry->attribute);
+        s32 variant = KCL_ATTRIBUTE_VARIANT(::Field::closestCollisionEntry->attribute);
         if (variant == 1) {
             kartColInfo.flags |= (COL_FLAG_MOVING_WATER_V0 | COL_FLAG_MOVING_WATER_STRONG_CURRENT | COL_FLAG_MOVING_WATER_DISABLE_ACC);
         } else if (variant == 2) {
@@ -116,47 +116,47 @@ void KartCollide::processMovingWater(KartCollisionInfo& kartColInfo, u32* colTyp
     }
 }
 
-void KartCollide::processFloor(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const Field::ColInfo& colInfo, u32* colTypeMask, bool isWheel) {
+void KartCollide::processFloor(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::Field::ColInfo& colInfo, u32* colTypeMask, bool isWheel) {
     if ((kartColInfo.flags & COL_FLAG_SOFT_WALL) != 0) {
         this->someSoftWallTimer++;
         f32 radius = hitbox.radius;
         this->suspBottomHeightSoftWall += hitbox.pos.y - radius;
     }
 
-    if (Field::lookupCollisionEntry(colTypeMask, KCL_TYPE_FLOOR)) {
-        if ((Field::closestCollisionEntry->attribute & KCL_TRICKABLE_MASK) != 0) {
+    if (::Field::lookupCollisionEntry(colTypeMask, KCL_TYPE_FLOOR)) {
+        if ((::Field::closestCollisionEntry->attribute & KCL_TRICKABLE_MASK) != 0) {
             kartColInfo.flags |= COL_FLAG_TRICKABLE;
             this->surfaceFlags |= SURF_FLAG_TRICKABLE;
         } else {
             this->surfaceFlags |= SURF_FLAG_NOT_TRICKABLE;
         }
 
-        kartColInfo.sinkDepth = KCL_ATTRIBUTE_SINK_DEPTH(Field::closestCollisionEntry->attribute);
-        f32 speedFactor = kartStats()->getSpeedFactor(KCL_ATTRIBUTE_TYPE(Field::closestCollisionEntry->attribute));
+        kartColInfo.sinkDepth = KCL_ATTRIBUTE_SINK_DEPTH(::Field::closestCollisionEntry->attribute);
+        f32 speedFactor = kartStats()->getSpeedFactor(KCL_ATTRIBUTE_TYPE(::Field::closestCollisionEntry->attribute));
         if (kartColInfo.speedFactor > speedFactor) {
             kartColInfo.speedFactor = speedFactor;
         }
-        kartColInfo.handlingFactor += kartStats()->getHandlingFactor(KCL_ATTRIBUTE_TYPE(Field::closestCollisionEntry->attribute));
+        kartColInfo.handlingFactor += kartStats()->getHandlingFactor(KCL_ATTRIBUTE_TYPE(::Field::closestCollisionEntry->attribute));
 
-        if ((Field::closestCollisionEntry->attribute & KCL_REJECT_ROAD_MASK) != 0) {
+        if ((::Field::closestCollisionEntry->attribute & KCL_REJECT_ROAD_MASK) != 0) {
             kartMove()->kartState()->set(KART_FLAG_REJECT_ROAD);
         }
 
-        kartColInfo.floorKclTypeMask = Field::closestCollisionEntry->typeMask;
-        kartColInfo.floorKclVariant = KCL_ATTRIBUTE_VARIANT(Field::closestCollisionEntry->attribute);
+        kartColInfo.floorKclTypeMask = ::Field::closestCollisionEntry->typeMask;
+        kartColInfo.floorKclVariant = KCL_ATTRIBUTE_VARIANT(::Field::closestCollisionEntry->attribute);
 
         if ((*colTypeMask & KCL_TYPE_OFFROAD_ANY) != 0) {
             this->surfaceFlags |= SURF_FLAG_OFFROAD;
         }
 
         if (isWheel && (*colTypeMask & KCL_BOOST_PAD_MASK) != 0) {
-            kartMove()->setPadType(PAD_TYPE_BOOST_PANEL);
+            kartMove()->setPadType(::Field::PAD_TYPE_BOOST_PANEL);
             this->surfaceFlags |= SURF_FLAG_BOOST_PANEL;
         }
 
-        if (Field::lookupCollisionEntry(colTypeMask, KCL_BOOST_RAMP_MASK)) {
-            kartMove()->setPadType(PAD_TYPE_BOOST_RAMP);
-            kartState()->setBoostRampType(KCL_ATTRIBUTE_VARIANT(Field::closestCollisionEntry->attribute));
+        if (::Field::lookupCollisionEntry(colTypeMask, KCL_BOOST_RAMP_MASK)) {
+            kartMove()->setPadType(::Field::PAD_TYPE_BOOST_RAMP);
+            kartState()->setBoostRampType(KCL_ATTRIBUTE_VARIANT(::Field::closestCollisionEntry->attribute));
             this->surfaceFlags |= (SURF_FLAG_BOOST_PANEL | SURF_FLAG_BOOST_RAMP | SURF_FLAG_TRICKABLE);
         } else {
             kartState()->setBoostRampType(-1);
@@ -173,23 +173,23 @@ void KartCollide::processFloor(KartCollisionInfo& kartColInfo, const Hitbox& hit
             kartMove()->kartState()->set(KART_FLAG_STICKY_ROAD);
         }
 
-        if (Field::lookupCollisionEntry(colTypeMask, KCL_HALFPIPE_RAMP_MASK)) {
+        if (::Field::lookupCollisionEntry(colTypeMask, KCL_HALFPIPE_RAMP_MASK)) {
             kartMove()->kartState()->set(KART_FLAG_HALFPIPE_RAMP);
             if (!kartState()->on(KART_FLAG_ONLINE_REMOTE)) {
                 kartMove()->kartState()->set(KART_FLAG_HALFPIPE_RAMP_LOCAL);
             }
             this->surfaceFlags |= SURF_FLAG_HALFPIPE_RAMP;
             kartState()->setHalfpipeInvisibilityTimer(2);
-            if (KCL_ATTRIBUTE_VARIANT(Field::closestCollisionEntry->attribute) == 1) {
-                kartMove()->setPadType(PAD_TYPE_BOOST_PANEL);
+            if (KCL_ATTRIBUTE_VARIANT(::Field::closestCollisionEntry->attribute) == 1) {
+                kartMove()->setPadType(::Field::PAD_TYPE_BOOST_PANEL);
             }
         }
 
-        if (Field::lookupCollisionEntry(colTypeMask, KCL_JUMP_PAD_MASK)) {
+        if (::Field::lookupCollisionEntry(colTypeMask, KCL_JUMP_PAD_MASK)) {
             KartState* ks = kartState();
             if ((!ks->on(KART_FLAG_TOUCHING_GROUND) || !ks->on(KART_FLAG_JUMPPAD)) && !ks->on(KART_FLAG_JUMPPAD_VELY_INCREASE)) {
-                kartMove()->setPadType(PAD_TYPE_JUMP_PAD);
-                kartState()->setJumpPadType(KCL_ATTRIBUTE_VARIANT(Field::closestCollisionEntry->attribute));
+                kartMove()->setPadType(::Field::PAD_TYPE_JUMP_PAD);
+                kartState()->setJumpPadType(KCL_ATTRIBUTE_VARIANT(::Field::closestCollisionEntry->attribute));
             }
             kartColInfo.flags |= COL_FLAG_TRICKABLE;
         }
@@ -202,22 +202,22 @@ void KartCollide::processFloor(KartCollisionInfo& kartColInfo, const Hitbox& hit
 
 void KartCollide::updateHitboxes() {
     KartDynamics* dynamics = kartDynamics();
-    HitboxGroup* hGroup = hitboxGroup();
+    HitboxGroup* hGroup = static_cast<HitboxGroup*>(hitboxGroup());
     for (s32 i = 0; (u16)i < hGroup->getHitboxCount(); i++) {
         Hitbox& hbox = hGroup->getHitbox(i);
         hbox.update(getScale(), dynamics->fullRot, dynamics->pos, kartMove()->totalScale(), kartBody()->getSinkDepth());
     }
 }
 
-bool KartCollide::processWall(KartCollisionInfo& kartColInfo, const Field::ColInfo& colInfo, u32* colTypeMask) {
-    if (Field::lookupCollisionEntry(colTypeMask, KCL_TYPE_PLAYER_WALL_CAT1)) {
-        u32 wallKclType = KCL_ATTRIBUTE_TYPE(Field::closestCollisionEntry->attribute);
-        u32 wallKclVariant = KCL_ATTRIBUTE_VARIANT(Field::closestCollisionEntry->attribute);
+bool KartCollide::processWall(KartCollisionInfo& kartColInfo, const ::Field::ColInfo& colInfo, u32* colTypeMask) {
+    if (::Field::lookupCollisionEntry(colTypeMask, KCL_TYPE_PLAYER_WALL_CAT1)) {
+        u32 wallKclType = KCL_ATTRIBUTE_TYPE(::Field::closestCollisionEntry->attribute);
+        u32 wallKclVariant = KCL_ATTRIBUTE_VARIANT(::Field::closestCollisionEntry->attribute);
 
-        if (Field::lookupCollisionEntry(colTypeMask, KCL_TYPE_PLAYER_WALL_CAT2)) {
+        if (::Field::lookupCollisionEntry(colTypeMask, KCL_TYPE_PLAYER_WALL_CAT2)) {
             kartColInfo.wallKclType = wallKclType;
             kartColInfo.wallKclVariant = wallKclVariant;
-            if ((Field::closestCollisionEntry->attribute & KCL_SOFT_WALL_MASK) != 0) {
+            if ((::Field::closestCollisionEntry->attribute & KCL_SOFT_WALL_MASK) != 0) {
                 kartColInfo.flags |= COL_FLAG_SOFT_WALL;
             }
         }
@@ -227,7 +227,7 @@ bool KartCollide::processWall(KartCollisionInfo& kartColInfo, const Field::ColIn
     }
 }
 
-void KartCollide::checkNeighborhood(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const Field::ColInfo& colInfo) {
+void KartCollide::checkNeighborhood(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::Field::ColInfo& colInfo) {
     f32 colPerp = colInfo.colPerpendicularity;
     if (colPerp > 0.0f) {
         if (_68 < colPerp) {
@@ -255,11 +255,11 @@ void KartCollide::checkNeighborhood(KartCollisionInfo& kartColInfo, const Hitbox
                     }
                     sign *= hitbox.radius;
                     EGG::Vector3f offset = hitbox.pos + localRight * sign;
-                    Field::ColInfoPartial tmpInfo;
+                    ::Field::ColInfoPartial tmpInfo;
                     tmpInfo.bboxLow.setAll(0);
                     tmpInfo.bboxHigh.setAll(0);
-                    if (Field::CourseModel::spInstance->checkSphereCachedPartial(offset, hitbox.lastPos, KCL_TYPE_DRIVER_WALL, &tmpInfo, hitbox.radius, 0)) {
-                        offs[i] = colInfo.tangentOff.lenSq();
+                    if (::Field::CourseModel::spInstance->checkSphereCachedPartial(offset, hitbox.lastPos, KCL_TYPE_DRIVER_WALL, &tmpInfo, hitbox.radius, 0)) {
+                        offs[i] = colInfo.tangentOff.dot(colInfo.tangentOff);
                     }
                 }
 
@@ -276,8 +276,8 @@ void KartCollide::checkNeighborhood(KartCollisionInfo& kartColInfo, const Hitbox
 }
 
 void KartCollide::processCannon(u32* colTypeMask) {
-    if (Field::lookupCollisionEntry(colTypeMask, KCL_CANNON_TRIGGER_MASK)) {
-        kartState()->setCannonPointId(KCL_ATTRIBUTE_VARIANT(Field::closestCollisionEntry->attribute));
+    if (::Field::lookupCollisionEntry(colTypeMask, KCL_CANNON_TRIGGER_MASK)) {
+        kartState()->setCannonPointId(KCL_ATTRIBUTE_VARIANT(::Field::closestCollisionEntry->attribute));
         kartState()->set(KART_FLAG_CANNON_START);
     }
 }

@@ -53,9 +53,9 @@ void CourseObjActor_StartAnimation(CourseObjActor* self) {
 
     // Start 3D audio
     u8 objId = CourseObjActor_GetID(self);
-    CourseObjManager* mgr = CourseObjManager::sInstance;
+    CourseObjManager* mgr = sCourseObjManager;
     u32 idx = objId << 2;
-    void** actorArray = *reinterpret_cast<void***>(static_cast<u8*>(mgr) + 0x68);
+    void** actorArray = *reinterpret_cast<void***>(reinterpret_cast<u8*>(mgr) + 0x68);
     void* audioEntry = actorArray[idx];
     audio_Play3D(audioEntry, 0);
 
@@ -99,12 +99,12 @@ void CourseObjActor_StartAnimation(CourseObjActor* self) {
     self->lodTimer3 = duration;
 
     // Check if there's a secondary timer at 0x148
-    s16 secondaryTimer = *reinterpret_cast<s16*>(static_cast<u8*>(self) + 0x148);
+    s16 secondaryTimer = *reinterpret_cast<s16*>(reinterpret_cast<u8*>(self) + 0x148);
     s16 globalTimer = *reinterpret_cast<s16*>(static_cast<u8*>(global));
     if (secondaryTimer <= globalTimer) {
         // Decrement secondary timer
         secondaryTimer--;
-        *reinterpret_cast<s16*>(static_cast<u8*>(self) + 0x148) = secondaryTimer;
+        *reinterpret_cast<s16*>(reinterpret_cast<u8*>(self) + 0x148) = secondaryTimer;
     }
 }
 
@@ -138,9 +138,9 @@ void CourseObjActor_StartAnimationVariant(CourseObjActor* self) {
 
     // Start 3D audio
     u8 objId = CourseObjActor_GetID(self);
-    CourseObjManager* mgr = CourseObjManager::sInstance;
+    CourseObjManager* mgr = sCourseObjManager;
     u32 idx = objId << 2;
-    void** actorArray = *reinterpret_cast<void***>(static_cast<u8*>(mgr) + 0x68);
+    void** actorArray = *reinterpret_cast<void***>(reinterpret_cast<u8*>(mgr) + 0x68);
     void* audioEntry = actorArray[idx];
     audio_Play3D(audioEntry, 0);
 
@@ -179,11 +179,11 @@ void CourseObjActor_StartAnimationVariant(CourseObjActor* self) {
     self->lodTimer3 = duration;
 
     // Secondary timer
-    s16 secondaryTimer = *reinterpret_cast<s16*>(static_cast<u8*>(self) + 0x148);
+    s16 secondaryTimer = *reinterpret_cast<s16*>(reinterpret_cast<u8*>(self) + 0x148);
     s16 globalTimer = *reinterpret_cast<s16*>(static_cast<u8*>(global));
     if (secondaryTimer <= globalTimer) {
         secondaryTimer--;
-        *reinterpret_cast<s16*>(static_cast<u8*>(self) + 0x148) = secondaryTimer;
+        *reinterpret_cast<s16*>(reinterpret_cast<u8*>(self) + 0x148) = secondaryTimer;
     }
 }
 
@@ -204,10 +204,30 @@ void CourseObjActor_StartAnimationVariant(CourseObjActor* self) {
 void CourseObjActor_UpdateFade(CourseObjActor* self) {
     CourseObjSub* sub = self->sub;
 
+    // Forward-declare all variables that may be crossed by gotos
+    void* global;
+    f32 currentAlpha;
+    f32 fadeStep;
+    f32 minAlpha;
+    void* manager;
+    void* vtbl;
+    typedef void (*SetAlphaFunc3)(void*, f32, u32);
+    SetAlphaFunc3 setAlpha3;
+    u8 objId;
+    CourseObjManager* mgr;
+    u32 idx;
+    void** actorArray;
+    void* audioEntry;
+    void* animEntry;
+    u16 objFlags2;
+    s16 countdown;
+    void* global2;
+    s16 threshold;
+
     // Check if distance-fade is active (bit 13 of sub->flags)
     if ((sub->drawFlags & (1u << 13)) == 0) {
         // Not fading — check if we should start countdown
-        u16 objFlags = *reinterpret_cast<u16*>(static_cast<u8*>(sub) + 0x14);
+        u16 objFlags = *reinterpret_cast<u16*>(reinterpret_cast<u8*>(sub) + 0x14);
         if ((objFlags & (1u << 14)) == 0) {
             goto check_countdown;
         }
@@ -224,20 +244,20 @@ void CourseObjActor_UpdateFade(CourseObjActor* self) {
     }
 
     // Distance-fade is active — decrease alpha
-    void* global = sGlobalInstance;
-    f32 currentAlpha = *reinterpret_cast<f32*>(static_cast<u8*>(self) + 0x160);
-    f32 fadeStep = *reinterpret_cast<f32*>(static_cast<u8*>(global) + 0x48);
+    global = sGlobalInstance;
+    currentAlpha = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(self) + 0x160);
+    fadeStep = *reinterpret_cast<f32*>(static_cast<u8*>(global) + 0x48);
 
     /* WII_FIXED: verify — floating point comparison */
     if (currentAlpha > fadeStep) {
         // Still visible — decrease alpha
         currentAlpha -= fadeStep;
-        *reinterpret_cast<f32*>(static_cast<u8*>(self) + 0x160) = currentAlpha;
+        *reinterpret_cast<f32*>(reinterpret_cast<u8*>(self) + 0x160) = currentAlpha;
 
         // Clamp to 0
-        f32 minAlpha = *reinterpret_cast<f32*>(static_cast<u8*>(global) + 0xC8);
+        minAlpha = *reinterpret_cast<f32*>(static_cast<u8*>(global) + 0xC8);
         if (currentAlpha <= minAlpha) {
-            *reinterpret_cast<f32*>(static_cast<u8*>(self) + 0x160) = minAlpha;
+            *reinterpret_cast<f32*>(reinterpret_cast<u8*>(self) + 0x160) = minAlpha;
         }
     } else {
         // Fully faded — deactivate
@@ -245,12 +265,11 @@ void CourseObjActor_UpdateFade(CourseObjActor* self) {
     }
 
     // Update alpha display via vtable
-    void* manager = CourseObjActor_GetManager(self);
-    void* vtbl = self->vtable;
-    typedef void (*SetAlphaFunc)(void*, f32, u32);
-    auto setAlpha = reinterpret_cast<SetAlphaFunc>(
+    manager = CourseObjActor_GetManager(self);
+    vtbl = self->vtable;
+    setAlpha3 = reinterpret_cast<SetAlphaFunc3>(
         *reinterpret_cast<u32*>(static_cast<u8*>(vtbl) + 0xE4));
-    setAlpha(self, 0, 0x1AA);
+    setAlpha3(self, 0, 0x1AA);
 
     // Clear "animated" flag
     sub->drawFlags = sub->drawFlags & ~0x0F;
@@ -263,16 +282,16 @@ void CourseObjActor_UpdateFade(CourseObjActor* self) {
     courseObj_E308(self);
 
     // Stop 3D audio
-    u8 objId = CourseObjActor_GetID(self);
-    CourseObjManager* mgr = CourseObjManager::sInstance;
-    u32 idx = objId << 2;
-    void** actorArray = *reinterpret_cast<void***>(static_cast<u8*>(mgr) + 0x68);
-    void* audioEntry = actorArray[idx];
+    objId = CourseObjActor_GetID(self);
+    mgr = sCourseObjManager;
+    idx = objId << 2;
+    actorArray = *reinterpret_cast<void***>(reinterpret_cast<u8*>(mgr) + 0x68);
+    audioEntry = actorArray[idx];
     audio_Stop3D(audioEntry);
 
     // Reset animation entry
-    void* animEntry = *reinterpret_cast<void**>(
-        static_cast<u8*>(mgr->actorArray) + (objId * 0x248));
+    animEntry = *reinterpret_cast<void**>(
+        reinterpret_cast<u8*>(mgr->actorArray) + (objId * 0x248));
     anim3D_Stop(animEntry, 0);
 
     return;
@@ -282,7 +301,7 @@ deactivate:
     sub->drawFlags = sub->drawFlags & ~0x0F;
 
     // Check if the object should be permanently hidden
-    u16 objFlags2 = *reinterpret_cast<u16*>(static_cast<u8*>(sub) + 0x14);
+    objFlags2 = *reinterpret_cast<u16*>(reinterpret_cast<u8*>(sub) + 0x14);
     if ((objFlags2 & (1u << 27)) != 0) {
         return;
     }
@@ -300,9 +319,9 @@ deactivate:
 
 check_countdown:
     // Handle the countdown-to-start mechanism at offset 0x21C
-    s16 countdown = *reinterpret_cast<s16*>(static_cast<u8*>(self) + 0x21C);
-    void* global2 = sGlobalInstance;
-    s16 threshold = *reinterpret_cast<s16*>(static_cast<u8*>(global2));
+    countdown = *reinterpret_cast<s16*>(reinterpret_cast<u8*>(self) + 0x21C);
+    global2 = sGlobalInstance;
+    threshold = *reinterpret_cast<s16*>(static_cast<u8*>(global2));
 
     if (countdown < threshold - 0x5A) {
         // Start the countdown
@@ -310,7 +329,7 @@ check_countdown:
     }
 
     countdown++;
-    *reinterpret_cast<s16*>(static_cast<u8*>(self) + 0x21C) = countdown;
+    *reinterpret_cast<s16*>(reinterpret_cast<u8*>(self) + 0x21C) = countdown;
 
     threshold = *reinterpret_cast<s16*>(static_cast<u8*>(global2));
     if (countdown >= threshold) {
@@ -368,35 +387,58 @@ void CourseObjActor_UpdateMovement(CourseObjActor* self) {
     CourseObjSub* sub = self->sub;
     CourseRenderSettings* settings = sRenderSettings;
 
+    // Forward-declare all variables that may be crossed by gotos
+    f32 scaleFactor;
+    f32 objectScale;
+    f32 speed;
+    u32 moveFlags;
+    u32 renderGroup;
+    f32 velocity;
+    f32 threshold;
+    s16 moveTimer;
+    s16 maxTimer;
+    f32 magnitude;
+    void* vtbl;
+    typedef void (*StartMoveFunc)(void*);
+    StartMoveFunc startMove;
+    f32 velocity2;
+    u32 flags;
+    f32 posX;
+    f32 posY;
+    f32 posZ;
+    f32 delta;
+    f32 scale2;
+    f32 current;
+
     // Check if movement is enabled (bit 27 of sub->flags)
     if ((sub->flags & (1u << 27)) == 0) {
-        goto check_movement_timer;
+        goto update_position;
     }
 
     // Check if the "no-move" flag (bit 4) is set in variantFlags
     if ((sub->drawFlags & (1u << 4)) != 0) {
-        goto check_movement_timer;
+        goto update_position;
     }
 
     // Check movement type flags
-    u32 moveFlags = sub->renderGroup;  // offset 0x08
+    moveFlags = sub->renderGroup;  // offset 0x08
     if ((moveFlags & (1u << 4)) != 0) {
-        goto check_movement_timer;
+        goto update_position;
     }
 
     // Calculate movement magnitude: settings.animSpeedFactor * self.scale * speed
-    f32 scaleFactor = settings->animSpeedFactor;  // 0x22C
-    f32 objectScale = *reinterpret_cast<f32*>(static_cast<u8*>(self) + 0x14);
-    f32 speed = *reinterpret_cast<f32*>(static_cast<u8*>(settings) + 0x20);
+    scaleFactor = settings->animSpeedFactor;  // 0x22C
+    objectScale = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(self) + 0x14);
+    speed = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(settings) + 0x20);
 
     /* WII_GX: Movement calculation with fmuls */
-    f32 magnitude = scaleFactor * objectScale;
+    magnitude = scaleFactor * objectScale;
     if (magnitude < speed) {
         goto check_activation;
     }
 
     // Check additional activation conditions
-    u32 renderGroup = sub->renderGroup;
+    renderGroup = sub->renderGroup;
     if ((renderGroup & (1u << 21)) != 0) {
         goto check_activation;
     }
@@ -405,8 +447,8 @@ void CourseObjActor_UpdateMovement(CourseObjActor* self) {
     }
 
     // Check velocity magnitude
-    f32 velocity = *reinterpret_cast<f32*>(static_cast<u8*>(sub) + 0x88);
-    f32 threshold = *reinterpret_cast<f32*>(static_cast<u8*>(settings) + 0xB8);
+    velocity = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(sub) + 0x88);
+    threshold = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(settings) + 0xB8);
 
     /* WII_GX: fabs comparison */
     if (velocity < 0) velocity = -velocity;
@@ -415,24 +457,24 @@ void CourseObjActor_UpdateMovement(CourseObjActor* self) {
     }
 
     // Object is moving — increment movement timer
-    s16 moveTimer = *reinterpret_cast<s16*>(static_cast<u8*>(self) + 0x1CC);
-    s16 maxTimer = *reinterpret_cast<s16*>(static_cast<u8*>(settings) + 0xCC);
+    moveTimer = *reinterpret_cast<s16*>(reinterpret_cast<u8*>(self) + 0x1CC);
+    maxTimer = *reinterpret_cast<s16*>(reinterpret_cast<u8*>(settings) + 0xCC);
 
     moveTimer++;
     if (moveTimer >= maxTimer) {
         moveTimer = maxTimer;  // clamp
     }
-    *reinterpret_cast<s16*>(static_cast<u8*>(self) + 0x1CC) = moveTimer;
+    *reinterpret_cast<s16*>(reinterpret_cast<u8*>(self) + 0x1CC) = moveTimer;
     goto apply_movement;
 
 check_activation:
     // Object is not moving enough — reset timer
-    *reinterpret_cast<s16*>(static_cast<u8*>(self) + 0x1CC) = 0;
+    *reinterpret_cast<s16*>(reinterpret_cast<u8*>(self) + 0x1CC) = 0;
 
 apply_movement:
     // Apply movement based on timer
-    s16 moveTimer = *reinterpret_cast<s16*>(static_cast<u8*>(self) + 0x1CC);
-    s16 maxTimer = *reinterpret_cast<s16*>(static_cast<u8*>(settings) + 0xCC);
+    moveTimer = *reinterpret_cast<s16*>(reinterpret_cast<u8*>(self) + 0x1CC);
+    maxTimer = *reinterpret_cast<s16*>(reinterpret_cast<u8*>(settings) + 0xCC);
 
     if (moveTimer < maxTimer) {
         // Timer not expired — continue
@@ -440,9 +482,8 @@ apply_movement:
     }
 
     // Timer expired — call vtable method to start movement
-    void* vtbl = self->vtable;
-    typedef void (*StartMoveFunc)(void*);
-    auto startMove = reinterpret_cast<StartMoveFunc>(
+    vtbl = self->vtable;
+    startMove = reinterpret_cast<StartMoveFunc>(
         *reinterpret_cast<u32*>(static_cast<u8*>(vtbl) + 0x34));
     startMove(self);
 
@@ -450,41 +491,41 @@ apply_movement:
     sub->drawFlags |= 0x1000;
 
     // Check if "distance animated" flag (bit 13) is set
-    u32 flags = sub->drawFlags;
+    flags = sub->drawFlags;
     if ((flags & (1u << 13)) == 0) {
         goto update_position;
     }
 
     // Object is distance-animated — calculate new position
-    f32 velocity2 = *reinterpret_cast<f32*>(static_cast<u8*>(sub) + 0x88);
+    velocity2 = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(sub) + 0x88);
 
     if (velocity2 < 0) {
         // Moving backward
-        *reinterpret_cast<s16*>(static_cast<u8*>(settings) + 0xCC) = 1;
+        *reinterpret_cast<s16*>(reinterpret_cast<u8*>(settings) + 0xCC) = 1;
 
         courseObj_E0F0(self);
-        f32 delta = *reinterpret_cast<f32*>(static_cast<u8*>(settings) + 0xC8);
-        f32 scale2 = *reinterpret_cast<f32*>(static_cast<u8*>(self) + 0x5C);
-        f32 current = *reinterpret_cast<f32*>(static_cast<u8*>(self) + 0x1C8);
+        delta = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(settings) + 0xC8);
+        scale2 = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(self) + 0x5C);
+        current = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(self) + 0x1C8);
         current -= delta * scale2;
-        *reinterpret_cast<f32*>(static_cast<u8*>(self) + 0x1C8) = current;
+        *reinterpret_cast<f32*>(reinterpret_cast<u8*>(self) + 0x1C8) = current;
     } else {
         // Moving forward
-        *reinterpret_cast<s16*>(static_cast<u8*>(settings) + 0xCC) = -1;
+        *reinterpret_cast<s16*>(reinterpret_cast<u8*>(settings) + 0xCC) = -1;
 
         courseObj_E0F0(self);
-        f32 delta = *reinterpret_cast<f32*>(static_cast<u8*>(settings) + 0xC8);
-        f32 scale2 = *reinterpret_cast<f32*>(static_cast<u8*>(self) + 0x5C);
-        f32 current = *reinterpret_cast<f32*>(static_cast<u8*>(self) + 0x1C8);
+        delta = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(settings) + 0xC8);
+        scale2 = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(self) + 0x5C);
+        current = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(self) + 0x1C8);
         current += delta * scale2;
-        *reinterpret_cast<f32*>(static_cast<u8*>(self) + 0x1C8) = current;
+        *reinterpret_cast<f32*>(reinterpret_cast<u8*>(self) + 0x1C8) = current;
     }
 
     // Get position update from vtable
     courseObj_E0F0(self);
-    f32 posX = *reinterpret_cast<f32*>(static_cast<u8*>(self) + 0x64);
-    f32 posY = *reinterpret_cast<f32*>(static_cast<u8*>(settings) + 0xC4);
-    f32 posZ = *reinterpret_cast<f32*>(static_cast<u8*>(self) + 0x1C8);
+    posX = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(self) + 0x64);
+    posY = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(settings) + 0xC4);
+    posZ = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(self) + 0x1C8);
 
     // Update position
     /* WII_GX: Position update calculation */
@@ -493,6 +534,7 @@ apply_movement:
 
 update_position:
     // Continue with position updates...
+    (void)0;
 }
 
 // ============================================================================
@@ -510,12 +552,25 @@ update_position:
 void CourseObjActor_InitAnimation(CourseObjActor* self, void* param, s16 frameCount) {
     CourseObjSub* sub = self->sub;
 
+    // Forward-declare all variables that may be crossed by gotos
+    u16 animFlags;
+    void* vtbl;
+    typedef void (*SetAlphaFunc)(void*, f32);
+    SetAlphaFunc setAlpha;
+    u8 objId;
+    CourseObjManager* mgr;
+    u32 idx;
+    void** actorArray;
+    void* audioEntry;
+    void* manager;
+    u16 animFlags2;
+
     // Check if frame count is negative (use default from object)
     if (frameCount < 0) {
         // Get the default frame count from the object's anim data
         courseObj_E0F0(self);
         frameCount = static_cast<s16>(*reinterpret_cast<u32*>(
-            static_cast<u8*>(self) + 0x6C));
+            reinterpret_cast<u8*>(self) + 0x6C));
     }
 
     // Convert frame count to float if needed
@@ -549,7 +604,7 @@ void CourseObjActor_InitAnimation(CourseObjActor* self, void* param, s16 frameCo
     }
 
     // Already animated — check and update
-    u16 animFlags = self->animFlags;
+    animFlags = self->animFlags;
     if ((animFlags & 1) == 0) {
         // First time — set timer
         self->animTimer = frameCount;
@@ -560,9 +615,8 @@ void CourseObjActor_InitAnimation(CourseObjActor* self, void* param, s16 frameCo
     self->animFlags = animFlags;
 
     // Set alpha to 0.0f
-    void* vtbl = self->vtable;
-    typedef void (*SetAlphaFunc)(void*, f32);
-    auto setAlpha = reinterpret_cast<SetAlphaFunc>(
+    vtbl = self->vtable;
+    setAlpha = reinterpret_cast<SetAlphaFunc>(
         *reinterpret_cast<u32*>(static_cast<u8*>(vtbl) + 0xE0));
     setAlpha(self, 0.0f);
 
@@ -570,19 +624,19 @@ void CourseObjActor_InitAnimation(CourseObjActor* self, void* param, s16 frameCo
 
 start_anim:
     // Start 3D audio
-    u8 objId = CourseObjActor_GetID(self);
-    CourseObjManager* mgr = CourseObjManager::sInstance;
-    u32 idx = objId << 2;
-    void** actorArray = *reinterpret_cast<void***>(static_cast<u8*>(mgr) + 0x68);
-    void* audioEntry = actorArray[idx];
+    objId = CourseObjActor_GetID(self);
+    mgr = sCourseObjManager;
+    idx = objId << 2;
+    actorArray = *reinterpret_cast<void***>(reinterpret_cast<u8*>(mgr) + 0x68);
+    audioEntry = actorArray[idx];
     audio_Play3D(audioEntry, 0);
 
     // Trigger effect
-    void* manager = CourseObjActor_GetManager(self);
+    manager = CourseObjActor_GetManager(self);
     effectMgr_962A8(manager);
 
     // Check animation flags
-    u16 animFlags2 = self->animFlags;
+    animFlags2 = self->animFlags;
     if ((animFlags2 & 1) == 0) {
         self->animTimer = frameCount;
         animFlags2 |= 1;

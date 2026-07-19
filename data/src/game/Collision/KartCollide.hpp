@@ -1,17 +1,16 @@
 #include <game/field/CourseColManager.hpp>
-// Define GENESIS guards before including KartObjectProxy.hpp
+// GENESIS guards: KartDynamics has a local full definition (KartDynamics.hpp).
+// KartCollide has a local full definition (this file).
+// All others (KartState, KartMove, KartBody, KartStats, KartPhysicsEngine)
+// get stub definitions from KartObjectProxy.hpp.
 #ifndef GENESIS_KART_COLLIDE_HPP_GUARD
 #define GENESIS_KART_COLLIDE_HPP_GUARD
-#define GENESIS_KART_STATE_DEFINED
-#define GENESIS_KART_MOVE_DEFINED
-#define GENESIS_KART_BODY_DEFINED
 #define GENESIS_KART_DYNAMICS_DEFINED
-#define GENESIS_KART_PHYSICS_ENGINE_DEFINED
-#define GENESIS_KART_STATS_DEFINED
 #define GENESIS_KART_COLLIDE_DEFINED
 
 #pragma once
 
+#include <decomp.h>
 #include <rk_types.h>
 
 #include <egg/math/eggVector.hpp>
@@ -36,8 +35,8 @@ class KartObjectProxy;
 
 class IKartCollide {
 public:
-    virtual void processBody(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::::Field::ColInfo & colInfo, u32* colTypeMask) = 0;
-    virtual void processWheels(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::::Field::ColInfo & colInfo, u32* colTypeMask) = 0;
+    virtual void processBody(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::Field::ColInfo & colInfo, u32* colTypeMask) = 0;
+    virtual void processWheels(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::Field::ColInfo & colInfo, u32* colTypeMask) = 0;
 };
 
 #define SURF_FLAG_WALL                0x1
@@ -63,16 +62,16 @@ public:
     KartCollide();
     virtual ~KartCollide();
 
-    virtual void processBody(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::::Field::ColInfo & colInfo, u32* colTypeMask) override;
-    virtual void processWheels(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::::Field::ColInfo & colInfo, u32* colTypeMask) override;
+    virtual void processBody(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::Field::ColInfo & colInfo, u32* colTypeMask) override;
+    virtual void processWheels(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::Field::ColInfo & colInfo, u32* colTypeMask) override;
 
     void init();
     void updateBbox();
     void processMovingWater(KartCollisionInfo& kartColInfo, u32* colTypeMask) NEVER_INLINE;
-    void processFloor(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::::Field::ColInfo & colInfo, u32* colTypeMask, bool isWheel);
-    void checkNeighborhood(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::::Field::ColInfo & colInfo);
+    void processFloor(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::Field::ColInfo & colInfo, u32* colTypeMask, bool isWheel);
+    void checkNeighborhood(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::Field::ColInfo & colInfo);
     void updateHitboxes();
-    bool processWall(KartCollisionInfo& kartColInfo, const ::::Field::ColInfo & colInfo, u32* colTypeMask);
+    bool processWall(KartCollisionInfo& kartColInfo, const ::Field::ColInfo & colInfo, u32* colTypeMask);
     void processCannon(u32* kclTypeMask);
     void applySomeFloorMoment(KartDynamics* kartDynamics, HitboxGroup* hitboxGroup,
                     const EGG::Vector3f& forward, const EGG::Vector3f& dir, const EGG::Vector3f& speed,

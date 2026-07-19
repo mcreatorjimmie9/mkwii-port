@@ -38,6 +38,7 @@ public:
     void reset();
     void init();
     void setInitialState();
+    void resetQuaternions();
 
     // Main per-frame suspension update
     // @param forward     Vehicle forward direction vector

@@ -8,6 +8,70 @@
 
 namespace Kart {
 
+// Forward declarations — always available so pointer types work even when
+// GENESIS modules provide full definitions.
+class KartState;
+class KartMove;
+class KartBody;
+class KartDynamics;
+class KartPhysicsEngine;
+class KartStats;
+class KartCollide;
+
+// KartFlags enum — used by KartState::on()/set() with bit indices.
+// The authoritative definition lives in data/src/game/KartMovement/KartState.hpp;
+// this copy covers the stub path.
+#ifndef KART_FLAGS_ENUM_DEFINED
+#define KART_FLAGS_ENUM_DEFINED
+enum KartFlags {
+    KART_FLAG_HOPPING = 3,
+    KART_FLAG_STAR = 4,
+    KART_FLAG_MEGA = 5,
+    KART_FLAG_RESPAWN_INVINCIBLE = 6,
+    KART_FLAG_THUNDER = 7,
+    KART_FLAG_ALL_WHEELS_COLLISION = 15,
+    KART_FLAG_STICKY_ROAD = 16,
+    KART_FLAG_TOUCHING_GROUND = 18,
+    KART_FLAG_AUTO_DRIFT = 19,
+    KART_FLAG_AIR_START = 23,
+    KART_FLAG_LARGE_FLIP_HIT = 25,
+    KART_FLAG_BULLET = 27,
+    KART_FLAG_IN_BULLET = 28,
+    KART_FLAG_JUMPPAD = 30,
+    KART_FLAG_HIT_ITEM_OR_OBJ = 32,
+    KART_FLAG_CANNON_START = 35,
+    KART_FLAG_IN_CANNON = 36,
+    KART_FLAG_HALFPIPE_RAMP = 41,
+    KART_FLAG_AT_SUSP_LIMIT = 51,
+    KART_FLAG_JUMPPAD_VELY_INCREASE = 55,
+    KART_FLAG_REJECT_ROAD = 59,
+    KART_FLAG_DRIFTING_ON_GROUND = 61,
+    KART_FLAG_HALFPIPE_RAMP_LOCAL = 0x43,
+    KART_FLAG_WHEELIE_ROT = 0x44,
+    KART_FLAG_SKIP_WHEEL_CALC = 0x45,
+    KART_FLAG_DISABLE_Y_SUS_FORCE = 0x56,
+    KART_FLAG_HALFPIPE_MIDAIR = 0x57,
+    KART_FLAG_COL_INVISIBILITY = 0x59,
+    KART_FLAG_IN_A_BULLET = 0x5b,
+    KART_FLAG_STH_61 = 0x61,
+    KART_FLAG_STH_WALL_COL = 0x63,
+    KART_FLAG_STH_KILLER = 0x6a,
+    KART_FLAG_STH_3 = 0x5c,
+    KART_FLAG_STH_5 = 0x5d,
+    KART_FLAG_SOMETHING = 0x5e,
+    KART_FLAG_CPU = 0x80,
+    KART_FLAG_LOCAL = 0x81,
+    KART_FLAG_ONLINE_LOCAL = 0x82,
+    KART_FLAG_ONLINE_REMOTE = 0x83,
+    KART_FLAG_AUTOMATIC_DRIFT = 0x84,
+    KART_FLAG_GHOST = 0x86,
+    KART_FLAG_SET_SPEED_ZERO = 0x89,
+    KART_FLAG_DEMO_LOSS = 0x8b,
+    KART_FLAG_HAS_STOPPED = 0x8c
+};
+
+#endif // KART_FLAGS_ENUM_DEFINED
+
 // ===== Minimal stubs =====
 // These classes are defined in more detail in the GENESIS module headers.
 // Only define them here when NOT already defined by a GENESIS module.

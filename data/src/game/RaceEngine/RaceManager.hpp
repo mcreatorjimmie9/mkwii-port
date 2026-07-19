@@ -7,7 +7,7 @@
 #include <decomp.h>
 #include "system/KPadDirector.hpp"
 #include "system/GhostFile.hpp"
-#include "system/RaceConfig.hpp"
+#include "RaceConfig.hpp"
 #include "system/ElineControlManager.hpp"
 #include "util/Random.hpp"
 #include "system/ResourceManager.hpp"
@@ -34,7 +34,7 @@ struct KmgFileRaw {
   u32 fileSize;
   s32 field2_0x8;
   void* coinRunnersOff;
-  s16 balloonBattleSystem::TimeLimits[10][11];
+  s16 balloonBattleTimeLimits[10][11];
   u16 field5_0xec[10][11];
   s16 enemyHitScore;
   s16 enemyDefeatScore;
@@ -46,7 +46,7 @@ struct KmgFileRaw {
   s16 field13_0x1d6;
   s16 field14_0x1d8;
   s16 field15_0x1da;
-  s16 coinRunnersSystem::TimeLimits[10][11];
+  s16 coinRunnersTimeLimits[10][11];
   u16 field17_0x2b8[10][11];
   u16 startCoinCounts[10][11];
   u16 maxCoinCounts[10][11];
@@ -70,17 +70,17 @@ public:
 };
 // static_assert(sizeof(KmgFile) == 0x8); // disabled for now
 
-class System::TimerManagerBase {
+class TimerManagerBase {
 public:
-  System::TimerManagerBase() { reset(); }
-  virtual ~System::TimerManagerBase();
+  TimerManagerBase() { reset(); }
+  virtual ~TimerManagerBase();
   virtual void reset();
   virtual void update();
 
 protected:
-  System::Time timer1;
-  System::Time timer2;
-  System::Time timer3;
+  Time timer1;
+  Time timer2;
+  Time timer3;
   Util::Random random;
   s8 field26_0x40;
   bool raceHasStarted;
@@ -89,10 +89,10 @@ protected:
   u8 unk48[0x50-0x48];
 };
 
-class System::TimerManager : public System::TimerManagerBase {
+class TimerManager : public TimerManagerBase {
 public:
-  System::TimerManager() : System::TimerManagerBase() {}
-  virtual ~System::TimerManager() override;
+  TimerManager() : TimerManagerBase() {}
+  virtual ~TimerManager() override;
   virtual void reset() override;
   virtual void update() override;
   inline void setLimit(u16 minutes, u8 seconds) {
@@ -102,7 +102,7 @@ public:
     this->raceDurationMillis = (seconds+60*minutes)*1000;
   }
 };
-// static_assert(sizeof(System::TimerManager) == 0x50); // disabled for now
+// static_assert(sizeof(TimerManager) == 0x50); // disabled for now
 
 class MovingMask {
 public:
@@ -118,7 +118,7 @@ public:
   void updateGpRankScore();
   virtual ~RaceManagerPlayer();
 
-  unk32 field_0x4;
+  u32 field_0x4;
   s8 idx;
   u16 checkpointId;
   float raceCompletion;
@@ -137,8 +137,8 @@ public:
   u32 framesInFirstPlace;
   s32 unk34;
   RaceManagerPlayerFlags flags;
-  System::Time* lapFinishSystem::Times;
-  System::Time* raceFinishSystem::Time;
+  Time* lapFinishTimes;
+  Time* raceFinishTime;
   u32 somethingRaceEndMessageOnline;
   KPadPlayer* kpadPlayer;
   u8 unk_4c_50[0x50-0x4c];
@@ -150,7 +150,7 @@ public:
 
 struct KrtFile {
     u32 magic;
-    u32 rankSystem::TimeDeltaFactor;
+    u32 rankTimeDeltaFactor;
     u16 numEntries;
     u16 headerSize;
     u16 entries[32][4];
@@ -170,18 +170,18 @@ public:
 
   RaceMode* initGamemode(RaceConfig::Settings::GameMode mode);
   RaceMode* createCompetitionMode();
-  u16 getBattleSystem::TimeLimit();
+  u16 getBattleTimeLimit();
   KrtFile** getKrtFile();
 
   Util::Random* random1;
   Util::Random* random2;
   RaceManagerPlayer** players;
   RaceMode* raceMode;
-  System::TimerManager* timerManager;
+  TimerManager* timerManager;
   s8* player_id_in_each_position;
   s8 finished_player_count;
   s8 disconnectedPlayerCount;
-  s16 introSystem::Timer;
+  s16 introTimer;
   u32 timer;
   s8 battleKtptStart;
   s8 field12_0x25;

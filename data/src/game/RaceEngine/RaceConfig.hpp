@@ -14,7 +14,12 @@
 #include <system/Rating.hpp>
 #include <rk_common.h>
 
+#define __RACECONFIG_DEFINED__
+
 namespace System {
+
+#define STANDARD_KART_M ((VehicleId)0)
+#define MARIO ((CharacterId)0)
 
 enum CupId {
   MUSHROOM_CUP,
@@ -68,6 +73,7 @@ public:
     void setPrevFinishPos(s8 pos);
     void setUnkPos(s8 pos);
     void setVehicle(VehicleId vehicle);
+    s8 getPlayerInputIdx() const { return mPlayerInputIdx; }
 
     u8 _04;
     s8 mLocalPlayerNum;
@@ -78,11 +84,12 @@ public:
     Mii mMii;
     BattleTeam mTeam;
     s32 mControllerId;
-    unk32 _d4;
+    u32 _d4;
     u16 mPreviousScore;
     u16 mGpScore;
     u16 _dc;
     s16 mGpRankScore;
+    s16 mGpStarRankScore;
     u8 _e0;
     u8 mPrevFinishPos;
     u8 mFinishPos;
@@ -152,6 +159,9 @@ public:
 
     CourseId mCourseId;
     u32 mEngineClass;
+
+    u32 getEngineClass() const { return mEngineClass; }
+    u32 getCourseId() const { return (u32)mCourseId; }
     GameMode mGameMode;
     CameraMode mCameraMode;
     u32 mBattleType;

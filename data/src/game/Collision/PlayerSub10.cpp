@@ -51,7 +51,8 @@ f32 PlayerSub10::computeWallCollisionSpeedFactor(const EGG::Vector3f& wallNrm) {
 
     // Check the player bump timer to avoid repeated speed reduction
     // (uses the KartCollide solidOobTimer or similar mechanism)
-    if (this->/* solidOobTimer or similar */ 0 > 0) {
+    // TODO: check solidOobTimer
+    if (false) {
         return 1.0f;
     }
 
@@ -63,7 +64,7 @@ f32 PlayerSub10::computeWallCollisionSpeedFactor(const EGG::Vector3f& wallNrm) {
     EGG::Vector3f flatDir = this->dir;
     flatDir.y = 0.0f;
 
-    f32 dot = EGG::Vector3f::dot(flatWallNrm, flatDir);
+    f32 dot = flatWallNrm.dot(flatDir);
     f32 absDot = fabsf(dot);
 
     // The more head-on (dot closer to 1.0), the more speed is lost
@@ -98,7 +99,8 @@ void PlayerSub10::doRespawn() {
     state->set(KART_FLAG_RESPAWN_INVINCIBLE);
 
     // Reset various timers and flags
-    this->/* preRespawnTimer or similar */ 0 = 0;
+    // TODO: reset preRespawnTimer
+    (void)0;
 }
 
 } // namespace Kart

@@ -148,9 +148,9 @@ void KartDynamics::calc(f32 dt, f32 maxSpeed, s32 air) {
             speedNorm = 0.0f;
         }
 
-        this->speedFix = speedNorm * EGG::Vector3f::dot(kartBack2, kartBackHorizontal);
+        this->speedFix = speedNorm * kartBack2.dot(kartBackHorizontal);
 
-        if (EGG::Vector3f::dot(speedBack, kartBackHorizontal)) {
+        if (speedBack.dot(kartBackHorizontal)) {
             this->speedFix = -this->speedFix;
         }
     }
@@ -182,7 +182,8 @@ void KartDynamics::calc(f32 dt, f32 maxSpeed, s32 air) {
     EGG::Vector3f angVel = angVel2 + angVel1 + angVel0 * this->angVel0Factor;
     if (angVel.squaredLength() > FLT_EPSILON) {
         EGG::Quatf drot;
-        EGG::Quatf::quatMul(drot, this->mainRot, angVel);
+        EGG::Quatf angVelQuat(0.0f, angVel.x, angVel.y, angVel.z);
+        EGG::Quatf::quatMul(drot, this->mainRot, angVelQuat);
         this->mainRot += drot * dt * 0.5f;
 
         if (fabsf(mainRot.squareNorm()) <= FLT_EPSILON) {

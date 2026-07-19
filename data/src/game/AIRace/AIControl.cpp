@@ -51,7 +51,7 @@ bool AIAirtimeTracker::isCurrentGroundStartTimerZero() {
 // Address: 0x8072CC28
 // Size: 12 bytes, 3 instructions
 AIPowAvoider::AIPowAvoider(const AIInfo& info)
-    // TODO: : mpInfo(&info), mAvoidChance(0), mAvoidState(0) {}
+    : mpInfo(&info), mAvoidChance(0), mAvoidState(0) {}
 // 
 // init__Q25Enemy12AIPowAvoiderFv
 // Address: 0x8072CC7C
@@ -88,7 +88,7 @@ void AIPowAvoider::update() {
     // TODO: if (sameTeamNearby || mAvoidChance == 0) {
             mAvoidState++;
             return;
-        }
+    // }
 
         // Perform the dodge trick
         mpInfo->mpInput->setTrick(System::KPadRaceInputState_Tricks::UP_TRICK);

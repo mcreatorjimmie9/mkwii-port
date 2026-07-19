@@ -189,3 +189,9 @@ void CourseObjActor_TickTimer(CourseObjActor* self);
 
 // 0x8060F4CC — Main update function for course objects
 void CourseObjActor_Update(CourseObjActor* self);
+
+// ============================================================================
+// External globals (shared between CourseObj.cpp and CourseObjAdvanced.cpp)
+// ============================================================================
+extern CourseObjManager* sCourseObjManager;
+extern CourseRenderSettings* sRenderSettings;

@@ -107,4 +107,6 @@ typedef void* OSMessage;
 typedef u32   OSTick;
 typedef s32   OSHeapHandle;
 
+extern "C" inline u32 OSGetTick() { return 0; }
+
 #endif // __RK_TYPES_H_CANONICAL__

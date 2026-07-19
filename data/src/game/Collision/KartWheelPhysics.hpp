@@ -1,18 +1,24 @@
-struct KartCollisionInfo {};
-#include <game/kart/KartObjectProxy.hpp>
 #pragma once
 
-#include <rk_types.h>
+// Define GENESIS guards before including KartObjectProxy.hpp
+#define GENESIS_KART_STATE_DEFINED
+#define GENESIS_KART_MOVE_DEFINED
+#define GENESIS_KART_BODY_DEFINED
+#define GENESIS_KART_DYNAMICS_DEFINED
+#define GENESIS_KART_COLLIDE_DEFINED
 
+#include <rk_types.h>
 #include <egg/math/eggVector.hpp>
 #include <egg/math/eggQuat.hpp>
 #include <egg/math/eggMatrix.hpp>
+#include <game/kart/KartObjectProxy.hpp>
+#include "KartHitbox.hpp"
+#include "KartDynamics.hpp"
 
 namespace Kart {
 
 class KartObjectProxy;
 class KartWheelPhysics;
-class KartDynamics;
 class BspWheel;
 
 enum KartWheelType {

@@ -489,7 +489,7 @@ void RaceConfig::Scenario::initCompetitionSettings() {
   memset(&settings, 0, sizeof(CompetitionSettings));
   CompetitionWrapper wrapper;
   wrapper.isValid = false;
-  wrapper.fileRaw = (u32) nullptr;
+  wrapper.fileRaw = nullptr;
   getCompetitionWrapper(ptr_Nwc24Manager, &wrapper);
   RawCompetitionFile* file = wrapper.fileRaw;
 
@@ -702,7 +702,7 @@ void RaceConfig::loadNextCourse() {
     return;
   }
 
-  ResourceManager::spInstance.nonvol->preloadCourseAsync(
+  ResourceManager::spInstance->nonvol->preloadCourseAsync(
       COURSE_ORDER[mRaceScenario.mSettings.mCupId][raceNumber + 1]);
 }
 
@@ -740,10 +740,5 @@ bool RaceConfig::isTimeAttackReplay() {
              ? true
              : false;
 }
-
-void ParameterFile::emptySub3() {}
-void ParameterFile::emptySub2() {}
-void ParameterFile::emptySub1() {}
-s32 ParameterFile::emptySub0() { return 0; }
 
 } // namespace System

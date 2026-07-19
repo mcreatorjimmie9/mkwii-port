@@ -37,7 +37,9 @@ typedef u8 BOOL;
 #define ALIGN16(val) (((val) + 15) & ~15)
 
 // Common constants
-#define BIT(n) (1 << (n))
+#ifndef BIT
+#define BIT(n) (1U << (n))
+#endif
 
 // Pad buttons
 #ifndef __PAD_BUTTON_ENUM_DEFINED__

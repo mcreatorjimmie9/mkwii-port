@@ -4,7 +4,56 @@
 #include "RaceManager.hpp"
 #include "RaceConfig.hpp"
 
+// Stub: Kart namespace (deep accessor chain for GP rank scoring)
+namespace Kart {
+    struct GpStats {
+        bool startBoostSuccessful;
+        u16 miniturbos;
+        u32 offroad;
+        u16 numWallCollision;
+        u16 numObjectCollision;
+        u16 outOfBounds;
+        u16 aiRankBonus;
+    };
+    struct RaceStats {
+        u16 hitOthersWithItemsCount;
+    };
+    struct KartSettings {
+        GpStats* gpStats;
+        RaceStats* raceStats;
+    };
+    struct KartAccessor {
+        KartSettings* settings;
+    };
+    class KartObject {
+    public:
+        KartAccessor* mAccessor;
+    };
+    class KartObjectManager {
+    public:
+        static KartObjectManager* spInstance;
+        KartObject* getObject(u8 idx) { (void)idx; static KartObject obj; return &obj; }
+    };
+}
+Kart::KartObjectManager* Kart::KartObjectManager::spInstance = nullptr;
+
+// Stub: InputManager
+struct InputPlayerInput {
+    Controller* raceController;
+};
+class InputManager {
+public:
+    static InputManager* spInstance;
+    InputPlayerInput playerInputs[4];
+};
+InputManager* InputManager::spInstance = nullptr;
+
 namespace System {
+
+class RaceModeGrandPrix : public RaceMode {
+public:
+    KrtFile** krtFile;
+};
 
 KrtFile** RaceManager::getKrtFile() {
     KrtFile** files;

@@ -344,7 +344,7 @@ void TexAnim_DestroyNode(void* node) {
 
         // Recurse into child
         TexAnim_DestroyNode(next);
-        current = next;
+        current = reinterpret_cast<u8*>(next);
     }
 }
 
@@ -368,7 +368,7 @@ void TexAnim_UnlinkNode(void* node, void* child) {
         u8 parentFlags = childObj[0x1C];
         parentFlags &= 0xFE;  // clear bit 0
         childObj[0x1C] = parentFlags;
-        memfill(obj + 4, 0, sizeof(reinterpret_cast<void*>));
+        memfill(obj + 4, 0, sizeof(void*));
         memfill(obj + 0x10, 0, sizeof(void*));
 
         if (obj + 4 != nullptr) {
@@ -492,14 +492,14 @@ void TexAnim_LoadFromResource(void* self, TexAnimResource* res) {
     *reinterpret_cast<u16*>(&dest[0x96]) = *reinterpret_cast<u16*>(&res[6]);  // texV
     *reinterpret_cast<f32*>(&dest[0x98]) = *reinterpret_cast<f32*>(&res[8]);  // scaleX
     *reinterpret_cast<f32*>(&dest[0x9C]) = *reinterpret_cast<f32*>(&res[12]); // scaleY
-    dest[0xA0] = res[0x10];  // colorR
-    dest[0xA1] = res[0x11];  // colorG
-    dest[0xA2] = res[0x12];  // colorB
-    dest[0xA3] = res[0x13];  // colorA
-    dest[0xA4] = res[0x14];  // flags
+    dest[0xA0] = reinterpret_cast<u8*>(res)[0x10];  // colorR
+    dest[0xA1] = reinterpret_cast<u8*>(res)[0x11];  // colorG
+    dest[0xA2] = reinterpret_cast<u8*>(res)[0x12];  // colorB
+    dest[0xA3] = reinterpret_cast<u8*>(res)[0x13];  // colorA
+    dest[0xA4] = reinterpret_cast<u8*>(res)[0x14];  // flags
 
     // Call scene setup function (0x805AE940)
-    scene_B9838();
+    texAnim_B9838();
 
     // Reset animation
     TexAnim_AdvanceFrame(self, 0);
@@ -583,15 +583,17 @@ void TexAnim_AdvanceFrame(void* self, u32 param) {
     obj[0x54] = obj[0x3C]; // flags
 
     // Call vtable[0x10/4] on sub-object at offset 0x04
-    void** subObj = *reinterpret_cast<void***>(&obj[0x04]);
-    if (subObj != nullptr) {
-        void* vtbl = *reinterpret_cast<void**>(subObj);
-        typedef void (*DrawFunc)(void*);
-        auto drawFn = reinterpret_cast<DrawFunc>(
-            *reinterpret_cast<u32*>(reinterpret_cast<u8*>(vtbl) + 0x10));
-        drawFn(subObj);
-    } else {
-        obj[0xC6] = 0xFF;  // -1
+    {
+        void** subObj = *reinterpret_cast<void***>(&obj[0x04]);
+        if (subObj != nullptr) {
+            void* vtbl = *reinterpret_cast<void**>(subObj);
+            typedef void (*DrawFunc)(void*);
+            auto drawFn = reinterpret_cast<DrawFunc>(
+                *reinterpret_cast<u32*>(reinterpret_cast<u8*>(vtbl) + 0x10));
+            drawFn(subObj);
+        } else {
+            obj[0xC6] = 0xFF;  // -1
+        }
     }
 
 advance_frame:

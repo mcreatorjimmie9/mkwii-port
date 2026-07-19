@@ -425,8 +425,8 @@ void SoundHandle::update() {
 // ============================================================================
     // TODO: void SoundHandle::setCategoryVolume(f32 catVolume) {
 //     // Category volume is multiplied into the effective volume
-    // during the per-frame update
-}
+//     // during the per-frame update
+// }
 
 } // namespace snd
 } // namespace nw4r

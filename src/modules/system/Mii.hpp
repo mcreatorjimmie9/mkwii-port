@@ -4,5 +4,7 @@
 namespace System {
 struct Mii {
     u8 _00[0x60];
+    Mii() {}
+    Mii(int) {}
 };
 }

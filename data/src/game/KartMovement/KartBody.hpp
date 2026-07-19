@@ -71,6 +71,8 @@ private:
 
 // ===== KartCollide =====
 // 0x8059648c - __ct__Q24Kart15KartCollideAreaFv
+#ifndef __KART_COLLIDE_AREA_DEFINED__
+#define __KART_COLLIDE_AREA_DEFINED__
 class KartCollideArea {
 public:
     KartCollideArea();
@@ -82,6 +84,7 @@ public:
 private:
     u8 _10[0x40 - 0x10];
 };
+#endif // __KART_COLLIDE_AREA_DEFINED__
 // static_assert(sizeof(KartCollideArea) == 0x40);
 
 } // namespace Kart

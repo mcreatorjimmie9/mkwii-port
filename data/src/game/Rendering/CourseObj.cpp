@@ -10,10 +10,10 @@
 void* sGlobalInstance = nullptr;
 
 // Course render settings (accessed via "lis r31, 0; r31 = r31 + 0")
-static CourseRenderSettings* sRenderSettings = nullptr;
+CourseRenderSettings* sRenderSettings = nullptr;
 
 // Course object manager (accessed via "lis r4, 0; r4 = *(0+r4)")
-static CourseObjManager* sCourseObjManager = nullptr;
+CourseObjManager* sCourseObjManager = nullptr;
 
 // ============================================================================
 // Getter helpers — Thin vtable dispatch wrappers
@@ -372,7 +372,7 @@ s32 CourseObjActor_InitVariant(CourseObjActor* self, void* a, s32 b, void* c, s3
     }
 
     // Call creation with variant type
-    CourseObjActor_CallCreate(self, variantType);
+    CourseObjActor_CallCreate(self, variantType, 0, 0, 0);
 
     // Get animation entry and create 3D model
     u8 objId = CourseObjActor_GetID(self);
@@ -475,7 +475,7 @@ void CourseObjActor_TickTimer(CourseObjActor* self) {
         audio_Stop3D(audioEntry);
 
         // Transition to deactivate state (type 0xB)
-        CourseObjActor_CallCreate(self, 0xB);
+        CourseObjActor_CallCreate(self, 0xB, 0, 0, 0);
     }
 
     // Call calcAnim again to finalize
@@ -541,26 +541,38 @@ void CourseObjActor_Update(CourseObjActor* self) {
     CourseObjSub* sub = self->sub;
     CourseRenderSettings* settings = sRenderSettings;
 
+    // Forward-declare all variables that may be crossed by gotos
+    u8 objId;
+    CourseObjManager* mgr;
+    u32 idx;
+    void** actorArray;
+    void* audioEntry;
+    bool hasMovement;
+    bool canSee;
+    s16 duration;
+    void* manager;
+    void* global;
+
     // Check bit 17 of flags — "start animation" trigger
     if ((sub->flags & (1u << 17)) == 0) {
         goto check_timers;
     }
 
     // Start animation path
-    u8 objId = CourseObjActor_GetID(self);
-    CourseObjManager* mgr = sCourseObjManager;
-    u32 idx = objId << 2;
-    void** actorArray = *reinterpret_cast<void***>(reinterpret_cast<u8*>(mgr) + 0x68);
-    void* audioEntry = actorArray[idx];
+    objId = CourseObjActor_GetID(self);
+    mgr = sCourseObjManager;
+    idx = objId << 2;
+    actorArray = *reinterpret_cast<void***>(reinterpret_cast<u8*>(mgr) + 0x68);
+    audioEntry = actorArray[idx];
 
     // Mark audio as active
     *reinterpret_cast<u8*>(reinterpret_cast<u8*>(audioEntry) + 0x6A) = 1;
 
     // Check bit 13 of drawFlags — "has movement"
-    bool hasMovement = (sub->flags & (1u << 13)) != 0;
+    hasMovement = (sub->flags & (1u << 13)) != 0;
 
     // Check visibility conditions (same as UpdateWithRotation)
-    bool canSee = true;
+    canSee = true;
     if (hasMovement) {
         canSee = false;
     }
@@ -585,8 +597,8 @@ void CourseObjActor_Update(CourseObjActor* self) {
                 // Still timing
             } else {
                 // Timer expired — start animation
-                s16 duration = settings->animDuration;
-                void* manager = CourseObjActor_GetManager(self);
+                duration = settings->animDuration;
+                manager = CourseObjActor_GetManager(self);
                 effectMgr_962A8(manager);
 
                 // Mark as animated
@@ -624,13 +636,13 @@ void CourseObjActor_Update(CourseObjActor* self) {
     }
 
     // Object is visible — start animation
-    s16 duration = settings->animDuration;
+    duration = settings->animDuration;
 
     // Stop 3D audio
     audio_Play3D(audioEntry, 0);
 
     // Start 3D animation
-    void* manager = CourseObjActor_GetManager(self);
+    manager = CourseObjActor_GetManager(self);
     effectMgr_962A8(manager);
 
     // Check if already animated
@@ -682,7 +694,7 @@ decrement_timers:
     self->animTimer = settings->animDuration;
 
     // Check game mode
-    void* global = sGlobalInstance;
+    global = sGlobalInstance;
     if (*reinterpret_cast<u32*>(reinterpret_cast<u8*>(global) + 0xB78) != 0) {
         // Special mode active
         s32 mode = *reinterpret_cast<s32*>(reinterpret_cast<u8*>(global) + 0xB70) - 3;

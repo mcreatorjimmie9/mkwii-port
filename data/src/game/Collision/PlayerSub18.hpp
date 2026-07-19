@@ -13,7 +13,6 @@ class KartObjectProxy;
 class HitboxGroup;
 class KartDynamics;
 class KartCollisionInfo;
-class BspHitbox;
 
 // Forward declarations for Field and Item systems
 namespace Field { struct ColInfo; }

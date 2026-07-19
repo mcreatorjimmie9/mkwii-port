@@ -1,14 +1,11 @@
 #include "KartWheelPhysics.hpp"
-#include <game/kart/KartObjectProxy.hpp>
 #include "KartHitbox.hpp"
 #include "KartDynamics.hpp"
 #include "../KartMovement/KartState.hpp"
 #include "../KartMovement/KartMove.hpp"
 #include "../KartMovement/KartBody.hpp"
-#include <game/kart/KartPhysicsEngine.hpp>  // Cross-module include
-#include <game/kart/KartWheel.hpp>
+#include "KartCollide.hpp"
 #include "BSP.hpp"
-#include "RKGeom.hpp"
 
 #include <egg/math/eggVector.hpp>
 #include <egg/math/eggQuat.hpp>
@@ -124,7 +121,7 @@ void KartWheelPhysics::calcCollision(const EGG::Vector3f& downDir, const EGG::Ve
     f32 scaledRadius = effectiveRadius * kartMove()->totalScale();
     this->suspTop = suspTop;
     wheelEdgePos = wheelPos + scaledRadius * downDir;
-    f32 travel = EGG::Vector3f::dot(downDir, wheelPos - suspTop);
+    f32 travel = downDir.dot(wheelPos - suspTop);
     updateEffectiveRadius();
     this->susTravel = travel;
 
@@ -171,7 +168,7 @@ void KartWheelPhysics::calc(const EGG::Vector3f& down, const EGG::Vector3f& move
     speed -= pDynamics->internalVel;
     speed -= pDynamics->movingRoadVel;
     speed -= pDynamics->movingWaterVel;
-    speed -= bodyColInfo()->movement;
+    speed -= hitboxGroup->getKartCollisionInfo().movement;
     speed -= kartCollide()->getMovement();
     hitboxGroup->getKartCollisionInfo().vel += speed;
     prevWheelPos = wheelPos;
@@ -231,7 +228,7 @@ void KartSusPhysics::reset() {
 void KartSusPhysics::calcCollision(const EGG::Vector3f& gravity, const EGG::Matrix34f& mtx, f32 dt) {
     // Delegate to wheel physics collision handling
     if (this->wheelPhysics != nullptr) {
-        this->wheelPhysics->calcCollision(/* down dir */, /* susp top */);
+        this->wheelPhysics->calcCollision(gravity, mtx * EGG::Vector3f::zero);
     }
 }
 

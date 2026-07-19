@@ -363,7 +363,7 @@ void SceneNode_PropagateColor(SceneNode* node, u8 newColor) {
             SceneNode* grandChild = nullptr;
             u16 gcCount = *reinterpret_cast<u16*>(reinterpret_cast<u8*>(child) + 0x04);
             if (grandChildIdx < gcCount) {
-                grandChild = *reinterpret_cast<SceneNode**>(
+                grandChild = reinterpret_cast<SceneNode**>(
                     &reinterpret_cast<u8*>(child)[0x38])[grandChildIdx];
             }
 
@@ -389,7 +389,7 @@ void SceneNode_PropagateColor(SceneNode* node, u8 newColor) {
                 SceneNode* ggc = nullptr;
                 u16 ggcCount = *reinterpret_cast<u16*>(reinterpret_cast<u8*>(grandChild) + 0x04);
                 if (ggcIdx < ggcCount) {
-                    ggc = *reinterpret_cast<SceneNode**>(
+                    ggc = reinterpret_cast<SceneNode**>(
                         &reinterpret_cast<u8*>(grandChild)[0x38])[ggcIdx];
                 }
 
@@ -409,7 +409,7 @@ void SceneNode_PropagateColor(SceneNode* node, u8 newColor) {
                 ggcFlags |= 1;
                 *reinterpret_cast<u16*>(reinterpret_cast<u8*>(ggc)[0x18]) = ggcFlags;
 
-                ggc = static_cast<SceneNode*>(reinterpret_cast<u8*>(ggc) + 0x18);
+                ggc = reinterpret_cast<SceneNode*>(reinterpret_cast<u8*>(ggc) + 0x18);
                 ggcIdx++;
                 if (ggcIdx < *reinterpret_cast<u16*>(reinterpret_cast<u8*>(grandChild) + 0x04)) {
                     continue;
@@ -417,7 +417,7 @@ void SceneNode_PropagateColor(SceneNode* node, u8 newColor) {
                 break;
             }
 
-            grandChild = static_cast<SceneNode*>(reinterpret_cast<u8*>(grandChild) + 0x18);
+            grandChild = reinterpret_cast<SceneNode*>(reinterpret_cast<u8*>(grandChild) + 0x18);
             grandChildIdx++;
             if (grandChildIdx < *reinterpret_cast<u16*>(reinterpret_cast<u8*>(child) + 0x04)) {
                 continue;
@@ -425,7 +425,7 @@ void SceneNode_PropagateColor(SceneNode* node, u8 newColor) {
             break;
         }
 
-        node = static_cast<SceneNode*>(reinterpret_cast<u8*>(node) + 0x18);
+        node = reinterpret_cast<SceneNode*>(reinterpret_cast<u8*>(node) + 0x18);
         childIdx++;
         if (childIdx < *reinterpret_cast<u16*>(reinterpret_cast<u8*>(node) + 0x04)) {
             continue;
