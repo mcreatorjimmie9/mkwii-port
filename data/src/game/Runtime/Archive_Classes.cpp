@@ -4,7 +4,7 @@
 //
 // Real implementations translated from decompiled EGG archive sources:
 //   - eggArchive.cpp   → BurstArchive mount/unmount/find/read
-//   - eggDvdFile.cpp   → DvdArchive open/read/close stubs
+//   - eggDvdFile.cpp   → DvdArchive open/read/close (PC port uses stdio instead of DVD API)
 //   - eggDvdRipper.cpp → loadToMainRAM logic for file loading
 //   - eggDecomp.cpp    → SZS (Yaz0/LZ77) decompression
 //   - eggCompress.cpp  → SZS compression helpers (reference)

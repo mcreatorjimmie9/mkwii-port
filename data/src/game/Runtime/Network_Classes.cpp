@@ -1,9 +1,12 @@
 // ============================================================================
-// Network_Classes.cpp — EGG Network / NW4R Online Implementations (Stubs)
+// Network_Classes.cpp — EGG Network / NW4R Online Implementations (Functional Stubs)
 // Address range: 0x805A0000 - 0x805C0000 (337 functions)
 //
-// These are stub implementations. Real method bodies require full
-// reimplementation from decompiled code.
+// Functional stubs: all methods return safe default values (0, nullptr, false).
+// Real method bodies require full reimplementation from decompiled NW4R/EGG
+// networking code, which depends on the Wii SDK's SO (socket) and KC (crypto)
+// libraries. These stubs allow the runtime module to link and run non-networked
+// code paths without modification.
 //
 // Categorization: GENESIS Phase 8 (Runtime Network Class Extraction)
 // ============================================================================

@@ -52,7 +52,9 @@ void* OSSetMEM2ArenaHi(void* ptr);
 #define ROUND_DOWN(val, align) ((val) & ~((align) - 1))
 #endif
 
-// EGG_ASSERT stub (decompiled uses EGG_ASSERT extensively)
+// EGG_ASSERT — shim for the decompiled EGG_ASSERT(cond, file, line, msg) macro.
+// In the original Wii SDK this expands to OSPanic("...", ...) on failure.
+// On PC we suppress the assertion (no-op) to allow execution to continue.
 #ifndef EGG_ASSERT
 #define EGG_ASSERT(cond, file, line, msg) \
     do { if (!(cond)) { (void)(file); (void)(line); (void)(msg); } } while (0)
@@ -94,8 +96,10 @@ Disposer::Disposer()
     // appendDisposer not yet available on Heap class.
     Heap* containHeap = ExpHeap::findContainHeap(this);
     if (containHeap != nullptr) {
-        // TODO: containHeap->appendDisposer(this);
-        (void)containHeap;
+        // Original: containHeap->appendDisposer(this);
+        // Heap::appendDisposer is a no-op (mDisposerHead/mDisposerTail not in layout),
+        // but we call it for API compatibility.
+        containHeap->appendDisposer(this);
     }
 }
 
@@ -108,7 +112,8 @@ Disposer::Disposer(Heap* heap, u32 align)
     //   if (mContainHeap != nullptr)
     //       mContainHeap->appendDisposer(this);
     if (heap != nullptr) {
-        // TODO: heap->appendDisposer(this);
+        // Original: heap->appendDisposer(this);
+        heap->appendDisposer(this);
     }
 }
 
@@ -145,7 +150,8 @@ Disposer::~Disposer() {
 // Default constructor (protected, for derived classes)
 Thread::Thread()
     : Disposer(), mHeap(nullptr), mStackBase(nullptr), mStackSize(0)
-    , mPriority(PRIORITY_NORM), mState(STATE_READY) {
+    , mPriority(PRIORITY_NORM), mState(STATE_READY)
+    , mMesgBuffer(nullptr), mMesgCount(0) {
     __builtin_memset(mOspThread, 0, sizeof(mOspThread));
     __builtin_memset(mMsgQueueBuffer, 0, sizeof(mMsgQueueBuffer));
 }
@@ -154,13 +160,14 @@ Thread::Thread()
 // From eggThread.cpp: Thread::Thread(u32 stackSize, int msgCount, int prio, Heap* heap)
 Thread::Thread(Heap* heap, u32 stackSize, s32 priority, s32 msgCount)
     : Disposer(heap), mHeap(heap), mStackBase(nullptr), mStackSize(stackSize)
-    , mPriority(priority), mState(STATE_READY) {
+    , mPriority(priority), mState(STATE_READY)
+    , mMesgBuffer(nullptr), mMesgCount(0) {
     // From decompiled:
     //   if (!heap)
     //       heap = Heap::getCurrentHeap();
     //   mContainingHeap = heap;
     if (!mHeap) {
-        // TODO: mHeap = Heap::getCurrentHeap();
+        mHeap = Heap::getCurrentHeap();
     }
 
     // Round down stack size to 32-byte alignment
@@ -207,11 +214,16 @@ Thread::Thread(Heap* heap, u32 stackSize, s32 priority, s32 msgCount)
     // The message buffer would need separate heap allocation (no field to
     // track the buffer pointer in this layout), so we zero-init the queue.
     __builtin_memset(mMsgQueueBuffer, 0, sizeof(mMsgQueueBuffer));
+    mMesgBuffer = nullptr;
+    mMesgCount = 0;
     if (msgCount > 0 && mHeap) {
-        // TODO: void* msgBuf = mHeap->alloc(sizeof(OSMessage) * msgCount, 4);
-        //       OSInitMessageQueue(mMsgQueueBuffer, msgBuf, msgCount);
+        // Allocate message buffer from heap, matching decompiled setCommonMesgQueue().
+        // OSMessage is 4 bytes on Wii (it's just a void*).
+        mMesgBuffer = mHeap->alloc(sizeof(void*) * msgCount, 4);
+        mMesgCount = msgCount;
+        EGG_ASSERT(mMesgBuffer, "eggThread.cpp", 262, "mMesgBuffer");
+        OSInitMessageQueue(mMsgQueueBuffer, mMesgBuffer, msgCount);
     }
-    UNUSED(msgCount);
 }
 
 // Thread destructor
@@ -245,7 +257,14 @@ Thread::~Thread() {
         mStackBase = nullptr;
     }
 
-    // Heap::free(mMesgBuffer, nullptr); // TODO: track message buffer pointer
+    // Free the heap-allocated message buffer if it exists.
+    // In the original: Heap::free(mMesgBuffer, nullptr) — freed from any heap.
+    if (mMesgBuffer) {
+        if (mHeap) {
+            mHeap->free(mMesgBuffer);
+        }
+        mMesgBuffer = nullptr;
+    }
 }
 
 // Static thread entry point
@@ -336,7 +355,9 @@ Thread* Thread::create(Heap* heap, u32 stackSize, s32 priority, s32 msgCount) {
     //   if (!heap) heap = Heap::getCurrentHeap();
     //   allocate + construct
     if (!heap) {
-        // TODO: heap = Heap::getCurrentHeap();
+        heap = Heap::getCurrentHeap();
+    }
+    if (!heap) {
         return nullptr;
     }
 
@@ -345,10 +366,11 @@ Thread* Thread::create(Heap* heap, u32 stackSize, s32 priority, s32 msgCount) {
         return nullptr;
 
     // Note: Thread has pure virtual run(), so only concrete subclasses
-    // can be instantiated. The real create() is templated or overridden
-    // by derived classes (e.g. TaskThread::create).
-    // TODO: accept a factory/callback or template parameter for concrete type
-    // For now, return nullptr — callers must use subclass create().
+    // can be instantiated. The real EGG create() is templated:
+    //   template<class T> static T* create(Heap*, u32, s32, s32)
+    // where T must be a concrete subclass with a non-pure run().
+    // This base-class version cannot instantiate an abstract type, so
+    // callers must use the subclass create() (e.g. TaskThread::create).
     heap->free(mem);
     (void)stackSize; (void)priority; (void)msgCount;
     return nullptr;
@@ -668,8 +690,9 @@ bool Core::initialize() {
     OSSetMEM2ArenaLo(arena2Start);
     OSSetMEM2ArenaHi(arena2Start);
 
-    // Heap::initialize();
-    // TODO: add static Heap::initialize() to Heap class
+    // Initialize the heap subsystem (resets current heap pointer).
+    // Original: Heap::initialize() called before any heap creation.
+    Heap::initialize();
 
     // Calculate heap sizes
     // Original:

@@ -74,6 +74,23 @@ public:
     void* alloc(u32 size)                       { return alloc(size, 4); }
     void* allocAligned(u32 size, s32 alignment) { return alloc(size, alignment); }
 
+    // --- Static heap state ---
+    static Heap* sCurrentHeap;  // thread-local current heap pointer
+
+    // @addr — get the current heap for this thread
+    // Original: per-thread heap pointer set by becomeCurrentHeap()
+    static Heap* getCurrentHeap() { return sCurrentHeap; }
+    static void setCurrentHeap(Heap* heap) { sCurrentHeap = heap; }
+
+    // @addr — initialize heap subsystem (called once at startup)
+    static void initialize() { sCurrentHeap = nullptr; }
+
+    // @addr — append a Disposer to this heap's disposal linked list.
+    // In the original EGG, each Heap tracks Disposers allocated from it
+    // via mDisposerHead/mDisposerTail (not in this layout), so this is
+    // a no-op. The Disposer destructor already handles unlinking.
+    void appendDisposer(void* disposer) { (void)disposer; }
+
     // @addr 0x80450014 — Heap null-check / size validation (operator new pattern)
     // Used by EGG heap allocators as a placement new validator
     static void* operatorValidate(void* ptr, u32 size);

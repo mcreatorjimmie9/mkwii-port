@@ -26,6 +26,10 @@ namespace EGG {
 // EGG::Heap
 // ============================================================
 
+// Static heap state — in the original EGG this is per-thread (OS-specific storage).
+// For the PC port, a single global suffices since we don't have thread-local storage.
+Heap* Heap::sCurrentHeap = nullptr;
+
 // @addr 0x80450014 — null-check validator used by placement new
 // In the original EGG, this is called by operator new(size, Heap*, align)
 // to validate the allocation result.
@@ -527,8 +531,57 @@ void ExpHeap::freeAll() {
     }
     mUsedHead = nullptr;
 
-    // TODO: coalesce adjacent free blocks into a single block
-    // (matching MEMVisitAllocatedForExpHeap + free_all_visitor behavior)
+    // Coalesce adjacent free blocks into a single block.
+    // Walk the free list and merge any pair of adjacent blocks
+    // where block1->mEnd == block2->mStart. This matches the
+    // MEMVisitAllocatedForExpHeap + free_all_visitor behavior.
+    if (!mFreeHead)
+        return;
+
+    // Sort free blocks by address so we can check adjacency.
+    // Simple insertion sort — the free list is usually small after freeAll().
+    MemoryBlock* sorted = nullptr;
+    for (MemoryBlock* block = mFreeHead; block != nullptr; ) {
+        MemoryBlock* next = block->mNext;
+        block->mPrev = nullptr;
+        block->mNext = nullptr;
+
+        if (!sorted || block->mStart < sorted->mStart) {
+            block->mNext = sorted;
+            if (sorted) sorted->mPrev = block;
+            sorted = block;
+        } else {
+            MemoryBlock* cur = sorted;
+            while (cur->mNext && cur->mNext->mStart < block->mStart)
+                cur = cur->mNext;
+            block->mNext = cur->mNext;
+            block->mPrev = cur;
+            if (cur->mNext) cur->mNext->mPrev = block;
+            cur->mNext = block;
+        }
+        block = next;
+    }
+
+    // Merge adjacent blocks
+    MemoryBlock* merged = sorted;
+    MemoryBlock* prev = nullptr;
+    while (merged) {
+        MemoryBlock* next = merged->mNext;
+        while (next && merged->mEnd == next->mStart) {
+            // Extend current block to cover next block
+            merged->mEnd = next->mEnd;
+            // Remove next from list
+            merged->mNext = next->mNext;
+            if (next->mNext) next->mNext->mPrev = merged;
+            next = merged->mNext;
+        }
+        merged->mPrev = prev;
+        if (prev) prev->mNext = merged;
+        prev = merged;
+        merged = next;
+    }
+
+    mFreeHead = sorted;
 }
 
 // @addr 0x8045ccd8 — debug dump
@@ -600,7 +653,8 @@ void* ExpHeap::operatorValidateBottom(void* ptr, u32 size) {
 // EGG::FrameHeap
 // ============================================================
 // NOTE: No decompiled source available for FrameHeap.
-// All methods below remain as stubs.
+// Functional stubs: create/init/saveState/restoreState/freeAll are implemented;
+// alloc/free are no-ops (LIFO frame allocator requires full watermark tracking).
 
 FrameHeap* FrameHeap::create(Heap* parent, u32 size, s32 align) {
     if (size == static_cast<u32>(-1))
@@ -693,7 +747,8 @@ void* FrameHeap::operatorValidate(void* ptr, u32 size) {
 // EGG::AdminHeap
 // ============================================================
 // NOTE: No decompiled source available for AdminHeap.
-// All methods remain as stubs.
+// Functional stubs: create returns nullptr (requires OSCreateHeap from SDK).
+// All virtual methods return safe default values (nullptr / 0).
 
 AdminHeap* AdminHeap::create(u32 size, s32 align) {
     // @addr 0x80451668 — original calls OSCreateHeap

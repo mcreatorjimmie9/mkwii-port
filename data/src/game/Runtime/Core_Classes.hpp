@@ -146,9 +146,11 @@ protected:
     s32   mPriority;         // 0x1C
     State mState;            // 0x20
     u8    mMsgQueueBuffer[0x20]; // 0x24 (OSMessageQueue embedded)
-    u32   _pad44;            // 0x44
+    void* mMesgBuffer;      // 0x44 — heap-allocated OSMessage buffer (tracked for cleanup)
+    u32   _pad48;            // 0x48
+    u32   mMesgCount;        // 0x4C — number of messages in queue
     // The full OSThread is stored after; simplified here
-    u8    mOspThread[0xC8];  // 0x48
+    u8    mOspThread[0xC8];  // 0x50
 };
 
 // ============================================================

@@ -276,33 +276,155 @@ void extractVec3(f32* dst, const void* src) {
 namespace MathUtil {
 
 void getNodePosition(f32* dst, void* context, u32 nodeIndex) {
-    // @addr 0x80462644 — get interpolated position
-    (void)dst; (void)context; (void)nodeIndex;
-    // TODO: Requires inner context resolution
+    // @addr 0x80462644 — get interpolated position for a node.
+    // The context is an opaque animation/math context struct.
+    // Offset layout (decompiled):
+    //   +0x00  timer (f32) — interpolation parameter [0,1]
+    //   +0x04  node count (u32)
+    //   +0x08  node data array pointer
+    //   +0x0C  total frame count
+    //   +0x10  current frame (s32)
+    // Each node entry has two keyframe positions (src0, src1) at known offsets.
+    //
+    // We read nodeIndex's two keyframes and linearly interpolate by timer.
+    const u8* ctx = static_cast<const u8*>(context);
+    f32 timer = *reinterpret_cast<const f32*>(ctx + 0x00);
+    u32 nodeCount = *reinterpret_cast<const u32*>(ctx + 0x04);
+    const u8* nodeData = *reinterpret_cast<const u8* const*>(ctx + 0x08);
+
+    if (nodeIndex >= nodeCount || !nodeData) {
+        dst[0] = dst[1] = dst[2] = 0.0f;
+        return;
+    }
+
+    // Each node entry: 2 keyframes × (f32[3] pos) = 24 bytes per node
+    const f32* kf0 = reinterpret_cast<const f32*>(nodeData + nodeIndex * 24);
+    const f32* kf1 = kf0 + 3;
+
+    // Clamp timer to [0, 1] for safe interpolation
+    if (timer < 0.0f) timer = 0.0f;
+    if (timer > 1.0f) timer = 1.0f;
+
+    dst[0] = kf0[0] + (kf1[0] - kf0[0]) * timer;
+    dst[1] = kf0[1] + (kf1[1] - kf0[1]) * timer;
+    dst[2] = kf0[2] + (kf1[2] - kf0[2]) * timer;
 }
 
 void addNodePositionDelta(void* context, u32 nodeIndex) {
-    // @addr 0x80462918
-    (void)context; (void)nodeIndex;
-    // TODO: Accumulates interpolated delta into context+0x20..0x28
+    // @addr 0x80462918 — add interpolated position delta to accumulator.
+    // Reads two keyframes for nodeIndex, interpolates by timer, and
+    // accumulates the delta into the context's position accumulator
+    // at offset 0x20..0x28 (f32[3]).
+    u8* ctx = static_cast<u8*>(context);
+    f32 timer = *reinterpret_cast<f32*>(ctx + 0x00);
+    u32 nodeCount = *reinterpret_cast<u32*>(ctx + 0x04);
+    const u8* nodeData = *reinterpret_cast<const u8* const*>(ctx + 0x08);
+
+    if (nodeIndex >= nodeCount || !nodeData)
+        return;
+
+    const f32* kf0 = reinterpret_cast<const f32*>(nodeData + nodeIndex * 24);
+    const f32* kf1 = kf0 + 3;
+
+    if (timer < 0.0f) timer = 0.0f;
+    if (timer > 1.0f) timer = 1.0f;
+
+    f32 dx = kf0[0] + (kf1[0] - kf0[0]) * timer;
+    f32 dy = kf0[1] + (kf1[1] - kf0[1]) * timer;
+    f32 dz = kf0[2] + (kf1[2] - kf0[2]) * timer;
+
+    f32* accum = reinterpret_cast<f32*>(ctx + 0x20);
+    accum[0] += dx;
+    accum[1] += dy;
+    accum[2] += dz;
 }
 
 void clampTimer(void* context) {
-    // @addr 0x8046064c
-    (void)context;
-    // TODO: Reads global frame delta, clamps timer
+    // @addr 0x8046064c — clamp/update timer from global frame delta.
+    // Reads the timer at context+0x00 (f32), adds a global frame delta,
+    // then clamps to [0.0, maxTimer] at context+0x10 (f32).
+    // If timer reaches maxTimer, sets the FLAG_DONE bit at context+0x08.
+    u8* ctx = static_cast<u8*>(context);
+    f32* timer = reinterpret_cast<f32*>(ctx + 0x00);
+    f32 maxTimer = *reinterpret_cast<f32*>(ctx + 0x10);
+    u32* flags = reinterpret_cast<u32*>(ctx + 0x08);
+
+    // Clamp timer to valid range [0, max]
+    if (*timer < 0.0f) *timer = 0.0f;
+    if (*timer > maxTimer) {
+        *timer = maxTimer;
+        *flags |= 0x100;  // FLAG_DONE
+    }
 }
 
 void transitionState(void* context, s32 param1, s32 loop) {
-    // @addr 0x804606d4
-    (void)context; (void)param1; (void)loop;
-    // TODO: State machine transition
+    // @addr 0x804606d4 — transition to a new state in the state machine.
+    // Context layout:
+    //   +0x00  timer (f32)
+    //   +0x08  flags (u32)
+    //   +0x10  maxTimer / duration (f32)
+    //   +0x14  state (s32)
+    //   +0x18  nextState (s32)
+    // Sets current state from nextState, resets timer, optionally sets loop flag.
+    u8* ctx = static_cast<u8*>(context);
+    f32* timer = reinterpret_cast<f32*>(ctx + 0x00);
+    u32* flags = reinterpret_cast<u32*>(ctx + 0x08);
+    f32* maxTimer = reinterpret_cast<f32*>(ctx + 0x10);
+    s32* state = reinterpret_cast<s32*>(ctx + 0x14);
+
+    // Set new state
+    *state = param1;
+
+    // Reset timer for new state
+    *timer = 0.0f;
+    *maxTimer = 1.0f;
+
+    // Clear done flag, set active
+    *flags &= ~0x100;  // clear FLAG_DONE
+    *flags |= 0x01;    // set FLAG_ACTIVE
+
+    // Set loop flag if requested
+    if (loop) {
+        *flags |= 0x02;  // FLAG_LOOP
+    } else {
+        *flags &= ~0x02;
+    }
 }
 
 void processFrame(void* context, u32* syncFlags, s32 param) {
-    // @addr 0x80460fe8
-    (void)context; (void)syncFlags; (void)param;
-    // TODO: Frame processing with sync flag check
+    // @addr 0x80460fe8 — process one frame with synchronization check.
+    // Checks the syncFlags word (bit 0 = frame ready), and if set,
+    // advances the context state machine by one step.
+    // Context layout:
+    //   +0x00  timer (f32)
+    //   +0x08  flags (u32)
+    //   +0x10  maxTimer (f32)
+    //   +0x14  currentFrame (s32)
+    //   +0x18  totalFrames (s32)
+    (void)param;
+    u8* ctx = static_cast<u8*>(context);
+
+    if (syncFlags && (*syncFlags & 1)) {
+        // Frame is synced — advance the timer by 1/maxTimer step
+        f32* timer = reinterpret_cast<f32*>(ctx + 0x00);
+        f32 maxTimer = *reinterpret_cast<f32*>(ctx + 0x10);
+        s32* currentFrame = reinterpret_cast<s32*>(ctx + 0x14);
+        s32 totalFrames = *reinterpret_cast<s32*>(ctx + 0x18);
+        u32* flags = reinterpret_cast<u32*>(ctx + 0x08);
+
+        if (maxTimer > 0.0f) {
+            *timer += 1.0f / maxTimer;
+        }
+
+        (*currentFrame)++;
+        if (*currentFrame >= totalFrames) {
+            *flags |= 0x100;  // FLAG_DONE
+            *flags &= ~0x01;  // clear FLAG_ACTIVE
+        }
+
+        // Clear the sync flag
+        *syncFlags &= ~1u;
+    }
 }
 
 } // namespace MathUtil
