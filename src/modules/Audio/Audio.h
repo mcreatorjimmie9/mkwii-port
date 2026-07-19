@@ -1,8 +1,6 @@
 #pragma once
 // Audio module - Mario Kart Wii PC Port
-// Phase 6: 942 reconstructed functions
-// Address range: 0x805100ac - 0x8073ffd4
-
+// Phase 6: 942 functions
 #include "../types.h"
 
 #ifdef __cplusplus
@@ -1609,7 +1607,7 @@ void EGG_Sound_validate_80562ff0(int, int, int);
 u32 snd_EGG_Sound_8056319c(int);
 
 // 0x0x805631a8 (address_range)
-u32 snd_EGG_Sound_805631a8(int, ushort);
+u32 snd_EGG_Sound_805631a8(int, u16);
 
 // 0x0x80563240 (address_range)
 void EGG_Sound_assertFail_80563240(void);

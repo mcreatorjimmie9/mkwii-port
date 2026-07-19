@@ -15,6 +15,9 @@ typedef int16_t  s16;
 typedef int32_t  s32;
 typedef int64_t  s64;
 
+typedef unsigned int uint;
+typedef long long llong;
+
 // Floating point
 typedef float  f32;
 typedef double f64;
@@ -56,11 +59,16 @@ enum {
 typedef u32 undefined;
 typedef u32 undefined4;
 typedef u8  undefined1;
+typedef s32 long32;
+typedef u32 uint;
+typedef u16 ushort;
+typedef u8 byte;
 typedef u16 undefined2;
 typedef u64 undefined8;
 
 // Ghidra compatibility
-typedef void (*code)(void);
+// Ghidra compatibility - code is a generic function pointer (varargs for compatibility)
+typedef void (*code)(...);
 
 // Memory base (for Ram references in decompiled code)
 #define RAM_BASE 0x80000000U

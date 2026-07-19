@@ -1,8 +1,6 @@
 #pragma once
 // Data module - Mario Kart Wii PC Port
-// Phase 6: 438 reconstructed functions
-// Address range: 0x806701e8 - 0x8068fd70
-
+// Phase 6: 438 functions
 #include "../types.h"
 
 #ifdef __cplusplus
@@ -937,7 +935,7 @@ uint data_Config_80685dc4(uint);
 int data_Config_80685f9c(int, u32, int, int);
 
 // 0x0x806863cc (address_range)
-ushort * data_Config_806863cc(ushort, ushort, byte, int);
+u16 * data_Config_806863cc(u16, u16, byte, int);
 
 // 0x0x8068642c (address_range)
 byte * data_Config_8068642c(byte, byte, int);
@@ -982,7 +980,7 @@ u16 * data_Config_806875e8(u32, u32, u16);
 u16 * data_Config_806876b4(u32, u16);
 
 // 0x0x80687778 (address_range)
-u16 * data_Config_80687778(u32, int, int, ushort, ushort, byte);
+u16 * data_Config_80687778(u32, int, int, u16, u16, byte);
 
 // 0x0x80687858 (address_range)
 u16 * data_Config_80687858(u32);
@@ -994,7 +992,7 @@ u32 data_Config_8068792c(int);
 void data_Config_80687934(int, byte, byte, u32, uint);
 
 // 0x0x8068795c (address_range)
-ushort data_Config_8068795c(int, int);
+u16 data_Config_8068795c(int, int);
 
 // 0x0x80687978 (address_range)
 u32 data_Config_80687978(int);

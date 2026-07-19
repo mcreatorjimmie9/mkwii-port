@@ -1,8 +1,6 @@
 #pragma once
 // Scene module - Mario Kart Wii PC Port
-// Phase 6: 1708 reconstructed functions
-// Address range: 0x805b0028 - 0x8077f014
-
+// Phase 6: 1708 functions
 #include "../types.h"
 
 #ifdef __cplusplus
@@ -763,7 +761,7 @@ void CourseObjects_validate_805cc7e8(u32, u16, u32);
 int CourseObjects_validate_805cc944(int, int);
 
 // 0x0x805cc984 (address_range)
-void CourseObjects_validate_805cc984(double, u32, u16, u32, ushort, u32, u32);
+void CourseObjects_validate_805cc984(double, u32, u16, u32, u16, u32, u32);
 
 // 0x0x805cca84 (address_range)
 u32 CourseObjects_validate_805cca84(u32);

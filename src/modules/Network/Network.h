@@ -1,8 +1,6 @@
 #pragma once
 // Network module - Mario Kart Wii PC Port
-// Phase 6: 171 reconstructed functions
-// Address range: 0x8055008c - 0x8055fea4
-
+// Phase 6: 171 functions
 #include "../types.h"
 
 #ifdef __cplusplus

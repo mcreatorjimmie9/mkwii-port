@@ -1,8 +1,6 @@
 #pragma once
 // UI module - Mario Kart Wii PC Port
-// Phase 6: 2065 reconstructed functions
-// Address range: 0x8050a144 - 0x8071ff08
-
+// Phase 6: 2065 functions
 #include "../types.h"
 
 #ifdef __cplusplus
@@ -1498,7 +1496,7 @@ void Pages_validate_8061b7d0(int);
 void Pages_validate_8061b800(int);
 
 // 0x0x8061b884 (address_range)
-void ui_Pages_8061b884(int, ushort);
+void ui_Pages_8061b884(int, u16);
 
 // 0x0x8061b8ac (address_range)
 void Pages_assertFail_8061b8ac(void);
@@ -1795,7 +1793,7 @@ void ui_Pages_806204f4(int);
 void ui_Pages_806205a0(int);
 
 // 0x0x80620648 (address_range)
-ushort ui_Pages_80620648(int, int);
+u16 ui_Pages_80620648(int, int);
 
 // 0x0x80620724 (address_range)
 void ui_Pages_80620724(int, u32);
@@ -2314,10 +2312,10 @@ void Pages_assertFail_80629db8(void);
 void Pages_assertFail_80629fb8(void);
 
 // 0x0x8062a300 (address_range)
-void ui_Pages_8062a300(int, ushort, uint, u32);
+void ui_Pages_8062a300(int, u16, uint, u32);
 
 // 0x0x8062a48c (address_range)
-void ui_Pages_8062a48c(int, ushort, uint, u32);
+void ui_Pages_8062a48c(int, u16, uint, u32);
 
 // 0x0x8062a670 (address_range)
 void ui_Pages_8062a670(int, char);

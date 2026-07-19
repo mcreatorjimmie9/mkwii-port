@@ -1,8 +1,6 @@
 #pragma once
 // Rendering module - Mario Kart Wii PC Port
-// Phase 6: 1130 reconstructed functions
-// Address range: 0x804e0010 - 0x806fff48
-
+// Phase 6: 1130 functions
 #include "../types.h"
 
 #ifdef __cplusplus
