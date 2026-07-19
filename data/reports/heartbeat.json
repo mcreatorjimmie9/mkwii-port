@@ -1,21 +1,29 @@
 {
-  "last_update": "2026-07-19T00:45:00Z",
-  "phase": "Phase 4 - Ghidra Control Flow Analysis",
+  "last_update": "2026-07-19T01:10:00Z",
+  "phase": "Phase 4 — StaticR.rel analysis COMPLETE",
   "status": "in_progress",
   "ghidra_installed": true,
   "ghidra_version": "11.2.1",
-  "ghidra_mode": "headless (JRE fallback)",
   "main_dol": {
-    "ghidra_functions_found": 68,
-    "ghidra_functions_decompiled": 68,
-    "ghidra_blocks": "segment_0 (0-0x85CDF, RWX) + segment_1 (0x29FD00-0x384DFB, R)",
-    "dol2elf_converter": "working (ELF32 BE PPC)",
-    "issues": "Low function count - need enhanced discovery for ~2000+ expected functions"
+    "ghidra_functions_found": 54,
+    "ghidra_functions_decompiled": 54,
+    "notes": "Limited by DOL sparse memory layout. Phase 3 capstone output (1000+ functions) still primary."
   },
-  "staticr_rel": "pending",
+  "staticr_rel": {
+    "ghidra_functions_found": 11343,
+    "ghidra_functions_decompiled": 11343,
+    "total_c_code_bytes": 7799781,
+    "total_output_mb": 48,
+    "notes": "Full decompilation complete. Output in data/ghidra_staticr/ (48MB, too large for git)."
+  },
+  "tools": {
+    "ghidra_headless": "/home/z/ghidra_11.2.1_PUBLIC/support/analyzeHeadless (JRE mode)",
+    "dol2elf": "/home/z/my-project/scripts/dol2elf.py",
+    "rel2elf": "/home/z/my-project/scripts/rel2elf.py"
+  },
   "next_steps": [
-    "Enhanced function discovery for main.dol",
-    "Process StaticR.rel through Ghidra",
-    "Commit Phase 4 results to GitHub"
+    "Combine StaticR (11K functions) with main.dol (54 functions) into unified codebase",
+    "Phase 5: Function signature recovery + cross-module linking",
+    "Phase 6: Module reconstruction and validation"
   ]
 }
