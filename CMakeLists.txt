@@ -193,6 +193,28 @@ set(UI_SOURCES
     data/src/game/UI/PageManager.cpp
 )
 
+# --- Runtime (18 files — Gfx/MathUtil classes) ---
+set(RUNTIME_SOURCES
+    data/src/game/Runtime/Gfx_Classes.cpp
+    data/src/game/Runtime/MathUtil_Classes.cpp
+    data/src/game/Runtime/RuntimeOS.cpp
+    data/src/game/Runtime/Memory.cpp
+    data/src/game/Runtime/Heap.cpp
+    data/src/game/Runtime/MathUtil.cpp
+    data/src/game/Runtime/Core.cpp
+    data/src/game/Runtime/Gfx.cpp
+    data/src/game/Runtime/Archive.cpp
+    data/src/game/Runtime/ArchiveExt.cpp
+    data/src/game/Runtime/Scene3D.cpp
+    data/src/game/Runtime/SceneGraph.cpp
+    data/src/game/Runtime/Particle.cpp
+    data/src/game/Runtime/Animation.cpp
+    data/src/game/Runtime/AudioEngine.cpp
+    data/src/game/Runtime/Network.cpp
+    data/src/game/Runtime/DiscIO.cpp
+    data/src/game/Runtime/System.cpp
+)
+
 # =============================================================================
 # Static library target
 # =============================================================================
@@ -208,6 +230,7 @@ add_library(mkwii-genesis STATIC
     ${RENDERING_SOURCES}
     ${SCENE_SOURCES}
     ${UI_SOURCES}
+    ${RUNTIME_SOURCES}
 )
 
 # =============================================================================

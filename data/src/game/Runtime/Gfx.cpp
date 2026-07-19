@@ -534,7 +534,7 @@ void fn_804a1598(u32, s32) {
 }
 
 // @addr 0x804a1638
-void fn_804a1638(void, void) {
+void fn_804a1638(void*, void*) {
 }
 
 // @addr 0x804a18d4
@@ -1606,11 +1606,11 @@ void fn_804b683c(s32) {
 }
 
 // @addr 0x804b6b18
-void fn_804b6b18(s32, void) {
+void fn_804b6b18(s32, void*) {
 }
 
 // @addr 0x804b6c00
-void fn_804b6c00(s32, void) {
+void fn_804b6c00(s32, void*) {
 }
 
 // @addr 0x804b6d64
@@ -1630,7 +1630,7 @@ void fn_804b7630(void) {
 }
 
 // @addr 0x804b78a4
-void fn_804b78a4(s32*, void) {
+void fn_804b78a4(s32*, void*) {
 }
 
 // @addr 0x804b7b04

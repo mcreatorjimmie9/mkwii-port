@@ -909,7 +909,7 @@ void fn_80458fd4(void) {
 }
 
 // @addr 0x804593ec
-void fn_804593ec(s32*, void, u32) {
+void fn_804593ec(s32*, void*,  u32) {
 }
 
 // @addr 0x80459494

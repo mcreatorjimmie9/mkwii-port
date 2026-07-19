@@ -769,7 +769,7 @@ void fn_804c52a4(s32, s32*) {
 }
 
 // @addr 0x804c54f4
-void fn_804c54f4(u32*, void) {
+void fn_804c54f4(u32*, void*) {
 }
 
 // @addr 0x804c565c

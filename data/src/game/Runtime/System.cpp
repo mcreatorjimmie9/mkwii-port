@@ -135,7 +135,7 @@ u32 fn_805e7a18(s32) {
 }
 
 // @addr 0x805e7c60
-u32 fn_805e7c60(s32, s32, void) {
+u32 fn_805e7c60(s32, s32, void*) {
     return 0;
 }
 

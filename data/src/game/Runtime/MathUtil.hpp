@@ -978,7 +978,7 @@ void fn_8047ecf4(s32*, u32*);
 // @addr 0x8047ed48
 void fn_8047ed48(s32*);
 // @addr 0x8047edb4
-void fn_8047edb4(s32*, void(*)()*);
+void fn_8047edb4(s32*, void(*)());
 // @addr 0x8047eee0
 void fn_8047eee0(s32*, f32*);
 // @addr 0x8047ef88
@@ -992,7 +992,7 @@ void fn_8047f070(s32*, u32);
 // @addr 0x8047f0c8
 void fn_8047f0c8(u32*);
 // @addr 0x8047f114
-void fn_8047f114(u32*, void);
+void fn_8047f114(u32*, void*);
 // @addr 0x8047f138
 void fn_8047f138(u32*);
 // @addr 0x8047f15c

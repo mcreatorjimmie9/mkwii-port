@@ -82,7 +82,7 @@ s32 fn_805d08e4(s32, s32);
 // @addr 0x805d0f48
 u32 fn_805d0f48(s32, s32);
 // @addr 0x805d0f58
-u32 fn_805d0f58(s32, s32, void);
+u32 fn_805d0f58(s32, s32, void*);
 // @addr 0x805d3040
 s32 fn_805d3040(s32, s32);
 // @addr 0x805d61b8
@@ -398,9 +398,9 @@ void fn_805cd228(s32*);
 // @addr 0x805cd26c
 void fn_805cd26c();
 // @addr 0x805cd3c8
-void fn_805cd3c8(u32*, void);
+void fn_805cd3c8(u32*, void*);
 // @addr 0x805cd550
-void fn_805cd550(u32*, void);
+void fn_805cd550(u32*, void*);
 // @addr 0x805cd708
 void fn_805cd708(s32);
 // @addr 0x805cd7ac

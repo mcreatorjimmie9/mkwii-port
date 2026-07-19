@@ -232,7 +232,7 @@ void fn_804a14a8(void);
 // @addr 0x804a1598
 void fn_804a1598(u32, s32);
 // @addr 0x804a1638
-void fn_804a1638(void, void);
+void fn_804a1638(void*, void*);
 // @addr 0x804a18d4
 void fn_804a18d4();
 // @addr 0x804a1afc
@@ -768,9 +768,9 @@ void fn_804b66d4(s32, s32, s32, s32, u16);
 // @addr 0x804b683c
 void fn_804b683c(s32);
 // @addr 0x804b6b18
-void fn_804b6b18(s32, void);
+void fn_804b6b18(s32, void*);
 // @addr 0x804b6c00
-void fn_804b6c00(s32, void);
+void fn_804b6c00(s32, void*);
 // @addr 0x804b6d64
 void fn_804b6d64(u32*, s32, s32);
 // @addr 0x804b71a4
@@ -780,7 +780,7 @@ void fn_804b74f4(u32*, s32);
 // @addr 0x804b7630
 void fn_804b7630(void);
 // @addr 0x804b78a4
-void fn_804b78a4(s32*, void);
+void fn_804b78a4(s32*, void*);
 // @addr 0x804b7b04
 void fn_804b7b04(s32);
 // @addr 0x804b7b9c

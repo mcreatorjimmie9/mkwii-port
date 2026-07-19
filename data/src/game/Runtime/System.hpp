@@ -66,7 +66,7 @@ u32 fn_805e79c4(s32);
 // @addr 0x805e7a18
 u32 fn_805e7a18(s32);
 // @addr 0x805e7c60
-u32 fn_805e7c60(s32, s32, void);
+u32 fn_805e7c60(s32, s32, void*);
 // @addr 0x805e7eb0
 u32 fn_805e7eb0(s32, u32, s32);
 // @addr 0x805e7fbc

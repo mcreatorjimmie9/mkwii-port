@@ -346,7 +346,7 @@ void fn_804c51b8(s32*, s32*, s32*, u32);
 // @addr 0x804c52a4
 void fn_804c52a4(s32, s32*);
 // @addr 0x804c54f4
-void fn_804c54f4(u32*, void);
+void fn_804c54f4(u32*, void*);
 // @addr 0x804c565c
 void fn_804c565c(s32, s32, s32, s32);
 // @addr 0x804c5890
