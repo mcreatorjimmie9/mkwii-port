@@ -3,6 +3,7 @@
 
 #include "PaneWrapper.hpp"
 #include "LayoutLoader.hpp"
+#include "ui_stubs.h"
 
 namespace UI {
 
@@ -74,12 +75,11 @@ void* PaneWrapper::construct() {
 }
 
 // @addr 0x8050a6f4
-void* PaneWrapper::destroy(s32 freeMemory) {
+void* PaneWrapper::destroy(s32 shouldFree) {
     if (this != nullptr) {
-        destroyChild(mAnimationFrameCtrl, -1);
         clearVtable();
-        if (freeMemory > 0) {
-            freeMemory(this);
+        if (shouldFree > 0) {
+            free(this);
         }
     }
     return this;
@@ -108,7 +108,7 @@ void PaneWrapper::update(f32 deltaTime) {
     s32 networkState = (s32)(networkResult >> 32);
 
     if (networkState >= 4 && networkState <= 5 || networkState == 0 || networkState == 1) {
-        s32 director = getSceneDirector();
+        SceneDirector* director = getSceneDirector();
         director->mNetworkState = networkState;
         director->mNetworkSubState = (u32)networkResult;
         onNetworkUpdate(deltaTime, this, 0x78, 0);

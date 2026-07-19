@@ -21,6 +21,10 @@ enum UIFlag {
     UI_FLAG_DEMO_MODE = 0x20,
 };
 
+struct CallbackSystem {
+    void onSceneComplete(u32 mask) { (void)mask; }
+};
+
 struct GlobalUIState {
     u32 sceneId;               // Current scene/page ID
     u32 prevSceneId;           // Previous scene
@@ -34,6 +38,7 @@ struct GlobalUIState {
     u8 playerCount;            // Active player count (1-4)
     u8 localPlayerCount;       // Local player count
     u8 _pad[2];
+    void* callbackSystem;      // Optional callback system pointer (actually CallbackSystem*)
 };
 
 class UIManager {
@@ -113,6 +118,8 @@ private:
     // Timing
     f32 mFrameTimer;
     u32 mFrameCount;
+    u32 mHUDInstanceCount;     // number of HUD instances
+    u32 mSceneChangeTarget;     // target scene for onSceneChange
 
     // Internal
     void updateInput();

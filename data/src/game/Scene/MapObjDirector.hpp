@@ -9,6 +9,7 @@
 // in that MapObjs are primarily visual and part of the course BMD model.
 
 #include "rk_common.h"
+#include <EGG/math.h>
 
 namespace Scene {
 

@@ -4,6 +4,7 @@
 #include "MenuPage.hpp"
 #include "Layout.hpp"
 #include "LayoutLoader.hpp"
+#include "ui_stubs.h"
 
 namespace UI {
 
@@ -104,38 +105,38 @@ void MenuPage::setupLayoutGroups() {
     // Group 0: Primary text content
     attachToGroup(this, 0, mTextGroup0, 0);
     initPictureGroup(mTextGroup0);
-    setTextBounds(mTextGroup0, 0, 0xA7, 0xAE, 0xC1, 1, 0, 0);
-    bindAnimationFrame(mTextGroup0, this + 0x44, 0);
-    bindPositionRef(mTextGroup0, this + 0x6C);
+    setTextBounds(mTextGroup0, 0, 0xA7, 0xAE);
+    bindAnimationFrame(mTextGroup0, (void*)((u8*)this + 0x44), 0);
+    bindPositionRef(mTextGroup0, (void*)((u8*)this + 0x6C));
 
     // Set player name in text group 0
     u32 playerNameTag[13];
     initPlayerNameTag(playerNameTag);
-    setTextBinding(mTextGroup0, 0x0D1, 0x106A, playerNameTag);
+    ::setTextBinding(mTextGroup0, 0x0D1, playerNameTag);
 
     // Group 1: Secondary text content
     attachToGroup(this, 1, mTextGroup1, 0);
-    setTextBounds(mTextGroup1, 0xD4, 0xDB, 0xEE, 1, 0, 0);
-    bindAnimationFrame(mTextGroup1, this + 0x44, 0);
-    bindPositionRef(mTextGroup1, this + 0x6C);
+    setTextBounds(mTextGroup1, 0xD4, 0xDB, 0xEE);
+    bindAnimationFrame(mTextGroup1, (void*)((u8*)this + 0x44), 0);
+    bindPositionRef(mTextGroup1, (void*)((u8*)this + 0x6C));
 
     // Set secondary player name
     u32 playerTag[13];
     initPlayerNameTag(playerTag);
-    setTextBinding(mTextGroup1, 0x0FB, 0x106B, playerTag);
+    ::setTextBinding(mTextGroup1, 0x0FB, playerTag);
 
     // Group 2: Tertiary content
     attachToGroup(this, 2, mTextGroup2, 0);
-    setTextBounds(mTextGroup2, 0xFE, 0x105, 0x10A, 1, 0, 1);
-    bindAnimationFrame(mTextGroup2, this + 0x58, 0);
-    bindPositionRef(mTextGroup2, this + 0x6C);
+    setTextBounds(mTextGroup2, 0xFE, 0x105, 0x10A);
+    bindAnimationFrame(mTextGroup2, (void*)((u8*)this + 0x58), 0);
+    bindPositionRef(mTextGroup2, (void*)((u8*)this + 0x6C));
 
     // Group 3: Picture/icon content
     attachToGroup(this, 3, mSubPageLayout, 0);
     initPictureGroup(mSubPageLayout);
 
     // Configure window to track layout bounds
-    bindWindowToGroup(mWindowPane, 1, this + 0x80, 0, 0);
+    bindWindowToGroup(mWindowPane, 1, (void*)((u8*)this + 0x80), 0, 0);
 
     // Hide text groups initially
     hideTextGroup(mTextGroup0);
@@ -164,7 +165,7 @@ void MenuPage::onTransitionComplete(PageState state, void* param) {
 // @addr 0x8050d4a4
 void MenuPage::requestTransition(u32 nextPage, u32 param) {
     mTransitionId = 0x8B;
-    resolveTransitionParam(param);
+    resolveTransitionParam((void*)&nextPage);
     setLayoutReady(this, 1);
 }
 
@@ -172,7 +173,7 @@ void MenuPage::requestTransition(u32 nextPage, u32 param) {
 void MenuPage::setNavigationTarget(MenuPage* page, u16 param) {
     if (mInitFlag == 0) {
         s16 pageType = page->getLayoutType();
-        initNavigationEntry(mNavigationList, page, pageType);
+        initNavigationEntry((uintptr_t)mNavigationList, (void*)page, pageType);
 
         // Find matching page type in lookup table
         for (s32 i = 0; i < 12; i++) {

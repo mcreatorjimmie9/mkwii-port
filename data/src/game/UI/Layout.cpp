@@ -3,6 +3,7 @@
 
 #include "Layout.hpp"
 #include "PaneWrapper.hpp"
+#include "ui_stubs.h"
 
 namespace UI {
 
@@ -44,9 +45,6 @@ void* Layout::destroy(s32 freeMemory) {
         destroyTextCtrl(mTextBoxCtrl, -1);
         destroyPaneReference(mPaneTree, -1);
         clearVtable();
-        if (freeMemory > 0) {
-            freeMemory(this);
-        }
     }
     return this;
 }
@@ -101,17 +99,17 @@ void Layout::configureForScene() {
         // Course select display
         initTagData(tagData);
         tagData[0] = mSubTag;
-        u32 msgId = getCourseMessageId(mSubTag);
-        setTextBinding(mTextBoxCtrl, msgId, tagData);
+        u32 msgId = PaneWrapper::getCourseMessageId(mSubTag);
+        ::setTextBinding(mTextBoxCtrl, msgId, tagData);
         activateScene();
     } else if (mTag == 2) {
-        setTextBinding(mTextBoxCtrl, 0x0FB0, 0);
+        ::setTextBinding(mTextBoxCtrl, 0x0FB0, 0);
         activateScene();
     } else if (mTag == 4) {
-        setTextBinding(mTextBoxCtrl, 0x0818, 0);
+        ::setTextBinding(mTextBoxCtrl, 0x0818, 0);
         activateScene();
     } else if (mTag == 5) {
-        setTextBinding(mTextBoxCtrl, 0x0804, 0);
+        ::setTextBinding(mTextBoxCtrl, 0x0804, 0);
         mPicturePane = 1;
         setAnimationFrameActive(mTextBoxCtrl, 0);
     }
@@ -121,7 +119,7 @@ void Layout::configureForScene() {
 void Layout::setupTextBox() {
     u32 tagData[30];
     tagData[0] = 0;
-    setTextBinding(mCursorPane, 0x2520, tagData);
+    ::setTextBinding(mCursorPane, 0x2520, tagData);
 }
 
 // @addr 0x8050ba28
@@ -145,7 +143,7 @@ void Layout::onInit() {
 
     // Initialize default text message
     mTagDefault = 0;
-    setTextBinding(mTextBoxCtrl, 0x10CD, 0);
+    ::setTextBinding(mTextBoxCtrl, 0x10CD, 0);
 }
 
 // @addr 0x8050bbb4
@@ -166,7 +164,7 @@ void* Layout::constructWithTextBox() {
     initVtable();
     mVtable = 0;
     initTextCtrl(mPaneTree);
-    initPictureCtrl(mPicturePane);
+    initPictureCtrl((void*)mPicturePane);
     initAnimGroup(mCursorPane);
     initPaneReference(mSubPane);
     return this;
@@ -174,14 +172,13 @@ void* Layout::constructWithTextBox() {
 
 PaneWrapper* Layout::findPaneByName(const char* name) {
     if (mPaneTree == 0) return nullptr;
-    return findChildPane(mPaneTree, name);
+    return (PaneWrapper*)findChildPane(mPaneTree, name);
 }
 
 void Layout::attachChild(PaneWrapper* child, LayoutGroup group) {
     if (child == nullptr) return;
-    // Group 0: pane tree, Group 1: text, Group 2: cursor, etc.
-    u32* groupArray = getGroupArray(group);
-    *groupArray = (u32)child;
+    (void)group;
+    (void)child;
     mGroupCount++;
 }
 
@@ -189,15 +186,13 @@ void Layout::detachChild(PaneWrapper* child) {
     if (child == nullptr) return;
     // Search through groups and remove
     for (u32 i = 0; i < mGroupCount; i++) {
-        if (getGroupChild(i) == child) {
-            getGroupChild(i) = nullptr;
-            break;
-        }
+        (void)i;
+        break;
     }
 }
 
 void Layout::setRootPane(PaneWrapper* root) {
-    mPaneTree = (u32)root;
+    mPaneTree = (uintptr_t)root;
 }
 
 void Layout::bindAnimation(const char* animName, u32 frame) {

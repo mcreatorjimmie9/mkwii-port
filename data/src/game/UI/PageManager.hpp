@@ -34,7 +34,7 @@ public:
     ~PageManager();
 
     // @addr 0x8062559c
-    void* destroy(void* buffer, s32 freeMemory);
+    void* destroy(void* buffer, s32 shouldFree);
 
     // Page lifecycle
     // @addr 0x8062568c
@@ -96,7 +96,7 @@ private:
     u32 mLayoutGroupC;      // 0x170 - tertiary layout group
 
     // Shared layout reference
-    u32 mSharedLayout;      // 0x190
+    u32* mSharedLayout;     // 0x190
 
     // Focus
     s32 mFocusIndex;        // 0x174

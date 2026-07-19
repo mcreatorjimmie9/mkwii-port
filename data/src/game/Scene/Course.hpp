@@ -10,6 +10,7 @@
 // - Collision with static course geometry
 
 #include "rk_common.h"
+#include <EGG/math.h>
 
 namespace Scene {
 

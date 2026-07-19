@@ -5,6 +5,8 @@
 #include "MenuPage.hpp"
 #include "Layout.hpp"
 #include "LayoutLoader.hpp"
+#include "PaneWrapper.hpp"
+#include "ui_stubs.h"
 
 namespace UI {
 
@@ -125,7 +127,7 @@ void SectionDirector::onSceneChange(MenuPage* page, s32 sceneId, s32 param) {
     mTargetSceneId = sceneId;
 
     // Find and update the scene name pane
-    PaneWrapper* namePane = findPaneByIndex(page + 0x24, 0);
+    PaneWrapper* namePane = (PaneWrapper*)findPaneByIndex((void*)((u8*)page + 0x24), 0);
     if (namePane != nullptr && isPaneVisible(namePane)) {
         u32 msgId = getSceneNameMessageId(mTargetSceneId);
         setTextBinding(namePane, msgId, 0);
@@ -190,11 +192,11 @@ void SectionDirector::resolveCourseAssignments() {
         }
 
         // Look up the actual course from assignment tables
-        u32 courseTableIdx = getCourseTableIndex(resolvedId);
+        u32 courseTableIdx = getCourseTableIndex(courseId);
         u32 tableEntry = getCourseTableEntry(courseTableIdx);
 
         while (!isValidCourseEntry(tableEntry)) {
-            courseTableIdx = getCourseTableIndex(resolvedId);
+            courseTableIdx = getCourseTableIndex(courseId);
             tableEntry = getCourseTableEntry(courseTableIdx);
         }
 
@@ -253,10 +255,10 @@ MenuPage* SectionDirector::findPageByAnimGroup(s32 sceneType, u32 groupIdx, u32 
     do {
         if (paneIdx >= mSceneCount) return nullptr;
 
-        PaneWrapper* pane = findPaneByIndex(mSceneLayout + 0x24,
+        PaneWrapper* pane = (PaneWrapper*)findPaneByIndex((void*)((u8*)mSceneLayout + 0x24),
                                               (sceneType == 2) + 1);
-        pane = findPaneByIndex(pane + 0x68, groupIdx);
-        MenuPage* page = (MenuPage*)findPaneByIndex(pane + 0x68, animIdx);
+        pane = (PaneWrapper*)findPaneByIndex((void*)((u8*)pane + 0x68), groupIdx);
+        MenuPage* page = (MenuPage*)findPaneByIndex((void*)((u8*)pane + 0x68), animIdx);
 
         if (page != nullptr && isPaneVisible(page)) {
             if (isPaneBound(page)) {
@@ -274,10 +276,10 @@ MenuPage* SectionDirector::findPageByPane(s32 sceneType, s32 paneIndex) {
         if (idx < (u32)mSceneCount) return nullptr;
 
         for (u32 j = 0; j < mSceneCount; j++) {
-            PaneWrapper* pane = findPaneByIndex(mSceneLayout + 0x24,
+            PaneWrapper* pane = (PaneWrapper*)findPaneByIndex((void*)((u8*)mSceneLayout + 0x24),
                                                   (sceneType == 2) + 1);
-            pane = findPaneByIndex(pane + 0x68, j);
-            MenuPage* page = (MenuPage*)findPaneByIndex(pane + 0x68, idx);
+            pane = (PaneWrapper*)findPaneByIndex((void*)((u8*)pane + 0x68), j);
+            MenuPage* page = (MenuPage*)findPaneByIndex((void*)((u8*)pane + 0x68), idx);
 
             if (page != nullptr && isPaneBound(page) &&
                 isPaneVisible(page) && page->getPaneIndex() == paneIndex) {

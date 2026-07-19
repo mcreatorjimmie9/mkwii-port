@@ -84,8 +84,8 @@ private:
     static LayoutLoader* sInstance;
 
     // Resource cache (up to 32 entries)
-    LayoutResource mCache[32];
-    u32 mCacheCount;
+    static LayoutResource sCache[32];
+    static u32 sCacheCount;
 
     // Active layout tracking
     Layout* mActiveLayout;

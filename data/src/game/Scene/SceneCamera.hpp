@@ -7,6 +7,7 @@
 // between camera states. The camera also manages split-screen layouts.
 
 #include "rk_common.h"
+#include <EGG/math.h>
 
 namespace Scene {
 

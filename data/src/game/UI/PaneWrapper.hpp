@@ -57,12 +57,20 @@ protected:
     u32 mVtable;               // 0x00
     u8 mPaneData[0x10];       // 0x04 - nw4r::lyt::Pane internal
     u32 mAnimationFrameCtrl;  // 0x14
+    u32 mGroupChain;          // linked list chain
     u16 mGroupId;             // 0x18
     u16 mTag;                 // 0x1A
     PaneFlag mFlags;          // 0x1C
     u8 _1D;
     u8 _1E;
     u8 _1F;
+
+    // Runtime state
+    u32 mTransitionState;      // transition state for pane
+    u32 mState;                // pane state (4 = active)
+    u32 mOverlayActive;        // overlay flag
+    u8 mInitFlag;              // initialization flag
+    u8 mOverlayFlag;           // overlay visibility
 };
 
 } // namespace UI

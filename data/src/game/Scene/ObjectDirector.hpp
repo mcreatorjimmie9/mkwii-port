@@ -8,6 +8,7 @@
 // It uses a linked-list / array-based object pool pattern.
 
 #include "rk_common.h"
+#include <EGG/math.h>
 
 namespace Scene {
 

@@ -80,6 +80,9 @@ enum PageId {
 };
 
 class MenuPage {
+    friend class SectionDirector;
+    friend class UIManager;
+    friend class PageManager;
 public:
     MenuPage();
     virtual ~MenuPage();
@@ -116,11 +119,19 @@ public:
 
     // --- State queries ---
     PageState getPageState() const { return mState; }
-    PageId getPageId() const { return mPageId; }
+    u32 getPageIdRaw() const { return mPageId; }
+    u32 getPageId() const { return mPageId; }
     bool isActive() const { return mState == PAGE_STATE_ACTIVE; }
 
     // @addr 0x8060a194
     void setNavigationTarget(MenuPage* page, u16 param);
+
+    // Additional accessors for director/manager
+    s16 getLayoutType() const { return (s16)mPageId; }
+    u32 getGhostDataId() const { return 0; }
+    u32 getReplayDataId() const { return 0; }
+    s32 getPaneIndex() const { return 0; }
+    void setParentGroup(u32 group) { (void)group; }
 
 protected:
     u32 mVtable;               // 0x000
@@ -128,6 +139,7 @@ protected:
     u32 mPrevPageId;           // 0x008
     PageState mState;          // 0x00C
     TransitionType mTransition;// 0x010
+    u32 mSubTag;             // sub-tag for display info
     u8 mInitFlag;              // 0x014 - whether onLoad has been called
     u8 _15;
     u16 mTransitionParam;      // 0x016
@@ -150,6 +162,11 @@ protected:
     u16 mNavParam;             // 0xFAC - navigation parameter
     u8 mIsVisible;             // 0xFAE
     u8 _FAF;
+
+    // Navigation
+    u32 mNavigationList[12]; // navigation entry table
+    static const s32 sPageTypeTable[12];
+    static const u32 sPageIdTable[12];
 
     // Cursor-related (for character/kart/course select)
     u32 mCursorX;              // 0xFB0

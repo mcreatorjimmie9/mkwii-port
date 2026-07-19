@@ -6,6 +6,7 @@
 // and transient visual effects during races (stars, sparks, smoke, etc.)
 
 #include "rk_common.h"
+#include <EGG/math.h>
 
 namespace Scene {
 

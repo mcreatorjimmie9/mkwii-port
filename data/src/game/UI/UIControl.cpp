@@ -4,6 +4,7 @@
 #include "UIControl.hpp"
 #include "Layout.hpp"
 #include "AnimationController.hpp"
+#include "ui_stubs.h"
 
 namespace UI {
 
@@ -38,7 +39,7 @@ UIControl::UIControl()
     , mInitialized(0)
     , mInputCaptured(0)
     , _pad{0,0}
-    , mSceneGroupPane(0)
+    , mSceneGroupPane(nullptr)
     , mPanelCount(0)
     , mResultValue(0) {
 }
@@ -191,8 +192,8 @@ void UIControl::applyPosition(u32* positionData) {
     mInputCooldown = 0;
 
     // Set initial highlight
-    uVar3 = mPosX;
-    uVar4 = mPosY;
+    f32 uVar3 = mPosX;
+    f32 uVar4 = mPosY;
     mPosX = uVar3;
     mPosY = uVar4;
     f32 z = mPosZ + getGlobalTime();

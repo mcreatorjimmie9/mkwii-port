@@ -3,16 +3,17 @@
 
 #include "LayoutLoader.hpp"
 #include "Layout.hpp"
+#include "ui_stubs.h"
 
 namespace UI {
 
 LayoutLoader* LayoutLoader::sInstance = nullptr;
+LayoutResource LayoutLoader::sCache[32] = {};
+u32 LayoutLoader::sCacheCount = 0;
 
 LayoutLoader::LayoutLoader()
     : mActiveLayout(nullptr)
-    , mCacheCount(0)
     , mPendingLoads(0) {
-    memset(mCache, 0, sizeof(mCache));
 }
 
 LayoutLoader::~LayoutLoader() {
@@ -55,9 +56,6 @@ void* LayoutLoader::destroyWithTextBox(void* buffer, s32 freeMemory) {
         destroyPictureCtrl((u8*)buffer + 0x1B8, -1);
         destroyPaneReference((u8*)buffer + 0x44, -1);
         clearVtable();
-        if (freeMemory > 0) {
-            freeMemory(buffer);
-        }
     }
     return buffer;
 }
@@ -78,9 +76,6 @@ void* LayoutLoader::destroySimplePane(void* buffer, s32 freeMemory) {
     if (buffer != nullptr) {
         destroyPaneReference((u8*)buffer + 0x58, -1);
         clearVtable();
-        if (freeMemory > 0) {
-            freeMemory(buffer);
-        }
     }
     return buffer;
 }
@@ -178,22 +173,22 @@ void LayoutLoader::clearTextBinding(void* ctrl, u32 group) {
 LayoutResource* LayoutLoader::loadResource(const char* name, LayoutResourceType type) {
     // Check cache first
     u32 hash = computeHash(name);
-    for (u32 i = 0; i < mCacheCount; i++) {
-        if (mCache[i].nameHash == hash && mCache[i].type == type) {
-            mCache[i].refCount++;
-            return &mCache[i];
+    for (u32 i = 0; i < sCacheCount; i++) {
+        if (sCache[i].nameHash == hash && sCache[i].type == type) {
+            sCache[i].refCount++;
+            return &sCache[i];
         }
     }
 
     // Load from archive
-    if (mCacheCount >= 32) {
+    if (sCacheCount >= 32) {
         // Evict least-recently-used
         evictLRU();
     }
 
-    LayoutResource* res = &mCache[mCacheCount++];
+    LayoutResource* res = &sCache[sCacheCount++];
     res->nameHash = hash;
-    res->resourcePtr = loadFromArchive(name);
+    res->resourcePtr = (u32*)loadFromArchive(name);
     res->refCount = 1;
     res->type = type;
     return res;
@@ -209,13 +204,13 @@ void LayoutLoader::releaseResource(LayoutResource* resource) {
 }
 
 void LayoutLoader::flushCache() {
-    for (u32 i = 0; i < mCacheCount; i++) {
-        if (mCache[i].resourcePtr != nullptr) {
-            unloadResource(mCache[i].resourcePtr);
-            mCache[i].resourcePtr = nullptr;
+    for (u32 i = 0; i < sCacheCount; i++) {
+        if (sCache[i].resourcePtr != nullptr) {
+            unloadResource(sCache[i].resourcePtr);
+            sCache[i].resourcePtr = nullptr;
         }
     }
-    mCacheCount = 0;
+    sCacheCount = 0;
 }
 
 } // namespace UI

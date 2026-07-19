@@ -8,6 +8,7 @@
 // This is separate from ObjectDirector which handles dynamic scene objects.
 
 #include "rk_common.h"
+#include <EGG/math.h>
 
 namespace Scene {
 

@@ -4,6 +4,7 @@
 #include "TextInput.hpp"
 #include "Layout.hpp"
 #include "LayoutLoader.hpp"
+#include "ui_stubs.h"
 
 namespace UI {
 

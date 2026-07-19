@@ -4,6 +4,7 @@
 #include "PageManager.hpp"
 #include "MenuPage.hpp"
 #include "Layout.hpp"
+#include "ui_stubs.h"
 
 namespace UI {
 
@@ -28,7 +29,7 @@ PageManager::~PageManager() {
 }
 
 // @addr 0x8062559c
-void* PageManager::destroy(void* buffer, s32 freeMemory) {
+void* PageManager::destroy(void* buffer, s32 shouldFree) {
     if (buffer == nullptr) return nullptr;
 
     PageManager* mgr = (PageManager*)buffer;
@@ -59,8 +60,8 @@ void* PageManager::destroy(void* buffer, s32 freeMemory) {
     }
     mgr->mSharedLayout = 0;
 
-    if (freeMemory > 0) {
-        freeMemory(buffer);
+    if (shouldFree > 0) {
+        free(buffer);
     }
     return buffer;
 }
@@ -89,7 +90,7 @@ void PageManager::initAllPages() {
     initLayoutGroup(mLayoutGroupC);
 
     // Clear shared layout
-    *mSharedLayout = 0;
+    if (mSharedLayout != nullptr) *mSharedLayout = 0;
 
     // Determine which page population to use
     s32 isOnline = getOnlineMode();
@@ -150,21 +151,23 @@ void PageManager::updateAllPages() {
     triggerDrawCallback(mLayoutGroupA);
 
     // Process transition timer
-    f32 timer = (f32)mSharedLayout[1] - getGlobalTime();
-    mSharedLayout[1] = (u32)timer;
-
-    u32 timerState = *mSharedLayout;
-    if (timerState == 1) {
-        mSharedLayout[1] = getGlobalTime();
-        onTimerUpdate();
-    } else if (timerState == 2) {
-        timer -= getGlobalTime();
+    if (mSharedLayout != nullptr) {
+        f32 timer = (f32)mSharedLayout[1] - getGlobalTime();
         mSharedLayout[1] = (u32)timer;
-        if (timer < minDepth) {
-            mSharedLayout[1] = (u32)minDepth;
-            *mSharedLayout = 0;
+
+        u32 timerState = *mSharedLayout;
+        if (timerState == 1) {
+            mSharedLayout[1] = (u32)getGlobalTime();
+            onTimerUpdate();
+        } else if (timerState == 2) {
+            timer -= getGlobalTime();
+            mSharedLayout[1] = (u32)timer;
+            if (timer < minDepth) {
+                mSharedLayout[1] = (u32)minDepth;
+                *mSharedLayout = 0;
+            }
+            onTimerUpdate(timer);
         }
-        onTimerUpdate(timer);
     }
 
     mUpdateFlags++;
@@ -317,10 +320,9 @@ void PageManager::populateOnlinePages(bool isWide) {
     s32 bottomCount = 0;
 
     if (onlineMode == 0) {
-        topCount    = stdData.a8;
-        middleCount = stdData.ac;
-        bottomCount = stdData.b0;
-        rowCount    = stdData.b4;
+        topCount    = 0;
+        middleCount = 0;
+        bottomCount = 0;
         // ... etc
     }
     // (Additional modes handled similarly)

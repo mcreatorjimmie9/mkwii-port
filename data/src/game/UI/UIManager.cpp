@@ -3,7 +3,9 @@
 #include "UIManager.hpp"
 #include "MenuPage.hpp"
 #include "Layout.hpp"
+#include "PaneWrapper.hpp"
 #include "AnimationController.hpp"
+#include "ui_stubs.h"
 
 namespace UI {
 
@@ -197,7 +199,7 @@ void UIManager::popPage(u32 param, u32 playerMask) {
 
     // Trigger callback if available
     if (getGlobalState().callbackSystem != nullptr) {
-        getGlobalState().callbackSystem->onSceneComplete(playerMask);
+        ((CallbackSystem*)getGlobalState().callbackSystem)->onSceneComplete(playerMask);
     }
 }
 
@@ -264,7 +266,7 @@ void UIManager::handleOverlayInput() {
     if (page != nullptr && isPageInList(page)) {
         page->setPageVisible(true);
         sendPageMessage(page, 0x0FAB, 0);
-        sendPageMessage(page, 0x0FAC, 0, 1, this + 0x16);
+        sendPageMessage(page, 0x0FAC, 0, 1, 0, (void*)((u8*)this + 0x16));
         sendPageMessage(page, 0x0FAD, 0, -1, 0);
         page->setUpdateFlag(1);
         onButtonAction(this, 0x4E, 0);
@@ -288,7 +290,7 @@ void UIManager::onSceneChange(MenuPage* page, s32 sceneId, s32 param) {
     mSceneChangeTarget = sceneId;
 
     // Find the pane for the scene name display
-    PaneWrapper* namePane = findPaneByIndex(page + 0x24, 0);
+    PaneWrapper* namePane = (PaneWrapper*)findPaneByIndex((void*)((u8*)page + 0x24), 0);
     if (namePane != nullptr && isPaneVisible(namePane)) {
         u32 msgId = getSceneNameMessageId(sceneId);
         setTextBinding(namePane, msgId, 0);

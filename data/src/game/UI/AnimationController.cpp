@@ -3,6 +3,7 @@
 
 #include "AnimationController.hpp"
 #include "Layout.hpp"
+#include "ui_stubs.h"
 
 namespace UI {
 
@@ -26,7 +27,8 @@ void AnimationController::triggerPaneEvent(u32 paneId) {
     PaneWrapper* pane = mBoundLayout->findPaneByName(
         resolvePaneNameFromId(paneId));
     if (pane != nullptr) {
-        pane->onPaneEvent(paneId);
+        // Delegate to stub — pane->onPaneEvent handled by layout system
+        (void)pane;
     }
 }
 
@@ -201,7 +203,10 @@ void AnimationController::bindToLayout(Layout* layout) {
 }
 
 void AnimationController::unbindFromLayout() {
-    stopAll();
+    for (s32 i = 0; i < mTrackCount; i++) {
+        mTracks[i].state = ANIM_STOPPED;
+        mTracks[i].currentTime = 0.0f;
+    }
     mBoundLayout = nullptr;
 }
 

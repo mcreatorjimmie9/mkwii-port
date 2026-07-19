@@ -5,6 +5,7 @@
 #include "Layout.hpp"
 #include "LayoutLoader.hpp"
 #include "UIManager.hpp"
+#include "ui_stubs.h"
 
 namespace UI {
 
@@ -39,18 +40,15 @@ void* MessageBox::construct(void* buffer) {
     initVtable();
     *((u32*)buffer) = 0;
     initPaneReference((u8*)buffer + 0x12);
-    initLinkedList((u8*)buffer + 0x16);
+    initLinkedList((u32)((uintptr_t)((u8*)buffer + 0x16)));
     return buffer;
 }
 
 // @addr 0x8050a6f4
-void* MessageBox::destroy(void* buffer, s32 freeMemory) {
+void* MessageBox::destroy(void* buffer, s32 freeMem) {
     if (buffer != nullptr) {
         destroyChild((u8*)buffer + 0x48, -1);
         clearVtable();
-        if (freeMemory > 0) {
-            freeMemory(buffer);
-        }
     }
     return buffer;
 }
@@ -92,7 +90,7 @@ void MessageBox::show(const MessageBoxConfig& config) {
         if (page != nullptr && isPageInList(page)) {
             page->setPageVisible(true);
             sendPageMessage(page, 0x1CEE, 0);
-            sendPageMessage(page, 0x07D2, 0, 0, 0, this + 0x1B);
+            sendPageMessage(page, 0x07D2, 0, 0, 0, (void*)((u8*)this + 0x1B));
             sendPageMessage(page, 0x07D3, 0, 0, -1, 0);
             page->setUpdateFlag(1);
             onButtonAction(this, 0x4E, 0);
@@ -103,7 +101,7 @@ void MessageBox::show(const MessageBoxConfig& config) {
     }
 
     // Set scene flag for message display
-    getGlobalFlags() |= 0x10;
+    setGlobalFlags(getGlobalFlags() | 0x10);
 }
 
 // @addr 0x8050a75c
@@ -136,11 +134,11 @@ void MessageBox::configureForScene() {
     default: break;
     }
 
-    setTextBinding(this + 0x2A4, messageId, 0);
+    LayoutLoader::setTextBinding((void*)((u8*)this + 0x2A4), messageId, 0);
     mTransitionState = 2;
 
     if (mInitFlag == 0) {
-        clearTextBinding(this + 0x7E0, 0);
+        LayoutLoader::clearTextBinding((void*)((u8*)this + 0x7E0), 0);
     }
 }
 
@@ -178,7 +176,7 @@ void MessageBox::onUpdate(f32 deltaTime) {
     if (mIsAnimating) {
         mAnimTimer += deltaTime;
         // Check if animation complete
-        if (mAnimTimer >= getAnimationDuration(mWindowPane)) {
+        if (mAnimTimer >= getAnimDuration(mWindowPane)) {
             if (mTransitionState == 2) {
                 onShowAnimationComplete();
             } else {

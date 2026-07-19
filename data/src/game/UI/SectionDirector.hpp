@@ -94,6 +94,13 @@ public:
     void setSceneCount(u32 count) { mSceneCount = count; }
     u32 getSceneCount() const { return mSceneCount; }
 
+    // Scene transition helper
+    void performSceneTransition(u32 param, u32 sceneId, MenuPage* page) { (void)param; (void)sceneId; (void)page; }
+
+    // Access to current scene for sub-directors
+    u32 getCurrentSceneIdRaw() const { return mCurrentSceneId; }
+    void setCurrentSceneId(u32 id) { mCurrentSceneId = id; }
+
     // Course assignment data
     struct CourseAssignment {
         u8 courseId;
@@ -133,9 +140,9 @@ private:
     f32 mTransitionTimer;
 
     // Internal routing
-    s32 routeSpecialScene(u32 sceneId);
-    s32 routeGhostScene(u32 sceneId);
-    s32 routeTournamentScene(u32 sceneId);
+    static s32 routeSpecialScene(u32 sceneId);
+    static s32 routeGhostScene(u32 sceneId);
+    static s32 routeTournamentScene(u32 sceneId);
     void executeSceneChange(u32 targetScene, u32 playerMask);
 
     // @addr 0x8070f680

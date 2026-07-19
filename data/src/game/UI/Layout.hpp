@@ -25,7 +25,9 @@ enum LayoutGroup {
     LAYOUT_GROUP_PICTURE = 4,
 };
 
+class LayoutLoader; // friend declaration
 class Layout {
+    friend class LayoutLoader;
 public:
     Layout();
     virtual ~Layout();
@@ -87,6 +89,13 @@ protected:
     u32 mMainGroupPane;        // 0x478 - main content group
     LayoutState mState;        // 0x6B0
     u32 mTag;                  // 0x6B4
+    u32 mSubTag;               // sub-tag for display info
+    u32 mTagDefault;           // default tag value
+    u32 mSubPane;              // sub-pane reference
+    u32 mGroupChain;           // linked list chain for groups
+    u32 mInitFlag;             // initialization flag
+    u32 mTransitionId;         // transition message ID
+    u32 mCancelFlag;           // cancellation flag
     u8 mFlags;                 // 0x6B5
     u8 _6B6[2];
     u32 mGroupCount;           // 0x6B8

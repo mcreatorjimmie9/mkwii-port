@@ -43,6 +43,9 @@ public:
     // @addr 0x8050f41c
     void handleInput(u32 input);
 
+    // Confirmation
+    virtual void onConfirm() {}
+
     // @addr 0x8050f598
     void setConfirmEnabled(bool enabled);
     // @addr 0x8050f678
@@ -117,6 +120,8 @@ private:
     // Cursor animation
     f32 mCursorAnimTime;       // 0x2C7
     u8 mCursorConfirmed;       // 0x2C6
+    u8 mInitFlag;              // initialization flag
+    u32 mNavigationTarget;     // navigation target ID
     u8 _pad[1];
 };
 

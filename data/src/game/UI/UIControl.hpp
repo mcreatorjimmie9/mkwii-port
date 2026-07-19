@@ -142,7 +142,7 @@ protected:
     u8 _pad[2];
 
     // Scene interaction
-    u32 mSceneGroupPane;       // 0xB0
+    UIControl* mSceneGroupPane;  // 0xB0
     u32 mPanelCount;           // 0xEC
     u32 mResultValue;          // 0xF0
 
