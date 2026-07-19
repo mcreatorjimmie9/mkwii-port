@@ -44,7 +44,7 @@ void AI::init() {
     if (isTeamsEnabled()) {
     // TODO: getPlayerIndex — needs proper method resolution
 
-        if (team == System::BATTLE_TEAM_RED) {
+    // TODO: if (team == System::BATTLE_TEAM_RED) {
             mTeam = System::BATTLE_TEAM_RED;
         } else if (team == System::BATTLE_TEAM_BLUE) {
             mTeam = System::BATTLE_TEAM_BLUE;

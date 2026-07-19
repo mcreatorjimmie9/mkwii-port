@@ -234,7 +234,7 @@ public:
   // @addr 0x80532644
   RaceConfig();
   // @addr 0x80532520
-  ~RaceConfig() override;
+  ~RaceConfig();
 
   // @addr 0x8053093c
   void clear();

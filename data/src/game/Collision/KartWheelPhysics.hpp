@@ -1,3 +1,4 @@
+#include <game/kart/KartObjectProxy.hpp>
 #pragma once
 
 #include <rk_types.h>

@@ -132,7 +132,7 @@ void KartDynamics::calc(f32 dt, f32 maxSpeed, s32 air) {
 
     EGG::Vector3f kartBack2 = EGG::Vector3f::ez;
     EGG::Vector3f kartBack;
-    kartBack.fromRotated(this->mainRot, kartBack2);
+    // TODO: kartBack.fromRotated(this->mainRot, kartBack2);
     kartBack2 = kartBack;
 
     EGG::Vector3f kartBackHorizontal = kartBack;

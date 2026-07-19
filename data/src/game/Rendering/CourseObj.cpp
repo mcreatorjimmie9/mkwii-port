@@ -24,14 +24,14 @@ static CourseObjManager* sCourseObjManager = nullptr;
 u8 CourseObjActor_GetID(CourseObjActor* self) {
     void* vtbl = self->vtable;
     void* inner = *reinterpret_cast<void**>(vtbl);
-    return *reinterpret_cast<u8*>(static_cast<u8*>(inner) + 0x10);
+    return *reinterpret_cast<u8*>(reinterpret_cast<u8*>(inner) + 0x10);
 }
 
 // 0x8061E010 (12 bytes)
 // Get the manager: this->vtable->0x1C
 void* CourseObjActor_GetManager(CourseObjActor* self) {
     void* vtbl = self->vtable;
-    return *reinterpret_cast<void**>(static_cast<u8*>(vtbl) + 0x1C);
+    return *reinterpret_cast<void**>(reinterpret_cast<u8*>(vtbl) + 0x1C);
 }
 
 // 0x8061E02C (16 bytes)
@@ -39,8 +39,8 @@ void* CourseObjActor_GetManager(CourseObjActor* self) {
 //   this->vtable->0x14->0x0C, then branch to 0x808F4360
 void CourseObjActor_CallAnimate(CourseObjActor* self, s32 type) {
     void* vtbl = self->vtable;
-    void* movement = *reinterpret_cast<void**>(static_cast<u8*>(vtbl) + 0x14);
-    void* fn = *reinterpret_cast<void**>(static_cast<u8*>(movement) + 0x0C);
+    void* movement = *reinterpret_cast<void**>(reinterpret_cast<u8*>(vtbl) + 0x14);
+    void* fn = *reinterpret_cast<void**>(reinterpret_cast<u8*>(movement) + 0x0C);
     // Branch to external animate function at 0x808F4360
     // ((void(*)(void*, s32, void*))(0x808F4360))(movement, type, fn);
 }
@@ -49,14 +49,14 @@ void CourseObjActor_CallAnimate(CourseObjActor* self, s32 type) {
 // Get the movement controller: this->vtable->0x14
 void* CourseObjActor_GetMovement(CourseObjActor* self) {
     void* vtbl = self->vtable;
-    return *reinterpret_cast<void**>(static_cast<u8*>(vtbl) + 0x14);
+    return *reinterpret_cast<void**>(reinterpret_cast<u8*>(vtbl) + 0x14);
 }
 
 // 0x8061E59C (12 bytes)
 // Get the animation object: this->vtable->0x2C
 void* CourseObjActor_GetAnimObj(CourseObjActor* self) {
     void* vtbl = self->vtable;
-    return *reinterpret_cast<void**>(static_cast<u8*>(vtbl) + 0x2C);
+    return *reinterpret_cast<void**>(reinterpret_cast<u8*>(vtbl) + 0x2C);
 }
 
 // 0x8061E5D8 (44 bytes)
@@ -64,9 +64,9 @@ void* CourseObjActor_GetAnimObj(CourseObjActor* self) {
 //   this->vtable->0x2C->vtable->0x0C (vtable[3])
 void CourseObjActor_CallCreate(CourseObjActor* self, s32 a, s32 b, s32 c, s32 d) {
     void* vtbl = self->vtable;
-    void* animObj = *reinterpret_cast<void**>(static_cast<u8*>(vtbl) + 0x2C);
+    void* animObj = *reinterpret_cast<void**>(reinterpret_cast<u8*>(vtbl) + 0x2C);
     void* animVtbl = *reinterpret_cast<void**>(animObj);
-    void* fn = *reinterpret_cast<void**>(static_cast<u8*>(animVtbl) + 0x0C);
+    void* fn = *reinterpret_cast<void**>(reinterpret_cast<u8*>(animVtbl) + 0x0C);
     // bctrl — indirect call to vtable method
     // ((void(*)(void*, s32, s32, s32, s32, s32))(fn))(animObj, 0, 0, 0, 0xC, 0);
 }
@@ -75,8 +75,8 @@ void CourseObjActor_CallCreate(CourseObjActor* self, s32 a, s32 b, s32 c, s32 d)
 // Get the animation manager: this->vtable->0x2C->0x1C
 void* CourseObjActor_GetAnimMgr(CourseObjActor* self) {
     void* vtbl = self->vtable;
-    void* animObj = *reinterpret_cast<void**>(static_cast<u8*>(vtbl) + 0x2C);
-    return *reinterpret_cast<void**>(static_cast<u8*>(animObj) + 0x1C);
+    void* animObj = *reinterpret_cast<void**>(reinterpret_cast<u8*>(vtbl) + 0x2C);
+    return *reinterpret_cast<void**>(reinterpret_cast<u8*>(animObj) + 0x1C);
 }
 
 // 0x8061E6BC (20 bytes)
@@ -84,7 +84,7 @@ void* CourseObjActor_GetAnimMgr(CourseObjActor* self) {
 // Otherwise, branch to 0x8062DE24 (external calc function)
 void CourseObjActor_CallCalcAnim(CourseObjActor* self) {
     void* vtbl = self->vtable;
-    void* fn = *reinterpret_cast<void**>(static_cast<u8*>(vtbl) + 0x24);
+    void* fn = *reinterpret_cast<void**>(reinterpret_cast<u8*>(vtbl) + 0x24);
     if (fn != nullptr) {
         // beqlr — return if null, otherwise call 0x8062DE24
         // ((void(*)(CourseObjActor*))(0x8062DE24))(self);
@@ -95,9 +95,9 @@ void CourseObjActor_CallCalcAnim(CourseObjActor* self) {
 // Get course data: this->vtable->0x08->0x90->0x04
 void* CourseObjActor_GetCourseData(CourseObjActor* self) {
     void* vtbl = self->vtable;
-    void* base = *reinterpret_cast<void**>(static_cast<u8*>(vtbl) + 0x08);
-    void* courseData = *reinterpret_cast<void**>(static_cast<u8*>(base) + 0x90);
-    return *reinterpret_cast<void**>(static_cast<u8*>(courseData) + 0x04);
+    void* base = *reinterpret_cast<void**>(reinterpret_cast<u8*>(vtbl) + 0x08);
+    void* courseData = *reinterpret_cast<void**>(reinterpret_cast<u8*>(base) + 0x90);
+    return *reinterpret_cast<void**>(reinterpret_cast<u8*>(courseData) + 0x04);
 }
 
 // 0x8061DC70 (40 bytes)
@@ -108,19 +108,19 @@ void* CourseObjActor_GetCourseData(CourseObjActor* self) {
 void* CourseObjActor_GetIDTableEntry(CourseObjActor* self) {
     void* vtbl = self->vtable;
     void* inner = *reinterpret_cast<void**>(vtbl);
-    u8 objId = *reinterpret_cast<u8*>(static_cast<u8*>(inner) + 0x10);
+    u8 objId = *reinterpret_cast<u8*>(reinterpret_cast<u8*>(inner) + 0x10);
 
     void* global = sGlobalInstance;
-    void* table = *reinterpret_cast<void**>(static_cast<u8*>(global) + 0x0C);
-    void* entry = *reinterpret_cast<void**>(static_cast<u8*>(table) + (objId << 2));
-    return *reinterpret_cast<void**>(static_cast<u8*>(entry) + 0x48);
+    void* table = *reinterpret_cast<void**>(reinterpret_cast<u8*>(global) + 0x0C);
+    void* entry = *reinterpret_cast<void**>(reinterpret_cast<u8*>(table) + (objId << 2));
+    return *reinterpret_cast<void**>(reinterpret_cast<u8*>(entry) + 0x48);
 }
 
 // 0x8061DFE0 (12 bytes)
 // Get collision object: this->vtable->0x18
 void* CourseObjActor_GetCollisionObj(CourseObjActor* self) {
     void* vtbl = self->vtable;
-    return *reinterpret_cast<void**>(static_cast<u8*>(vtbl) + 0x18);
+    return *reinterpret_cast<void**>(reinterpret_cast<u8*>(vtbl) + 0x18);
 }
 
 // ============================================================================
@@ -176,7 +176,7 @@ void CourseObjActor_UpdateWithRotation(CourseObjActor* self, s32 variantIdx) {
     // Calculate pointer into the animation entry table
     // Entry offset = 0x2E0 + variantIdx * 0x0C
     u32 entryOffset = 0x2E0 + (variantIdx * 0x0C);
-    self->courseDataPtr = reinterpret_cast<uintptr_t>(static_cast<u8*>(courseData) + entryOffset);
+    self->courseDataPtr = reinterpret_cast<uintptr_t>(reinterpret_cast<u8*>(courseData) + entryOffset);
 
     // Set "loaded" flag (bit 14) on draw flags
     sub->drawFlags |= 0x4000;
@@ -195,7 +195,7 @@ void CourseObjActor_UpdateWithRotation(CourseObjActor* self, s32 variantIdx) {
         s32 sign = (variantIdx < lodMin) ? -1 : ((lodMin < variantIdx) ? 1 : 0);
         s32 absSign = (sign < 0) ? -sign : sign;
         u32 newOffset = 0x348 + (absSign * 0x0C);
-        self->courseDataPtr = reinterpret_cast<u32>(static_cast<u8*>(sRenderSettings) + newOffset);
+        self->courseDataPtr = reinterpret_cast<u32>(reinterpret_cast<u8*>(sRenderSettings) + newOffset);
 
         inLodRange = false;
 
@@ -233,13 +233,13 @@ void CourseObjActor_UpdateWithRotation(CourseObjActor* self, s32 variantIdx) {
         // Object was hidden — mark as such
         // Get the course data entry and load position
         void* entry = reinterpret_cast<void*>(self->courseDataPtr);
-        f32 entryY = *reinterpret_cast<f32*>(static_cast<u8*>(entry) + 8);
+        f32 entryY = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(entry) + 8);
 
         // Get world position from course data
         void* worldData = CourseObjActor_GetCourseData(self);
-        self->boundingBox.x = *reinterpret_cast<f32*>(static_cast<u8*>(worldData) + 0x74);
+        self->boundingBox.x = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(worldData) + 0x74);
         self->boundingBox.y = entryY;
-        self->boundingBox.z = *reinterpret_cast<f32*>(static_cast<u8*>(worldData) + 0x7C);
+        self->boundingBox.z = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(worldData) + 0x7C);
 
         // Copy current position
         Vec3f pos = self->position;
@@ -326,7 +326,7 @@ s32 CourseObjActor_InitVariant(CourseObjActor* self, void* a, s32 b, void* c, s3
         u8 objId = CourseObjActor_GetID(self);
         CourseObjManager* mgr = sCourseObjManager;
         u32 entryBase = objId * 0x248;
-        void* animEntry = static_cast<u8*>(mgr->actorArray) + entryBase;
+        void* animEntry = reinterpret_cast<u8*>(mgr->actorArray) + entryBase;
 
         // Create 3D animation
         anim3D_Init(animEntry, nullptr, 0, 0);
@@ -338,7 +338,7 @@ s32 CourseObjActor_InitVariant(CourseObjActor* self, void* a, s32 b, void* c, s3
         void* vtbl = self->vtable;
         typedef void (*SetAlphaFunc)(void*, f32);
         auto setAlpha = reinterpret_cast<SetAlphaFunc>(
-            *reinterpret_cast<u32*>(static_cast<u8*>(vtbl) + 0xE0));
+            *reinterpret_cast<u32*>(reinterpret_cast<u8*>(vtbl) + 0xE0));
         setAlpha(self, 0.0f);
 
         // Reset collision timer
@@ -351,7 +351,7 @@ s32 CourseObjActor_InitVariant(CourseObjActor* self, void* a, s32 b, void* c, s3
         // Check if audio has been initialized
         if (self->drawFlags2 == 0) {
             // Initialize 3D audio
-            void* audioObj = *reinterpret_cast<void**>(static_cast<u8*>(self) + 0x260);
+            void* audioObj = *reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x260);
             audio_Play3D(audioObj, 1);
             self->drawFlags2 = 1;
         }
@@ -378,7 +378,7 @@ s32 CourseObjActor_InitVariant(CourseObjActor* self, void* a, s32 b, void* c, s3
     u8 objId = CourseObjActor_GetID(self);
     CourseObjManager* mgr = sCourseObjManager;
     u32 entryBase = objId * 0x248;
-    void* animEntry = static_cast<u8*>(mgr->actorArray) + entryBase;
+    void* animEntry = reinterpret_cast<u8*>(mgr->actorArray) + entryBase;
     anim3D_Init(animEntry, nullptr, 0x0C, 0);
 
     // Set alpha to 0.0f
@@ -386,12 +386,12 @@ s32 CourseObjActor_InitVariant(CourseObjActor* self, void* a, s32 b, void* c, s3
     void* vtbl = self->vtable;
     typedef void (*SetAlphaFunc)(void*, f32);
     auto setAlpha = reinterpret_cast<SetAlphaFunc>(
-        *reinterpret_cast<u32*>(static_cast<u8*>(vtbl) + 0xE0));
+        *reinterpret_cast<u32*>(reinterpret_cast<u8*>(vtbl) + 0xE0));
     setAlpha(self, 0.0f);
 
     // Check if audio was initialized during creation
     if (self->drawFlags2 == 0) {
-        void* audioObj = *reinterpret_cast<void**>(static_cast<u8*>(self) + 0x260);
+        void* audioObj = *reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x260);
         audio_Play3D(audioObj, 1);
         self->drawFlags2 = 1;
     }
@@ -436,7 +436,7 @@ void CourseObjActor_TickTimer(CourseObjActor* self) {
     if (result == 0) {
         // Animation still running — reset timer from global
         void* global = sGlobalInstance;
-        self->animTimer = *reinterpret_cast<s16*>(static_cast<u8*>(global));
+        self->animTimer = *reinterpret_cast<s16*>(reinterpret_cast<u8*>(global));
         return;
     }
 
@@ -444,7 +444,7 @@ void CourseObjActor_TickTimer(CourseObjActor* self) {
     void* animObj = CourseObjActor_GetAnimObj(self);
 
     // Check if animation has more frames
-    s16 frameCount = *reinterpret_cast<s16*>(static_cast<u8*>(animObj) + 0xC4);
+    s16 frameCount = *reinterpret_cast<s16*>(reinterpret_cast<u8*>(animObj) + 0xC4);
     if (frameCount >= 0) {
         // Still has frames — continue animating
         CourseObjActor_CallCalcAnim(self);
@@ -453,7 +453,7 @@ void CourseObjActor_TickTimer(CourseObjActor* self) {
         void* animVtbl = *reinterpret_cast<void**>(animObj);
         typedef void (*UpdateFunc)(void*);
         auto updateFn = reinterpret_cast<UpdateFunc>(
-            *reinterpret_cast<u32*>(static_cast<u8*>(animVtbl) + 0x10));
+            *reinterpret_cast<u32*>(reinterpret_cast<u8*>(animVtbl) + 0x10));
         updateFn(animObj);
 
         // Call FX function
@@ -470,7 +470,7 @@ void CourseObjActor_TickTimer(CourseObjActor* self) {
         u8 objId = CourseObjActor_GetID(self);
         CourseObjManager* mgr = sCourseObjManager;
         u32 idx = objId << 2;
-        void** actorArray = *reinterpret_cast<void***>(static_cast<u8*>(mgr) + 0x68);
+        void** actorArray = *reinterpret_cast<void***>(reinterpret_cast<u8*>(mgr) + 0x68);
         void* audioEntry = actorArray[idx];
         audio_Stop3D(audioEntry);
 
@@ -482,19 +482,19 @@ void CourseObjActor_TickTimer(CourseObjActor* self) {
     CourseObjActor_CallCalcAnim(self);
 
     // Check if animation object has the "done" flag
-    s16 doneCount = *reinterpret_cast<s16*>(static_cast<u8*>(animObj) + 0xCC);
+    s16 doneCount = *reinterpret_cast<s16*>(reinterpret_cast<u8*>(animObj) + 0xCC);
     if ((doneCount & (1u << 30)) != 0) {
         // Has pending frames — kill 3D audio
         u8 objId = CourseObjActor_GetID(self);
         CourseObjManager* mgr = sCourseObjManager;
         u32 idx = objId << 2;
-        void** actorArray = *reinterpret_cast<void***>(static_cast<u8*>(mgr) + 0x68);
+        void** actorArray = *reinterpret_cast<void***>(reinterpret_cast<u8*>(mgr) + 0x68);
         void* audioEntry = actorArray[idx];
         audio_Kill3D(audioEntry);
 
         // Check game mode flags
         void* global = sGlobalInstance;
-        s32 gameMode = *reinterpret_cast<s32*>(static_cast<u8*>(global) + 0xB70);
+        s32 gameMode = *reinterpret_cast<s32*>(reinterpret_cast<u8*>(global) + 0xB70);
         gameMode -= 3;
         if (gameMode <= 0) {
             // Check bits 0 and 6 of (1 << gameMode) & 0xC1
@@ -511,7 +511,7 @@ void CourseObjActor_TickTimer(CourseObjActor* self) {
     void* animVtbl = *reinterpret_cast<void**>(animObj);
     typedef void (*FinalizeFunc)(void*);
     auto finalizeFn = reinterpret_cast<FinalizeFunc>(
-        *reinterpret_cast<u32*>(static_cast<u8*>(animVtbl) + 0x10));
+        *reinterpret_cast<u32*>(reinterpret_cast<u8*>(animVtbl) + 0x10));
     finalizeFn(animObj);
 
     // Call scene update
@@ -550,11 +550,11 @@ void CourseObjActor_Update(CourseObjActor* self) {
     u8 objId = CourseObjActor_GetID(self);
     CourseObjManager* mgr = sCourseObjManager;
     u32 idx = objId << 2;
-    void** actorArray = *reinterpret_cast<void***>(static_cast<u8*>(mgr) + 0x68);
+    void** actorArray = *reinterpret_cast<void***>(reinterpret_cast<u8*>(mgr) + 0x68);
     void* audioEntry = actorArray[idx];
 
     // Mark audio as active
-    *reinterpret_cast<u8*>(static_cast<u8*>(audioEntry) + 0x6A) = 1;
+    *reinterpret_cast<u8*>(reinterpret_cast<u8*>(audioEntry) + 0x6A) = 1;
 
     // Check bit 13 of drawFlags — "has movement"
     bool hasMovement = (sub->flags & (1u << 13)) != 0;
@@ -683,9 +683,9 @@ decrement_timers:
 
     // Check game mode
     void* global = sGlobalInstance;
-    if (*reinterpret_cast<u32*>(static_cast<u8*>(global) + 0xB78) != 0) {
+    if (*reinterpret_cast<u32*>(reinterpret_cast<u8*>(global) + 0xB78) != 0) {
         // Special mode active
-        s32 mode = *reinterpret_cast<s32*>(static_cast<u8*>(global) + 0xB70) - 3;
+        s32 mode = *reinterpret_cast<s32*>(reinterpret_cast<u8*>(global) + 0xB70) - 3;
         if (mode <= 0) {
             s32 mask = (1 << mode) & 0xC1;
             if (mask != 0) {
@@ -696,7 +696,7 @@ decrement_timers:
 
         // Mark as replay-visible
         sub->drawFlags |= 0x100;
-        self->animSpeed = *reinterpret_cast<f32*>(static_cast<u8*>(settings) + 0x124);
+        self->animSpeed = *reinterpret_cast<f32*>(reinterpret_cast<u8*>(settings) + 0x124);
     }
 
 handle_draw_group:

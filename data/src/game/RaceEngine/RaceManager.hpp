@@ -64,7 +64,7 @@ public:
   KmgFile(void* file) { fromRaw(file); }
   void fromRaw(void* file);
   virtual ~KmgFile();
-  s16 getBattleManager::CourseId(System::CourseId courseId);
+    // TODO: s16 getBattleManager::CourseId(System::CourseId courseId);
 
   KmgFileRaw* data;
 };

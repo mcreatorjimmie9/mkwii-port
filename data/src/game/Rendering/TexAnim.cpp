@@ -368,7 +368,7 @@ void TexAnim_UnlinkNode(void* node, void* child) {
         u8 parentFlags = childObj[0x1C];
         parentFlags &= 0xFE;  // clear bit 0
         childObj[0x1C] = parentFlags;
-        memfill(obj + 4, 0, sizeof(void*));
+        memfill(obj + 4, 0, sizeof(reinterpret_cast<void*>));
         memfill(obj + 0x10, 0, sizeof(void*));
 
         if (obj + 4 != nullptr) {

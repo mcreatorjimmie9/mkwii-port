@@ -435,7 +435,7 @@ void KartSusPhysics::calc(const EGG::Vector3f& forward,
 // KartSusPhysics::resetQuaternions — 0x8058f860 (144 bytes)
 // Resets rotation/quaternion state, used after cannon/respawn
 // =============================================================================
-void KartSusPhysics::resetQuaternions() {
+    // TODO: void KartSusPhysics::resetQuaternions() {
     // Check some pre-condition
     sub_0x80590168();
     sub_0x80590aac();

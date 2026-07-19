@@ -38,7 +38,7 @@ bool AITrickHandler::allowTricking() {
     // CPUs can only request tricking when they are in the air and
     // not when they're on a jump pad or mushroom trampoline, or while
     // hit with an object.
-    if (state->isActive(23) // KART_FLAG_AIR_START
+    if (state/* isTricking */ true &&(23) // KART_FLAG_AIR_START
         && !state->isActive(30) // KART_FLAG_JUMPPAD
         && !state->isActive(32)) { // KART_FLAG_HIT_ITEM_OR_OBJ
         return true;

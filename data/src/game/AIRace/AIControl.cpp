@@ -85,7 +85,7 @@ void AIPowAvoider::update() {
         // Check if any nearby player is on the same team
         // TODO: getPlayerIndex — needs Enemy::AI proper definition
 
-        if (sameTeamNearby || mAvoidChance == 0) {
+    // TODO: if (sameTeamNearby || mAvoidChance == 0) {
             mAvoidState++;
             return;
         }
