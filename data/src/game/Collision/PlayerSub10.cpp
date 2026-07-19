@@ -21,12 +21,12 @@ PlayerSub10::PlayerSub10() {
     hardSpeedLimit = 0.0f;
     acceleration = 0.0f;
     speedDragMultiplier = 1.0f;
-    smoothedUp.setZero();
+    smoothedUp.setAll(0);
     up.setUp();
-    landingDir.setZero();
-    dir.setZero();
-    lastDir.setZero();
-    vel1Dir.setZero();
+    landingDir.setAll(0);
+    dir.setAll(0);
+    lastDir.setAll(0);
+    vel1Dir.setAll(0);
 }
 
 PlayerSub10::~PlayerSub10() {
@@ -86,11 +86,11 @@ void PlayerSub10::doRespawn() {
 
     // Reset dynamics
     dynamics->pos = respawnPos;
-    dynamics->externalVel.setZero();
-    dynamics->internalVel.setZero();
-    dynamics->angVel0.setZero();
-    dynamics->angVel1.setZero();
-    dynamics->angVel2.setZero();
+    dynamics->externalVel.setAll(0);
+    dynamics->internalVel.setAll(0);
+    dynamics->angVel0.setAll(0);
+    dynamics->angVel1.setAll(0);
+    dynamics->angVel2.setAll(0);
     dynamics->mainRot.setIdentity();
     dynamics->fullRot.setIdentity();
 

@@ -2,9 +2,9 @@
 #include <game/kart/KartObjectProxy.hpp>
 #include "KartHitbox.hpp"
 #include "KartDynamics.hpp"
-#include "KartState.hpp"
-#include "KartMove.hpp"
-#include "KartBody.hpp"
+#include "../KartMovement/KartState.hpp"
+#include "../KartMovement/KartMove.hpp"
+#include "../KartMovement/KartBody.hpp"
 #include "KartPhysicsEngine.hpp"
 #include "KartWheel.hpp"
 #include "BSP.hpp"
@@ -46,17 +46,17 @@ void KartWheelPhysics::setBsp() {
 
 void KartWheelPhysics::reset() {
     this->hitboxGroup->reset();
-    this->wheelPos.setZero();
-    this->prevWheelPos.setZero();
-    this->prevWheelOffset.setZero();
+    this->wheelPos.setAll(0);
+    this->prevWheelPos.setAll(0);
+    this->prevWheelOffset.setAll(0);
     this->susTravel = 0.0f;
-    this->colVel.setZero();
-    this->speed.setZero();
-    this->wheelEdgePos.setZero();
+    this->colVel.setAll(0);
+    this->speed.setAll(0);
+    this->wheelEdgePos.setAll(0);
     this->effectiveRadius = 0.0f;
     this->targetEffectiveRadius = 0.0f;
     this->isAtSuspLimit = 0.0f;
-    this->suspTop.setZero();
+    this->suspTop.setAll(0);
     if (this->bspWheel) {
         this->susTravel = bspWheel->maxTravel;
         this->effectiveRadius = bspWheel->wheelRadius;
@@ -184,7 +184,7 @@ void KartWheelPhysics::updateEffectiveRadius() {
     this->effectiveRadius += (targetEffectiveRadius - effectiveRadius) * 0.1f;
 }
 
-void KartWheelPhysics::unk80599dc0(const EGG::Vector3f& front) {
+void KartWheelPhysics::u80599dc0(const EGG::Vector3f& front) {
     f32 rateLateral;
     if (kartState()->on(KART_FLAG_STH_WALL_COL)) {
         rateLateral = 0.01f;
@@ -221,11 +221,11 @@ KartSusPhysics::KartSusPhysics(u32 wheelIdx, KartWheelType wheelType, s32 bspWhe
 
 void KartSusPhysics::reset() {
     this->_38 = 1.0f / this->bspWheel->maxTravel;
-    this->suspTop.setZero();
+    this->suspTop.setAll(0);
     this->maxTravelScaled = 0.0f;
     this->hasFloorCol = false;
     this->_36 = 0;
-    this->downDir.setZero();
+    this->downDir.setAll(0);
 }
 
 void KartSusPhysics::calcCollision(const EGG::Vector3f& gravity, const EGG::Matrix34f& mtx, f32 dt) {

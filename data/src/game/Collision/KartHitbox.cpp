@@ -18,9 +18,9 @@ Hitbox::Hitbox() {
 
 void Hitbox::reset() {
     this->_8 = 0;
-    this->pos.setZero();
-    this->lastPos.setZero();
-    this->relPos.setZero();
+    this->pos.setAll(0);
+    this->lastPos.setAll(0);
+    this->relPos.setAll(0);
 }
 
 void Hitbox::update(const EGG::Vector3f& scale, const EGG::Quatf& rot, const EGG::Vector3f& pos, f32 totalScale, f32 hitboxElevation) {
@@ -82,14 +82,14 @@ KartCollisionInfo* KartCollisionInfo::initStatus() {
 
 void KartCollisionInfo::reset() {
     this->flags = 0;
-    this->tangentOff.setZero();
-    this->floorNrm.setZero();
-    this->wallNrm.setZero();
-    this->softWallNrm.setZero();
-    this->vel.setZero();
-    this->relPos.setZero();
-    this->movement.setZero();
-    this->_58.setZero();
+    this->tangentOff.setAll(0);
+    this->floorNrm.setAll(0);
+    this->wallNrm.setAll(0);
+    this->softWallNrm.setAll(0);
+    this->vel.setAll(0);
+    this->relPos.setAll(0);
+    this->movement.setAll(0);
+    this->_58.setAll(0);
     this->speedFactor = 1.0f;
     this->handlingFactor = 0.0f;
     this->floorKclTypeMask = 0;

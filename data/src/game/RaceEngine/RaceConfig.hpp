@@ -69,7 +69,7 @@ public:
     void setUnkPos(s8 pos);
     void setVehicle(VehicleId vehicle);
 
-    unk8 _04;
+    u8 _04;
     s8 mLocalPlayerNum;
     s8 mPlayerInputIdx;
     VehicleId mVehicleId;
@@ -83,7 +83,7 @@ public:
     u16 mGpScore;
     u16 _dc;
     s16 mGpRankScore;
-    unk8 _e0;
+    u8 _e0;
     u8 mPrevFinishPos;
     u8 mFinishPos;
     Rating mRating;

@@ -1,3 +1,4 @@
+#include <cstring>
 // Scenario.cpp - Additional RaceConfig::Scenario functions from Ghidra
 // These two functions were declared in the community header but had no
 // community implementation. Reconstructed from Ghidra decompilation.

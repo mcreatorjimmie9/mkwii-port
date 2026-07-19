@@ -66,7 +66,7 @@ public:
     void calcCollision(const EGG::Vector3f& bottom, const EGG::Vector3f& topmostPos);
     void calc(const EGG::Vector3f& down, const EGG::Vector3f& vehicleMovement);
     void updateEffectiveRadius();
-    void unk80599dc0(const EGG::Vector3f& front);
+    void u80599dc0(const EGG::Vector3f& front);
 
     bool hasFloorCollision() const;
     const EGG::Vector3f& getCollisionFloorNrm() const;

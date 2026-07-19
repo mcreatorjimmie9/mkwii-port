@@ -5,9 +5,9 @@ namespace Kart {
 Hitbox::Hitbox() : bsp(nullptr), radius(0.0f), _8(0) {}
 
 void Hitbox::reset() {
-    pos.setZero();
-    lastPos.setZero();
-    relPos.setZero();
+    pos.setAll(0);
+    lastPos.setAll(0);
+    relPos.setAll(0);
 }
 
 void Hitbox::update(const EGG::Vector3f& scale, const EGG::Quatf& rot, const EGG::Vector3f& pos, f32 totalScale, f32 hitboxElevation) {
@@ -68,14 +68,14 @@ KartCollisionInfo* KartCollisionInfo::initStatus() { this->reset(); return this;
 
 void KartCollisionInfo::reset() {
     flags = 0;
-    tangentOff.setZero();
-    floorNrm.setZero();
-    wallNrm.setZero();
-    softWallNrm.setZero();
-    vel.setZero();
-    relPos.setZero();
-    movement.setZero();
-    _58.setZero();
+    tangentOff.setAll(0);
+    floorNrm.setAll(0);
+    wallNrm.setAll(0);
+    softWallNrm.setAll(0);
+    vel.setAll(0);
+    relPos.setAll(0);
+    movement.setAll(0);
+    _58.setAll(0);
     speedFactor = 1.0f;
     handlingFactor = 0.0f;
     floorKclTypeMask = 0;

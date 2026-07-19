@@ -44,17 +44,17 @@ void KartWheelPhysics::setBsp() {
 // Size: 184 bytes
 void KartWheelPhysics::reset() {
     this->hitboxGroup->reset();
-    this->wheelPos.setZero();
-    this->prevWheelPos.setZero();
-    this->prevWheelOffset.setZero();
+    this->wheelPos.setAll(0);
+    this->prevWheelPos.setAll(0);
+    this->prevWheelOffset.setAll(0);
     this->susTravel = 0.0f;
-    this->colVel.setZero();
-    this->speed.setZero();
-    this->wheelEdgePos.setZero();
+    this->colVel.setAll(0);
+    this->speed.setAll(0);
+    this->wheelEdgePos.setAll(0);
     this->effectiveRadius = 0.0f;
     this->targetEffectiveRadius = 0.0f;
     this->isAtSuspLimit = 0.0f;
-    this->suspTop.setZero();
+    this->suspTop.setAll(0);
     if (this->bspWheel) {
         this->susTravel = bspWheel->maxTravel;
         this->effectiveRadius = bspWheel->wheelRadius;
@@ -198,7 +198,7 @@ void KartWheelPhysics::updateEffectiveRadius() {
     this->effectiveRadius += (this->targetEffectiveRadius - this->effectiveRadius) * rateForward;
 }
 
-// 0x8059c2a8 - unk80599dc0__Q24Kart16KartWheelPhysicsFRCQ23EGG8Vector3f
+// 0x8059c2a8 - u80599dc0__Q24Kart16KartWheelPhysicsFRCQ23EGG8Vector3f
 // Size: 236 bytes - Applies floor moment via kartCollide
 void KartWheelPhysics::applyFloorMoment(const EGG::Vector3f& front) {
     // Computes and applies a torque/moment from floor collision
@@ -243,11 +243,11 @@ void KartSusPhysics::reset() {
     if (this->bspWheel) {
         this->_38 = 1.0f / this->bspWheel->maxTravel;
     }
-    this->suspTop.setZero();
+    this->suspTop.setAll(0);
     this->maxTravelScaled = 0.0f;
     this->hasFloorCol = false;
     this->_36 = 0;
-    this->downDir.setZero();
+    this->downDir.setAll(0);
 }
 
 // 0x8059c488 - init__Q24Kart14KartSusPhysicsFv

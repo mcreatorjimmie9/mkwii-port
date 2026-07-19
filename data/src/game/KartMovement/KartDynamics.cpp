@@ -32,7 +32,7 @@ static void vec3ArrayZero(EGG::Vector3f* arr, int count) {
     if (!arr || count <= 0)
         return;
     for (int i = 0; i < count; i++) {
-        arr[i].setZero();
+        arr[i].setAll(0);
     }
 }
 
@@ -41,32 +41,32 @@ static void vec3ArrayZero(EGG::Vector3f* arr, int count) {
 KartDynamicsKart::KartDynamicsKart() {
     0.0f; // to make 0.0f appear before 1.0f in rodata
     this->angVel0Factor = 1.0f;
-    this->inertiaTensor.makeIdentity();
-    this->invInertiaTensor.makeIdentity();
+    this->inertiaTensor.identity();
+    this->invInertiaTensor.identity();
     this->setDefault();
 }
 
 void KartDynamics::setDefault() {
-    this->pos.setZero();
-    this->externalVel.setZero();
-    this->acceleration.setZero();
-    this->externalVelBody.setZero();
-    this->_98.setZero();
-    this->angVel0.setZero();
-    this->movingRoadVel.setZero();
-    this->angVel1.setZero();
-    this->movingWaterVel.setZero();
-    this->speed.setZero();
+    this->pos.setAll(0);
+    this->externalVel.setAll(0);
+    this->acceleration.setAll(0);
+    this->externalVelBody.setAll(0);
+    this->_98.setAll(0);
+    this->angVel0.setAll(0);
+    this->movingRoadVel.setAll(0);
+    this->angVel1.setAll(0);
+    this->movingWaterVel.setAll(0);
+    this->speed.setAll(0);
     this->speedNorm = 0.0f;
-    this->angVel2.setZero();
+    this->angVel2.setAll(0);
     this->mainRot.setIdentity();
     this->fullRot.setIdentity();
-    this->totalForce.setZero();
-    this->totalTorque.setZero();
+    this->totalForce.setAll(0);
+    this->totalTorque.setAll(0);
     this->specialRot.setIdentity();
     this->extraRot.setIdentity();
     this->gravity = -1.0f;
-    this->internalVel.setZero();
+    this->internalVel.setAll(0);
 
     this->up.setUp();
     this->_forceUpright = true;
@@ -77,8 +77,8 @@ void KartDynamics::setDefault() {
     this->stabilizationFactor = PHYS_STABILIZATION_DEFAULT;
     this->upInterpolated = RKSystem_ey;
     this->speedFix = 0.0f;
-    this->_18c.setZero();
-    this->_198.setZero();
+    this->_18c.setAll(0);
+    this->_198.setAll(0);
     this->angVel0YFactor = 0.0f;
     this->scale.x = 1.0f;
     this->scale.y = 1.0f;
@@ -86,18 +86,18 @@ void KartDynamics::setDefault() {
 }
 
 void KartDynamics::reset() {
-    this->externalVel.setZero();
-    this->acceleration.setZero();
-    this->externalVelBody.setZero();
-    this->_98.setZero();
-    this->angVel0.setZero();
-    this->movingRoadVel.setZero();
-    this->angVel1.setZero();
-    this->movingWaterVel.setZero();
-    this->angVel2.setZero();
-    this->totalForce.setZero();
-    this->totalTorque.setZero();
-    this->internalVel.setZero();
+    this->externalVel.setAll(0);
+    this->acceleration.setAll(0);
+    this->externalVelBody.setAll(0);
+    this->_98.setAll(0);
+    this->angVel0.setAll(0);
+    this->movingRoadVel.setAll(0);
+    this->angVel1.setAll(0);
+    this->movingWaterVel.setAll(0);
+    this->angVel2.setAll(0);
+    this->totalForce.setAll(0);
+    this->totalTorque.setAll(0);
+    this->internalVel.setAll(0);
 }
 
 void KartDynamics::init() {
@@ -234,9 +234,9 @@ void KartDynamics::calc(float dt, float maxSpeed, int air) {
     EGG::Quatf::quatMul(this->fullRot, this->fullRot, this->specialRot);
     this->fullRot.normalise();
     this->mainRot.rotateVectorInv(externalVel, externalVelBody);
-    this->totalForce.setZero();
-    this->totalTorque.setZero();
-    this->angVel2.setZero();
+    this->totalForce.setAll(0);
+    this->totalTorque.setAll(0);
+    this->angVel2.setAll(0);
 }
 
 void KartDynamics::forceUpright() {
@@ -503,7 +503,7 @@ void KartDynamics::calcTransformMatrix(EGG::Vector3f& out) {
     // Call vec3 zero on matrix columns
     // Copy 12 floats from stack to output
     EGG::Matrix34f mtx;
-    mtx.makeIdentity();
+    mtx.identity();
     mtx(0,3) = this->pos.x;
     mtx(1,3) = this->pos.y;
     mtx(2,3) = this->pos.z;
@@ -581,8 +581,8 @@ void KartDynamics::initAllFields() {
     //   - Physics scale values
     // Calls setDefault() and additional per-field inits
     this->setDefault();
-    this->inertiaTensor.makeIdentity();
-    this->invInertiaTensor.makeIdentity();
+    this->inertiaTensor.identity();
+    this->invInertiaTensor.identity();
 }
 
 // 0x805a4898 - calcAngularVelocity__Q212KartDynamicsFv

@@ -1,3 +1,4 @@
+#include <cstring>
 // TimeAttackSplitsPage.cpp - Reconstructed from Ghidra decompilation
 // Module: RaceEngine
 

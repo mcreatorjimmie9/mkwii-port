@@ -5,10 +5,10 @@
 #include <egg/math/eggMatrix.hpp>
 
 #include <game/kart/KartObjectProxy.hpp>
-#include "KartWheelPhysics.hpp"  // For KartWheelType enum
+#include "KartWheelPhysics.hpp"  // For Kart::KartWheelType enum
 
 class KartWheelPhysics;
-namespace Kart { class BspWheel; class HitboxGroup; }
+namespace Kart { class BspWheel; class HitboxGroup; using ::Kart::KartWheelType; }
 
 namespace Kart {
 class KartPhysicsEngine;

@@ -1,3 +1,4 @@
+#include "KartHitbox.hpp"
 #pragma once
 
 #include <rk_types.h>

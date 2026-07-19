@@ -1,3 +1,4 @@
+#include <cstring>
 // RaceConfig.cpp - Adapted from community decomp with address annotations
 // Original: data/decompiled/existing/src/system/RaceConfig.cpp
 

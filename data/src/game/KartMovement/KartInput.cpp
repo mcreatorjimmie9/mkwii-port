@@ -1,3 +1,4 @@
+#include <cstring>
 #include "KartInput.hpp"
 
 namespace Kart {

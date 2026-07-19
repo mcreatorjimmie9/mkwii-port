@@ -81,9 +81,9 @@ KartSusPhysics::KartSusPhysics(u32 wheelIdx, Kart::KartWheelType wType,
                                  s32 bspWheelIdx)
     : KartObjectProxy(), bspWheel(nullptr), wheelPhysics(nullptr),
       wheelType(wType), bspWheelIdx(bspWheelIdx), wheelIdx(wheelIdx),
-      suspTop(EGG::Vector3f::zero), maxTravelScaled(0.0f),
+      suspTop(EGG::Vector3f(0,0,0)), maxTravelScaled(0.0f),
       hasFloorCol(false), _36(0), _38(0.0f),
-      downDir(EGG::Vector3f::zero) {
+      downDir(EGG::Vector3f(0,0,0)) {
     // Allocate internal BSP collision buffer
     void* state = EGG::Heap::alloc(0x240);
     if (state == nullptr) return;

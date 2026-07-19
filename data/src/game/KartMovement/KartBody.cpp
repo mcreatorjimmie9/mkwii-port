@@ -1,3 +1,4 @@
+#include <cstring>
 #include "KartBody.hpp"
 #include "KartPhysicsSub.hpp"
 #include "KartDynamics.hpp"

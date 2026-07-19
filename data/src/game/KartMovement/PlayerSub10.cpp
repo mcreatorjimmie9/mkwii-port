@@ -1,3 +1,4 @@
+#include <cstring>
 #include "PlayerSub10.hpp"
 #include "KartMove.hpp"
 #include "KartSettings.hpp"

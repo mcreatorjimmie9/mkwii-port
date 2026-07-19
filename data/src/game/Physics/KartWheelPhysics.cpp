@@ -77,16 +77,16 @@ KartWheelPhysics::KartWheelPhysics(u32 wheelIdx, s32 bspWheelIdx)
     *reinterpret_cast<u32*>(reinterpret_cast<char*>(state) + 0x0C) = 0;
 
     // Zero all vector fields
-    this->wheelPos = EGG::Vector3f::zero;
-    this->prevWheelPos = EGG::Vector3f::zero;
-    this->prevWheelOffset = EGG::Vector3f::zero;
-    this->colVel = EGG::Vector3f::zero;
-    this->speed = EGG::Vector3f::zero;
-    this->wheelEdgePos = EGG::Vector3f::zero;
+    this->wheelPos = EGG::Vector3f(0,0,0);
+    this->prevWheelPos = EGG::Vector3f(0,0,0);
+    this->prevWheelOffset = EGG::Vector3f(0,0,0);
+    this->colVel = EGG::Vector3f(0,0,0);
+    this->speed = EGG::Vector3f(0,0,0);
+    this->wheelEdgePos = EGG::Vector3f(0,0,0);
     this->effectiveRadius = 0.0f;
     this->targetEffectiveRadius = 0.0f;
     this->isAtSuspLimit = 0.0f;
-    this->suspTop = EGG::Vector3f::zero;
+    this->suspTop = EGG::Vector3f(0,0,0);
 
     // Store this object and call BSP init
     *reinterpret_cast<KartWheelPhysics**>(

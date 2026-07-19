@@ -44,10 +44,10 @@ void KartCollide::init() {
     this->updateBbox();
     this->playerBumpTimer = 0;
     _1c = 0.8f;
-    _20.setZero();
+    _20.setAll(0);
     this->surfaceFlags = 0;
-    this->tangentOff.setZero();
-    this->movement.setZero();
+    this->tangentOff.setAll(0);
+    this->movement.setAll(0);
     this->respawnTimer = 0;
     this->solidOobTimer = 0;
     this->someLightningTimer = 0;
@@ -256,8 +256,8 @@ void KartCollide::checkNeighborhood(KartCollisionInfo& kartColInfo, const Hitbox
                     sign *= hitbox.radius;
                     EGG::Vector3f offset = hitbox.pos + localRight * sign;
                     Field::ColInfoPartial tmpInfo;
-                    tmpInfo.bboxLow.setZero();
-                    tmpInfo.bboxHigh.setZero();
+                    tmpInfo.bboxLow.setAll(0);
+                    tmpInfo.bboxHigh.setAll(0);
                     if (Field::CourseModel::spInstance->checkSphereCachedPartial(offset, hitbox.lastPos, KCL_TYPE_DRIVER_WALL, &tmpInfo, hitbox.radius, 0)) {
                         offs[i] = colInfo.tangentOff.lenSq();
                     }

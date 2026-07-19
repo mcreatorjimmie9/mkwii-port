@@ -1,3 +1,4 @@
+#include <game/kart/BSP.hpp>
 #pragma once
 
 // Define all GENESIS guards BEFORE including KartObjectProxy.hpp
@@ -51,7 +52,7 @@ public:
     void calc(const EGG::Vector3f& down, const EGG::Vector3f& vehicleMovement);
     // updateEffectiveRadius__Q24Kart16KartWheelPhysicsFv  0x8059c284
     void updateEffectiveRadius();
-    // unk80599dc0__Q24Kart16KartWheelPhysicsFRCQ23EGG8Vector3f  0x8059c2a8
+    // u80599dc0__Q24Kart16KartWheelPhysicsFRCQ23EGG8Vector3f  0x8059c2a8
     void applyFloorMoment(const EGG::Vector3f& front);
     // hasFloorCollision__Q24Kart16KartWheelPhysicsCFv  0x8059c394
     bool hasFloorCollision() const;

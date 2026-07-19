@@ -15,8 +15,11 @@ public:
     void set(T _x, T _y) { x = _x; y = _y; }
 };
 
+#ifndef _EGG_VECTOR2F_DEFINED_
+#define _EGG_VECTOR2F_DEFINED_
 typedef TVector2<f32> Vector2f;
 typedef TVector2<s32> Vector2i;
+#endif
 
 template<typename T>
 class TVector3 {
@@ -27,6 +30,7 @@ public:
     void set(T _x, T _y, T _z) { x = _x; y = _y; z = _z; }
     void setZero() { x = y = z = 0; }
     void setUp() { x = 0; y = 1; z = 0; }
+    void setAll(T v) { x = y = z = v; }
     TVector3 operator+(const TVector3& o) const { return TVector3(x+o.x, y+o.y, z+o.z); }
     TVector3 operator-(const TVector3& o) const { return TVector3(x-o.x, y-o.y, z-o.z); }
     TVector3 operator*(T s) const { return TVector3(x*s, y*s, z*s); }
@@ -44,7 +48,11 @@ public:
     static const TVector3 ez;
 };
 
+// Vector3f: always defined in EGG namespace from either this header or eggVector.hpp
+#ifndef _EGG_VECTOR3F_FROM_EGGVECTOR_DEFINED_
+#define _EGG_VECTOR3F_FROM_EGGVECTOR_DEFINED_
 typedef TVector3<f32> Vector3f;
+#endif
 typedef TVector3<s32> Vector3i;
 
 class Quaternion {
@@ -118,12 +126,16 @@ const EGG::TVector3<T> EGG::TVector3<T>::ez = EGG::TVector3<T>(T(0), T(0), T(1))
 template<typename T>
 EGG::TVector3<T> operator*(T s, const EGG::TVector3<T>& v) { return v * s; }
 
+// Convenience global typedefs (only if not already defined elsewhere)
+#ifndef _EGG_VEC_TYPEDEF_DEFINED_
+#define _EGG_VEC_TYPEDEF_DEFINED_
 typedef EGG::Vector3f Vec;
 typedef EGG::Vector3f Vec3;
 typedef EGG::Vector3f Vec3f;
-typedef EGG::Vector2f Vec2;
-typedef EGG::Vector2f Vec2f;
+typedef EGG::TVector2<f32> Vec2;
+typedef EGG::TVector2<f32> Vec2f;
 typedef EGG::Quaternion Quat;
 typedef EGG::Quaternion Quatf;
 typedef EGG::Matrix44f Mat44;
 typedef EGG::Matrix34f Mat34;
+#endif

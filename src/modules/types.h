@@ -40,6 +40,8 @@ typedef u8 BOOL;
 #define BIT(n) (1 << (n))
 
 // Pad buttons
+#ifndef __PAD_BUTTON_ENUM_DEFINED__
+#define __PAD_BUTTON_ENUM_DEFINED__
 enum {
     PAD_BUTTON_A      = 0x0100,
     PAD_BUTTON_B      = 0x0200,
@@ -54,6 +56,7 @@ enum {
     PAD_BUTTON_LEFT   = 0x0004,
     PAD_BUTTON_RIGHT  = 0x0008,
 };
+#endif
 
 // Undefined types for decompiled code compatibility
 typedef u32 undefined;

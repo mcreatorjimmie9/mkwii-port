@@ -1,5 +1,7 @@
 #pragma once
 #include "../rk_types.h"
+#include "Mii.hpp"
+#include "ResourceManager.hpp"
 
 namespace System {
 
@@ -14,13 +16,8 @@ struct CompetitionSettings {
     u32 _00[4];
 };
 
-struct Mii {
-    u8 _00[0x60];
-};
-
-struct Rating {
-    u8 _00[0x08];
-};
+// Mii is defined in Mii.hpp
+// Rating is defined in Rating.hpp
 
 struct RawGhostFile {
     u8 _00[0x100];
@@ -31,15 +28,10 @@ public:
     RawGhostFile raw;
 };
 
-class ResourceManager {
-public:
-    virtual ~ResourceManager() {}
-};
+// ResourceManager defined in ResourceManager.hpp
 
-class InitScene {
-public:
-    virtual ~InitScene() {}
-};
+#include "InitScene.hpp"
+// InitScene defined in InitScene.hpp
 
 class KPadPlayer {
 public:

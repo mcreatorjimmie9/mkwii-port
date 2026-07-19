@@ -19,26 +19,26 @@ KartDynamicsKart::KartDynamicsKart() {
 }
 
 void KartDynamics::setDefault() {
-    this->pos.setZero();
-    this->externalVel.setZero();
-    this->acceleration.setZero();
-    this->externalVelBody.setZero();
-    this->_98.setZero();
-    this->angVel0.setZero();
-    this->movingRoadVel.setZero();
-    this->angVel1.setZero();
-    this->movingWaterVel.setZero();
-    this->speed.setZero();
+    this->pos.setAll(0);
+    this->externalVel.setAll(0);
+    this->acceleration.setAll(0);
+    this->externalVelBody.setAll(0);
+    this->_98.setAll(0);
+    this->angVel0.setAll(0);
+    this->movingRoadVel.setAll(0);
+    this->angVel1.setAll(0);
+    this->movingWaterVel.setAll(0);
+    this->speed.setAll(0);
     this->speedNorm = 0.0f;
-    this->angVel2.setZero();
+    this->angVel2.setAll(0);
     this->mainRot.setIdentity();
     this->fullRot.setIdentity();
-    this->totalForce.setZero();
-    this->totalTorque.setZero();
+    this->totalForce.setAll(0);
+    this->totalTorque.setAll(0);
     this->specialRot.setIdentity();
     this->extraRot.setIdentity();
     this->gravity = -1.0f;
-    this->internalVel.setZero();
+    this->internalVel.setAll(0);
 
     this->up.setUp();
     this->_forceUpright = true;
@@ -49,8 +49,8 @@ void KartDynamics::setDefault() {
     this->stabilizationFactor = 0.1f;
     this->upInterpolated = RKSystem_ey;
     this->speedFix = 0.0f;
-    this->_18c.setZero();
-    this->_198.setZero();
+    this->_18c.setAll(0);
+    this->_198.setAll(0);
     this->angVel0YFactor = 0.0f;
     this->scale.x = 1.0f;
     this->scale.y = 1.0f;
@@ -58,18 +58,18 @@ void KartDynamics::setDefault() {
 }
 
 void KartDynamics::reset() {
-    this->externalVel.setZero();
-    this->acceleration.setZero();
-    this->externalVelBody.setZero();
-    this->_98.setZero();
-    this->angVel0.setZero();
-    this->movingRoadVel.setZero();
-    this->angVel1.setZero();
-    this->movingWaterVel.setZero();
-    this->angVel2.setZero();
-    this->totalForce.setZero();
-    this->totalTorque.setZero();
-    this->internalVel.setZero();
+    this->externalVel.setAll(0);
+    this->acceleration.setAll(0);
+    this->externalVelBody.setAll(0);
+    this->_98.setAll(0);
+    this->angVel0.setAll(0);
+    this->movingRoadVel.setAll(0);
+    this->angVel1.setAll(0);
+    this->movingWaterVel.setAll(0);
+    this->angVel2.setAll(0);
+    this->totalForce.setAll(0);
+    this->totalTorque.setAll(0);
+    this->internalVel.setAll(0);
 }
 
 void KartDynamics::init() {
@@ -205,9 +205,9 @@ void KartDynamics::calc(f32 dt, f32 maxSpeed, s32 air) {
     EGG::Quatf::quatMul(this->fullRot, this->fullRot, this->specialRot);
     this->fullRot.normalise();
     this->mainRot.rotateVectorInv(externalVel, externalVelBody);
-    this->totalForce.setZero();
-    this->totalTorque.setZero();
-    this->angVel2.setZero();
+    this->totalForce.setAll(0);
+    this->totalTorque.setAll(0);
+    this->angVel2.setAll(0);
 }
 
 void KartDynamics::forceUpright() {

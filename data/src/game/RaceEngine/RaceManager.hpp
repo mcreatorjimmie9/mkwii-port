@@ -5,14 +5,13 @@
 
 #include <rk_types.h>
 #include <decomp.h>
-#include "KPadDirector.hpp"
-#include "GhostFile.hpp"
-#include "CourseMap.hpp"
-#include "RaceConfig.hpp"
-#include "ElineControlManager.hpp"
+#include "system/KPadDirector.hpp"
+#include "system/GhostFile.hpp"
+#include "system/RaceConfig.hpp"
+#include "system/ElineControlManager.hpp"
 #include "util/Random.hpp"
-#include "ResourceManager.hpp"
-#include "RaceMode.hpp"
+#include "system/ResourceManager.hpp"
+#include "system/RaceMode.hpp"
 
 namespace System {
 enum RaceStage {
@@ -53,7 +52,7 @@ struct KmgFileRaw {
   u16 maxCoinCounts[10][11];
   u16 field20_0x54c[10][11];
   u16 field21_0x628[10][11];
-  unk8 unk[0x712-0x704];
+  u8 unk[0x712-0x704];
   s16 fallOffCoinLoss;
   s16 hitCoinLoss;
   s16 coinLossPercent;
@@ -87,7 +86,7 @@ protected:
   bool raceHasStarted;
   bool timerIsReversed;
   u32 raceDurationMillis;
-  unk8 unk48[0x50-0x48];
+  u8 unk48[0x50-0x48];
 };
 
 class TimerManager : public TimerManagerBase {
@@ -142,7 +141,7 @@ public:
   Time* raceFinishTime;
   u32 somethingRaceEndMessageOnline;
   KPadPlayer* kpadPlayer;
-  unk8 unk_4c_50[0x50-0x4c];
+  u8 unk_4c_50[0x50-0x4c];
   u16 playersAheadFlags;
   s8 field36_0x52;
   s8 finishingPosition;

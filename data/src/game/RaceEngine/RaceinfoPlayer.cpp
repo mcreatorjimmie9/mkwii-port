@@ -1,3 +1,4 @@
+#include <cstring>
 // RaceinfoPlayer.cpp - Reconstructed from Ghidra decompilation
 // Module: RaceEngine
 

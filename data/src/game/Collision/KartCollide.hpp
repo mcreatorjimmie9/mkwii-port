@@ -110,3 +110,5 @@ private:
 };
 
 } // namespace Kart
+
+#endif // GENESIS_KART_COLLIDE_HPP_GUARD

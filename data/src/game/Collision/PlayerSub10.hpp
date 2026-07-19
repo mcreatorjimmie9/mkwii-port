@@ -1,3 +1,4 @@
+class PlayerPointers;
 #pragma once
 
 #include <rk_types.h>

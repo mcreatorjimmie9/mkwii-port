@@ -16,7 +16,7 @@ KartState::KartState(KartSettings* settings) {
     _24 = 0.0f;
     mCannonPointId = 0;
     mStartBoostIdx = 0;
-    mUp.setZero();
+    mUp.setAll(0);
     mProxy = nullptr;
 
     // Determine player type from race config
@@ -85,10 +85,10 @@ void KartState::reset() {
     mStick.set(0.0f, 0.0f);
     mWipeState = 0;
     mWipeFrame = 0;
-    mUp.setZero();
-    _40.setZero();
-    _4c.setZero();
-    m_a8.setZero();
+    mUp.setAll(0);
+    _40.setAll(0);
+    _4c.setAll(0);
+    m_a8.setAll(0);
 }
 
 // 0x80596b1c - resetOob__Q24Kart9KartStateFv
