@@ -1,0 +1,25 @@
+// Function at 0x801a9da8
+// Size: 60 bytes
+// Category: SDK_Libs
+// Calls: 0 functions
+// Stack frame: 0x10 bytes
+//
+// Disassembly (first 20 instructions):
+//   0x801a9da8: stwu     r1, -0x10(r1)
+//   0x801a9dac: mflr     r0
+//   0x801a9db0: stw      r0, 0x14(r1)
+//   0x801a9db4: stw      r31, 0xc(r1)
+//   0x801a9db8: bl       0x801a650c
+//   0x801a9dbc: mr       r31, r3
+//   0x801a9dc0: li       r3, 1
+//   0x801a9dc4: bl       0x801a9b68
+//   0x801a9dc8: mr       r3, r31
+//   0x801a9dcc: bl       0x801a6534
+//   0x801a9dd0: lwz      r0, 0x14(r1)
+//   0x801a9dd4: lwz      r31, 0xc(r1)
+//   0x801a9dd8: mtlr     r0
+//   0x801a9ddc: addi     r1, r1, 0x10
+//   0x801a9de0: blr      
+//
+
+// TODO: Full decompilation requires Ghidra
