@@ -423,8 +423,8 @@ void SoundHandle::update() {
 // setCategoryVolume()
 // (part of the update chain — applies category volume multiplier)
 // ============================================================================
-void SoundHandle::setCategoryVolume(f32 catVolume) {
-    // Category volume is multiplied into the effective volume
+    // TODO: void SoundHandle::setCategoryVolume(f32 catVolume) {
+//     // Category volume is multiplied into the effective volume
     // during the per-frame update
 }
 

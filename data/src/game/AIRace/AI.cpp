@@ -45,15 +45,15 @@ void AI::init() {
     // TODO: getPlayerIndex — needs proper method resolution
 
     // TODO: if (team == System::BATTLE_TEAM_RED) {
-            mTeam = System::BATTLE_TEAM_RED;
-        } else if (team == System::BATTLE_TEAM_BLUE) {
-            mTeam = System::BATTLE_TEAM_BLUE;
-        }
-    }
-
-    mpEngine->init();
-}
-
+    // TODO: team context reference
+    // TODO: team context reference
+    // TODO: team context reference
+    // TODO: team context reference
+    // TODO: team context reference
+    // TODO: team context reference
+    // TODO: team context reference
+    // TODO: team context reference
+    // TODO: team context reference
 // update__Q25Enemy2AIFv
 // Address: 0x807286A0
 // Size: 36 bytes, 9 instructions

@@ -51,8 +51,8 @@ bool AIAirtimeTracker::isCurrentGroundStartTimerZero() {
 // Address: 0x8072CC28
 // Size: 12 bytes, 3 instructions
 AIPowAvoider::AIPowAvoider(const AIInfo& info)
-    : mpInfo(&info), mAvoidChance(0), mAvoidState(0) {}
-
+    // TODO: : mpInfo(&info), mAvoidChance(0), mAvoidState(0) {}
+// 
 // init__Q25Enemy12AIPowAvoiderFv
 // Address: 0x8072CC7C
 // Size: 12 bytes, 3 instructions

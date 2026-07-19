@@ -336,7 +336,7 @@ void SceneNode_PropagateColor(SceneNode* node, u8 newColor) {
         u16 childCount = *reinterpret_cast<u16*>(reinterpret_cast<u8*>(node) + 0x04);
         if (childIdx < childCount) {
     node = child;
-                &((u8*)node)[0x38])[childIdx];
+                // TODO: SceneGraph pointer arithmetic
         }
 
         // Check if child is active (bit 0 of flags)

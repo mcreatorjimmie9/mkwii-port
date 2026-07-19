@@ -140,8 +140,8 @@ void KartDynamics::calc(f32 dt, f32 maxSpeed, s32 air) {
     if (kartBackHorizontal.squaredLength() > FLT_EPSILON) {
         kartBackHorizontal.normalise();
         EGG::Vector3f speedBack;
-        EGG::Vector3f::projAndRej(speedBack, this->externalVel, this->externalVel, kartBackHorizontal);
-        f32 speedNorm = speedBack.squaredLength();
+    // TODO: EGG::Vector3f::projAndRej(speedBack, this->externalVel, this->externalVel, kartBackHorizontal);
+//         f32 speedNorm = speedBack.squaredLength();
         if (speedNorm > FLT_EPSILON) {
             speedNorm = sqrtf(speedNorm);
         } else {

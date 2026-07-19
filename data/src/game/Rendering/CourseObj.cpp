@@ -195,7 +195,7 @@ void CourseObjActor_UpdateWithRotation(CourseObjActor* self, s32 variantIdx) {
         s32 sign = (variantIdx < lodMin) ? -1 : ((lodMin < variantIdx) ? 1 : 0);
         s32 absSign = (sign < 0) ? -sign : sign;
         u32 newOffset = 0x348 + (absSign * 0x0C);
-        self->courseDataPtr = reinterpret_cast<u32>(reinterpret_cast<u8*>(sRenderSettings) + newOffset);
+        self->courseDataPtr = reinterpret_cast<uintptr_t>(reinterpret_cast<u8*>(sRenderSettings) + newOffset);
 
         inLodRange = false;
 

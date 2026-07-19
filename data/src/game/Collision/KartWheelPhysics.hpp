@@ -1,3 +1,4 @@
+struct KartCollisionInfo {};
 #include <game/kart/KartObjectProxy.hpp>
 #pragma once
 

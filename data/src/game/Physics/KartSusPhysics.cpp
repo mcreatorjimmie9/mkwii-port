@@ -437,9 +437,9 @@ void KartSusPhysics::calc(const EGG::Vector3f& forward,
 // =============================================================================
     // TODO: void KartSusPhysics::resetQuaternions() {
     // Check some pre-condition
-    sub_0x80590168();
-    sub_0x80590aac();
-
+    // TODO: KartSusPhysics constructor continuation
+    // TODO: KartSusPhysics constructor continuation
+    // TODO: KartSusPhysics constructor continuation
     bool hasColState = false; // result from query
 
     if (hasColState) {
