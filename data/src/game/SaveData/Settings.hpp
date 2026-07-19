@@ -1,0 +1,117 @@
+#pragma once
+// ============================================================================
+// Settings.hpp — Game Settings Storage
+//
+// Persists player-modifiable game settings across sessions.
+// Stored within the save file (not in the license data).
+//
+// Categorization: GENESIS Phase 5 (SaveData Module)
+// ============================================================================
+
+#include "rk_common.h"
+
+// ============================================================================
+// Settings — Global Game Options
+// ============================================================================
+
+namespace Save {
+
+class Settings {
+public:
+    Settings();
+    ~Settings();
+
+    // --- Drift Mode ---
+    enum DriftMode {
+        DRIFT_MANUAL = 0,
+        DRIFT_AUTO   = 1,
+    };
+
+    DriftMode getDriftMode() const { return (DriftMode)mDriftMode; }
+    void setDriftMode(DriftMode mode) { mDriftMode = (u8)mode; }
+
+    // --- Control Scheme ---
+    enum ControlScheme {
+        CTRL_WII_WHEEL = 0,
+        CTRL_NUNCHUK   = 1,
+        CTRL_CLASSIC   = 2,
+        CTRL_GAMECUBE  = 3,
+    };
+
+    ControlScheme getControlScheme() const { return (ControlScheme)mControlScheme; }
+    void setControlScheme(ControlScheme scheme) { mControlScheme = (u8)scheme; }
+
+    // --- Volume ---
+    u8 getSoundVolume() const { return mSoundVolume; }
+    void setSoundVolume(u8 vol) { mSoundVolume = vol > 100 ? 100 : vol; }
+
+    u8 getMusicVolume() const { return mMusicVolume; }
+    void setMusicVolume(u8 vol) { mMusicVolume = vol > 100 ? 100 : vol; }
+
+    u8 getSFXVolume() const { return mSFXVolume; }
+    void setSFXVolume(u8 vol) { mSFXVolume = vol > 100 ? 100 : vol; }
+
+    // --- Rumble ---
+    bool isRumbleEnabled() const { return mRumble != 0; }
+    void setRumbleEnabled(bool enabled) { mRumble = enabled ? 1 : 0; }
+
+    // --- Stereo ---
+    enum StereoType {
+        STEREO_MONO     = 0,
+        STEREO_STEREO   = 1,
+        STEREO_SURROUND = 2,
+    };
+
+    StereoType getStereoType() const { return (StereoType)mStereoType; }
+    void setStereoType(StereoType type) { mStereoType = (u8)type; }
+
+    // --- Language ---
+    enum Language {
+        LANG_ENGLISH = 0,
+        LANG_JAPANESE = 1,
+        LANG_FRENCH   = 2,
+        LANG_GERMAN   = 3,
+        LANG_ITALIAN  = 4,
+        LANG_SPANISH  = 5,
+        LANG_KOREAN   = 6,
+        LANG_DUTCH    = 7,
+    };
+
+    Language getLanguage() const { return (Language)mLanguage; }
+    void setLanguage(Language lang) { mLanguage = (u8)lang; }
+
+    // --- PC-Specific ---
+    enum TargetFPS {
+        FPS_30 = 0,
+        FPS_60 = 1,
+    };
+
+    TargetFPS getTargetFPS() const { return (TargetFPS)mTargetFPS; }
+    void setTargetFPS(TargetFPS fps) { mTargetFPS = (u8)fps; }
+
+    // --- VR Display ---
+    bool showVR() const { return mShowVR != 0; }
+    void setShowVR(bool show) { mShowVR = show ? 1 : 0; }
+
+    // --- Defaults ---
+    void setDefaults();
+
+    // --- Serialization ---
+    u32 serialize(u8* buffer, u32 bufferSize) const;
+    u32 deserialize(const u8* buffer, u32 bufferSize);
+
+private:
+    u8  mDriftMode;       // 0: Manual, 1: Auto
+    u8  mControlScheme;   // Control scheme
+    u8  mSoundVolume;     // 0-100
+    u8  mMusicVolume;     // 0-100
+    u8  mSFXVolume;       // 0-100
+    u8  mRumble;          // Rumble on/off
+    u8  mStereoType;      // Mono/Stereo/Surround
+    u8  mLanguage;        // Game language
+    u8  mTargetFPS;       // PC: 30 or 60
+    u8  mShowVR;          // Show VR in online lobby
+    u8  _pad[0x07];
+};
+
+} // namespace Save

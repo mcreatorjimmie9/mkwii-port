@@ -1,0 +1,349 @@
+{
+  "version": "6b",
+  "description": "Phase 6b Type Refinement Database - cross-referenced from GENESIS headers, raw decompiled code, community headers, and binary metadata",
+  "classes": {
+    "KartBody": {
+      "full_name": "::KartBody",
+      "namespace": "(global)",
+      "note": "This is NOT Kart::KartBody. This is a global singleton that manages visual/audio effects. The mangled name Q29KartBody confirms no namespace qualifier (Q2 = no ns, 9 chars 'KartBody').",
+      "size": 0x38,
+      "vtable_size": 0,
+      "base_class": null,
+      "allocation_addr": "0x805a3c10",
+      "allocation_size_insn": "li r3, 0x38",
+      "fields": [
+        {"offset": 0x00, "type": "void*", "name": "vtable", "confidence": "high", "source": "constructor stores vtable ptr at r31+0"},
+        {"offset": 0x04, "type": "void*", "name": "effectVtable", "confidence": "medium", "source": "constructor: r23=r31+4, stores vtable-like ptr"},
+        {"offset": 0x08, "type": "void*", "name": "effectGroup", "confidence": "low", "source": "constructor: called sub_80555bf8() on r23"},
+        {"offset": 0x0C, "type": "void*", "name": "effectDataTable", "confidence": "low", "source": "constructor: called sub_80555bf8() on r3+0xC"},
+        {"offset": 0x14, "type": "void**", "name": "effectArray1", "confidence": "high", "source": "createEffectObj stores new objects via stwx at (r31+0x14)"},
+        {"offset": 0x18, "type": "void**", "name": "effectArray2", "confidence": "high", "source": "createEffectObj stores new objects via stwx at (r31+0x18)"},
+        {"offset": 0x1C, "type": "u32", "name": "activeCount", "confidence": "medium", "source": "countActiveEffects reads 0x20 and 0x18, 0x1C may be related"},
+        {"offset": 0x20, "type": "u32", "name": "effectArraySize", "confidence": "high", "source": "countActiveEffects: mtctr = r0 from 0x20, loop counter"},
+        {"offset": 0x24, "type": "u8", "name": "vehicleType", "confidence": "medium", "source": "constructor: stb at 0x24(r31), compared to race state"},
+        {"offset": 0x25, "type": "u8", "name": "engineClass", "confidence": "high", "source": "constructor: clz(r3+0xb70-6) stored as u8 at 0x25"},
+        {"offset": 0x26, "type": "u8", "name": "someFlag", "confidence": "low", "source": "constructor: conditional stb at 0x26, compared to 3"},
+        {"offset": 0x27, "type": "u8", "name": "raceStatus", "confidence": "low", "source": "constructor: reads from global at 0x27(r4)"},
+        {"offset": 0x28, "type": "u16", "name": "unk28", "confidence": "low", "source": "gap in field map"},
+        {"offset": 0x2A, "type": "u16", "name": "unk2a", "confidence": "low", "source": "constructor: sth (store halfword) at 0x2a"},
+        {"offset": 0x2C, "type": "void*", "name": "unk2c", "confidence": "low", "source": "constructor: sth (store halfword) at 0x2c (zeroed)"},
+        {"offset": 0x30, "type": "void*", "name": "audioSystem", "confidence": "high", "source": "updateAudio: reads global, checks flag, calls audio with (r31+0x30)"},
+        {"offset": 0x34, "type": "void*", "name": "sceneParent", "confidence": "high", "source": "createEffectObj: lwz r24, 0x34(r25) when online flag set"}
+      ],
+      "virtual_methods": [],
+      "functions": {
+        "0x805a3c10": {"name": "createInstance", "params": [], "return": "KartBody*", "confidence": "high"},
+        "0x805a3c94": {"name": "__ct", "params": ["KartBody* this"], "return": "void", "confidence": "high"},
+        "0x805a3b78": {"name": "__dt", "params": ["KartBody* this", "s32 flags"], "return": "KartBody*", "confidence": "high"},
+        "0x805a45c0": {"name": "createEffectObj", "params": ["s32 effectType", "s32 slotIdx", "s32 variation", "void* parent", "s32 index", "s32 onlineFlag"], "return": "void*", "confidence": "medium"},
+        "0x805a47a8": {"name": "countActiveEffects", "params": ["KartBody* this", "s32 arg"], "return": "int", "confidence": "high"},
+        "0x805a4838": {"name": "updateAudio", "params": ["KartBody* this"], "return": "void", "confidence": "high"}
+      }
+    },
+    "Kart::KartMove": {
+      "full_name": "Kart::KartMove",
+      "namespace": "Kart",
+      "size": 0x294,
+      "vtable_size": 13,
+      "base_class": "Kart::KartObjectProxy",
+      "note": "KartObjectProxy adds 8 bytes (KartAccessor* + nw4r::ut::Node). Vtable starts at 0x00, KartAccessor* at 0x04, nw4r::ut::Node at 0x08.",
+      "fields": [
+        {"offset": 0x00, "type": "void*", "name": "vtable", "confidence": "high", "source": "virtual methods confirm vtable at 0x00"},
+        {"offset": 0x04, "type": "KartAccessor*", "name": "mAccessor", "confidence": "high", "source": "KartObjectProxy base class"},
+        {"offset": 0x08, "type": "nw4r::ut::Node", "name": "mNode", "confidence": "high", "source": "KartObjectProxy base class (4 bytes)"},
+        {"offset": 0x0C, "type": "u8[4]", "name": "_00c", "confidence": "low", "source": "padding before mBaseSpeed"},
+        {"offset": 0x014, "type": "f32", "name": "mBaseSpeed", "confidence": "high", "source": "community header + getter at 0x014"},
+        {"offset": 0x018, "type": "u8[8]", "name": "_018", "confidence": "low", "source": "gap between mBaseSpeed and mSpeed"},
+        {"offset": 0x020, "type": "f32", "name": "mSpeed", "confidence": "high", "source": "community header, setScale reads f1 at 0x20(r31)"},
+        {"offset": 0x024, "type": "u8[0x38]", "name": "_024", "confidence": "low", "source": "gap before mDir"},
+        {"offset": 0x05C, "type": "EGG::Vector3f", "name": "mDir", "confidence": "high", "source": "community header, dir() accessor"},
+        {"offset": 0x068, "type": "u8[0x48]", "name": "_068", "confidence": "low", "source": "gap before mSpeedRatioCapped"},
+        {"offset": 0x0B0, "type": "f32", "name": "mSpeedRatioCapped", "confidence": "high", "source": "community header + accessor"},
+        {"offset": 0x0B4, "type": "f32", "name": "mSpeedRatio", "confidence": "high", "source": "community header + accessor"},
+        {"offset": 0x0B8, "type": "u8[0x14]", "name": "_0b8", "confidence": "low", "source": "gap before mHopStickX"},
+        {"offset": 0x0CC, "type": "s32", "name": "mHopStickX", "confidence": "high", "source": "community header, getAppliedHopStickX loads from 0x14(r3) after mulli 0x248"},
+        {"offset": 0x0D0, "type": "u8[0x2C]", "name": "_0d0", "confidence": "low", "source": "gap before mDriftState"},
+        {"offset": 0x0FC, "type": "s16", "name": "mDriftState", "confidence": "high", "source": "community header, driftState() accessor"},
+        {"offset": 0x0FE, "type": "s16", "name": "mMtCharge", "confidence": "high", "source": "community header, mtCharge() accessor"},
+        {"offset": 0x100, "type": "s16", "name": "mSmtCharge", "confidence": "high", "source": "community header, smtCharge() accessor"},
+        {"offset": 0x102, "type": "u8[0x62]", "name": "_102", "confidence": "low", "source": "gap before mScale. clearBoost writes 4 vec3s to 0x100-0x110 area"},
+        {"offset": 0x164, "type": "EGG::Vector3f", "name": "mScale", "confidence": "high", "source": "community header, setScale stores vec3 to 0x164 area"},
+        {"offset": 0x170, "type": "f32", "name": "mTotalScale", "confidence": "high", "source": "community header, totalScale() accessor"},
+        {"offset": 0x174, "type": "f32", "name": "mHitboxScale", "confidence": "high", "source": "community header, hitboxScale() accessor"},
+        {"offset": 0x178, "type": "u8[0xC0]", "name": "_178", "confidence": "low", "source": "large gap before _someTimer"},
+        {"offset": 0x238, "type": "s16", "name": "someTimer", "confidence": "medium", "source": "community header, someTimer() accessor"},
+        {"offset": 0x23A, "type": "s16", "name": "mRespawnTimer", "confidence": "high", "source": "community header, respawnTimer() accessor"},
+        {"offset": 0x23C, "type": "u8[0x0C]", "name": "_23c", "confidence": "low", "source": "gap before mDrivingDirection"},
+        {"offset": 0x248, "type": "s32", "name": "mDrivingDirection", "confidence": "high", "source": "community: DrivingDirection enum. GENESIS incorrectly has u32. getAppliedHopStickX compares to 3."},
+        {"offset": 0x24C, "type": "s16", "name": "mBackwardsAllowCounter", "confidence": "high", "source": "community header, backwardsAllowCounter() accessor"},
+        {"offset": 0x24E, "type": "u8[2]", "name": "_24e", "confidence": "low", "source": "padding"},
+        {"offset": 0x250, "type": "u32", "name": "mPadType", "confidence": "high", "source": "community header, setPadType uses OR"},
+        {"offset": 0x254, "type": "u16", "name": "mFlags", "confidence": "high", "source": "community header, flags() accessor"},
+        {"offset": 0x256, "type": "u8[2]", "name": "_256", "confidence": "low", "source": "padding before mJump"},
+        {"offset": 0x258, "type": "KartJump*", "name": "mJump", "confidence": "high", "source": "community header, MISSING from GENESIS"},
+        {"offset": 0x25C, "type": "KartHalfPipe*", "name": "mHalfPipe", "confidence": "high", "source": "community header, MISSING from GENESIS"},
+        {"offset": 0x260, "type": "u8[0x34]", "name": "_260", "confidence": "low", "source": "trailing padding to 0x294"}
+      ],
+      "virtual_methods": [
+        {"index": 0, "name": "~KartMove", "return": "void"},
+        {"index": 1, "name": "createComponents", "return": "void"},
+        {"index": 2, "name": "setTurnParams", "return": "void"},
+        {"index": 3, "name": "init", "return": "void"},
+        {"index": 4, "name": "activateStar", "return": "void"},
+        {"index": 5, "name": "activateMega", "return": "void"},
+        {"index": 6, "name": "activateGesso", "return": "void"},
+        {"index": 7, "name": "clear", "return": "void"},
+        {"index": 8, "name": "initOob", "return": "void"},
+        {"index": 9, "name": "vf2c", "return": "void"},
+        {"index": 10, "name": "vf30", "return": "void"},
+        {"index": 11, "name": "getLeanRot", "return": "f32"},
+        {"index": 12, "name": "canWheelie", "return": "bool"}
+      ],
+      "functions": {
+        "0x805814c8": {"name": "getMaxMtCharge", "params": ["KartMove* this"], "return": "s16", "confidence": "high", "source": "mangled symbol, community header"},
+        "0x805814d4": {"name": "getMaxSmtCharge", "params": ["KartMove* this"], "return": "s16", "confidence": "high", "source": "mangled symbol, community header"},
+        "0x805814e0": {"name": "getAppliedHopStickX", "params": ["KartMove* this"], "return": "s32", "confidence": "high", "source": "mangled symbol, decompiled code shows mulli 0x248 then lwz 0x14"},
+        "0x80583c08": {"name": "setScale", "params": ["KartMove* this", "EGG::Vector3f scale"], "return": "void", "confidence": "high", "source": "mangled symbol shows Vector3f param"},
+        "0x80583f0c": {"name": "empty", "params": ["KartMove* this", "s32 arg"], "return": "void", "confidence": "high", "source": "mangled symbol Q24Kart8KartMoveFl"},
+        "0x805857cc": {"name": "clearBoost", "params": ["KartMove* this"], "return": "void", "confidence": "high", "source": "mangled symbol, decompiled shows 4 vec3 zero operations"}
+      }
+    },
+    "Kart::KartDynamics": {
+      "full_name": "Kart::KartDynamics",
+      "namespace": "Kart",
+      "size": null,
+      "note": "Exact size unknown. Fields end at scale(0x1A0). No static_assert in community. The GENESIS version incorrectly includes KartPhysicsEngine functions.",
+      "vtable_size": 3,
+      "base_class": null,
+      "fields": [
+        {"offset": 0x00, "type": "void*", "name": "vtable", "confidence": "high", "source": "virtual destructor at index 0"},
+        {"offset": 0x04, "type": "EGG::Matrix34f", "name": "inertiaTensor", "confidence": "high", "source": "community header, 0x30 bytes"},
+        {"offset": 0x34, "type": "EGG::Matrix34f", "name": "invInertiaTensor", "confidence": "high", "source": "community header, 0x30 bytes"},
+        {"offset": 0x64, "type": "f32", "name": "angVel0Factor", "confidence": "high", "source": "community header, setBspParams mangled symbol shows float param"},
+        {"offset": 0x68, "type": "EGG::Vector3f", "name": "pos", "confidence": "high", "source": "community header"},
+        {"offset": 0x74, "type": "EGG::Vector3f", "name": "externalVel", "confidence": "high", "source": "community header"},
+        {"offset": 0x80, "type": "EGG::Vector3f", "name": "acceleration", "confidence": "high", "source": "community header"},
+        {"offset": 0x8C, "type": "EGG::Vector3f", "name": "externalVelBody", "confidence": "high", "source": "community header"},
+        {"offset": 0x98, "type": "EGG::Vector3f", "name": "_98", "confidence": "low", "source": "community header, unknown purpose"},
+        {"offset": 0xA4, "type": "EGG::Vector3f", "name": "angVel0", "confidence": "high", "source": "community header, angular velocity"},
+        {"offset": 0xB0, "type": "EGG::Vector3f", "name": "movingRoadVel", "confidence": "high", "source": "community header"},
+        {"offset": 0xBC, "type": "EGG::Vector3f", "name": "angVel1", "confidence": "medium", "source": "community header"},
+        {"offset": 0xC8, "type": "EGG::Vector3f", "name": "movingWaterVel", "confidence": "high", "source": "community header"},
+        {"offset": 0xD4, "type": "EGG::Vector3f", "name": "speed", "confidence": "high", "source": "community header, total speed"},
+        {"offset": 0xE0, "type": "f32", "name": "speedNorm", "confidence": "high", "source": "community header"},
+        {"offset": 0xE4, "type": "EGG::Vector3f", "name": "angVel2", "confidence": "medium", "source": "community header"},
+        {"offset": 0xF0, "type": "EGG::Quatf", "name": "mainRot", "confidence": "high", "source": "community header"},
+        {"offset": 0x100, "type": "EGG::Quatf", "name": "fullRot", "confidence": "high", "source": "community header"},
+        {"offset": 0x110, "type": "EGG::Vector3f", "name": "totalForce", "confidence": "high", "source": "community header"},
+        {"offset": 0x11C, "type": "EGG::Vector3f", "name": "totalTorque", "confidence": "high", "source": "community header"},
+        {"offset": 0x128, "type": "EGG::Quatf", "name": "specialRot", "confidence": "high", "source": "community header, stunt rotation"},
+        {"offset": 0x138, "type": "EGG::Quatf", "name": "extraRot", "confidence": "high", "source": "community header, collision animation rotation"},
+        {"offset": 0x148, "type": "f32", "name": "gravity", "confidence": "high", "source": "community header, setDefault stores -1.0f"},
+        {"offset": 0x14C, "type": "EGG::Vector3f", "name": "internalVel", "confidence": "high", "source": "community header, engine velocity"},
+        {"offset": 0x158, "type": "EGG::Vector3f", "name": "up", "confidence": "high", "source": "community header"},
+        {"offset": 0x164, "type": "u8[0x0C]", "name": "_168", "confidence": "low", "source": "gap before bools"},
+        {"offset": 0x170, "type": "bool", "name": "_forceUpright", "confidence": "high", "source": "community header, setDefault stores true"},
+        {"offset": 0x171, "type": "bool", "name": "noGravity", "confidence": "high", "source": "community header, setDefault stores false"},
+        {"offset": 0x172, "type": "bool", "name": "isHit", "confidence": "high", "source": "community header"},
+        {"offset": 0x173, "type": "bool", "name": "force0xVelY", "confidence": "high", "source": "community header"},
+        {"offset": 0x174, "type": "bool", "name": "inBullet", "confidence": "high", "source": "community header"},
+        {"offset": 0x178, "type": "f32", "name": "stabilizationFactor", "confidence": "high", "source": "community header, setDefault stores 0.1f"},
+        {"offset": 0x17C, "type": "f32", "name": "speedFix", "confidence": "high", "source": "community header"},
+        {"offset": 0x180, "type": "EGG::Vector3f", "name": "upInterpolated", "confidence": "high", "source": "community header, stabilization"},
+        {"offset": 0x18C, "type": "EGG::Vector3f", "name": "_18c", "confidence": "low", "source": "community header, unknown"},
+        {"offset": 0x198, "type": "EGG::Vector3f", "name": "_198", "confidence": "low", "source": "community header, unknown"},
+        {"offset": 0x1A4, "type": "f32", "name": "angVel0YFactor", "confidence": "medium", "source": "community header"},
+        {"offset": 0x1A8, "type": "EGG::Vector3f", "name": "scale", "confidence": "high", "source": "community header, model scale"}
+      ],
+      "virtual_methods": [
+        {"index": 0, "name": "~KartDynamics", "return": "void"},
+        {"index": 1, "name": "stabilize", "return": "void"},
+        {"index": 2, "name": "forceUpright", "return": "void"}
+      ],
+      "functions": {
+        "0x805B72AC": {"name": "setBspParams", "params": ["KartDynamics* this", "EGG::Vector3f& m", "EGG::Vector3f& n", "bool skipInertia", "f32 angVel0Factor"], "return": "void", "confidence": "high", "source": "mangled symbol confirms params"}
+      },
+      "subclasses": {
+        "Kart::KartDynamicsKart": {"base": "Kart::KartDynamics", "vtable_overrides": [], "note": "No additional fields or vtable entries beyond base"},
+        "Kart::KartDynamicsBike": {"base": "Kart::KartDynamicsKart", "vtable_overrides": ["stabilize", "forceUpright"], "note": "Overrides stabilize and forceUpright with bike-specific behavior"}
+      }
+    },
+    "System::RaceConfig": {
+      "full_name": "System::RaceConfig",
+      "namespace": "System",
+      "size": null,
+      "note": "Size not determined. Constructor at 0x80532644 accesses offsets up to 0xC10 from this pointer. Inherits from RaceConfigEx (empty) and ParameterFile.",
+      "vtable_size": 2,
+      "base_class": "System::RaceConfigEx, System::ParameterFile",
+      "fields": {
+        "Player": [
+          {"offset": 0x04, "type": "u8", "name": "_04", "confidence": "low", "source": "community header, unknown"},
+          {"offset": 0x05, "type": "s8", "name": "mLocalPlayerNum", "confidence": "high", "source": "community header, initialized to -1"},
+          {"offset": 0x06, "type": "s8", "name": "mPlayerInputIdx", "confidence": "high", "source": "community header, initialized to -1"},
+          {"offset": 0x08, "type": "VehicleId", "name": "mVehicleId", "confidence": "high", "source": "community header, enum type"},
+          {"offset": 0x0C, "type": "CharacterId", "name": "mCharacterId", "confidence": "high", "source": "community header, enum type"},
+          {"offset": 0x10, "type": "Player::Type", "name": "mPlayerType", "confidence": "high", "source": "community header, enum type"},
+          {"offset": 0x14, "type": "Mii", "name": "mMii", "confidence": "high", "source": "community header"},
+          {"offset": 0xB4, "type": "BattleTeam", "name": "mTeam", "confidence": "high", "source": "community header"},
+          {"offset": 0xB8, "type": "s32", "name": "mControllerId", "confidence": "high", "source": "community header, initialized to -1"},
+          {"offset": 0xBC, "type": "u32", "name": "_d4", "confidence": "low", "source": "community header, initialized to 8"},
+          {"offset": 0xC0, "type": "u16", "name": "mPreviousScore", "confidence": "medium", "source": "community header"},
+          {"offset": 0xC2, "type": "u16", "name": "mGpScore", "confidence": "high", "source": "community header, GP scoring"},
+          {"offset": 0xC4, "type": "u16", "name": "_dc", "confidence": "low", "source": "community header"},
+          {"offset": 0xC6, "type": "s16", "name": "mGpRankScore", "confidence": "medium", "source": "community header"},
+          {"offset": 0xC8, "type": "u8", "name": "_e0", "confidence": "low", "source": "community header"},
+          {"offset": 0xC9, "type": "u8", "name": "mPrevFinishPos", "confidence": "high", "source": "community header"},
+          {"offset": 0xCA, "type": "u8", "name": "mFinishPos", "confidence": "high", "source": "community header"},
+          {"offset": 0xCB, "type": "Rating", "name": "mRating", "confidence": "high", "source": "community header"},
+          {"offset": 0xEC, "type": "s8", "name": "_ec", "confidence": "low", "source": "community header"}
+        ]
+      },
+      "functions": {
+        "0x80532644": {"name": "__ct", "params": ["RaceConfig* this"], "return": "void", "confidence": "high", "source": "constructor, 360 bytes"},
+        "0x80532520": {"name": "__dt", "params": ["RaceConfig* this"], "return": "void", "confidence": "high", "source": "destructor"},
+        "0x80530228": {"name": "init", "params": ["RaceConfig* this"], "return": "void", "confidence": "high", "source": "mangled symbol"},
+        "0x8053093c": {"name": "clear", "params": ["RaceConfig* this"], "return": "void", "confidence": "high", "source": "mangled symbol"},
+        "0x80532340": {"name": "createInstance", "params": [], "return": "RaceConfig*", "confidence": "high", "source": "mangled symbol"},
+        "0x805341cc": {"name": "update", "params": ["RaceConfig* this"], "return": "u8", "confidence": "high", "source": "mangled symbol"},
+        "0x805327ac": {"name": "initRace", "params": ["RaceConfig* this"], "return": "void", "confidence": "high", "source": "mangled symbol"},
+        "0x8052ffd8": {"name": "computeGpRank", "params": ["Player* this"], "return": "s32", "confidence": "high", "source": "mangled symbol"}
+      }
+    },
+    "Kart::KartCollide": {
+      "full_name": "Kart::KartCollide",
+      "namespace": "Kart",
+      "size": 0x74,
+      "note": "Size estimated from highest field offset 0x70 + 4. Inherits from IKartCollide (2 vtable entries) and KartObjectProxy (8 bytes data). Total vtable = IKartCollide(2) + KartObjectProxy virtuals.",
+      "vtable_size": null,
+      "base_class": "Kart::IKartCollide, Kart::KartObjectProxy",
+      "fields": [
+        {"offset": 0x00, "type": "void*", "name": "vtable", "confidence": "high", "source": "multiple virtual methods"},
+        {"offset": 0x04, "type": "KartAccessor*", "name": "mAccessor", "confidence": "high", "source": "KartObjectProxy base"},
+        {"offset": 0x08, "type": "nw4r::ut::Node", "name": "mNode", "confidence": "high", "source": "KartObjectProxy base"},
+        {"offset": 0x0C, "type": "KartCollideArea*", "name": "kartCollideArea", "confidence": "high", "source": "GENESIS init() calls kartCollideArea->init()"},
+        {"offset": 0x10, "type": "f32", "name": "boundingRadius", "confidence": "high", "source": "GENESIS init() sets to 100.0f"},
+        {"offset": 0x14, "type": "s16", "name": "playerBumpTimer", "confidence": "high", "source": "GENESIS init() sets to 0"},
+        {"offset": 0x16, "type": "u8[2]", "name": "_16", "confidence": "low", "source": "padding to 0x18"},
+        {"offset": 0x18, "type": "f32", "name": "_1c", "confidence": "high", "source": "GENESIS init() sets to 0.8f"},
+        {"offset": 0x1C, "type": "EGG::Vector3f", "name": "_20", "confidence": "medium", "source": "GENESIS init() zeroes, processFloor accesses offset 0x80 of pointed-to obj"},
+        {"offset": 0x28, "type": "u32", "name": "surfaceFlags", "confidence": "high", "source": "GENESIS init() zeroes, used as KCL type bitmask"},
+        {"offset": 0x2C, "type": "EGG::Vector3f", "name": "tangentOff", "confidence": "high", "source": "GENESIS init() zeroes"},
+        {"offset": 0x38, "type": "EGG::Vector3f", "name": "movement", "confidence": "high", "source": "GENESIS init() zeroes, getMovement() accessor"},
+        {"offset": 0x44, "type": "s16", "name": "respawnTimer", "confidence": "high", "source": "GENESIS init() zeroes"},
+        {"offset": 0x46, "type": "s16", "name": "solidOobTimer", "confidence": "high", "source": "GENESIS init() zeroes"},
+        {"offset": 0x48, "type": "s16", "name": "someLightningTimer", "confidence": "medium", "source": "GENESIS init() zeroes"},
+        {"offset": 0x4A, "type": "u8[2]", "name": "_4a", "confidence": "low", "source": "padding to 0x4C"},
+        {"offset": 0x4C, "type": "f32", "name": "_50", "confidence": "low", "source": "GENESIS init() zeroes"},
+        {"offset": 0x50, "type": "f32", "name": "suspBottomHeightSoftWall", "confidence": "high", "source": "GENESIS init() zeroes, collision suspension"},
+        {"offset": 0x54, "type": "s16", "name": "someSoftWallTimer", "confidence": "medium", "source": "GENESIS init() zeroes"},
+        {"offset": 0x56, "type": "u8[2]", "name": "_56", "confidence": "low", "source": "padding"},
+        {"offset": 0x58, "type": "f32", "name": "suspBottomHeightNonSoftWall", "confidence": "high", "source": "GENESIS init() zeroes"},
+        {"offset": 0x5C, "type": "s16", "name": "someNonSoftWallTimer", "confidence": "medium", "source": "GENESIS init() zeroes"},
+        {"offset": 0x5E, "type": "s16", "name": "someAngVel3FrameTimer", "confidence": "medium", "source": "GENESIS init() zeroes"},
+        {"offset": 0x60, "type": "f32", "name": "someYawAngVel", "confidence": "medium", "source": "GENESIS init() zeroes"},
+        {"offset": 0x64, "type": "f32", "name": "_68", "confidence": "low", "source": "GENESIS init() zeroes"},
+        {"offset": 0x68, "type": "s16", "name": "oobAreaIdx", "confidence": "high", "source": "GENESIS init() sets to -1"},
+        {"offset": 0x6A, "type": "u8[2]", "name": "_6a", "confidence": "low", "source": "padding to 0x6C"},
+        {"offset": 0x6C, "type": "f32", "name": "_70", "confidence": "low", "source": "GENESIS init() zeroes"}
+      ],
+      "virtual_methods": [
+        {"index": 0, "name": "processBody", "return": "void", "params": ["KartCollisionInfo&", "const Hitbox&", "const Field::ColInfo&", "u32*"]},
+        {"index": 1, "name": "processWheels", "return": "void", "params": ["KartCollisionInfo&", "const Hitbox&", "const Field::ColInfo&", "u32*"]}
+      ],
+      "functions": {
+        "0x80570A54": {"name": "__ct", "params": ["KartCollide* this"], "return": "void", "confidence": "high", "source": "constructor"},
+        "0x80570B0C": {"name": "init", "params": ["KartCollide* this"], "return": "void", "confidence": "high", "source": "mangled symbol"},
+        "0x80570BF4": {"name": "updateBbox", "params": ["KartCollide* this"], "return": "void", "confidence": "high", "source": "mangled symbol"},
+        "0x80570C4C": {"name": "processBody", "params": ["KartCollide* this", "KartCollisionInfo&", "const Hitbox&", "const Field::ColInfo&", "u32*"], "return": "void", "confidence": "high", "source": "mangled symbol"},
+        "0x80570DBC": {"name": "processWheels", "params": ["KartCollide* this", "KartCollisionInfo&", "const Hitbox&", "const Field::ColInfo&", "u32*"], "return": "void", "confidence": "high", "source": "mangled symbol"},
+        "0x80570E18": {"name": "processMovingWater", "params": ["KartCollide* this", "KartCollisionInfo&", "u32*"], "return": "void", "confidence": "high", "source": "mangled symbol"},
+        "0x80570EEC": {"name": "processFloor", "params": ["KartCollide* this", "KartCollisionInfo&", "const Hitbox&", "const Field::ColInfo&", "u32*", "bool"], "return": "void", "confidence": "high", "source": "mangled symbol, 198 instructions"},
+        "0x8057130C": {"name": "updateHitboxes", "params": ["KartCollide* this"], "return": "void", "confidence": "high", "source": "mangled symbol"},
+        "0x8057166C": {"name": "processWall", "params": ["KartCollide* this", "KartCollisionInfo&", "const Field::ColInfo&", "u32*"], "return": "bool", "confidence": "high", "source": "mangled symbol"},
+        "0x80571754": {"name": "checkNeighborhood", "params": ["KartCollide* this", "KartCollisionInfo&", "const Hitbox&", "const Field::ColInfo&"], "return": "void", "confidence": "high", "source": "mangled symbol, 137 instructions"},
+        "0x80571978": {"name": "processCannon", "params": ["KartCollide* this", "u32*"], "return": "void", "confidence": "high", "source": "mangled symbol"},
+        "0x805B9E10": {"name": "applySomeFloorMoment", "params": ["KartCollide* this", "KartDynamics*", "HitboxGroup*", "EGG::Vector3f&", "EGG::Vector3f&", "EGG::Vector3f&", "f32", "f32", "bool", "bool", "bool"], "return": "void", "confidence": "high", "source": "mangled symbol, 348 instructions"},
+        "0x805764D8": {"name": "__dt", "params": ["KartCollide* this", "s32"], "return": "void", "confidence": "high", "source": "destructor"}
+      }
+    }
+  },
+  "inheritance": {
+    "Kart::KartMove": {
+      "bases": ["Kart::KartObjectProxy"],
+      "total_vtable_entries": 13,
+      "note": "KartObjectProxy provides KartAccessor* and nw4r::ut::Node data, plus many accessor methods"
+    },
+    "Kart::KartDynamics": {
+      "bases": [],
+      "total_vtable_entries": 3,
+      "subclasses": ["Kart::KartDynamicsKart", "Kart::KartDynamicsBike"]
+    },
+    "Kart::KartDynamicsKart": {
+      "bases": ["Kart::KartDynamics"],
+      "total_vtable_entries": 3,
+      "subclasses": ["Kart::KartDynamicsBike"]
+    },
+    "Kart::KartDynamicsBike": {
+      "bases": ["Kart::KartDynamicsKart"],
+      "total_vtable_entries": 3,
+      "overrides": ["stabilize", "forceUpright"]
+    },
+    "Kart::KartCollide": {
+      "bases": ["Kart::IKartCollide", "Kart::KartObjectProxy"],
+      "note": "Multiple inheritance: IKartCollide provides 2 pure virtual methods, KartObjectProxy provides data layout and accessor methods"
+    },
+    "Kart::KartCollideArea": {
+      "bases": ["Kart::KartCollideAreaBase"],
+      "total_size": 0x40,
+      "note": "KartCollideAreaBase is 0x38 with vtable. KartCollideArea adds 8 bytes."
+    },
+    "System::RaceConfig": {
+      "bases": ["System::RaceConfigEx", "System::ParameterFile"],
+      "note": "RaceConfigEx is empty. ParameterFile provides base data/methods."
+    }
+  },
+  "mismatches_found": [
+    {
+      "class": "KartBody",
+      "file": "data/src/game/KartMovement/KartBody.hpp",
+      "issue": "GENESIS header treats this as Kart::KartBody but mangled name Q29KartBody shows it is ::KartBody (global namespace). Community's Kart::KartBody is a DIFFERENT class inheriting from KartPart with size 0x224.",
+      "severity": "high",
+      "fix": "Clarify this is ::KartBody (effect manager singleton, size 0x38), not Kart::KartBody (kart body part, size 0x224)"
+    },
+    {
+      "class": "Kart::KartMove",
+      "file": "data/src/game/KartMovement/KartMove.hpp",
+      "issue": "Missing inheritance from KartObjectProxy. Missing KartJump* and KartHalfPipe* fields at 0x258/0x25C. mDrivingDirection typed as u32 instead of s32/DrivingDirection enum.",
+      "severity": "high",
+      "fix": "Add KartObjectProxy base class, add missing pointer fields, fix DrivingDirection type"
+    },
+    {
+      "class": "Kart::KartMove",
+      "file": "data/src/game/KartMovement/KartMove.hpp",
+      "issue": "No static_assert for size 0x294",
+      "severity": "medium",
+      "fix": "Add static_assert(sizeof(KartMove) == 0x294)"
+    },
+    {
+      "class": "Kart::KartDynamics",
+      "file": "data/src/game/KartMovement/KartDynamics.hpp",
+      "issue": "GENESIS includes 20+ functions (initInternal, vec3Array, setupPhysics, etc.) that belong to KartPhysicsEngine, not KartDynamics. These pollute the class definition.",
+      "severity": "medium",
+      "fix": "Remove KartPhysicsEngine functions from KartDynamics, add comment noting they belong elsewhere"
+    },
+    {
+      "class": "Kart::KartCollide",
+      "file": "data/src/game/Collision/KartCollide.hpp",
+      "issue": "KartCollideArea missing inheritance from KartCollideAreaBase. GENESIS declares it standalone with size 0x40, but it actually inherits from KartCollideAreaBase (0x38).",
+      "severity": "medium",
+      "fix": "Add KartCollideAreaBase as base class of KartCollideArea"
+    },
+    {
+      "class": "Kart::KartCollide",
+      "file": "data/src/game/Collision/KartCollide.hpp",
+      "issue": "~KartCollide() declared as non-inline virtual in GENESIS but community has it as inline empty",
+      "severity": "low",
+      "fix": "Mark as inline empty to match community"
+    }
+  ]
+}

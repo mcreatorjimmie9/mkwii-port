@@ -38,7 +38,10 @@ static void vec3ArrayZero(EGG::Vector3f* arr, int count) {
 
 // ===== Community-verified implementations =====
 
-KartDynamicsKart::KartDynamicsKart() {
+// Phase 6b: Constructor signature corrected from () to (const EGG::Vector3f&, int)
+// The parameterized constructor was previously misattributed to KartDynamics base class.
+// It initializes BSP/physics arrays then calls setDefault().
+KartDynamicsKart::KartDynamicsKart(const EGG::Vector3f& param, int count) {
     0.0f; // to make 0.0f appear before 1.0f in rodata
     this->angVel0Factor = 1.0f;
     this->inertiaTensor.makeIdentity();
@@ -320,14 +323,19 @@ void KartDynamicsBike::forceUpright() {
 
 // ===== KartMovement module functions (from symbols) =====
 
+// Phase 6b: The parameterized KartDynamics constructor belongs to KartPhysicsEngine,
+// not KartDynamics. Commented out since initInternal is also disabled.
 // 0x805a26e0 - __ct__Q212KartDynamicsFRCQ23EGG8Vector3fi
-// Constructor: stores vtable, param, zeroes physics holder, calls initInternal
-KartDynamics::KartDynamics(const EGG::Vector3f& param, int count) {
-    // Store param reference and zero the physics holder pointer
-    // The actual vtable is set by the derived class constructor
-    // Offset 0x70 = physics holder pointer, zeroed initially
-    this->initInternal(param, count);
-}
+// KartDynamics::KartDynamics(const EGG::Vector3f& param, int count) {
+//     this->initInternal(param, count);
+// }
+
+// Phase 6b: The following functions belong to KartPhysicsEngine, NOT KartDynamics.
+// They have been removed from the header. Kept here as dead code for reference
+// until a KartPhysicsEngine module is created.
+// See data/reports/type_database.json "mismatches_found" for details.
+
+#if 0 // BEGIN KartPhysicsEngine functions (misattributed to KartDynamics)
 
 // 0x805a2770 - initInternal__Q212KartDynamicsFRCQ23EGG8Vector3fi
 // Allocates element arrays and initializes physics data from global table
@@ -671,6 +679,8 @@ void KartDynamics::physicsDataTable() {
     // In the original binary, this is accessed via computed offsets
     // from the base address (lis r4, 0; addi r4, r4, 0)
 }
+
+#endif // END KartPhysicsEngine functions (misattributed to KartDynamics)
 
 // 0x805a6da8 - calc__Q212KartDynamicsFv
 // Main physics calculation for body dynamics sub-system

@@ -58,6 +58,8 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/data/src/game
     ${CMAKE_SOURCE_DIR}/data/src/game/UI
     ${CMAKE_SOURCE_DIR}/data/src/game/Scene
+    ${CMAKE_SOURCE_DIR}/data/src/game/Network
+    ${CMAKE_SOURCE_DIR}/data/src/game/SaveData
 )
 
 # =============================================================================
@@ -215,6 +217,36 @@ set(RUNTIME_SOURCES
     data/src/game/Runtime/System.cpp
 )
 
+# --- EGG Framework Classes (6 files) ---
+set(EGG_CLASSES_SOURCES
+    data/src/game/Runtime/Archive_Classes.cpp
+    data/src/game/Runtime/Core_Classes.cpp
+    data/src/game/Runtime/Heap_Classes.cpp
+    data/src/game/Runtime/Gfx_Classes.cpp
+    data/src/game/Runtime/MathUtil_Classes.cpp
+)
+
+# --- Network (8 files) ---
+set(NETWORK_SOURCES
+    data/src/game/Network/Connection.cpp
+    data/src/game/Network/Packet.cpp
+    data/src/game/Network/PacketHandler.cpp
+    data/src/game/Network/RKNetConnectionManager.cpp
+    data/src/game/Network/RacingNet.cpp
+    data/src/game/Network/Session.cpp
+)
+
+# --- SaveData (8 files) ---
+set(SAVEDATA_SOURCES
+    data/src/game/SaveData/GhostFile.cpp
+    data/src/game/SaveData/License.cpp
+    data/src/game/SaveData/RecordBook.cpp
+    data/src/game/SaveData/RecordData.cpp
+    data/src/game/SaveData/SaveData.cpp
+    data/src/game/SaveData/SaveManager.cpp
+    data/src/game/SaveData/Settings.cpp
+)
+
 # =============================================================================
 # Static library target
 # =============================================================================
@@ -231,6 +263,9 @@ add_library(mkwii-genesis STATIC
     ${SCENE_SOURCES}
     ${UI_SOURCES}
     ${RUNTIME_SOURCES}
+    ${EGG_CLASSES_SOURCES}
+    ${NETWORK_SOURCES}
+    ${SAVEDATA_SOURCES}
 )
 
 # =============================================================================

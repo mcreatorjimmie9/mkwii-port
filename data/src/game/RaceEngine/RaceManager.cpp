@@ -158,7 +158,9 @@ void RaceManagerPlayer::updateGpRankScore() {
         }
 
         // Save the new star rank score
-        RaceConfig::spInstance->mMenuScenario.getPlayer(idx).mGpStarRankScore += (s16) raceStarRankScore;
+        // Phase 6b: mGpStarRankScore was removed (not in community header).
+        // Star rank score likely accumulated into mGpRankScore or stored at the offset that was _e0.
+        RaceConfig::spInstance->mMenuScenario.getPlayer(idx).mGpRankScore += (s16) raceStarRankScore;
     }
 }
 

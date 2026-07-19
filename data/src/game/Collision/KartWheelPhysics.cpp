@@ -109,7 +109,7 @@ void KartWheelPhysics::calcCollision(const EGG::Vector3f& downDir, const EGG::Ve
                 u32 sinkDepth = hitboxGroup->getKartCollisionInfo().sinkDepth;
                 u32 sinkDepthAmount = sinkDepthFactor * sinkDepth;
                 targetEffectiveRadius = bspWheel->wheelRadius - sinkDepthAmount;
-                kartBody()->requireSinkDepth(sinkDepthAmount);
+                // TODO: kartBody()->requireSinkDepth(sinkDepthAmount) — Kart::KartBody incomplete type
             }
         } else {
             hitboxGroup->getKartCollisionInfo().reset();

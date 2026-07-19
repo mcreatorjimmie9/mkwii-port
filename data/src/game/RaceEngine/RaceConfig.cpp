@@ -54,8 +54,8 @@ extern "C" void getCompetitionWrapper(void*, CompetitionWrapper*);
 RaceConfig::Player::Player()
     : _04(0), mLocalPlayerNum(-1), mPlayerInputIdx(-1),
       mVehicleId(STANDARD_KART_M), mCharacterId(MARIO),
-      mPlayerType(TYPE_REAL_LOCAL), mMii(7), mControllerId(-1), _d4(8),
-      mRating(), _ec(_ec & ~0x80) {}
+      mPlayerType(TYPE_REAL_LOCAL), mMii(7), mControllerId(-1), _bc(8),
+      mRating(), _ec(_ec & ~0x80), _c8(0), _cf{} {}
 
 void RaceConfig::Player::appendParamFile(RaceConfig* raceConfig) {
   raceConfig->append(mVehicleId, InitScene::spInstance->mHeapCollection
@@ -185,12 +185,12 @@ void RaceConfig::Player::reset(s8 pos) {
   mPreviousScore = 0;
   mGpRankScore = 0;
   mPrevFinishPos = pos;
-  this->_e0 = pos;
+  this->_c8 = pos;
 }
 
 void RaceConfig::Player::setPrevFinishPos(s8 pos) { mPrevFinishPos = pos; }
 
-void RaceConfig::Player::setUnkPos(s8 pos) { this->_e0 = pos; }
+void RaceConfig::Player::setUnkPos(s8 pos) { this->_c8 = pos; }
 
 // @addr 0x80530b50
 void RaceConfig::Scenario::clear() {
@@ -297,7 +297,7 @@ void RaceConfig::Scenario::initPlayers(u8 playerCount) {
     Player& player = getPlayer(i);
     player.mPreviousScore = 0;
     player.mPrevFinishPos = playerCount - i;
-    player._e0 = playerCount - i;
+    player._c8 = playerCount - i;
   }
 }
 

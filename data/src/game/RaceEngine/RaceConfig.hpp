@@ -2,6 +2,10 @@
 
 // RaceConfig.hpp - Adapted from community decomp with address annotations
 // Original: data/decompiled/existing/src/system/RaceConfig.hpp
+// Phase 6b refinement: field types verified against community header and binary
+// Constructor at 0x80532644 accesses Scenario at this+0x20, Ghost at this+0xC10
+// createInstance at 0x80532340 confirms Player stride = 0xF0 via mulli+addi loop
+// init at 0x80530228 confirms Scenario player array stride and field layout
 
 #include <rk_types.h>
 #include <host_system/ParameterFile.hpp>
@@ -75,26 +79,32 @@ public:
     void setVehicle(VehicleId vehicle);
     s8 getPlayerInputIdx() const { return mPlayerInputIdx; }
 
-    u8 _04;
-    s8 mLocalPlayerNum;
-    s8 mPlayerInputIdx;
-    VehicleId mVehicleId;
-    CharacterId mCharacterId;
-    Type mPlayerType;
-    Mii mMii;
-    BattleTeam mTeam;
-    s32 mControllerId;
-    u32 _d4;
-    u16 mPreviousScore;
-    u16 mGpScore;
-    u16 _dc;
-    s16 mGpRankScore;
-    s16 mGpStarRankScore;
-    u8 _e0;
-    u8 mPrevFinishPos;
-    u8 mFinishPos;
-    Rating mRating;
-    s8 _ec;
+    // --- Player fields (verified against community header) ---
+    u8 _04;                    // 0x04: unknown (copied as u8 in createInstance)
+    s8 mLocalPlayerNum;        // 0x05: local player index, -1 if none
+    s8 mPlayerInputIdx;        // 0x06: input device index, -1 if none
+    VehicleId mVehicleId;      // 0x08: vehicle selection (enum)
+    CharacterId mCharacterId;  // 0x0C: character selection (enum)
+    Type mPlayerType;          // 0x10: player type (local/cpu/ghost/etc)
+    Mii mMii;                  // 0x14: Mii data (0xA0 bytes, extends to 0xB4)
+    BattleTeam mTeam;          // 0xB4: team assignment (battle mode)
+    s32 mControllerId;         // 0xB8: controller index, -1 if none
+    u32 _bc;                    // 0xBC: unknown (init to 8 in ctor; Phase 6b: renamed from _d4 to match offset)
+    u16 mPreviousScore;        // 0xC0: previous race score
+    u16 mGpScore;               // 0xC2: current GP score
+    u16 _c4;                    // 0xC4: unknown score field (Phase 6b: renamed from _dc to match offset)
+    s16 mGpRankScore;           // 0xC6: GP rank score
+    // NOTE: mGpStarRankScore removed - not present in community header
+    u8 _c8;                    // 0xC8: unknown
+    u8 mPrevFinishPos;         // 0xC9: finish position from previous race
+    u8 mFinishPos;             // 0xCA: current finish position
+    Rating mRating;             // 0xCB: VR rating (4 bytes, extends to 0xCF)
+    // Phase 6b: From createInstance decomp (0x80532340), fields at 0xD0-0xEC:
+    //   0xD0: u32, 0xD4: u32, 0xD8: u16, 0xDA: u16, 0xDC: u16, 0xDE: s16,
+    //   0xE0: u8, 0xE1: u8, 0xE2: u8, 0xE8: u16, 0xEC: u8
+    u8 _cf[0xEC - 0xCF];      // 0xCF: 29 bytes (GP stars, extra scores, misc data)
+    s8 _ec;                    // 0xEC: unknown (community says ~0x80 mask applied)
+    // Total: 0xF0 bytes (static_assert below)
   };
 
   struct Settings {
@@ -241,10 +251,14 @@ public:
     RawGhostFile* mGhost;
   };
 
+  // Phase 6b: From decomp, Scenario is at this+0x20. mRaceScenario is first,
+  // mMenuScenario second (at this+0x20+sizeof(Scenario)), mAwardsScenario third.
+  // Each Scenario is approximately 0xBF0 bytes (12 players * 0xF0 + overhead).
+  // Ghost files at this+0xC10 (confirmed by addi r3, r31, 0xc10 in constructor).
   // @addr 0x80532644
   RaceConfig();
   // @addr 0x80532520
-  ~RaceConfig();
+  ~RaceConfig() override;
 
   // @addr 0x8053093c
   void clear();

@@ -1,6 +1,7 @@
 #include "KartMove.hpp"
 #include "KartState.hpp"
 #include "KartSettings.hpp"
+#include <game/kart/KartObjectProxy.hpp>
 
 namespace Kart {
 

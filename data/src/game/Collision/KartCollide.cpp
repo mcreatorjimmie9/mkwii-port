@@ -43,24 +43,24 @@ void KartCollide::init() {
     this->kartCollideArea->init();
     this->updateBbox();
     this->playerBumpTimer = 0;
-    _1c = 0.8f;
-    _20.setAll(0);
+    wallBounceFactor = 0.8f;
+    initialColNormal.setAll(0);
     this->surfaceFlags = 0;
     this->tangentOff.setAll(0);
     this->movement.setAll(0);
     this->respawnTimer = 0;
     this->solidOobTimer = 0;
     this->someLightningTimer = 0;
-    _50 = 0.0f;
+    oobCheckDist = 0.0f;
     this->suspBottomHeightNonSoftWall = 0.0f;
     this->suspBottomHeightSoftWall = 0.0f;
     this->someNonSoftWallTimer = 0;
     this->someSoftWallTimer = 0;
     this->someAngVel3FrameTimer = 0;
     this->someYawAngVel = 0.0f;
-    _68 = 0.0f;
+    maxColPerp = 0.0f;
     this->oobAreaIdx = -1;
-    _70 = 0.0f;
+    _6c = 0.0f;
 }
 
 void KartCollide::updateBbox() {
@@ -230,8 +230,8 @@ bool KartCollide::processWall(KartCollisionInfo& kartColInfo, const ::Field::Col
 void KartCollide::checkNeighborhood(KartCollisionInfo& kartColInfo, const Hitbox& hitbox, const ::Field::ColInfo& colInfo) {
     f32 colPerp = colInfo.colPerpendicularity;
     if (colPerp > 0.0f) {
-        if (_68 < colPerp) {
-            _68 = colPerp;
+        if (maxColPerp < colPerp) {
+            maxColPerp = colPerp;
         }
 
         if ((kartColInfo.flags & (COL_FLAG_WALL_AT_LEFT_CLOSER | COL_FLAG_WALL_AT_RIGHT_CLOSER)) != 0) {
