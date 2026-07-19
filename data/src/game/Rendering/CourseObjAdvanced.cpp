@@ -53,7 +53,7 @@ void CourseObjActor_StartAnimation(CourseObjActor* self) {
 
     // Start 3D audio
     u8 objId = CourseObjActor_GetID(self);
-    CourseObjManager* mgr = CourseObjManager::getInstance();
+    CourseObjManager* mgr = CourseObjManager::spInstance;
     u32 idx = objId << 2;
     void** actorArray = *reinterpret_cast<void***>(static_cast<u8*>(mgr) + 0x68);
     void* audioEntry = actorArray[idx];
@@ -138,7 +138,7 @@ void CourseObjActor_StartAnimationVariant(CourseObjActor* self) {
 
     // Start 3D audio
     u8 objId = CourseObjActor_GetID(self);
-    CourseObjManager* mgr = CourseObjManager::getInstance();
+    CourseObjManager* mgr = CourseObjManager::spInstance;
     u32 idx = objId << 2;
     void** actorArray = *reinterpret_cast<void***>(static_cast<u8*>(mgr) + 0x68);
     void* audioEntry = actorArray[idx];
@@ -264,7 +264,7 @@ void CourseObjActor_UpdateFade(CourseObjActor* self) {
 
     // Stop 3D audio
     u8 objId = CourseObjActor_GetID(self);
-    CourseObjManager* mgr = CourseObjManager::getInstance();
+    CourseObjManager* mgr = CourseObjManager::spInstance;
     u32 idx = objId << 2;
     void** actorArray = *reinterpret_cast<void***>(static_cast<u8*>(mgr) + 0x68);
     void* audioEntry = actorArray[idx];
@@ -571,7 +571,7 @@ void CourseObjActor_InitAnimation(CourseObjActor* self, void* param, s16 frameCo
 start_anim:
     // Start 3D audio
     u8 objId = CourseObjActor_GetID(self);
-    CourseObjManager* mgr = CourseObjManager::getInstance();
+    CourseObjManager* mgr = CourseObjManager::spInstance;
     u32 idx = objId << 2;
     void** actorArray = *reinterpret_cast<void***>(static_cast<u8*>(mgr) + 0x68);
     void* audioEntry = actorArray[idx];

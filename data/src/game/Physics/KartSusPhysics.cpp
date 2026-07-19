@@ -375,11 +375,11 @@ void KartSusPhysics::calcCollision(const EGG::Vector3f& gravity,
     // Store collision result
     void* colResult = nullptr; // returned from sub_80789eec
     *reinterpret_cast<u32*>(reinterpret_cast<char*>(this) + 0x6C) =
-        reinterpret_cast<u32>(colResult);
+        reinterpret_cast<uintptr_t>(colResult);
 
     // Store global collision result
     *reinterpret_cast<u32*>(0x00000000) =
-        reinterpret_cast<u32>(colResult);
+        reinterpret_cast<uintptr_t>(colResult);
 
     // Virtual collision handler via vtable[0x10]
     // This processes the BSP collision result and updates wheel state
@@ -397,7 +397,7 @@ void KartSusPhysics::calcCollision(const EGG::Vector3f& gravity,
 
     // Store the collision response object
     *reinterpret_cast<u32*>(reinterpret_cast<char*>(this) + 0x24) =
-        reinterpret_cast<u32>(colResult);
+        reinterpret_cast<uintptr_t>(colResult);
 }
 
 // =============================================================================

@@ -83,7 +83,7 @@ void AIPowAvoider::update() {
     // First frame of avoidance: decide whether to dodge
     if (mAvoidState == 1) {
         // Check if any nearby player is on the same team
-        bool sameTeamNearby = isSameTeam(mpInfo->mpAI->getPlayerIndex());
+        // TODO: getPlayerIndex — needs Enemy::AI proper definition
 
         if (sameTeamNearby || mAvoidChance == 0) {
             mAvoidState++;

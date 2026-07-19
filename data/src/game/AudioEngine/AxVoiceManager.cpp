@@ -1,5 +1,3 @@
-static void alSourceStop_stub(int) {}
-static void alSourceStop_stub(int) {}
 // ============================================================================
 // AxVoiceManager.cpp — AX Voice Allocation & Management Implementation
 // Reconstructed from nw4r::snd voice management functions

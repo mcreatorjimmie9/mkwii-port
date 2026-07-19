@@ -1,6 +1,6 @@
 #pragma once
 #include <rk_types.h>
-#include <game/kart/KartObjectProxy.hpp>  // For PlayerPointers
+#include <game/kart/KartObjectProxy.hpp>  // For Kart::PlayerPointers
 #include "KartHitbox.hpp"
 
 #include <egg/math/eggVector.hpp>
@@ -58,7 +58,7 @@ public:
     /// Checks sphere-sphere collision and returns collision info.
     static void findCollisionInner(f32 distSq, u32 distThreshold, void* colInfo);
 
-    PlayerPointers* playerPointers;
+    Kart::PlayerPointers* playerPointers;
     u8 _08[0x2C - 0x08];
     u32 surfaceProperties;
     u8 _30[0x4C - 0x30];
