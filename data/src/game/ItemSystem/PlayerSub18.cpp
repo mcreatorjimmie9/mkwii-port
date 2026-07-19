@@ -66,25 +66,25 @@ void PlayerSub18_checkItemCollision(void) {
 /* === DISASSEMBLY === */
 
 
-  0x80574a64:  lwz      r0, 8(r3)
-  0x80574a68:  lwz      r3, 0xc(r3)
-  0x80574a6c:  clrlwi.  r0, r0, 0x1f
-  0x80574a70:  rlwinm   r28, r3, 0xa, 0x1f, 0x1f
-  0x80574a74:  beq      0x80574a80
-  0x80574a78:  lfs      f31, 0x2c(r31)
-  0x80574a7c:  b        0x80574a84
-  0x80574a80:  lfs      f31, 0x34(r31)
-  0x80574a84:  addi     r3, r30, 4
-  0x80574a88:  bl       0x805903f0
-  0x80574a8c:  mr       r31, r3
-  0x80574a90:  addi     r3, r30, 4
-  0x80574a94:  bl       0x80590410
-  0x80574a98:  fmr      f1, f31
-  0x80574a9c:  cntlzw   r0, r28
-  0x80574aa0:  fmr      f2, f30
-  0x80574aa4:  lwz      r5, 8(r31)
-  0x80574aa8:  mr       r4, r3
-  0x80574aac:  mr       r3, r30
-  0x80574ab0:  mr       r6, r29
-  0x80574ab4:  srwi     r7, r0, 5
-  0x80574ab8:  bl       0x805b2bf8
+//   0x80574a64:  lwz      r0, 8(r3)
+//   0x80574a68:  lwz      r3, 0xc(r3)
+//   0x80574a6c:  clrlwi.  r0, r0, 0x1f
+//   0x80574a70:  rlwinm   r28, r3, 0xa, 0x1f, 0x1f
+//   0x80574a74:  beq      0x80574a80
+//   0x80574a78:  lfs      f31, 0x2c(r31)
+//   0x80574a7c:  b        0x80574a84
+//   0x80574a80:  lfs      f31, 0x34(r31)
+//   0x80574a84:  addi     r3, r30, 4
+//   0x80574a88:  bl       0x805903f0
+//   0x80574a8c:  mr       r31, r3
+//   0x80574a90:  addi     r3, r30, 4
+//   0x80574a94:  bl       0x80590410
+//   0x80574a98:  fmr      f1, f31
+//   0x80574a9c:  cntlzw   r0, r28
+//   0x80574aa0:  fmr      f2, f30
+//   0x80574aa4:  lwz      r5, 8(r31)
+//   0x80574aa8:  mr       r4, r3
+//   0x80574aac:  mr       r3, r30
+//   0x80574ab0:  mr       r6, r29
+//   0x80574ab4:  srwi     r7, r0, 5
+//   0x80574ab8:  bl       0x805b2bf8

@@ -126,58 +126,58 @@ void ItemSlotData_decideItem(void) {
 /* === DISASSEMBLY === */
 
 
-  0x807bd914:  lfs      f1, 0(r31)
-  0x807bd918:  lis      r3, 0
-  0x807bd91c:  lfs      f0, 0xc(r31)
-  0x807bd920:  li       r0, 0
-  0x807bd924:  stw      r0, 0x78(r1)
-  0x807bd928:  lwz      r3, 0(r3)
-  0x807bd92c:  stfs     f1, 0x28(r1)
-  0x807bd930:  stfs     f1, 0x24(r1)
-  0x807bd934:  stfs     f1, 0x20(r1)
-  0x807bd938:  stfs     f1, 0x34(r1)
-  0x807bd93c:  stfs     f1, 0x30(r1)
-  0x807bd940:  stfs     f1, 0x2c(r1)
-  0x807bd944:  stfs     f0, 0x70(r1)
-  0x807bd948:  stfs     f0, 0x6c(r1)
-  0x807bd94c:  stfs     f0, 0x68(r1)
-  0x807bd950:  stfs     f1, 0x74(r1)
-  0x807bd954:  lwz      r0, 8(r3)
-  0x807bd958:  cmpwi    r0, 0
-  0x807bd95c:  beq      0x807bd968
-  0x807bd960:  addi     r0, r26, 4
-  0x807bd964:  stw      r0, 0xc(r3)
-  0x807bd968:  fmr      f2, f31
-  0x807bd96c:  lwz      r4, 0(r26)
-  0x807bd970:  lfs      f1, 0x64(r26)
-  0x807bd974:  mr       r7, r28
-  0x807bd978:  mr       r9, r30
-  0x807bd97c:  addi     r5, r1, 0x14
-  0x807bd980:  addi     r6, r1, 8
-  0x807bd984:  addi     r8, r1, 0x20
-  0x807bd988:  bl       0x807bbc8c
-  0x807bd98c:  cmpwi    r3, 0
-  0x807bd990:  beq      0x807bd9b0
-  0x807bd994:  mr       r3, r29
-  0x807bd998:  addi     r4, r1, 0x20
-  0x807bd99c:  addi     r5, r26, 4
-  0x807bd9a0:  addi     r6, r26, 0x68
-  0x807bd9a4:  bl       0x807ba4b4
-  0x807bd9a8:  li       r3, 1
-  0x807bd9ac:  b        0x807bd9e4
-  0x807bd9b0:  li       r3, 0
-  0x807bd9b4:  b        0x807bd9e4
-  0x807bd9b8:  lis      r3, 0
-  0x807bd9bc:  fmr      f2, f31
-  0x807bd9c0:  lwz      r3, 0(r3)
-  0x807bd9c4:  mr       r7, r28
-  0x807bd9c8:  lwz      r4, 0(r26)
-  0x807bd9cc:  mr       r8, r29
-  0x807bd9d0:  lfs      f1, 0x64(r26)
-  0x807bd9d4:  mr       r9, r30
-  0x807bd9d8:  addi     r5, r1, 0x14
-  0x807bd9dc:  addi     r6, r1, 8
-  0x807bd9e0:  bl       0x807bbc8c
+//   0x807bd914:  lfs      f1, 0(r31)
+//   0x807bd918:  lis      r3, 0
+//   0x807bd91c:  lfs      f0, 0xc(r31)
+//   0x807bd920:  li       r0, 0
+//   0x807bd924:  stw      r0, 0x78(r1)
+//   0x807bd928:  lwz      r3, 0(r3)
+//   0x807bd92c:  stfs     f1, 0x28(r1)
+//   0x807bd930:  stfs     f1, 0x24(r1)
+//   0x807bd934:  stfs     f1, 0x20(r1)
+//   0x807bd938:  stfs     f1, 0x34(r1)
+//   0x807bd93c:  stfs     f1, 0x30(r1)
+//   0x807bd940:  stfs     f1, 0x2c(r1)
+//   0x807bd944:  stfs     f0, 0x70(r1)
+//   0x807bd948:  stfs     f0, 0x6c(r1)
+//   0x807bd94c:  stfs     f0, 0x68(r1)
+//   0x807bd950:  stfs     f1, 0x74(r1)
+//   0x807bd954:  lwz      r0, 8(r3)
+//   0x807bd958:  cmpwi    r0, 0
+//   0x807bd95c:  beq      0x807bd968
+//   0x807bd960:  addi     r0, r26, 4
+//   0x807bd964:  stw      r0, 0xc(r3)
+//   0x807bd968:  fmr      f2, f31
+//   0x807bd96c:  lwz      r4, 0(r26)
+//   0x807bd970:  lfs      f1, 0x64(r26)
+//   0x807bd974:  mr       r7, r28
+//   0x807bd978:  mr       r9, r30
+//   0x807bd97c:  addi     r5, r1, 0x14
+//   0x807bd980:  addi     r6, r1, 8
+//   0x807bd984:  addi     r8, r1, 0x20
+//   0x807bd988:  bl       0x807bbc8c
+//   0x807bd98c:  cmpwi    r3, 0
+//   0x807bd990:  beq      0x807bd9b0
+//   0x807bd994:  mr       r3, r29
+//   0x807bd998:  addi     r4, r1, 0x20
+//   0x807bd99c:  addi     r5, r26, 4
+//   0x807bd9a0:  addi     r6, r26, 0x68
+//   0x807bd9a4:  bl       0x807ba4b4
+//   0x807bd9a8:  li       r3, 1
+//   0x807bd9ac:  b        0x807bd9e4
+//   0x807bd9b0:  li       r3, 0
+//   0x807bd9b4:  b        0x807bd9e4
+//   0x807bd9b8:  lis      r3, 0
+//   0x807bd9bc:  fmr      f2, f31
+//   0x807bd9c0:  lwz      r3, 0(r3)
+//   0x807bd9c4:  mr       r7, r28
+//   0x807bd9c8:  lwz      r4, 0(r26)
+//   0x807bd9cc:  mr       r8, r29
+//   0x807bd9d0:  lfs      f1, 0x64(r26)
+//   0x807bd9d4:  mr       r9, r30
+//   0x807bd9d8:  addi     r5, r1, 0x14
+//   0x807bd9dc:  addi     r6, r1, 8
+//   0x807bd9e0:  bl       0x807bbc8c
 
 // Address: 0x807bd208 — ItemSlotData_scaleTableForPlayerCount (certain)
 // Source: snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)
@@ -360,94 +360,94 @@ void ItemSlotData_scaleTableForPlayerCount(void) {
 /* === DISASSEMBLY === */
 
 
-  0x807bd208:  mr       r4, r27
-  0x807bd20c:  addi     r3, r26, 0x34
-  0x807bd210:  addi     r5, r1, 8
-  0x807bd214:  bl       0x80555bf8
-  0x807bd218:  b        0x807bd23c
-  0x807bd21c:  lis      r4, 0
-  0x807bd220:  addi     r3, r4, 0
-  0x807bd224:  lfs      f2, 0(r4)
-  0x807bd228:  lfs      f1, 4(r3)
-  0x807bd22c:  lfs      f0, 8(r3)
-  0x807bd230:  stfs     f2, 8(r1)
-  0x807bd234:  stfs     f1, 0xc(r1)
-  0x807bd238:  stfs     f0, 0x10(r1)
-  0x807bd23c:  cmpwi    r29, 0
-  0x807bd240:  beq      0x807bd2e4
-  0x807bd244:  lfs      f1, 0(r31)
-  0x807bd248:  lis      r3, 0
-  0x807bd24c:  lfs      f0, 0xc(r31)
-  0x807bd250:  li       r0, 0
-  0x807bd254:  stw      r0, 0x78(r1)
-  0x807bd258:  lwz      r3, 0(r3)
-  0x807bd25c:  stfs     f1, 0x28(r1)
-  0x807bd260:  stfs     f1, 0x24(r1)
-  0x807bd264:  stfs     f1, 0x20(r1)
-  0x807bd268:  stfs     f1, 0x34(r1)
-  0x807bd26c:  stfs     f1, 0x30(r1)
-  0x807bd270:  stfs     f1, 0x2c(r1)
-  0x807bd274:  stfs     f0, 0x70(r1)
-  0x807bd278:  stfs     f0, 0x6c(r1)
-  0x807bd27c:  stfs     f0, 0x68(r1)
-  0x807bd280:  stfs     f1, 0x74(r1)
-  0x807bd284:  lwz      r0, 8(r3)
-  0x807bd288:  cmpwi    r0, 0
-  0x807bd28c:  beq      0x807bd298
-  0x807bd290:  addi     r0, r26, 4
-  0x807bd294:  stw      r0, 0xc(r3)
-  0x807bd298:  lwz      r4, 0(r26)
-  0x807bd29c:  mr       r7, r28
-  0x807bd2a0:  lfs      f1, 0x64(r26)
-  0x807bd2a4:  mr       r9, r30
-  0x807bd2a8:  addi     r5, r1, 0x14
-  0x807bd2ac:  addi     r6, r1, 8
-  0x807bd2b0:  addi     r8, r1, 0x20
-  0x807bd2b4:  bl       0x807bb35c
-  0x807bd2b8:  cmpwi    r3, 0
-  0x807bd2bc:  beq      0x807bd2dc
-  0x807bd2c0:  mr       r3, r29
-  0x807bd2c4:  addi     r4, r1, 0x20
-  0x807bd2c8:  addi     r5, r26, 4
-  0x807bd2cc:  addi     r6, r26, 0x68
-  0x807bd2d0:  bl       0x807ba4b4
-  0x807bd2d4:  li       r3, 1
-  0x807bd2d8:  b        0x807bd30c
-  0x807bd2dc:  li       r3, 0
-  0x807bd2e0:  b        0x807bd30c
-  0x807bd2e4:  lis      r3, 0
-  0x807bd2e8:  lwz      r4, 0(r26)
-  0x807bd2ec:  lwz      r3, 0(r3)
-  0x807bd2f0:  mr       r7, r28
-  0x807bd2f4:  lfs      f1, 0x64(r26)
-  0x807bd2f8:  mr       r8, r29
-  0x807bd2fc:  mr       r9, r30
-  0x807bd300:  addi     r5, r1, 0x14
-  0x807bd304:  addi     r6, r1, 8
-  0x807bd308:  bl       0x807bb35c
-  0x807bd30c:  addi     r11, r1, 0xa0
-  0x807bd310:  bl       0x80555bf8
-  0x807bd314:  lwz      r0, 0xa4(r1)
-  0x807bd318:  mtlr     r0
-  0x807bd31c:  addi     r1, r1, 0xa0
-  0x807bd320:  blr      
-  0x807bd324:  stwu     r1, -0x80(r1)
-  0x807bd328:  mflr     r0
-  0x807bd32c:  stw      r0, 0x84(r1)
-  0x807bd330:  stfd     f31, 0x70(r1)
-  0x807bd334:  xxsel    vs31, vs1, vs0, v1
-  0x807bd338:  addi     r11, r1, 0x70
-  0x807bd33c:  bl       0x80555bf8
-  0x807bd340:  fmr      f31, f1
-  0x807bd344:  mr       r27, r3
-  0x807bd348:  mr       r28, r5
-  0x807bd34c:  mr       r29, r6
-  0x807bd350:  mr       r30, r7
-  0x807bd354:  mr       r31, r8
-  0x807bd358:  addi     r3, r3, 0x34
-  0x807bd35c:  addi     r5, r1, 0x20
-  0x807bd360:  bl       0x80555bf8
-  0x807bd364:  lis      r3, 0
+//   0x807bd208:  mr       r4, r27
+//   0x807bd20c:  addi     r3, r26, 0x34
+//   0x807bd210:  addi     r5, r1, 8
+//   0x807bd214:  bl       0x80555bf8
+//   0x807bd218:  b        0x807bd23c
+//   0x807bd21c:  lis      r4, 0
+//   0x807bd220:  addi     r3, r4, 0
+//   0x807bd224:  lfs      f2, 0(r4)
+//   0x807bd228:  lfs      f1, 4(r3)
+//   0x807bd22c:  lfs      f0, 8(r3)
+//   0x807bd230:  stfs     f2, 8(r1)
+//   0x807bd234:  stfs     f1, 0xc(r1)
+//   0x807bd238:  stfs     f0, 0x10(r1)
+//   0x807bd23c:  cmpwi    r29, 0
+//   0x807bd240:  beq      0x807bd2e4
+//   0x807bd244:  lfs      f1, 0(r31)
+//   0x807bd248:  lis      r3, 0
+//   0x807bd24c:  lfs      f0, 0xc(r31)
+//   0x807bd250:  li       r0, 0
+//   0x807bd254:  stw      r0, 0x78(r1)
+//   0x807bd258:  lwz      r3, 0(r3)
+//   0x807bd25c:  stfs     f1, 0x28(r1)
+//   0x807bd260:  stfs     f1, 0x24(r1)
+//   0x807bd264:  stfs     f1, 0x20(r1)
+//   0x807bd268:  stfs     f1, 0x34(r1)
+//   0x807bd26c:  stfs     f1, 0x30(r1)
+//   0x807bd270:  stfs     f1, 0x2c(r1)
+//   0x807bd274:  stfs     f0, 0x70(r1)
+//   0x807bd278:  stfs     f0, 0x6c(r1)
+//   0x807bd27c:  stfs     f0, 0x68(r1)
+//   0x807bd280:  stfs     f1, 0x74(r1)
+//   0x807bd284:  lwz      r0, 8(r3)
+//   0x807bd288:  cmpwi    r0, 0
+//   0x807bd28c:  beq      0x807bd298
+//   0x807bd290:  addi     r0, r26, 4
+//   0x807bd294:  stw      r0, 0xc(r3)
+//   0x807bd298:  lwz      r4, 0(r26)
+//   0x807bd29c:  mr       r7, r28
+//   0x807bd2a0:  lfs      f1, 0x64(r26)
+//   0x807bd2a4:  mr       r9, r30
+//   0x807bd2a8:  addi     r5, r1, 0x14
+//   0x807bd2ac:  addi     r6, r1, 8
+//   0x807bd2b0:  addi     r8, r1, 0x20
+//   0x807bd2b4:  bl       0x807bb35c
+//   0x807bd2b8:  cmpwi    r3, 0
+//   0x807bd2bc:  beq      0x807bd2dc
+//   0x807bd2c0:  mr       r3, r29
+//   0x807bd2c4:  addi     r4, r1, 0x20
+//   0x807bd2c8:  addi     r5, r26, 4
+//   0x807bd2cc:  addi     r6, r26, 0x68
+//   0x807bd2d0:  bl       0x807ba4b4
+//   0x807bd2d4:  li       r3, 1
+//   0x807bd2d8:  b        0x807bd30c
+//   0x807bd2dc:  li       r3, 0
+//   0x807bd2e0:  b        0x807bd30c
+//   0x807bd2e4:  lis      r3, 0
+//   0x807bd2e8:  lwz      r4, 0(r26)
+//   0x807bd2ec:  lwz      r3, 0(r3)
+//   0x807bd2f0:  mr       r7, r28
+//   0x807bd2f4:  lfs      f1, 0x64(r26)
+//   0x807bd2f8:  mr       r8, r29
+//   0x807bd2fc:  mr       r9, r30
+//   0x807bd300:  addi     r5, r1, 0x14
+//   0x807bd304:  addi     r6, r1, 8
+//   0x807bd308:  bl       0x807bb35c
+//   0x807bd30c:  addi     r11, r1, 0xa0
+//   0x807bd310:  bl       0x80555bf8
+//   0x807bd314:  lwz      r0, 0xa4(r1)
+//   0x807bd318:  mtlr     r0
+//   0x807bd31c:  addi     r1, r1, 0xa0
+//   0x807bd320:  blr      
+//   0x807bd324:  stwu     r1, -0x80(r1)
+//   0x807bd328:  mflr     r0
+//   0x807bd32c:  stw      r0, 0x84(r1)
+//   0x807bd330:  stfd     f31, 0x70(r1)
+//   0x807bd334:  xxsel    vs31, vs1, vs0, v1
+//   0x807bd338:  addi     r11, r1, 0x70
+//   0x807bd33c:  bl       0x80555bf8
+//   0x807bd340:  fmr      f31, f1
+//   0x807bd344:  mr       r27, r3
+//   0x807bd348:  mr       r28, r5
+//   0x807bd34c:  mr       r29, r6
+//   0x807bd350:  mr       r30, r7
+//   0x807bd354:  mr       r31, r8
+//   0x807bd358:  addi     r3, r3, 0x34
+//   0x807bd35c:  addi     r5, r1, 0x20
+//   0x807bd360:  bl       0x80555bf8
+//   0x807bd364:  lis      r3, 0
 
 // Address: 0x807bd868 — ItemSlotData_checkSpawnTimer (certain)
 // Source: snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)
@@ -478,12 +478,12 @@ void ItemSlotData_checkSpawnTimer(void) {
 /* === DISASSEMBLY === */
 
 
-  0x807bd868:  addi     r1, r1, 0xb0
-  0x807bd86c:  blr      
-  0x807bd870:  stwu     r1, -0xb0(r1)
-  0x807bd874:  mflr     r0
-  0x807bd878:  stw      r0, 0xb4(r1)
-  0x807bd87c:  stfd     f31, 0xa0(r1)
+//   0x807bd868:  addi     r1, r1, 0xb0
+//   0x807bd86c:  blr      
+//   0x807bd870:  stwu     r1, -0xb0(r1)
+//   0x807bd874:  mflr     r0
+//   0x807bd878:  stw      r0, 0xb4(r1)
+//   0x807bd87c:  stfd     f31, 0xa0(r1)
 
 // Address: 0x807bded4 — ItemSlotData_updateTimers (certain)
 // Source: snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)
@@ -577,45 +577,45 @@ void ItemSlotData_updateTimers(void) {
 /* === DISASSEMBLY === */
 
 
-  0x807bded4:  bl       0x807bc138
-  0x807bded8:  cmpwi    r3, 0
-  0x807bdedc:  beq      0x807bdefc
-  0x807bdee0:  mr       r3, r29
-  0x807bdee4:  addi     r4, r1, 0x20
-  0x807bdee8:  addi     r5, r26, 4
-  0x807bdeec:  addi     r6, r26, 0x68
-  0x807bdef0:  bl       0x807ba4b4
-  0x807bdef4:  li       r3, 1
-  0x807bdef8:  b        0x807bdf2c
-  0x807bdefc:  li       r3, 0
-  0x807bdf00:  b        0x807bdf2c
-  0x807bdf04:  lis      r3, 0
-  0x807bdf08:  lwz      r4, 0(r26)
-  0x807bdf0c:  lwz      r3, 0(r3)
-  0x807bdf10:  mr       r7, r28
-  0x807bdf14:  lfs      f1, 0x64(r26)
-  0x807bdf18:  mr       r8, r29
-  0x807bdf1c:  mr       r9, r30
-  0x807bdf20:  addi     r5, r1, 0x14
-  0x807bdf24:  addi     r6, r1, 8
-  0x807bdf28:  bl       0x807bc138
-  0x807bdf2c:  addi     r11, r1, 0xa0
-  0x807bdf30:  bl       0x80555bf8
-  0x807bdf34:  lwz      r0, 0xa4(r1)
-  0x807bdf38:  mtlr     r0
-  0x807bdf3c:  addi     r1, r1, 0xa0
-  0x807bdf40:  blr      
-  0x807bdf44:  stwu     r1, -0xa0(r1)
-  0x807bdf48:  mflr     r0
-  0x807bdf4c:  stw      r0, 0xa4(r1)
-  0x807bdf50:  addi     r11, r1, 0xa0
-  0x807bdf54:  bl       0x80555bf8
-  0x807bdf58:  lwz      r9, 0(r3)
-  0x807bdf5c:  lis      r31, 0
-  0x807bdf60:  mr       r26, r3
-  0x807bdf64:  mr       r27, r5
-  0x807bdf68:  lhz      r0, 0x8c(r9)
-  0x807bdf6c:  mr       r28, r6
-  0x807bdf70:  mr       r29, r7
-  0x807bdf74:  mr       r30, r8
-  0x807bdf78:  cmpwi    r0, 0
+//   0x807bded4:  bl       0x807bc138
+//   0x807bded8:  cmpwi    r3, 0
+//   0x807bdedc:  beq      0x807bdefc
+//   0x807bdee0:  mr       r3, r29
+//   0x807bdee4:  addi     r4, r1, 0x20
+//   0x807bdee8:  addi     r5, r26, 4
+//   0x807bdeec:  addi     r6, r26, 0x68
+//   0x807bdef0:  bl       0x807ba4b4
+//   0x807bdef4:  li       r3, 1
+//   0x807bdef8:  b        0x807bdf2c
+//   0x807bdefc:  li       r3, 0
+//   0x807bdf00:  b        0x807bdf2c
+//   0x807bdf04:  lis      r3, 0
+//   0x807bdf08:  lwz      r4, 0(r26)
+//   0x807bdf0c:  lwz      r3, 0(r3)
+//   0x807bdf10:  mr       r7, r28
+//   0x807bdf14:  lfs      f1, 0x64(r26)
+//   0x807bdf18:  mr       r8, r29
+//   0x807bdf1c:  mr       r9, r30
+//   0x807bdf20:  addi     r5, r1, 0x14
+//   0x807bdf24:  addi     r6, r1, 8
+//   0x807bdf28:  bl       0x807bc138
+//   0x807bdf2c:  addi     r11, r1, 0xa0
+//   0x807bdf30:  bl       0x80555bf8
+//   0x807bdf34:  lwz      r0, 0xa4(r1)
+//   0x807bdf38:  mtlr     r0
+//   0x807bdf3c:  addi     r1, r1, 0xa0
+//   0x807bdf40:  blr      
+//   0x807bdf44:  stwu     r1, -0xa0(r1)
+//   0x807bdf48:  mflr     r0
+//   0x807bdf4c:  stw      r0, 0xa4(r1)
+//   0x807bdf50:  addi     r11, r1, 0xa0
+//   0x807bdf54:  bl       0x80555bf8
+//   0x807bdf58:  lwz      r9, 0(r3)
+//   0x807bdf5c:  lis      r31, 0
+//   0x807bdf60:  mr       r26, r3
+//   0x807bdf64:  mr       r27, r5
+//   0x807bdf68:  lhz      r0, 0x8c(r9)
+//   0x807bdf6c:  mr       r28, r6
+//   0x807bdf70:  mr       r29, r7
+//   0x807bdf74:  mr       r30, r8
+//   0x807bdf78:  cmpwi    r0, 0

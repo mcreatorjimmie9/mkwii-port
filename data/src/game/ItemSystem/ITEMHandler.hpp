@@ -8,7 +8,7 @@ public:
     // 0x80660224 — 868B
     void ITEMHandler_importNewPackets();  // TODO: add params from mangled name 'ITEMHandler_importNewPackets'
     // 0x8065e5d4 — 636B
-    void createStaticInstance__Q23Net11ITEMHandlerFv;  // TODO: add params from mangled name 'createStaticInstance__Q23Net11ITEMHandlerFv'
+    void createStaticInstance();  // TODO: add params from mangled name 'createStaticInstance__Q23Net11ITEMHandlerFv'
     // 0x8065e890 — 572B
     void ITEMHandler_construct();  // TODO: add params from mangled name 'ITEMHandler_construct'
     // 0x8065ead0 — 216B

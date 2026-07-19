@@ -98,41 +98,41 @@ void ItemObjFib_makeArray(void) {
 /* === DISASSEMBLY === */
 
 
-  0x807a9d90:  lwz      r3, 0(r5)
-  0x807a9d94:  lwz      r3, 0x74(r3)
-  0x807a9d98:  bl       0x8068f828
-  0x807a9d9c:  lwz      r0, 0x78(r30)
-  0x807a9da0:  li       r29, 2
-  0x807a9da4:  rlwinm.  r0, r0, 0, 0x10, 0x10
-  0x807a9da8:  bne      0x807a9db4
-  0x807a9dac:  lbz      r4, 0x6c(r30)
-  0x807a9db0:  b        0x807a9db8
-  0x807a9db4:  li       r4, 0xc
-  0x807a9db8:  cmplwi   r4, 0xc
-  0x807a9dbc:  bge      0x807a9dfc
-  0x807a9dc0:  lis      r3, 0
-  0x807a9dc4:  lbz      r0, 0(r3)
-  0x807a9dc8:  cmpwi    r0, 0
-  0x807a9dcc:  beq      0x807a9dfc
-  0x807a9dd0:  lis      r3, 0
-  0x807a9dd4:  mulli    r0, r4, 0xf0
-  0x807a9dd8:  lwz      r3, 0(r3)
-  0x807a9ddc:  add      r3, r3, r0
-  0x807a9de0:  lwz      r0, 0xf4(r3)
-  0x807a9de4:  cmpwi    r0, 0
-  0x807a9de8:  bne      0x807a9df0
-  0x807a9dec:  li       r29, 3
-  0x807a9df0:  cmpwi    r0, 1
-  0x807a9df4:  bne      0x807a9dfc
-  0x807a9df8:  li       r29, 4
-  0x807a9dfc:  lwz      r3, 0x330(r30)
-  0x807a9e00:  li       r4, 1
-  0x807a9e04:  lwz      r12, 0(r3)
-  0x807a9e08:  lwz      r12, 0xc(r12)
-  0x807a9e0c:  mtctr    r12
-  0x807a9e10:  bctrl    
-  0x807a9e14:  lwz      r3, 0xa4(r30)
-  0x807a9e18:  bl       0x8078a188
-  0x807a9e1c:  lwz      r3, 0x330(r30)
-  0x807a9e20:  addi     r4, r1, 8
-  0x807a9e24:  lfs      f0, 0x198(r31)
+//   0x807a9d90:  lwz      r3, 0(r5)
+//   0x807a9d94:  lwz      r3, 0x74(r3)
+//   0x807a9d98:  bl       0x8068f828
+//   0x807a9d9c:  lwz      r0, 0x78(r30)
+//   0x807a9da0:  li       r29, 2
+//   0x807a9da4:  rlwinm.  r0, r0, 0, 0x10, 0x10
+//   0x807a9da8:  bne      0x807a9db4
+//   0x807a9dac:  lbz      r4, 0x6c(r30)
+//   0x807a9db0:  b        0x807a9db8
+//   0x807a9db4:  li       r4, 0xc
+//   0x807a9db8:  cmplwi   r4, 0xc
+//   0x807a9dbc:  bge      0x807a9dfc
+//   0x807a9dc0:  lis      r3, 0
+//   0x807a9dc4:  lbz      r0, 0(r3)
+//   0x807a9dc8:  cmpwi    r0, 0
+//   0x807a9dcc:  beq      0x807a9dfc
+//   0x807a9dd0:  lis      r3, 0
+//   0x807a9dd4:  mulli    r0, r4, 0xf0
+//   0x807a9dd8:  lwz      r3, 0(r3)
+//   0x807a9ddc:  add      r3, r3, r0
+//   0x807a9de0:  lwz      r0, 0xf4(r3)
+//   0x807a9de4:  cmpwi    r0, 0
+//   0x807a9de8:  bne      0x807a9df0
+//   0x807a9dec:  li       r29, 3
+//   0x807a9df0:  cmpwi    r0, 1
+//   0x807a9df4:  bne      0x807a9dfc
+//   0x807a9df8:  li       r29, 4
+//   0x807a9dfc:  lwz      r3, 0x330(r30)
+//   0x807a9e00:  li       r4, 1
+//   0x807a9e04:  lwz      r12, 0(r3)
+//   0x807a9e08:  lwz      r12, 0xc(r12)
+//   0x807a9e0c:  mtctr    r12
+//   0x807a9e10:  bctrl    
+//   0x807a9e14:  lwz      r3, 0xa4(r30)
+//   0x807a9e18:  bl       0x8078a188
+//   0x807a9e1c:  lwz      r3, 0x330(r30)
+//   0x807a9e20:  addi     r4, r1, 8
+//   0x807a9e24:  lfs      f0, 0x198(r31)

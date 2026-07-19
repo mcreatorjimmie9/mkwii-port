@@ -6,5 +6,5 @@
 class PlayerSub18 {
 public:
     // 0x80574a64 — 1560B
-    void PlayerSub18_checkItemCollision;  // TODO: add params from mangled name 'PlayerSub18_checkItemCollision'
+    void PlayerSub18_checkItemCollision();  // TODO: add params from mangled name 'PlayerSub18_checkItemCollision'
 };

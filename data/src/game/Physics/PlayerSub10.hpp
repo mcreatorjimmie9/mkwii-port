@@ -6,10 +6,17 @@ class KartMove;
 class KartBody;
 class KartPhysics;
 class ItemHandler;
-class PlayerBoost;
-class PlayerTrick;
+#include "PlayerBoost.hpp"
+#include "PlayerTrick.hpp"
 class PlayerZipper;
 class PlayerPointers;
+
+// Forward declaration for JumpPadProperties struct
+struct JumpPadProperties {
+    f32 minSpeed;
+    f32 maxSpeed;
+    f32 velY;
+};
 
 class PlayerSub10 {
 public:
@@ -208,36 +215,5 @@ public:
 };
 // static_assert(sizeof(PlayerSub10) == 0x294);
 
-class PlayerSub10Remote : public PlayerSub10 { /* vtable 0x808b5d90 */ };
-class PlayerSub10RealLocal : public PlayerSub10 { /* vtable 0x808b5e78 */ };
-
-class PlayerSub10Bike : public PlayerSub10 {
-public:
-    virtual ~PlayerSub10Bike();                               // 0x80589704
-    virtual void setTurnParams() override;                    // 0x80587c54
-    virtual void cancelWheelie() override;                    // 0x80588b30
-    virtual bool checkWheelie() override;                     // 0x80588fe0
-    virtual void updateVehicleRotationVector(f32 turn) override; // 0x80587d68
-    virtual f32 getWheelieSoftSpeedLimitBonus() override;     // 0x80588324
-    virtual void updateWheelie() override;                    // 0x80587d64
-    virtual void updateMtCharge() override;                   // 0x80588888
-    virtual void startWheelie();                              // 0x80588350
-    virtual void cancelWheelie2();                            // 0x805883c4
-    PlayerSub10Bike();                                         // 0x80587b30
-    f32 leanRot;                    // 0x294
-    f32 leanRotCap;                 // 0x298
-    f32 leanRotInc;                 // 0x29C
-    f32 wheelieRot;                 // 0x2A0
-    f32 maxWheelieRot;              // 0x2A4
-    u32 wheelieTimer;               // 0x2A8
-    u8 field_0x2AC;                 // 0x2AC
-    u8 _2AD[0x007];                // 0x2AD
-    u16 wheelietimer2;              // 0x2B4
-    u16 wheelieCooldown;            // 0x2B6
-    u8 _2B8[0x008];                // 0x2B8
-    void* turnParams;               // 0x2C0
-};
-// static_assert(sizeof(PlayerSub10Bike) == 0x2C4);
-
-class PlayerSub10BikeRemote : public PlayerSub10Bike { /* vtable 0x808b5d18 */ };
-class PlayerSub10BikeRealLocal : public PlayerSub10Bike { /* vtable 0x808b5e00 */ };
+// PlayerSub10Bike is defined in PlayerSub10Bike.hpp
+// (included separately to avoid circular dependency)

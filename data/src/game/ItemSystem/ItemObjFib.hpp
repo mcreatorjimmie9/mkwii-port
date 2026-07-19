@@ -6,5 +6,5 @@
 class ItemObjFib {
 public:
     // 0x807a9d90 — 152B
-    void ItemObjFib_makeArray;  // TODO: add params from mangled name 'ItemObjFib_makeArray'
+    void ItemObjFib_makeArray();  // TODO: add params from mangled name 'ItemObjFib_makeArray'
 };

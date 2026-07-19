@@ -6,5 +6,5 @@
 class ItemRoulette {
 public:
     // 0x807bc864 — 496B
-    void ItemRoulette_update;  // TODO: add params from mangled name 'ItemRoulette_update'
+    void ItemRoulette_update();  // TODO: add params from mangled name 'ItemRoulette_update'
 };

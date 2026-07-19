@@ -5,6 +5,7 @@
 
 // Forward declarations
 class PlayerSub10;
+class PlayerPointers;
 
 // ============================================================================
 // Trick Properties — loaded from KartParam.bin per-vehicle
@@ -60,7 +61,8 @@ public:
 
     // === Field layout (from player.h) ===
     PlayerPointers* pointers;      // 0x00
-    u8 _004[0x008];               // 0x04-0x0B
+    u8 _004[0x004];               // 0x04-0x07
+    u8 _008[0x004];               // 0x08-0x0B
     // vtable at 0x0C
     TrickType type;                 // 0x10
     TrickCategory category;       // 0x14

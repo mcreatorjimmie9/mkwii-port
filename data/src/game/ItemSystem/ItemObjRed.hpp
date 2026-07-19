@@ -6,5 +6,5 @@
 class ItemObjRed {
 public:
     // 0x807ac4d8 — 456B
-    void ItemObjRed_makeArray;  // TODO: add params from mangled name 'ItemObjRed_makeArray'
+    void ItemObjRed_makeArray();  // TODO: add params from mangled name 'ItemObjRed_makeArray'
 };

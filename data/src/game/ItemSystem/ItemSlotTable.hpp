@@ -6,5 +6,5 @@
 class ItemSlotTable {
 public:
     // 0x807bcc64 — 152B
-    void ItemSlotTable_createInstance;  // TODO: add params from mangled name 'ItemSlotTable_createInstance'
+    void ItemSlotTable_createInstance();  // TODO: add params from mangled name 'ItemSlotTable_createInstance'
 };

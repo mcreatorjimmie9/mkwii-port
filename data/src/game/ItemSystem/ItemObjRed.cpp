@@ -35,10 +35,10 @@ void ItemObjRed_makeArray(void) {
 /* === DISASSEMBLY === */
 
 
-  0x807ac4d8:  bge      0x807ac4ec
-  0x807ac4dc:  cmplw    r4, r30
-  0x807ac4e0:  beq      0x807ac4ec
-  0x807ac4e4:  li       r3, 0
-  0x807ac4e8:  b        0x807ac600
-  0x807ac4ec:  addi     r30, r1, 0x14
-  0x807ac4f0:  lfs      f0, 0x34(r28)
+//   0x807ac4d8:  bge      0x807ac4ec
+//   0x807ac4dc:  cmplw    r4, r30
+//   0x807ac4e0:  beq      0x807ac4ec
+//   0x807ac4e4:  li       r3, 0
+//   0x807ac4e8:  b        0x807ac600
+//   0x807ac4ec:  addi     r30, r1, 0x14
+//   0x807ac4f0:  lfs      f0, 0x34(r28)
