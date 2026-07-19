@@ -1,28 +1,21 @@
 {
-  "timestamp": "2026-07-19T00:01:53Z",
-  "cycle": 6,
-  "phase": "blocked_ghidra_script",
-  "status": "phase:decompile_expand",
-  "notes": "Ghidra 12.1.2 Decompiler module inaccessible from headless post-scripts (OSGi classloader). Analysis/auto-disassembly works. Need workaround: Ghidra 11.x downgrade OR capstone-based approach.",
-  "totals": {
-    "functions_total": 18444,
-    "decompiled": 607,
-    "symbolized": 607,
-    "reconstructed": 607,
-    "compiling": 0,
-    "tested_passing": 0
+  "last_update": "2026-07-19T00:45:00Z",
+  "phase": "Phase 4 - Ghidra Control Flow Analysis",
+  "status": "in_progress",
+  "ghidra_installed": true,
+  "ghidra_version": "11.2.1",
+  "ghidra_mode": "headless (JRE fallback)",
+  "main_dol": {
+    "ghidra_functions_found": 68,
+    "ghidra_functions_decompiled": 68,
+    "ghidra_blocks": "segment_0 (0-0x85CDF, RWX) + segment_1 (0x29FD00-0x384DFB, R)",
+    "dol2elf_converter": "working (ELF32 BE PPC)",
+    "issues": "Low function count - need enhanced discovery for ~2000+ expected functions"
   },
-  "modules_completed": [
-    "Physics",
-    "AIRace",
-    "Collision",
-    "RaceEngine",
-    "KartMovement",
-    "ItemSystem"
-  ],
-  "modules_in_progress": {},
-  "milestone": null,
-  "open_issues": 0,
-  "budget_pct": 0,
-  "next_action": "Resolve Ghidra decompiler access OR switch to capstone-based approach for remaining ~17,837 functions"
+  "staticr_rel": "pending",
+  "next_steps": [
+    "Enhanced function discovery for main.dol",
+    "Process StaticR.rel through Ghidra",
+    "Commit Phase 4 results to GitHub"
+  ]
 }
