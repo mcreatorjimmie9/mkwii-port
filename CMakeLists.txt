@@ -2,7 +2,7 @@
 # mkwii-port — Mario Kart Wii PC Port
 # CMake build system for Phase 7 (Integration)
 #
-# Builds the GENESIS C++ reconstructed modules (88 files across 10 modules)
+# Builds the GENESIS C++ reconstructed modules (105 files across 10 modules)
 # as a static library. Uses C++17.
 # =============================================================================
 
@@ -60,6 +60,9 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/data/src/game/Scene
     ${CMAKE_SOURCE_DIR}/data/src/game/Network
     ${CMAKE_SOURCE_DIR}/data/src/game/SaveData
+    ${CMAKE_SOURCE_DIR}/data/src/game/Field
+    ${CMAKE_SOURCE_DIR}/data/src/game/Collision
+    ${CMAKE_SOURCE_DIR}/data/src/game/AIRace
 )
 
 # =============================================================================
@@ -111,16 +114,19 @@ set(RACEENGINE_SOURCES
     data/src/game/RaceEngine/TimeAttackBackPage.cpp
 )
 
-# --- AIRace (5 files) ---
+# --- AIRace (8 files) ---
 set(AIRACE_SOURCES
     data/src/game/AIRace/AI.cpp
     data/src/game/AIRace/AIControl.cpp
     data/src/game/AIRace/AIEngine.cpp
     data/src/game/AIRace/AITrickHandler.cpp
     data/src/game/AIRace/KPadAI.cpp
+    data/src/game/AIRace/AIRoad.cpp
+    data/src/game/AIRace/AIDrift.cpp
+    data/src/game/AIRace/AIItem.cpp
 )
 
-# --- Collision (6 files) ---
+# --- Collision (10 files) ---
 set(COLLISION_SOURCES
     data/src/game/Collision/KartCollide.cpp
     data/src/game/Collision/KartDynamics.cpp
@@ -128,6 +134,10 @@ set(COLLISION_SOURCES
     data/src/game/Collision/KartWheelPhysics.cpp
     data/src/game/Collision/PlayerSub10.cpp
     data/src/game/Collision/PlayerSub18.cpp
+    data/src/game/Collision/KartSuspension.cpp
+    data/src/game/Collision/KartBoost.cpp
+    data/src/game/Collision/KartRespawn.cpp
+    data/src/game/Collision/KartGravity.cpp
 )
 
 # --- ItemSystem (16 files) ---
@@ -178,7 +188,7 @@ set(RENDERING_SOURCES
     data/src/game/Rendering/ShadowManager.cpp
 )
 
-# --- Scene (10 files) ---
+# --- Scene (14 files) ---
 set(SCENE_SOURCES
     data/src/game/Scene/SceneDirector.cpp
     data/src/game/Scene/SceneBase.cpp
@@ -190,6 +200,10 @@ set(SCENE_SOURCES
     data/src/game/Scene/EffectDirector.cpp
     data/src/game/Scene/J2DPane.cpp
     data/src/game/Scene/ResTIMG.cpp
+    data/src/game/Scene/SceneCaryard.cpp
+    data/src/game/Scene/SceneRace.cpp
+    data/src/game/Scene/ParticleEffect.cpp
+    data/src/game/Scene/Skybox.cpp
 )
 
 # --- UI (11 files) ---
@@ -264,6 +278,14 @@ set(NETWORK_SOURCES
     data/src/game/Network/Session.cpp
 )
 
+# --- Field (4 files) ---
+set(FIELD_SOURCES
+    data/src/game/Field/KCollision.cpp
+    data/src/game/Field/CourseColManager.cpp
+    data/src/game/Field/KartInput.cpp
+    data/src/game/Field/InputManager.cpp
+)
+
 # --- SaveData (8 files) ---
 set(SAVEDATA_SOURCES
     data/src/game/SaveData/GhostFile.cpp
@@ -294,6 +316,7 @@ add_library(mkwii-genesis STATIC
     ${RUNTIME_CLASSES_SOURCES}
     ${NETWORK_SOURCES}
     ${SAVEDATA_SOURCES}
+    ${FIELD_SOURCES}
 )
 
 # =============================================================================
@@ -314,7 +337,8 @@ list(LENGTH AUDIOENGINE_SOURCES _audio_cnt)
 list(LENGTH RENDERING_SOURCES _render_cnt)
 list(LENGTH SCENE_SOURCES _scene_cnt)
 list(LENGTH UI_SOURCES _ui_cnt)
-math(EXPR _total "${_phys_cnt}+${_kart_cnt}+${_race_cnt}+${_ai_cnt}+${_coll_cnt}+${_item_cnt}+${_audio_cnt}+${_render_cnt}+${_scene_cnt}+${_ui_cnt}")
+list(LENGTH FIELD_SOURCES _field_cnt)
+math(EXPR _total "${_phys_cnt}+${_kart_cnt}+${_race_cnt}+${_ai_cnt}+${_coll_cnt}+${_item_cnt}+${_audio_cnt}+${_render_cnt}+${_scene_cnt}+${_ui_cnt}+${_field_cnt}")
 message(STATUS "Physics:       ${_phys_cnt} files")
 message(STATUS "KartMovement:  ${_kart_cnt} files")
 message(STATUS "RaceEngine:   ${_race_cnt} files")
@@ -325,4 +349,5 @@ message(STATUS "AudioEngine:  ${_audio_cnt} files")
 message(STATUS "Rendering:    ${_render_cnt} files")
 message(STATUS "Scene:        ${_scene_cnt} files")
 message(STATUS "UI:           ${_ui_cnt} files")
+message(STATUS "Field:        ${_field_cnt} files")
 message(STATUS "TOTAL:        ${_total} GENESIS source files")
