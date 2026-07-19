@@ -2,6 +2,7 @@
 
 #include <rk_types.h>
 #include <decomp.h>
+#define GENESIS_KART_BODY_DEFINED
 
 namespace Kart {
 

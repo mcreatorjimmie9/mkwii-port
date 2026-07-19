@@ -1,5 +1,15 @@
 #pragma once
 
+// Define all GENESIS guards BEFORE including KartObjectProxy.hpp
+// to prevent redefinition of classes that GENESIS modules define in detail.
+#define GENESIS_KART_STATE_DEFINED
+#define GENESIS_KART_MOVE_DEFINED
+#define GENESIS_KART_BODY_DEFINED
+#define GENESIS_KART_DYNAMICS_DEFINED
+#define GENESIS_KART_PHYSICS_ENGINE_DEFINED
+#define GENESIS_KART_STATS_DEFINED
+#define GENESIS_KART_COLLIDE_DEFINED
+
 #include <rk_types.h>
 #include <decomp.h>
 #include <egg/math/eggVector.hpp>
@@ -8,9 +18,9 @@
 #include "KartHitbox.hpp"
 #include "KartDynamics.hpp"
 
-namespace Kart {
+#include <game/kart/KartObjectProxy.hpp>
 
-class BspWheel;
+namespace Kart {
 
 enum KartWheelType {
     KART_WHEEL_KART_LEFT,

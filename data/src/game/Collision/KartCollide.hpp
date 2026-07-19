@@ -1,3 +1,14 @@
+// Define GENESIS guards before including KartObjectProxy.hpp
+#ifndef GENESIS_KART_COLLIDE_HPP_GUARD
+#define GENESIS_KART_COLLIDE_HPP_GUARD
+#define GENESIS_KART_STATE_DEFINED
+#define GENESIS_KART_MOVE_DEFINED
+#define GENESIS_KART_BODY_DEFINED
+#define GENESIS_KART_DYNAMICS_DEFINED
+#define GENESIS_KART_PHYSICS_ENGINE_DEFINED
+#define GENESIS_KART_STATS_DEFINED
+#define GENESIS_KART_COLLIDE_DEFINED
+
 #pragma once
 
 #include <rk_types.h>
@@ -5,6 +16,8 @@
 #include <egg/math/eggVector.hpp>
 #include <egg/math/eggQuat.hpp>
 #include <egg/math/eggMatrix.hpp>
+#include <game/field/CollisionEntries.hpp>
+#include <game/kart/KartObjectProxy.hpp>
 
 #include "KartHitbox.hpp"
 #include "KartDynamics.hpp"

@@ -3,10 +3,7 @@
 #include <rk_types.h>
 #include <decomp.h>
 
-#include <game/kart/KartObjectProxy.hpp>
-namespace System {
-// Full definition in KartObjectProxy.hpp
-}
+#include <KPadController.hpp>
 
 namespace Kart {
 

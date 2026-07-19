@@ -4,69 +4,31 @@
 #include <egg/math/eggVector.hpp>
 #include <egg/math/eggQuat.hpp>
 #include <egg/math/eggMatrix.hpp>
-
-namespace System {
-struct KPadRaceInputState {
-    u32 buttons;
-    f32 stickX;
-    f32 stickY;
-    f32 triggerL;
-    f32 triggerR;
-};
-}
+#include <KPadController.hpp> // For System::KPadRaceInputState
 
 namespace Kart {
 
-// Kart state flags
-enum KartFlag {
-    KART_FLAG_TOUCHING_GROUND = 0,
-    KART_FLAG_ALL_WHEELS_COLLISION,
-    KART_FLAG_DRIFTING_ON_GROUND,
-    KART_FLAG_HOPPING,
-    KART_FLAG_AUTO_DRIFT,
-    KART_FLAG_IN_BULLET,
-    KART_FLAG_STAR,
-    KART_FLAG_MEGA,
-    KART_FLAG_BULLET,
-    KART_FLAG_CANNON_START,
-    KART_FLAG_IN_A_BULLET,
-    KART_FLAG_STH_3,
-    KART_FLAG_STH_5,
-    KART_FLAG_STH_WALL_COL,
-    KART_FLAG_SOMETHING,
-    KART_FLAG_SKIP_WHEEL_CALC,
-    KART_FLAG_COL_INVISIBILITY,
-    KART_FLAG_STH_KILLER,
-    KART_FLAG_HALFPIPE_MIDAIR,
-    KART_FLAG_IN_CANNON,
-    KART_FLAG_STH_61,
-    KART_FLAG_LARGE_FLIP_HIT,
-    KART_FLAG_WHEELIE_ROT,
-    KART_FLAG_AIR_START,
-    KART_FLAG_JUMPPAD,
-    KART_FLAG_HIT_ITEM_OR_OBJ,
-    KART_FLAG_RESPAWN_INVINCIBLE,
-    KART_FLAG_REJECT_ROAD,
-    KART_FLAG_STICKY_ROAD,
-    KART_FLAG_HALFPIPE_RAMP,
-    KART_FLAG_ONLINE_REMOTE,
-    KART_FLAG_HALFPIPE_RAMP_LOCAL,
-    KART_FLAG_AT_SUSP_LIMIT,
-    KART_FLAG_JUMPPAD_VELY_INCREASE,
-};
+// ===== Minimal stubs =====
+// These classes are defined in more detail in the GENESIS module headers.
+// Only define them here when NOT already defined by a GENESIS module.
 
+#ifndef GENESIS_KART_STATE_DEFINED
+#define GENESIS_KART_STATE_DEFINED
 class KartState {
 public:
     virtual ~KartState() {}
-    bool on(KartFlag f) const { return (mFlags >> (int)f) & 1; }
-    void set(KartFlag f) { mFlags |= (1u << (int)f); }
+    bool on(int f) const { return (mFlags >> f) & 1; }
+    void set(int f) { mFlags |= (1u << f); }
     void setBoostRampType(s32 t) { (void)t; }
     void setJumpPadType(s32 t) { (void)t; }
     void setHalfpipeInvisibilityTimer(s32 t) { (void)t; }
     void setCannonPointId(s32 id) { (void)id; }
     u32 mFlags;
 };
+#endif
 
+#ifndef GENESIS_KART_MOVE_DEFINED
+#define GENESIS_KART_MOVE_DEFINED
 class KartMove {
 public:
     virtual ~KartMove() {}
@@ -79,14 +41,20 @@ public:
     virtual KartState* kartState() { return nullptr; }
     virtual void activateMushroom() {}
 };
+#endif
 
+#ifndef GENESIS_KART_BODY_DEFINED
+#define GENESIS_KART_BODY_DEFINED
 class KartBody {
 public:
     virtual ~KartBody() {}
     virtual f32 getSinkDepth() { return 0.0f; }
     virtual void requireSinkDepth(f32 d) { (void)d; }
 };
+#endif
 
+#ifndef GENESIS_KART_DYNAMICS_DEFINED
+#define GENESIS_KART_DYNAMICS_DEFINED
 class KartDynamics {
 public:
     virtual ~KartDynamics() {}
@@ -124,21 +92,30 @@ public:
     f32 angVel0YFactor;
     EGG::Vector3f scale;
 };
+#endif
 
+#ifndef GENESIS_KART_PHYSICS_ENGINE_DEFINED
+#define GENESIS_KART_PHYSICS_ENGINE_DEFINED
 class KartPhysicsEngine {
 public:
     virtual ~KartPhysicsEngine() {}
     virtual f32 getYScale() { return 1.0f; }
     virtual void registerSuspLimits(const EGG::Vector3f& v) { (void)v; }
 };
+#endif
 
+#ifndef GENESIS_KART_STATS_DEFINED
+#define GENESIS_KART_STATS_DEFINED
 class KartStats {
 public:
     virtual ~KartStats() {}
     virtual f32 getSpeedFactor(u32 type) { (void)type; return 1.0f; }
     virtual f32 getHandlingFactor(u32 type) { (void)type; return 0.0f; }
 };
+#endif
 
+#ifndef GENESIS_KART_COLLIDE_DEFINED
+#define GENESIS_KART_COLLIDE_DEFINED
 class KartCollide {
 public:
     virtual ~KartCollide() {}
@@ -146,6 +123,7 @@ public:
     virtual f32 get1c() const { return 0.8f; }
     virtual const EGG::Vector3f& getMovement() const { static EGG::Vector3f m; return m; }
 };
+#endif
 
 struct PlayerPointers {
     virtual ~PlayerPointers() {}

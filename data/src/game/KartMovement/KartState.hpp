@@ -5,6 +5,9 @@
 #include <system/RKBitField.hpp>
 #include <system/RaceConfig.hpp>
 #include <system/RaceManager.hpp>
+#include <EGG/math.h>
+
+#define GENESIS_KART_STATE_DEFINED
 
 namespace Kart {
 

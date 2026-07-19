@@ -17,6 +17,7 @@ public:
     virtual void stabilize();
     virtual void forceUpright();
 
+    KartDynamics() {} // Default constructor
     void setDefault();
     void reset();
     void init();

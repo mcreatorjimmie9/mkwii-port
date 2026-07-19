@@ -20,10 +20,13 @@ struct KPadUIInputState {
     s32 field_0x08;
 };
 
-// Trick types
 struct KPadRaceInputState {
+    u32 buttons;
+    f32 stickX;
+    f32 stickY;
+    f32 triggerL;
+    f32 triggerR;
     EGG::Vector2f mStick;
-    u32 mButtons;
     struct currentInputState_t {
         EGG::Vector2f mStick;
     } currentInputState;

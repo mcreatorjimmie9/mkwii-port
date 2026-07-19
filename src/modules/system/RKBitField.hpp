@@ -5,11 +5,15 @@
 template<int BITS>
 class RKBitField {
 public:
-    u32 data;
+    static constexpr int WORDS = (BITS + 31) / 32;
+    u32 data[WORDS];
 
-    RKBitField() : data(0) {}
-    bool test(int bit) const { return (data & (1u << bit)) != 0; }
-    void set(int bit) { data |= (1u << bit); }
-    void clear(int bit) { data &= ~(1u << bit); }
-    void reset() { data = 0; }
+    RKBitField() { reset(); }
+    bool test(int bit) const { return (data[bit / 32] & (1u << (bit % 32))) != 0; }
+    void set(int bit) { data[bit / 32] |= (1u << (bit % 32)); }
+    void clear(int bit) { data[bit / 32] &= ~(1u << (bit % 32)); }
+    void reset() { for (int i = 0; i < WORDS; i++) data[i] = 0; }
+    bool on(size_t n) const { return (data[n / 32] & (1u << (n % 32))) != 0; }
+    void reset(size_t n) { data[n / 32] &= ~(1u << (n % 32)); }
+    u32& field(size_t n) { return data[n / 32]; }
 };

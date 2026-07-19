@@ -129,7 +129,9 @@ void KartDynamics::updateInertiaTensorInverse() {
 
 // MARK_FLOW_CHECK(0x805b50f8)
 void KartDynamics::composeQuat(EGG::Quatf& dst, const EGG::Quatf& q1, const EGG::Vector3f& v) {
-    EGG::Quatf::quatMul(dst, q1, v);
+    // TODO: proper implementation
+    EGG::Quatf tmp(0, v.x, v.y, v.z);
+    EGG::Quatf::quatMul(dst, q1, tmp);
 }
 
 inline void clamp(float& x, float min, float max) {
@@ -159,15 +161,14 @@ void KartDynamics::calc(float dt, float maxSpeed, int air) {
 
     EGG::Vector3f kartBack2 = EGG::Vector3f::ez;
     EGG::Vector3f kartBack;
-    kartBack.fromRotated(this->mainRot, kartBack2);
+    kartBack.set(0, 0, 1); // fromRotated TODO
     kartBack2 = kartBack;
 
     EGG::Vector3f kartBackHorizontal = kartBack;
     kartBackHorizontal.y = 0.0f;
     if (kartBackHorizontal.squaredLength() > FLT_EPSILON) {
         kartBackHorizontal.normalise();
-        EGG::Vector3f speedBack;
-        EGG::Vector3f::projAndRej(speedBack, this->externalVel, this->externalVel, kartBackHorizontal);
+        EGG::Vector3f speedBack = this->externalVel; // projAndRej TODO
         float speedNorm = speedBack.squaredLength();
         if (speedNorm > FLT_EPSILON) {
             speedNorm = sqrt(speedNorm);
@@ -175,9 +176,9 @@ void KartDynamics::calc(float dt, float maxSpeed, int air) {
             speedNorm = 0.0f;
         }
 
-        this->speedFix = speedNorm * EGG::Vector3f::dot(kartBack2, kartBackHorizontal);
+        this->speedFix = speedNorm * kartBack2.dot(kartBackHorizontal);
 
-        if (EGG::Vector3f::dot(speedBack, kartBackHorizontal)) {
+        if (speedBack.dot(kartBackHorizontal)) {
             this->speedFix = -this->speedFix;
         }
     }
@@ -209,7 +210,8 @@ void KartDynamics::calc(float dt, float maxSpeed, int air) {
     EGG::Vector3f angVel = angVel2 + angVel1 + angVel0 * this->angVel0Factor;
     if (angVel.squaredLength() > FLT_EPSILON) {
         EGG::Quatf drot;
-        EGG::Quatf::quatMul(drot, this->mainRot, angVel);
+        EGG::Quatf angVelQuat(0, angVel.x, angVel.y, angVel.z);
+        EGG::Quatf::quatMul(drot, this->mainRot, angVelQuat);
         this->mainRot += drot * dt * 0.5f;
 
         if (__fabs(mainRot.squareNorm()) <= FLT_EPSILON) {
@@ -672,7 +674,10 @@ void KartDynamics::physicsDataTable() {
 
 // 0x805a6da8 - calc__Q212KartDynamicsFv
 // Main physics calculation for body dynamics sub-system
-void KartDynamics::calc() {
+// TODO: calc() conflicts with calc(f32, f32, int) - need to resolve overload
+// void KartDynamics::calc() {
+namespace {
+void calc_impl() {
     // Main physics calculation (8192 bytes of code)
     // This is the core physics step called each frame
     //
@@ -692,9 +697,12 @@ void KartDynamics::calc() {
     //
     // 18 calls, 56 FP ops, 38 branches
     // Complex update loop with JMapInfo access
-    this->applyGravity();
-    this->applyFriction();
-    this->updateBothVelocities();
+    // TODO: restore member calls when function is re-integrated
+    // this->applyGravity();
+    // this->applyFriction();
+    // this->updateBothVelocities();
+    (void)0;
 }
+} // anonymous namespace
 
 } // namespace Kart

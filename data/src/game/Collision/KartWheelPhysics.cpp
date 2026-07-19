@@ -1,5 +1,5 @@
 #include "KartWheelPhysics.hpp"
-#include "KartObjectProxy.hpp"
+#include <game/kart/KartObjectProxy.hpp>
 #include "KartHitbox.hpp"
 #include "KartDynamics.hpp"
 #include "KartState.hpp"

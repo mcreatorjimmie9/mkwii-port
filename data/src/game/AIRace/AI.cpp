@@ -208,42 +208,42 @@ void AI::handleBump(const EGG::Vector3f& bumpDirection, const AI& other) {
 // Address: 0x807289D0
 // Size: 20 bytes, 5 instructions
 bool AI::isOnGround() {
-    return kartState()->on(Kart::KART_FLAG_TOUCHING_GROUND);
+    return kartState()->on(18); // KART_FLAG_TOUCHING_GROUND
 }
 
 // isAllWheelsCollision__Q25Enemy2AIFv
 // Address: 0x807289E4
 // Size: 20 bytes, 5 instructions
 bool AI::isAllWheelsCollision() {
-    return kartState()->on(Kart::KART_FLAG_ALL_WHEELS_COLLISION);
+    return kartState()->on(15); // KART_FLAG_ALL_WHEELS_COLLISION
 }
 
 // isDriftingOnGround__Q25Enemy2AIFv
 // Address: 0x807289F8
 // Size: 20 bytes, 5 instructions
 bool AI::isDriftingOnGround() {
-    return kartState()->on(Kart::KART_FLAG_DRIFTING_ON_GROUND);
+    return kartState()->on(61); // KART_FLAG_DRIFTING_ON_GROUND
 }
 
 // isHopping__Q25Enemy2AIFv
 // Address: 0x80728A0C
 // Size: 20 bytes, 5 instructions
 bool AI::isHopping() {
-    return kartState()->on(Kart::KART_FLAG_HOPPING);
+    return kartState()->on(3); // KART_FLAG_HOPPING
 }
 
 // isAutoDrift__Q25Enemy2AIFv
 // Address: 0x80728A20
 // Size: 20 bytes, 5 instructions
 bool AI::isAutoDrift() {
-    return kartState()->on(Kart::KART_FLAG_AUTO_DRIFT);
+    return kartState()->on(19); // KART_FLAG_AUTO_DRIFT
 }
 
 // isInBullet__Q25Enemy2AIFv
 // Address: 0x80728A34
 // Size: 20 bytes, 5 instructions
 bool AI::isInBullet() {
-    return kartState()->on(Kart::KART_FLAG_IN_BULLET);
+    return kartState()->on(28); // KART_FLAG_IN_BULLET
 }
 
 } // namespace Enemy

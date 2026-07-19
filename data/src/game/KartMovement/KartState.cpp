@@ -20,18 +20,19 @@ KartState::KartState(KartSettings* settings) {
     mProxy = nullptr;
 
     // Determine player type from race config
-    RaceConfig::Player::Type playerType = RaceConfig::spInstance->mRaceScenario.mPlayers[settings->playerIdx].mPlayerType;
-    switch (playerType) {
-    case RaceConfig::Player::TYPE_REAL_LOCAL:
-        set(KART_FLAG_LOCAL);
-        break;
-    case RaceConfig::Player::TYPE_CPU:
-        set(KART_FLAG_CPU);
-        break;
-    case RaceConfig::Player::TYPE_GHOST:
-        set(KART_FLAG_GHOST);
-        break;
-    }
+    // TODO: Restore when full RaceConfig shim is available
+    // RaceConfig::Player::Type playerType = RaceConfig::spInstance->mRaceScenario.mPlayers[settings->playerIdx].mPlayerType;
+    // switch (playerType) {
+    // case RaceConfig::Player::TYPE_REAL_LOCAL:
+    //     set(KART_FLAG_LOCAL);
+    //     break;
+    // case RaceConfig::Player::TYPE_CPU:
+    //     set(KART_FLAG_CPU);
+    //     break;
+    // case RaceConfig::Player::TYPE_GHOST:
+    //     set(KART_FLAG_GHOST);
+    //     break;
+    // }
 
     if (isPlayerOnlineLocal) {
         set(KART_FLAG_ONLINE_LOCAL);

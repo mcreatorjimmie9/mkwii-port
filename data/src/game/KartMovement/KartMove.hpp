@@ -4,6 +4,8 @@
 #include <decomp.h>
 #include <egg/math/eggVector.hpp>
 
+#define GENESIS_KART_MOVE_DEFINED
+
 namespace Kart {
 
 // Forward declarations

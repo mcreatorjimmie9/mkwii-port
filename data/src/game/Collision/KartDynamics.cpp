@@ -101,7 +101,8 @@ void KartDynamics::updateInertiaTensorInverse() {
 }
 
 void KartDynamics::composeQuat(EGG::Quatf& dst, const EGG::Quatf& q1, const EGG::Vector3f& v) {
-    EGG::Quatf::quatMul(dst, q1, v);
+    EGG::Quatf tmp(0, v.x, v.y, v.z);
+    EGG::Quatf::quatMul(dst, q1, tmp);
 }
 
 inline void clamp(f32& x, f32 min, f32 max) {

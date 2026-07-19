@@ -46,5 +46,14 @@
 #pragma GCC diagnostic ignored "-Wunused-function"
 #endif
 
+#ifndef NEVER_INLINE
+#define NEVER_INLINE __attribute__((noinline))
+#endif
+
 // Common SDK function stubs that decompiled code references
 #include <cstring>
+#include <cmath>
+
+#ifndef __fabs
+#define __fabs fabsf
+#endif

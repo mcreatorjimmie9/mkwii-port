@@ -6,6 +6,8 @@
 #include <egg/math/eggQuat.hpp>
 #include <egg/math/eggMatrix.hpp>
 
+#define GENESIS_KART_DYNAMICS_DEFINED
+
 namespace Kart {
 
 class KartDynamics {
@@ -14,6 +16,7 @@ public:
     virtual void stabilize();
     virtual void forceUpright();
 
+    KartDynamics() {} // Default constructor for KartDynamicsKart
     void setDefault();
     void reset();
     void init();

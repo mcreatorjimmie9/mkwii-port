@@ -18,3 +18,36 @@
 #ifndef NEVER_INLINE
 #define NEVER_INLINE __attribute__((noinline))
 #endif
+
+// Type aliases used by RaceConfig and other system headers
+namespace System {
+enum CharacterId { CHARACTER_MARIO = 0, CHARACTER_LUIGI = 1, CHARACTER_PEACH = 2 };
+enum VehicleId { VEHICLE_STANDARD_KART = 0 };
+// BattleTeam defined in system/RaceConfig.hpp
+enum CourseId { COURSE_MARIO_CIRCUIT = 0 };
+
+typedef u8 unk8;
+typedef u32 unk32;
+
+class GhostFile;
+class Mii;
+class Rating;
+class ResourceManager;
+class InitScene;
+class KPadPlayer;
+class RaceMode;
+class ElineControlManager;
+
+struct RawGhostFile {
+    u8 _00[0x100];
+};
+
+struct Time {
+    s16 minutes;
+    s8 seconds;
+    s8 millis;
+    Time() : minutes(0), seconds(0), millis(0) {}
+    void set2(u16 m, u8 s, u8 ms, bool b) { minutes = m; seconds = s; millis = ms; (void)b; }
+};
+
+} // namespace System
