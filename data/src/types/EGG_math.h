@@ -26,6 +26,7 @@ namespace EGG {
         T lenSq() const { return x*x + y*y + z*z; }
         T squaredLength() const { return x*x + y*y + z*z; }
         T normalise() { T l = length(); if (l > 0) { x/=l; y/=l; z/=l; } return l; }
+        void normalise2();
         Vector3& operator*=(T s) { x*=s; y*=s; z*=s; return *this; }
         Vector3& operator/=(T s) { x/=s; y/=s; z/=s; return *this; }
         void set(T _x, T _y, T _z) { x = _x; y = _y; z = _z; }
@@ -51,6 +52,11 @@ namespace EGG {
         Vector2() : x(0), y(0) {}
         Vector2(T _x, T _y) : x(_x), y(_y) {}
         void set(T _x, T _y) { x = _x; y = _y; }
+        T normalise();
+        void normalise2();
+        static Vector2 zero;
+        static const Vector2 ex;
+        static const Vector2 ey;
     };
 
     // Forward declaration for Quat::toMatrix
@@ -64,6 +70,10 @@ namespace EGG {
         Quat(T _w, T _x, T _y, T _z) : w(_w), x(_x), y(_y), z(_z) {}
 
         T squareNorm() const { return w*w + x*x + y*y + z*z; }
+        T axisSquareNorm() const { return x*x + y*y + z*z; }
+        void set(T _w, T _x, T _y, T _z);
+        void setRPY(const Vector3<T>& euler);
+        void setRPY(T x, T y, T z);
         void setIdentity() { w = 1; x = 0; y = 0; z = 0; }
         T normalise() {
             f32 n = std::sqrt(squareNorm());
@@ -87,6 +97,7 @@ namespace EGG {
         }
         Quat& operator+=(const Quat& o) { w += o.w; x += o.x; y += o.y; z += o.z; return *this; }
         Quat operator*(f32 s) const { return Quat(w*s, x*s, y*s, z*s); }
+        void slerpTo(const Quat& q1, T t, Quat& dst) const;
         static void quatMul(Quat& dst, const Quat& q1, const Vector3<f32>& v) {
             (void)dst; (void)q1; (void)v;
         }
@@ -146,6 +157,11 @@ namespace EGG {
 template<typename T> const EGG::Vector3<T> EGG::Vector3<T>::ez(0, 0, 1);
 template<typename T> const EGG::Vector3<T> EGG::Vector3<T>::ey(0, 1, 0);
 template<typename T> const EGG::Vector3<T> EGG::Vector3<T>::ex(1, 0, 0);
+
+// Static member definitions for Vector2
+template<typename T> EGG::Vector2<T> EGG::Vector2<T>::zero(0.0f, 0.0f);
+template<typename T> const EGG::Vector2<T> EGG::Vector2<T>::ex(1.0f, 0.0f);
+template<typename T> const EGG::Vector2<T> EGG::Vector2<T>::ey(0.0f, 1.0f);
 
 // Bring common EGG types into global namespace (matching original Wii SDK style)
 // This allows decompiled code to use bare Vec3, Vec2, Quat, etc.
