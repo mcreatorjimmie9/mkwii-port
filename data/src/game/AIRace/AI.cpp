@@ -1,11 +1,11 @@
-#include "game/AIRace/AI.hpp"
-#include "game/AIRace/AIEngine.hpp"
-#include "game/AIRace/AIControl.hpp"
-#include "game/AIRace/AILookAt.hpp"
+#include "AI.hpp"
+#include "AIEngine.hpp"
+#include "AIControl.hpp"
+#include "AILookAt.hpp"
 #include "game/kart/KartInput.hpp"
 #include "game/kart/KartState.hpp"
-#include "game/system/RaceConfig.hpp"
-#include "game/system/CourseMap.hpp"
+#include "RaceConfig.hpp"
+#include "CourseMap.hpp"
 #include <egg/core/eggHeap.hpp>
 
 namespace Enemy {

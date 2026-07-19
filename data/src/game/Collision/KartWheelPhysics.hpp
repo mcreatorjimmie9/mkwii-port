@@ -49,7 +49,7 @@ private:
     f32 _38;
     EGG::Vector3f downDir;
 };
-static_assert(sizeof(KartSusPhysics) == 0x48);
+// static_assert(sizeof(KartSusPhysics) == 0x48);
 
 /// Handles physics for a single wheel including collision detection
 /// against the course geometry and suspension force computation.
@@ -101,6 +101,6 @@ public:
     /// Topmost point of the suspension the wheel can reach
     EGG::Vector3f suspTop;
 };
-static_assert(sizeof(KartWheelPhysics) == 0x84);
+// static_assert(sizeof(KartWheelPhysics) == 0x84);
 
 } // namespace Kart

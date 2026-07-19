@@ -323,10 +323,6 @@ void ItemObjBlue_tryLockPlayer(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemObjBlue_tryLockPlayer
-; Demangled: ItemObjBlue_tryLockPlayer
-; Address: 0x807b6a98  (.text+0x2a41fc)
-; Size: 608 bytes
 
   0x807b6a98:  beq      0x807b6ab8
   0x807b6a9c:  clrlwi   r0, r5, 1
@@ -508,10 +504,6 @@ void ItemObjBlue_makeArray(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemObjBlue_makeArray
-; Demangled: ItemObjBlue_makeArray
-; Address: 0x807adec8  (.text+0x29b62c)
-; Size: 564 bytes
 
   0x807adec8:  lfs      f0, 0x5c(r31)
   0x807adecc:  lfs      f1, 0x1d0(r3)
@@ -569,10 +561,6 @@ void ItemObjBlue_loadModel(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemObjBlue_loadModel
-; Demangled: ItemObjBlue_loadModel
-; Address: 0x807ae4f0  (.text+0x29bc54)
-; Size: 416 bytes
 
   0x807ae4f0:  addi     r1, r1, 0x30
   0x807ae4f4:  blr      

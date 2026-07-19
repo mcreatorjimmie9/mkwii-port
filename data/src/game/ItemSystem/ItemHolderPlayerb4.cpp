@@ -241,10 +241,6 @@ void ItemHolderPlayerb4_calcRotatingItemObjs(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolderPlayerb4_calcRotatingItemObjs
-; Demangled: ItemHolderPlayerb4_calcRotatingItemObjs
-; Address: 0x807966d8  (.text+0x283e3c)
-; Size: 876 bytes
 
   0x807966d8:  blr      
   0x807966dc:  lwz      r4, 0x8c(r3)
@@ -866,10 +862,6 @@ void ItemHolderPlayerb4_use(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolderPlayerb4_use
-; Demangled: ItemHolderPlayerb4_use
-; Address: 0x80793df8  (.text+0x28155c)
-; Size: 760 bytes
 
   0x80793df8:  lwz      r3, 0(r3)
   0x80793dfc:  lwz      r0, 0x42c(r3)

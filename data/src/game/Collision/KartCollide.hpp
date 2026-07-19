@@ -6,8 +6,8 @@
 #include <egg/math/eggQuat.hpp>
 #include <egg/math/eggMatrix.hpp>
 
-#include "game/Collision/KartHitbox.hpp"
-#include "game/Collision/KartDynamics.hpp"
+#include "KartHitbox.hpp"
+#include "KartDynamics.hpp"
 
 namespace Kart {
 

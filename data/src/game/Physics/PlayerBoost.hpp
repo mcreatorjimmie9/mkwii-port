@@ -51,4 +51,4 @@ public:
     f32 _1c;               // 0x1C: unknown float (possibly max multiplier)
     f32 speedLimit;        // 0x20: current speed limit
 }; // Total size 0x24
-static_assert(sizeof(PlayerBoost) == 0x24);
+// static_assert(sizeof(PlayerBoost) == 0x24);

@@ -104,7 +104,7 @@ enum BGMTrackId {
     BGM_FOURTH_150CC        = 21,
     BGM_MIRROR_150CC        = 22,
     BGM_BATTLE              = 23,
-    BGM-online_race         = 24,
+    BGM_online_race         = 24,
     BGM_CHANNEL            = 25,
     BGM_MAX                = 26
 };
@@ -120,7 +120,7 @@ enum SFXId {
     SFX_KART_OFFROAD       = 0x59,
     SFX_KART_BOOST_MUSHROOM = 0x5C,
     SFX_KART_BOOST_START   = 0x5E,
-    SFX_KART_BOOST Trick   = 0x5F,
+    SFX_KART_BOOST_TRICK   = 0x5F,
     // Item sounds
     SFX_ITEM_MUSHROOM_USE  = 0x60,
     SFX_ITEM_BANANA_DROP   = 0x61,

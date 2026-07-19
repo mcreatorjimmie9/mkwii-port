@@ -1,7 +1,7 @@
 #pragma once
 
-#include "game/AIRace/AIPath.hpp"
-#include "game/system/KPadController.hpp"
+#include "AIPath.hpp"
+#include "KPadController.hpp"
 
 namespace Enemy {
 

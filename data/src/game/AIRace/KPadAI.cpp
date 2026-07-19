@@ -1,6 +1,6 @@
-#include "game/AIRace/KPadAI.hpp"
-#include "game/AIRace/AI.hpp"
-#include "game/AIRace/AIEngine.hpp"
+#include "KPadAI.hpp"
+#include "AI.hpp"
+#include "AIEngine.hpp"
 
 namespace System {
 

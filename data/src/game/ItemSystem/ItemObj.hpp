@@ -6,13 +6,13 @@
 class ItemObj {
 public:
     // 0x807a14d4 — 2248B
-    void ItemObj_update;  // TODO: add params from mangled name 'ItemObj_update'
+    void ItemObj_update();  // TODO: add params from mangled name 'ItemObj_update'
     // 0x807a2868 — 592B
-    void ItemObj_loadTeamsModel;  // TODO: add params from mangled name 'ItemObj_loadTeamsModel'
+    void ItemObj_loadTeamsModel();  // TODO: add params from mangled name 'ItemObj_loadTeamsModel'
     // 0x807a39bc — 428B
-    void ItemObj_checkPlayerCollision;  // TODO: add params from mangled name 'ItemObj_checkPlayerCollision'
+    void ItemObj_checkPlayerCollision();  // TODO: add params from mangled name 'ItemObj_checkPlayerCollision'
     // 0x807a070c — 220B
-    void ItemObj_init;  // TODO: add params from mangled name 'ItemObj_init'
+    void ItemObj_init();  // TODO: add params from mangled name 'ItemObj_init'
     // 0x807a0a38 — 164B
-    void ItemObj_spawn;  // TODO: add params from mangled name 'ItemObj_spawn'
+    void ItemObj_spawn();  // TODO: add params from mangled name 'ItemObj_spawn'
 };

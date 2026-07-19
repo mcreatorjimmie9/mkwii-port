@@ -550,10 +550,6 @@ void ItemHolderPlayer_update(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolderPlayer_update
-; Demangled: ItemHolderPlayer_update
-; Address: 0x80799e10  (.text+0x287574)
-; Size: 2236 bytes
 
   0x80799e10:  bl       0x80656b38
   0x80799e14:  cmpwi    r3, 0
@@ -1193,10 +1189,6 @@ void ItemHolderPlayer_useBlooper(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolderPlayer_useBlooper
-; Demangled: ItemHolderPlayer_useBlooper
-; Address: 0x807aa69c  (.text+0x297e00)
-; Size: 452 bytes
 
   0x807aa69c:  addi     r1, r1, 0x20
   0x807aa6a0:  blr      
@@ -1463,10 +1455,6 @@ void ItemHolderPlayer_init(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolderPlayer_init
-; Demangled: ItemHolderPlayer_init
-; Address: 0x80799bc8  (.text+0x28732c)
-; Size: 432 bytes
 
   0x80799bc8:  mr       r7, r30
   0x80799bcc:  li       r5, 2
@@ -1653,10 +1641,6 @@ void ItemHolderPlayer_destroy(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolderPlayer_destroy
-; Demangled: ItemHolderPlayer_destroy
-; Address: 0x8079ba04  (.text+0x289168)
-; Size: 148 bytes
 
   0x8079ba04:  lfs      f1, 0x48(r4)
   0x8079ba08:  mr       r6, r30
@@ -1719,10 +1703,6 @@ void ItemHolderPlayer_useLightning(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolderPlayer_useLightning
-; Demangled: ItemHolderPlayer_useLightning
-; Address: 0x807ba064  (.text+0x2a77c8)
-; Size: 136 bytes
 
   0x807ba064:  mulli    r11, r11, 0xc
   0x807ba068:  add      r11, r31, r11

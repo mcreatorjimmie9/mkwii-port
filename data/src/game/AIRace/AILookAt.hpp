@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/AIRace/AIInfo.hpp"
+#include "AIInfo.hpp"
 #include "game/util/State.hpp"
 #include <egg/math/eggVector.hpp>
 

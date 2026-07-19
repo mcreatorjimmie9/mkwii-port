@@ -39,10 +39,6 @@ void ItemObj_update(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemObj_update
-; Demangled: ItemObj_update
-; Address: 0x807a14d4  (.text+0x28ec38)
-; Size: 2248 bytes
 
   0x807a14d4:  addi     r1, r1, 0x10
   0x807a14d8:  blr      
@@ -261,10 +257,6 @@ void ItemObj_loadTeamsModel(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemObj_loadTeamsModel
-; Demangled: ItemObj_loadTeamsModel
-; Address: 0x807a2868  (.text+0x28ffcc)
-; Size: 592 bytes
 
   0x807a2868:  stwu     r1, -0x10(r1)
   0x807a286c:  mflr     r0
@@ -558,10 +550,6 @@ void ItemObj_checkPlayerCollision(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemObj_checkPlayerCollision
-; Demangled: ItemObj_checkPlayerCollision
-; Address: 0x807a39bc  (.text+0x291120)
-; Size: 428 bytes
 
   0x807a39bc:  li       r4, 0x10e
   0x807a39c0:  stw      r6, 0x1ac(r3)
@@ -758,10 +746,6 @@ void ItemObj_init(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemObj_init
-; Demangled: ItemObj_init
-; Address: 0x807a070c  (.text+0x28de70)
-; Size: 220 bytes
 
   0x807a070c:  rlwinm.  r0, r0, 0, 0x1c, 0x1c
   0x807a0710:  bne      0x807a0724
@@ -921,10 +905,6 @@ void ItemObj_spawn(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemObj_spawn
-; Demangled: ItemObj_spawn
-; Address: 0x807a0a38  (.text+0x28e19c)
-; Size: 164 bytes
 
   0x807a0a38:  lwz      r4, 0x78(r3)
   0x807a0a3c:  rlwinm.  r0, r4, 0, 8, 0xa

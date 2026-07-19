@@ -65,10 +65,6 @@ void PlayerSub18_checkItemCollision(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: PlayerSub18_checkItemCollision
-; Demangled: PlayerSub18_checkItemCollision
-; Address: 0x80574a64  (.text+0x621c8)
-; Size: 1560 bytes
 
   0x80574a64:  lwz      r0, 8(r3)
   0x80574a68:  lwz      r3, 0xc(r3)

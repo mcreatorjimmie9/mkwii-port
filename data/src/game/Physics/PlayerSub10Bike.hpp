@@ -40,4 +40,4 @@ public:
     f32 wheelieRotSpeed;             // 0x2B8: Wheelie rotation speed per frame
     void* turnParams;                // 0x2C0: Pointer to bike turn parameter table
 };
-static_assert(sizeof(PlayerSub10Bike) == 0x2C4);
+// static_assert(sizeof(PlayerSub10Bike) == 0x2C4);

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "game/AIRace/AIInfo.hpp"
-#include "game/system/CourseMap.hpp"
-#include "game/system/KPadController.hpp"
+#include "AIInfo.hpp"
+#include "CourseMap.hpp"
+#include "KPadController.hpp"
 #include "game/util/State.hpp"
 
 namespace Enemy {

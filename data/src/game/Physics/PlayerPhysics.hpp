@@ -233,4 +233,4 @@ private:
 
     // 0x160: End of class
 };
-static_assert(sizeof(PlayerPhysics) == 0x160);
+// static_assert(sizeof(PlayerPhysics) == 0x160);

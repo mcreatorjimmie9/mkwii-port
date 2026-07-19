@@ -1,10 +1,10 @@
-#include "game/AIRace/AITrickHandler.hpp"
-#include "game/AIRace/AI.hpp"
-#include "game/AIRace/AIEngine.hpp"
-#include "game/AIRace/AIControl.hpp"
-#include "game/AIRace/AIPath.hpp"
-#include "game/AIRace/AIManager.hpp"
-#include "game/AIRace/AIProbability.hpp"
+#include "AITrickHandler.hpp"
+#include "AI.hpp"
+#include "AIEngine.hpp"
+#include "AIControl.hpp"
+#include "AIPath.hpp"
+#include "AIManager.hpp"
+#include "AIProbability.hpp"
 #include "game/kart/KartState.hpp"
 #include <rk_common.h>
 

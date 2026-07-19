@@ -34,10 +34,6 @@ void ItemObjRed_makeArray(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemObjRed_makeArray
-; Demangled: ItemObjRed_makeArray
-; Address: 0x807ac4d8  (.text+0x299c3c)
-; Size: 456 bytes
 
   0x807ac4d8:  bge      0x807ac4ec
   0x807ac4dc:  cmplw    r4, r30

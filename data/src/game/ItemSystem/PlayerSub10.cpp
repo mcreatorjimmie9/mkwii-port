@@ -216,10 +216,6 @@ void PlayerSub10_activateMushroom(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: PlayerSub10_activateMushroom
-; Demangled: PlayerSub10_activateMushroom
-; Address: 0x805818c0  (.text+0x6f024)
-; Size: 600 bytes
 
   0x805818c0:  bne      0x80581958
   0x805818c4:  lwz      r0, 4(r3)
@@ -620,10 +616,6 @@ void PlayerSub10_activateMega(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: PlayerSub10_activateMega
-; Demangled: PlayerSub10_activateMega
-; Address: 0x80582ffc  (.text+0x70760)
-; Size: 456 bytes
 
   0x80582ffc:  stw      r3, 0xc(r1)
   0x80583000:  lis      r4, 0
@@ -781,10 +773,6 @@ void PlayerSub10_activateBullet(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: PlayerSub10_activateBullet
-; Demangled: PlayerSub10_activateBullet
-; Address: 0x80587d94  (.text+0x754f8)
-; Size: 344 bytes
 
   0x80587d94:  lwz      r31, 0xc(r1)
   0x80587d98:  lwz      r0, 0x14(r1)

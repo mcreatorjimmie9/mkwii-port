@@ -254,10 +254,6 @@ void ITEMHandler_importNewPackets(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ITEMHandler_importNewPackets
-; Demangled: ITEMHandler_importNewPackets
-; Address: 0x80660224  (.text+0x14d988)
-; Size: 868 bytes
 
   0x80660224:  stw      r0, 0x3f0(r24)
   0x80660228:  lwz      r0, 0x3e4(r24)
@@ -746,10 +742,6 @@ void Net11ITEMHandler(void* self) {
 
 /* === DISASSEMBLY === */
 
-; Function: createStaticInstance__Q23Net11ITEMHandlerFv
-; Demangled: createStaticInstance__Net11ITEMHandlerFv
-; Address: 0x8065e5d4  (.text+0x14bd38)
-; Size: 636 bytes
 
   0x8065e5d4:  add      r3, r3, r27
   0x8065e5d8:  lhz      r5, 0x182(r3)
@@ -1090,10 +1082,6 @@ void ITEMHandler_construct(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ITEMHandler_construct
-; Demangled: ITEMHandler_construct
-; Address: 0x8065e890  (.text+0x14bff4)
-; Size: 572 bytes
 
   0x8065e890:  mflr     r0
   0x8065e894:  stw      r0, 0x14(r1)
@@ -1366,10 +1354,6 @@ void ITEMHandler_update(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ITEMHandler_update
-; Demangled: ITEMHandler_update
-; Address: 0x8065ead0  (.text+0x14c234)
-; Size: 216 bytes
 
   0x8065ead0:  stb      r29, 0x70(r21)
   0x8065ead4:  stb      r29, 0x71(r21)
@@ -1525,10 +1509,6 @@ u32 ITEMHandler_getPlayerMode(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ITEMHandler_getPlayerMode
-; Demangled: ITEMHandler_getPlayerMode
-; Address: 0x8065fa50  (.text+0x14d1b4)
-; Size: 160 bytes
 
   0x8065fa50:  or       r0, r0, r25
   0x8065fa54:  stw      r0, 0x3e0(r18)
@@ -1629,10 +1609,6 @@ u32 ITEMHandler_getPlayerStoredItem(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ITEMHandler_getPlayerStoredItem
-; Demangled: ITEMHandler_getPlayerStoredItem
-; Address: 0x8065f704  (.text+0x14ce68)
-; Size: 148 bytes
 
   0x8065f704:  li       r3, 0
   0x8065f708:  blr      

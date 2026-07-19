@@ -97,10 +97,6 @@ void ItemObjFib_makeArray(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemObjFib_makeArray
-; Demangled: ItemObjFib_makeArray
-; Address: 0x807a9d90  (.text+0x2974f4)
-; Size: 152 bytes
 
   0x807a9d90:  lwz      r3, 0(r5)
   0x807a9d94:  lwz      r3, 0x74(r3)

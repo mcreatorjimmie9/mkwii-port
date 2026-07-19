@@ -22,10 +22,6 @@ void ItemHolderItem_update(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolderItem_update
-; Demangled: ItemHolderItem_update
-; Address: 0x80798958  (.text+0x2860bc)
-; Size: 1308 bytes
 
   0x80798958:  lfs      f0, 0x24(r7)
 
@@ -222,10 +218,6 @@ void ItemHolderItem_despawn(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolderItem_despawn
-; Demangled: ItemHolderItem_despawn
-; Address: 0x80798450  (.text+0x285bb4)
-; Size: 648 bytes
 
   0x80798450:  li       r4, 0
   0x80798454:  bl       0x80555bf8
@@ -538,10 +530,6 @@ void ItemHolderItem_spawn(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolderItem_spawn
-; Demangled: ItemHolderItem_spawn
-; Address: 0x807982ec  (.text+0x285a50)
-; Size: 292 bytes
 
   0x807982ec:  stb      r3, 0x18(r12)
   0x807982f0:  addi     r3, r10, 0xf
@@ -736,10 +724,6 @@ void ItemHolderItem_initObjs(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolderItem_initObjs
-; Demangled: ItemHolderItem_initObjs
-; Address: 0x807981b4  (.text+0x285918)
-; Size: 200 bytes
 
   0x807981b4:  addi     r7, r10, 3
   0x807981b8:  stb      r8, 4(r12)

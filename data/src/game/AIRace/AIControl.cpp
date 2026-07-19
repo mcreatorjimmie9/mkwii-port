@@ -1,8 +1,8 @@
-#include "game/AIRace/AIControl.hpp"
-#include "game/AIRace/AIPath.hpp"
-#include "game/AIRace/AIProbability.hpp"
-#include "game/AIRace/AIRank.hpp"
-#include "game/system/RaceConfig.hpp"
+#include "AIControl.hpp"
+#include "AIPath.hpp"
+#include "AIProbability.hpp"
+#include "AIRank.hpp"
+#include "RaceConfig.hpp"
 #include <egg/core/eggHeap.hpp>
 
 namespace Enemy {

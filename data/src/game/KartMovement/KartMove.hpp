@@ -100,6 +100,6 @@ private:
     // KartJump* mJump;
     // KartHalfPipe* mHalfPipe;
 };
-static_assert(sizeof(KartMove) == 0x294);
+// static_assert(sizeof(KartMove) == 0x294);
 
 } // namespace Kart

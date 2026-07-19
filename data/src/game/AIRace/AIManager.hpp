@@ -1,8 +1,8 @@
 #pragma once
 
-#include "game/AIRace/AIInfo.hpp"
-#include "game/AIRace/AIRank.hpp"
-#include "game/AIRace/AISpeed.hpp"
+#include "AIInfo.hpp"
+#include "AIRank.hpp"
+#include "AISpeed.hpp"
 #include <egg/core/eggDisposer.hpp>
 #include <rk_common.h>
 

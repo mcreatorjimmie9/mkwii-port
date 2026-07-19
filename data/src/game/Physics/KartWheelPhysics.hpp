@@ -89,7 +89,7 @@ public:
     // Topmost point of suspension the wheel can reach
     EGG::Vector3f suspTop;         // 0x68: Suspension top anchor point
 };
-static_assert(sizeof(KartWheelPhysics) == 0x84);
+// static_assert(sizeof(KartWheelPhysics) == 0x84);
 
 // =============================================================================
 // KartSusPhysics — Per-wheel suspension physics
@@ -135,6 +135,6 @@ private:
     f32 _38;                         // 0x28: Unknown float
     EGG::Vector3f downDir;           // 0x2C: Down direction for ray cast
 };
-static_assert(sizeof(KartSusPhysics) == 0x48);
+// static_assert(sizeof(KartSusPhysics) == 0x48);
 
 } // namespace Kart

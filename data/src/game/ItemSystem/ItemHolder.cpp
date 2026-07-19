@@ -135,10 +135,6 @@ void ItemHolder_construct(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolder_construct
-; Demangled: ItemHolder_construct
-; Address: 0x8079b7c0  (.text+0x288f24)
-; Size: 516 bytes
 
   0x8079b7c0:  lwz      r4, 0xa4(r3)
   0x8079b7c4:  stfs     f3, 0x60(r3)
@@ -367,10 +363,6 @@ void ItemHolder_checkPlayerCollision(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolder_checkPlayerCollision
-; Demangled: ItemHolder_checkPlayerCollision
-; Address: 0x8079c194  (.text+0x2898f8)
-; Size: 420 bytes
 
   0x8079c194:  lwz      r3, 0x14(r3)
   0x8079c198:  lwz      r4, 4(r3)
@@ -608,10 +600,6 @@ void ItemHolder_destroy(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolder_destroy
-; Demangled: ItemHolder_destroy
-; Address: 0x8079b484  (.text+0x288be8)
-; Size: 412 bytes
 
   0x8079b484:  bl       0x8055fe08
   0x8079b488:  lwz      r0, 0x14(r1)
@@ -725,10 +713,6 @@ void ItemHolder_destroy(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolder_initItemDirect
-; Demangled: ItemHolder_initItemDirect
-; Address: 0x8079c338  (.text+0x289a9c)
-; Size: 364 bytes
 
 // Address: 0x8079c614 — ItemHolder_spawnDirect (certain)
 // Source: snailspeed3/mkw RMCP01 StaticR.rel module symbols (exact address match)
@@ -751,10 +735,6 @@ void ItemHolder_spawnDirect(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolder_spawnDirect
-; Demangled: ItemHolder_spawnDirect
-; Address: 0x8079c614  (.text+0x289d78)
-; Size: 364 bytes
 
   0x8079c614:  lis      r5, 0
 
@@ -892,10 +872,6 @@ void ItemHolder_update(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolder_update
-; Demangled: ItemHolder_update
-; Address: 0x8079bd38  (.text+0x28949c)
-; Size: 336 bytes
 
   0x8079bd38:  bgt      0x8079bd50
   0x8079bd3c:  li       r0, 1
@@ -1125,10 +1101,6 @@ void ItemHolder_spawnTc(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolder_spawnTc
-; Demangled: ItemHolder_spawnTc
-; Address: 0x8079c780  (.text+0x289ee4)
-; Size: 288 bytes
 
   0x8079c780:  lwz      r3, 0x14(r3)
   0x8079c784:  lwz      r4, 4(r3)
@@ -1317,10 +1289,6 @@ void ItemHolder_init(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemHolder_init
-; Demangled: ItemHolder_init
-; Address: 0x8079bc7c  (.text+0x2893e0)
-; Size: 188 bytes
 
   0x8079bc7c:  lbz      r25, 0x25(r3)
   0x8079bc80:  li       r26, 0

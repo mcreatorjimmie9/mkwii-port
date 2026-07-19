@@ -1,9 +1,9 @@
 #pragma once
 
-#include "game/AIRace/AIEngine.hpp"
-#include "game/AIRace/AIInfo.hpp"
+#include "AIEngine.hpp"
+#include "AIInfo.hpp"
 #include "game/kart/KartObjectProxy.hpp"
-#include "game/system/CourseMap.hpp"
+#include "CourseMap.hpp"
 #include <egg/math/eggVector.hpp>
 
 extern bool isTeamsEnabled();

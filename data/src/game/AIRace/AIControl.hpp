@@ -1,9 +1,9 @@
 #pragma once
 
-#include "game/AIRace/AIInfo.hpp"
-#include "game/AIRace/AIPath.hpp"
-#include "game/AIRace/AIProbability.hpp"
-#include "game/system/CourseMap.hpp"
+#include "AIInfo.hpp"
+#include "AIPath.hpp"
+#include "AIProbability.hpp"
+#include "CourseMap.hpp"
 #include "game/util/State.hpp"
 
 namespace Enemy {

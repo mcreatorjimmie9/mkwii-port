@@ -213,10 +213,6 @@ void ItemObjBomb_loadModel(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemObjBomb_loadModel
-; Demangled: ItemObjBomb_loadModel
-; Address: 0x807a762c  (.text+0x294d90)
-; Size: 508 bytes
 
   0x807a762c:  li       r14, 1
   0x807a7630:  b        0x807a77a0
@@ -452,10 +448,6 @@ void ItemObjBomb_makeArray(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemObjBomb_makeArray
-; Demangled: ItemObjBomb_makeArray
-; Address: 0x807a66ac  (.text+0x293e10)
-; Size: 448 bytes
 
   0x807a66ac:  lwz      r31, 0xc(r1)
   0x807a66b0:  mtlr     r0

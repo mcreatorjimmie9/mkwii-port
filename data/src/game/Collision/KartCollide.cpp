@@ -1,6 +1,6 @@
 #include "KartCollide.hpp"
-#include "game/Collision/PlayerSub18.hpp"
-#include "game/Collision/PlayerSub10.hpp"
+#include "PlayerSub18.hpp"
+#include "PlayerSub10.hpp"
 
 #include <game/kart/KartObjectProxy.hpp>
 #include <game/kart/KartMove.hpp>

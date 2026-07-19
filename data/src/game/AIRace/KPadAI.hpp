@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/system/KPadController.hpp"
+#include "KPadController.hpp"
 
 namespace System {
 

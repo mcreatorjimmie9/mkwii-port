@@ -113,10 +113,6 @@ void ItemRoulette_update(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemRoulette_update
-; Demangled: ItemRoulette_update
-; Address: 0x807bc864  (.text+0x2a9fc8)
-; Size: 496 bytes
 
   0x807bc864:  lwz      r8, 4(r5)
   0x807bc868:  mr       r4, r30

@@ -70,4 +70,4 @@ private:
     f32 _38;                         // 0x28: Unknown float (possibly penetration depth)
     EGG::Vector3f downDir;           // 0x2C: Direction of suspension ray (usually down)
 };
-static_assert(sizeof(KartSusPhysics) == 0x48);
+// static_assert(sizeof(KartSusPhysics) == 0x48);

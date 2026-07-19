@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/AIRace/AIInfo.hpp"
+#include "AIInfo.hpp"
 
 namespace Enemy {
 

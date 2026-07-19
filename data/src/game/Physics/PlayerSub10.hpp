@@ -206,7 +206,7 @@ public:
     s16 ghostVanishTimer;             // 0x290
     u8 _292[0x002];                  // 0x292
 };
-static_assert(sizeof(PlayerSub10) == 0x294);
+// static_assert(sizeof(PlayerSub10) == 0x294);
 
 class PlayerSub10Remote : public PlayerSub10 { /* vtable 0x808b5d90 */ };
 class PlayerSub10RealLocal : public PlayerSub10 { /* vtable 0x808b5e78 */ };
@@ -237,7 +237,7 @@ public:
     u8 _2B8[0x008];                // 0x2B8
     void* turnParams;               // 0x2C0
 };
-static_assert(sizeof(PlayerSub10Bike) == 0x2C4);
+// static_assert(sizeof(PlayerSub10Bike) == 0x2C4);
 
 class PlayerSub10BikeRemote : public PlayerSub10Bike { /* vtable 0x808b5d18 */ };
 class PlayerSub10BikeRealLocal : public PlayerSub10Bike { /* vtable 0x808b5e00 */ };

@@ -122,10 +122,6 @@ void initItemObjProperties(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: initItemObjProperties
-; Demangled: initItemObjProperties
-; Address: 0x80792fe4  (.text+0x280748)
-; Size: 800 bytes
 
   0x80792fe4:  lwz      r3, 0(r26)
   0x80792fe8:  lbz      r4, 0x10(r31)
@@ -304,10 +300,6 @@ bool cancelBullet(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: cancelBullet
-; Demangled: cancelBullet
-; Address: 0x8059e600  (.text+0x8bd64)
-; Size: 388 bytes
 
   0x8059e600:  lis      r3, 0
   0x8059e604:  lwz      r3, 0(r3)
@@ -405,10 +397,6 @@ void copyItemObjProperties(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: copyItemObjProperties
-; Demangled: copyItemObjProperties
-; Address: 0x80793364  (.text+0x280ac8)
-; Size: 316 bytes
 
   0x80793364:  bne      0x80793388
   0x80793368:  stw      r23, 0x14(r27)

@@ -125,10 +125,6 @@ void ItemSlotData_decideItem(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemSlotData_decideItem
-; Demangled: ItemSlotData_decideItem
-; Address: 0x807bd914  (.text+0x2ab078)
-; Size: 1188 bytes
 
   0x807bd914:  lfs      f1, 0(r31)
   0x807bd918:  lis      r3, 0
@@ -363,10 +359,6 @@ void ItemSlotData_scaleTableForPlayerCount(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemSlotData_scaleTableForPlayerCount
-; Demangled: ItemSlotData_scaleTableForPlayerCount
-; Address: 0x807bd208  (.text+0x2aa96c)
-; Size: 352 bytes
 
   0x807bd208:  mr       r4, r27
   0x807bd20c:  addi     r3, r26, 0x34
@@ -485,10 +477,6 @@ void ItemSlotData_checkSpawnTimer(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemSlotData_checkSpawnTimer
-; Demangled: ItemSlotData_checkSpawnTimer
-; Address: 0x807bd868  (.text+0x2aafcc)
-; Size: 172 bytes
 
   0x807bd868:  addi     r1, r1, 0xb0
   0x807bd86c:  blr      
@@ -588,10 +576,6 @@ void ItemSlotData_updateTimers(void) {
 
 /* === DISASSEMBLY === */
 
-; Function: ItemSlotData_updateTimers
-; Demangled: ItemSlotData_updateTimers
-; Address: 0x807bded4  (.text+0x2ab638)
-; Size: 168 bytes
 
   0x807bded4:  bl       0x807bc138
   0x807bded8:  cmpwi    r3, 0

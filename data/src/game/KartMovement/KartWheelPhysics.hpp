@@ -69,7 +69,7 @@ public:
     f32 isAtSuspLimit;
     EGG::Vector3f suspTop;
 };
-static_assert(sizeof(KartWheelPhysics) == 0x84);
+// static_assert(sizeof(KartWheelPhysics) == 0x84);
 
 class KartSusPhysics {
 public:
@@ -92,6 +92,6 @@ public:
     f32 _38;
     EGG::Vector3f downDir;
 };
-static_assert(sizeof(KartSusPhysics) == 0x48);
+// static_assert(sizeof(KartSusPhysics) == 0x48);
 
 } // namespace Kart

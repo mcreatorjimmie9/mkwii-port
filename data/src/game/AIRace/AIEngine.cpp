@@ -1,10 +1,10 @@
-#include "game/AIRace/AIEngine.hpp"
-#include "game/AIRace/AI.hpp"
-#include "game/AIRace/AIControl.hpp"
-#include "game/AIRace/AITrickHandler.hpp"
-#include "game/AIRace/AILookAt.hpp"
-#include "game/AIRace/AISpeed.hpp"
-#include "game/system/KPadController.hpp"
+#include "AIEngine.hpp"
+#include "AI.hpp"
+#include "AIControl.hpp"
+#include "AITrickHandler.hpp"
+#include "AILookAt.hpp"
+#include "AISpeed.hpp"
+#include "KPadController.hpp"
 #include <egg/core/eggHeap.hpp>
 
 namespace Enemy {
