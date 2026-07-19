@@ -1,0 +1,63 @@
+/* Function at 0x8076D26C, size=276 bytes */
+/* Stack frame: 0 bytes */
+
+int FUN_8076D26C(int r3, int r4, int r5, int r6, int r7)
+{
+    /* li r7, 0 */ // 0x8076D270
+    if (>=) goto 0x0x8076d2d4;
+    r0 = *(0x46 + r3); // lha @ 0x8076D278
+    if (<=) goto 0x0x8076d294;
+    if (>=) goto 0x0x8076d294;
+    /* li r7, 1 */ // 0x8076D28C
+    /* b 0x8076d378 */ // 0x8076D290
+    if (!=) goto 0x0x8076d2b4;
+    /* lfs f0, 0x40(r3) */ // 0x8076D29C
+    /* .byte 0xfc, 0x00, 0x08, 0x40 */ // 0x8076D2A0
+    /* cror cr0eq, cr0gt, cr0eq */ // 0x8076D2A4
+    if (!=) goto 0x0x8076d378;
+    /* li r7, 1 */ // 0x8076D2AC
+    /* b 0x8076d378 */ // 0x8076D2B0
+    if (!=) goto 0x0x8076d378;
+    /* lfs f0, 0x40(r3) */ // 0x8076D2BC
+    /* .byte 0xfc, 0x00, 0x10, 0x40 */ // 0x8076D2C0
+    /* cror cr0eq, cr0lt, cr0eq */ // 0x8076D2C4
+    if (!=) goto 0x0x8076d378;
+    /* li r7, 1 */ // 0x8076D2CC
+    /* b 0x8076d378 */ // 0x8076D2D0
+    if (<=) goto 0x0x8076d348;
+    r6 = *(0x46 + r3); // lha @ 0x8076D2D8
+    if (<=) goto 0x0x8076d2f0;
+    r0 = *(6 + r3); // lhz @ 0x8076D2E4
+    if (<) goto 0x0x8076d300;
+    if (<) goto 0x0x8076d308;
+    if (>=) goto 0x0x8076d308;
+    /* li r7, 1 */ // 0x8076D300
+    /* b 0x8076d378 */ // 0x8076D304
+    if (!=) goto 0x0x8076d328;
+    /* lfs f0, 0x40(r3) */ // 0x8076D310
+    /* .byte 0xfc, 0x00, 0x08, 0x40 */ // 0x8076D314
+    /* cror cr0eq, cr0gt, cr0eq */ // 0x8076D318
+    if (!=) goto 0x0x8076d378;
+    /* li r7, 1 */ // 0x8076D320
+    /* b 0x8076d378 */ // 0x8076D324
+    if (!=) goto 0x0x8076d378;
+    /* lfs f0, 0x40(r3) */ // 0x8076D330
+    /* .byte 0xfc, 0x00, 0x10, 0x40 */ // 0x8076D334
+    /* cror cr0eq, cr0lt, cr0eq */ // 0x8076D338
+    if (!=) goto 0x0x8076d378;
+    /* li r7, 1 */ // 0x8076D340
+    /* b 0x8076d378 */ // 0x8076D344
+    if (!=) goto 0x0x8076d378;
+    r0 = *(0x46 + r3); // lha @ 0x8076D34C
+    if (!=) goto 0x0x8076d378;
+    /* lfs f0, 0x40(r3) */ // 0x8076D358
+    /* .byte 0xfc, 0x00, 0x08, 0x40 */ // 0x8076D35C
+    /* cror cr0eq, cr0gt, cr0eq */ // 0x8076D360
+    if (!=) goto 0x0x8076d378;
+    /* .byte 0xfc, 0x00, 0x10, 0x40 */ // 0x8076D368
+    /* cror cr0eq, cr0lt, cr0eq */ // 0x8076D36C
+    if (!=) goto 0x0x8076d378;
+    /* li r7, 1 */ // 0x8076D374
+    r3 = r7;
+    return;
+}

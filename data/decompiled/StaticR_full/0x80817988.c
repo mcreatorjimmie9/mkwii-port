@@ -1,0 +1,20 @@
+/* Function at 0x80817988, size=56 bytes */
+/* Stack frame: 0 bytes */
+
+void FUN_80817988(int r3)
+{
+    /* lfs f1, 0xc(r3) */ // 0x80817988
+    /* lfs f0, 0x10(r3) */ // 0x8081798C
+    /* .byte 0xfc, 0x01, 0x00, 0x40 */ // 0x80817990
+    if (<=) goto 0x0x8081799c;
+    /* fmr f1, f0 */ // 0x80817998
+    /* lfs f0, 0x14(r3) */ // 0x8081799C
+    /* .byte 0xfc, 0x01, 0x00, 0x40 */ // 0x808179A0
+    if (<=) goto 0x0x808179ac;
+    /* fmr f1, f0 */ // 0x808179A8
+    /* lfs f0, 0x18(r3) */ // 0x808179AC
+    /* .byte 0xfc, 0x01, 0x00, 0x40 */ // 0x808179B0
+    /* blelr  */ // 0x808179B4
+    /* fmr f1, f0 */ // 0x808179B8
+    return;
+}
