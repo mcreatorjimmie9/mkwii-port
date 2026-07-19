@@ -176,7 +176,7 @@ void CourseObjActor_UpdateWithRotation(CourseObjActor* self, s32 variantIdx) {
     // Calculate pointer into the animation entry table
     // Entry offset = 0x2E0 + variantIdx * 0x0C
     u32 entryOffset = 0x2E0 + (variantIdx * 0x0C);
-    self->courseDataPtr = reinterpret_cast<u32>(static_cast<u8*>(courseData) + entryOffset);
+    self->courseDataPtr = reinterpret_cast<uintptr_t>(static_cast<u8*>(courseData) + entryOffset);
 
     // Set "loaded" flag (bit 14) on draw flags
     sub->drawFlags |= 0x4000;

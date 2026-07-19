@@ -25,7 +25,7 @@ void AIAirtimeTracker::init(s32 initialGroundStartTimer) {
 // Address: 0x8072CBC4
 // Size: 28 bytes, 7 instructions
 void AIAirtimeTracker::update() {
-    if (mpInfo->mpAI->isCpu()) {
+    if (mpInfo->mpAI->isCPU()) {
         if (mAirtime >= 20) {
             mCurrentGroundStartTimer = mInitialGroundStartTimer;
         }
@@ -83,7 +83,7 @@ void AIPowAvoider::update() {
     // First frame of avoidance: decide whether to dodge
     if (mAvoidState == 1) {
         // Check if any nearby player is on the same team
-        bool sameTeamNearby = isSameTeam(mpInfo->mpAI->getPlayerIdx());
+        bool sameTeamNearby = isSameTeam(mpInfo->mpAI->getPlayerIndex());
 
         if (sameTeamNearby || mAvoidChance == 0) {
             mAvoidState++;

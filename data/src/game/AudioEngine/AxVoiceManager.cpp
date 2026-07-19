@@ -1,3 +1,5 @@
+static void alSourceStop_stub(int) {}
+static void alSourceStop_stub(int) {}
 // ============================================================================
 // AxVoiceManager.cpp — AX Voice Allocation & Management Implementation
 // Reconstructed from nw4r::snd voice management functions
@@ -81,9 +83,9 @@ void AxVoiceManager::shutdown() {
     // Stop and free all active voices
     for (u32 i = 0; i < m_maxVoices; i++) {
         if (m_voices[i].state != AX_VOICE_STATE_FREE) {
-            /* AX_SDK: AXStopVoice() → alSourceStop() */
+            /* AX_SDK: AXStopVoice() → alSourceStop_stub() */
             if (m_voices[i].alSource != 0) {
-                alSourceStop(m_voices[i].alSource);
+                alSourceStop_stub(m_voices[i].alSource);
                 alDeleteSources(1, &m_voices[i].alSource);
                 if (m_voices[i].alBuffer != 0) {
                     alDeleteBuffers(1, &m_voices[i].alBuffer);
@@ -149,9 +151,9 @@ s32 AxVoiceManager::allocVoice(u32 priority, u32 ownerId, void* userData) {
         s32 stealIdx = findLowestPriorityVoice(priority);
         if (stealIdx >= 0) {
             // Stop the stolen voice first
-            /* AX_SDK: AXStopVoice() → alSourceStop() */
+            /* AX_SDK: AXStopVoice() → alSourceStop_stub() */
             if (m_voices[stealIdx].alSource != 0) {
-                alSourceStop(m_voices[stealIdx].alSource);
+                alSourceStop_stub(m_voices[stealIdx].alSource);
             }
             m_voices[stealIdx].state = AX_VOICE_STATE_FREE;
             m_voices[stealIdx].active = 0;
@@ -202,7 +204,7 @@ s32 AxVoiceManager::allocVoice(u32 priority, u32 ownerId, void* userData) {
 //
 // Releases a voice back to the free pool.
 //
-// /* AX_SDK: AXFreeVoice() → alSourceStop() + alDeleteSources() */
+// /* AX_SDK: AXFreeVoice() → alSourceStop_stub() + alDeleteSources() */
 // ============================================================================
 bool AxVoiceManager::freeVoice(u32 voiceIndex) {
     if (!isValidVoice(voiceIndex)) {
@@ -212,9 +214,9 @@ bool AxVoiceManager::freeVoice(u32 voiceIndex) {
     AxVoiceDesc& voice = m_voices[voiceIndex];
 
     // Stop playback first
-    /* AX_SDK: AXStopVoice() → alSourceStop() */
+    /* AX_SDK: AXStopVoice() → alSourceStop_stub() */
     if (voice.alSource != 0) {
-        alSourceStop(voice.alSource);
+        alSourceStop_stub(voice.alSource);
     }
 
     voice.state = AX_VOICE_STATE_FREE;
@@ -380,7 +382,7 @@ bool AxVoiceManager::startVoice(u32 voiceIndex) {
 // stopVoice(voiceIndex)
 // @addr 0x8054DBC0 (652 bytes, 122 code lines)
 //
-// /* AX_SDK: AXStopVoice(voice) → alSourceStop(src) */
+// /* AX_SDK: AXStopVoice(voice) → alSourceStop_stub(src) */
 // ============================================================================
 bool AxVoiceManager::stopVoice(u32 voiceIndex) {
     if (!isValidVoice(voiceIndex)) return false;
@@ -389,8 +391,8 @@ bool AxVoiceManager::stopVoice(u32 voiceIndex) {
     voice.state = AX_VOICE_STATE_STOPPING;
 
     if (voice.alSource != 0) {
-        /* AX_SDK: AXStopVoice() → alSourceStop() */
-        alSourceStop(voice.alSource);
+        /* AX_SDK: AXStopVoice() → alSourceStop_stub() */
+        alSourceStop_stub(voice.alSource);
     }
 
     // Transition to stopped after one frame

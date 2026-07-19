@@ -41,8 +41,8 @@ static void vec3ArrayZero(EGG::Vector3f* arr, int count) {
 KartDynamicsKart::KartDynamicsKart() {
     0.0f; // to make 0.0f appear before 1.0f in rodata
     this->angVel0Factor = 1.0f;
-    this->inertiaTensor.identity();
-    this->invInertiaTensor.identity();
+    this->inertiaTensor.makeIdentity();
+    this->invInertiaTensor.makeIdentity();
     this->setDefault();
 }
 
@@ -214,7 +214,7 @@ void KartDynamics::calc(float dt, float maxSpeed, int air) {
         EGG::Quatf::quatMul(drot, this->mainRot, angVelQuat);
         this->mainRot += drot * dt * 0.5f;
 
-        if (__fabs(mainRot.squareNorm()) <= FLT_EPSILON) {
+        if (fabs(mainRot.squareNorm()) <= FLT_EPSILON) {
             this->mainRot.setIdentity();
         } else {
             this->mainRot.normalise();
@@ -224,7 +224,7 @@ void KartDynamics::calc(float dt, float maxSpeed, int air) {
     if (_forceUpright) {
         this->stabilize();
     }
-    if (__fabs(mainRot.squareNorm()) <= FLT_EPSILON) {
+    if (fabs(mainRot.squareNorm()) <= FLT_EPSILON) {
         this->mainRot.setIdentity();
     } else {
         this->mainRot.normalise();
@@ -503,7 +503,7 @@ void KartDynamics::calcTransformMatrix(EGG::Vector3f& out) {
     // Call vec3 zero on matrix columns
     // Copy 12 floats from stack to output
     EGG::Matrix34f mtx;
-    mtx.identity();
+    mtx.makeIdentity();
     mtx(0,3) = this->pos.x;
     mtx(1,3) = this->pos.y;
     mtx(2,3) = this->pos.z;
@@ -581,8 +581,8 @@ void KartDynamics::initAllFields() {
     //   - Physics scale values
     // Calls setDefault() and additional per-field inits
     this->setDefault();
-    this->inertiaTensor.identity();
-    this->invInertiaTensor.identity();
+    this->inertiaTensor.makeIdentity();
+    this->invInertiaTensor.makeIdentity();
 }
 
 // 0x805a4898 - calcAngularVelocity__Q212KartDynamicsFv

@@ -1,7 +1,7 @@
-#include "KartHitbox.hpp"
 #pragma once
-
 #include <rk_types.h>
+#include <game/kart/KartObjectProxy.hpp>  // For PlayerPointers
+#include "KartHitbox.hpp"
 
 #include <egg/math/eggVector.hpp>
 #include <egg/math/eggQuat.hpp>

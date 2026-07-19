@@ -3,6 +3,12 @@
 #include "rk_types.h"
 namespace Kart {
 class BSP {};
-class BspWheel {};
+class BspWheel {
+public:
+    f32 maxTravel;
+    f32 contactDist;
+    f32 wheelRadius;
+    u8 pad[0x2C];
+};
 // HitboxGroup defined in KartHitbox.hpp
 } // namespace Kart

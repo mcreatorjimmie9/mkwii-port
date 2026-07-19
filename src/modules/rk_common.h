@@ -21,6 +21,8 @@
 
 // Type aliases used by RaceConfig and other system headers
 namespace System {
+#ifndef __CHARACTER_ID_DEFINED__
+#define __CHARACTER_ID_DEFINED__
 enum CharacterId { CHARACTER_MARIO = 0, CHARACTER_LUIGI = 1, CHARACTER_PEACH = 2 };
 enum VehicleId { VEHICLE_STANDARD_KART = 0 };
 // BattleTeam defined in system/RaceConfig.hpp
@@ -41,7 +43,10 @@ class ElineControlManager;
 struct RawGhostFile {
     u8 _00[0x100];
 };
+#endif
 
+#ifndef __SYSTEM_TIME_DEFINED__
+#define __SYSTEM_TIME_DEFINED__
 struct Time {
     s16 minutes;
     s8 seconds;
@@ -49,5 +54,6 @@ struct Time {
     Time() : minutes(0), seconds(0), millis(0) {}
     void set2(u16 m, u8 s, u8 ms, bool b) { minutes = m; seconds = s; millis = ms; (void)b; }
 };
+#endif
 
 } // namespace System

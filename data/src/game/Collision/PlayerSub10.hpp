@@ -1,10 +1,10 @@
-class PlayerPointers;
 #pragma once
-
 #include <rk_types.h>
+#include <game/kart/KartObjectProxy.hpp>  // For PlayerPointers
+
+class PlayerPointers;
 
 #include <egg/math/eggVector.hpp>
-#include <game/kart/KartObjectProxy.hpp>
 
 namespace Kart {
 

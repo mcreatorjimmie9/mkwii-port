@@ -5,7 +5,7 @@
 #include "../KartMovement/KartState.hpp"
 #include "../KartMovement/KartMove.hpp"
 #include "../KartMovement/KartBody.hpp"
-#include "KartPhysicsEngine.hpp"
+#include <game/kart/KartPhysicsEngine.hpp>  // Cross-module include
 #include "KartWheel.hpp"
 #include "BSP.hpp"
 #include "RKGeom.hpp"

@@ -335,7 +335,7 @@ void SceneNode_PropagateColor(SceneNode* node, u8 newColor) {
         SceneNode* child = nullptr;
         u16 childCount = *reinterpret_cast<u16*>(reinterpret_cast<u8*>(node) + 0x04);
         if (childIdx < childCount) {
-            child = *reinterpret_cast<SceneNode**>(
+    node = child;
                 &reinterpret_cast<u8*>(node)[0x38])[childIdx];
         }
 

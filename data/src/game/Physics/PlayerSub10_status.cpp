@@ -336,11 +336,11 @@ void PlayerSub10::applyLightningEffect(s16 frames, u8 unk0, u8 unk1) {
         sub_setMegaScale(this, 0.0f);
 
         // Clear mega started flag
-        if (0 /* TODO: field_0x196 */ == 0) {
+        if (0 /* TODO: field_0x190 */ == 0) {
             // Trigger trick end (effect group)
             sub_getEffectGroup(this->trick);
             sub_getEffectGroup2(this->trick, 1); // deactivate
-            // TODO: field_0x196 = 1;
+            // TODO: field_0x190 = 1;
         }
 
         return; // r3 = 1
@@ -553,7 +553,7 @@ void PlayerSub10::activateMegaVirtual() {
     sub_setSound2(this, 0x1B, 1, 0);
 
     // Clear mega started flag
-    this->field_0x196 = 0;
+    this->field_0x190 = 0;
 }
 
 // ============================================================================
@@ -591,10 +591,10 @@ void PlayerSub10::startMega(u8 resetScale) {
     sub_setMegaScale(this, 0.0f);
 
     // Clear mega started flag
-    if (0 /* TODO: field_0x196 */ == 0) {
+    if (0 /* TODO: field_0x190 */ == 0) {
         sub_getEffectGroup(this->trick);
         sub_getEffectGroup2(this->trick, 1); // activate
-        // TODO: field_0x196 = 1;
+        // TODO: field_0x190 = 1;
     }
 
     // If resetScale: zero someScale
@@ -631,9 +631,9 @@ void PlayerSub10::updateMega() {
     if (timer > 0) {
         // Still active
         // Check if we should trigger the "almost done" effect
-        u8 megaStarted = 0 /* TODO: field_0x196 */;
+        u8 megaStarted = 0 /* TODO: field_0x190 */;
         if (megaStarted == 0 && timer <= 0x19) { // 25 frames before end
-            // TODO: field_0x196 = 1;
+            // TODO: field_0x190 = 1;
             sub_getEffectGroup(this->trick);
             sub_getEffectGroup2(this->trick, 1);
         }
@@ -665,10 +665,10 @@ void PlayerSub10::updateMega() {
     sub_setMegaScale(this, 1.0f);
 
     // Clear mega started flag
-    if (0 /* TODO: field_0x196 */ == 0) {
+    if (0 /* TODO: field_0x190 */ == 0) {
         sub_getEffectGroup(this->trick);
         sub_getEffectGroup2(this->trick, 1);
-        // TODO: field_0x196 = 1;
+        // TODO: field_0x190 = 1;
     }
 }
 
