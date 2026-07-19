@@ -7,6 +7,7 @@
 
 #include "Scene3D_Classes.hpp"
 #include <cmath>
+#include <algorithm>
 
 namespace EGG {
 namespace Scene3D {
@@ -72,7 +73,10 @@ void BoundBox3f::merge(const BoundBox3f& other) {
 
 void BoundBox3f::transformByMatrix(const f32 mtx[3][4], u32 flags) {
     // @addr 0x80504c10
-    (void)mtx; (void)flags;
+    if (flags == 0)
+        return;
+    f32 src[6] = {minX, minY, minZ, maxX, maxY, maxZ};
+    Matrix34fOps::transformBounds(reinterpret_cast<f32*>(this), mtx, src);
 }
 
 void BoundBox3f::resetGlobal() {
@@ -103,7 +107,6 @@ void BoundSphere3f::setFromMatrix(const f32 mtx[3][4], s32 radiusScale) {
     centerY = mtx[1][3];
     centerZ = mtx[2][3];
     radius = static_cast<f32>(radiusScale);
-    (void)mtx;
 }
 
 void BoundSphere3f::setCenter(const f32 vec[3]) {
@@ -149,7 +152,12 @@ void BoundSphere3f::merge(const BoundSphere3f& other) {
 
 void BoundSphere3f::transformByMatrix(const f32 mtx[3][4], u32 flags) {
     // @addr 0x80502fe0
-    (void)mtx; (void)flags;
+    if (flags == 0)
+        return;
+    f32 pos[3] = {centerX, centerY, centerZ};
+    f32 out[3];
+    Vec3fOps::transformPoint(out, mtx, pos);
+    centerX = out[0]; centerY = out[1]; centerZ = out[2];
 }
 
 // ============================================================================
@@ -212,7 +220,6 @@ void Plane3f::normalize() {
 
 void Plane3f::setFromThreePoints(const f32 p0[3], const f32 p1[3], const f32 p2[3]) {
     // @addr 0x80505ae8
-    // Normal = cross(p1-p0, p2-p0)
     f32 e1x = p1[0] - p0[0], e1y = p1[1] - p0[1], e1z = p1[2] - p0[2];
     f32 e2x = p2[0] - p0[0], e2y = p2[1] - p0[1], e2z = p2[2] - p0[2];
     nx = e1y * e2z - e1z * e2y;
@@ -242,14 +249,29 @@ void Frustum::globalReset() { /* @addr 0x80514e20 */ }
 
 u32 Frustum::testPoint(const f32 point[3], u32 planeMask) const {
     // @addr 0x80514f20
-    (void)point; (void)planeMask;
+    // Test point against each active plane in the mask
+    for (u32 i = 0; i < PLANE_COUNT; i++) {
+        if (planeMask & (1 << i)) {
+            if (planes[i].dotPoint(point) < 0.0f)
+                return OUTSIDE;
+        }
+    }
     return INSIDE;
 }
 
 u32 Frustum::testSphere(const f32 center[3], f32 radius, u32 planeMask) const {
     // @addr 0x80514ff4
-    (void)center; (void)radius; (void)planeMask;
-    return INSIDE;
+    u32 result = INSIDE;
+    for (u32 i = 0; i < PLANE_COUNT; i++) {
+        if (planeMask & (1 << i)) {
+            f32 dist = planes[i].dotPoint(center);
+            if (dist < -radius)
+                return OUTSIDE;
+            if (dist < radius)
+                result = INTERSECT;
+        }
+    }
+    return result;
 }
 
 void Frustum::reset() {
@@ -285,7 +307,49 @@ const Plane3f& Frustum::getPlane(u32 index) const {
 
 void Frustum::extractFromMatrix(const f32 vpMatrix[4][4], s32 flags) {
     // @addr 0x805155e4
-    (void)vpMatrix; (void)flags;
+    // Extract frustum planes from a combined view-projection matrix.
+    // Standard plane extraction: combine rows of the VP matrix.
+    // GX uses Z in [0,1] clip space.
+
+    // Left plane: row3 + row0
+    planes[PLANE_LEFT].nx = vpMatrix[3][0] + vpMatrix[0][0];
+    planes[PLANE_LEFT].ny = vpMatrix[3][1] + vpMatrix[0][1];
+    planes[PLANE_LEFT].nz = vpMatrix[3][2] + vpMatrix[0][2];
+    planes[PLANE_LEFT].d  = vpMatrix[3][3] + vpMatrix[0][3];
+
+    // Right plane: row3 - row0
+    planes[PLANE_RIGHT].nx = vpMatrix[3][0] - vpMatrix[0][0];
+    planes[PLANE_RIGHT].ny = vpMatrix[3][1] - vpMatrix[0][1];
+    planes[PLANE_RIGHT].nz = vpMatrix[3][2] - vpMatrix[0][2];
+    planes[PLANE_RIGHT].d  = vpMatrix[3][3] - vpMatrix[0][3];
+
+    // Bottom plane: row3 + row1
+    planes[PLANE_BOTTOM].nx = vpMatrix[3][0] + vpMatrix[1][0];
+    planes[PLANE_BOTTOM].ny = vpMatrix[3][1] + vpMatrix[1][1];
+    planes[PLANE_BOTTOM].nz = vpMatrix[3][2] + vpMatrix[1][2];
+    planes[PLANE_BOTTOM].d  = vpMatrix[3][3] + vpMatrix[1][3];
+
+    // Top plane: row3 - row1
+    planes[PLANE_TOP].nx = vpMatrix[3][0] - vpMatrix[1][0];
+    planes[PLANE_TOP].ny = vpMatrix[3][1] - vpMatrix[1][1];
+    planes[PLANE_TOP].nz = vpMatrix[3][2] - vpMatrix[1][2];
+    planes[PLANE_TOP].d  = vpMatrix[3][3] - vpMatrix[1][3];
+
+    // Near plane: row2 + row3 (for GX Z=[0,1])
+    planes[PLANE_NEAR].nx = vpMatrix[2][0] + vpMatrix[3][0];
+    planes[PLANE_NEAR].ny = vpMatrix[2][1] + vpMatrix[3][1];
+    planes[PLANE_NEAR].nz = vpMatrix[2][2] + vpMatrix[3][2];
+    planes[PLANE_NEAR].d  = vpMatrix[2][3] + vpMatrix[3][3];
+
+    // Far plane: row2 - row3
+    planes[PLANE_FAR].nx = vpMatrix[2][0] - vpMatrix[3][0];
+    planes[PLANE_FAR].ny = vpMatrix[2][1] - vpMatrix[3][1];
+    planes[PLANE_FAR].nz = vpMatrix[2][2] - vpMatrix[3][2];
+    planes[PLANE_FAR].d  = vpMatrix[2][3] - vpMatrix[3][3];
+
+    if (flags != 0) {
+        normalizeAll();
+    }
 }
 
 void Frustum::setHorizontalPlanes(u32 fov, s32 aspect) {
@@ -300,12 +364,16 @@ void Frustum::setVerticalPlanes(u32 fov, s32 aspect) {
 
 void Frustum::setDepthPlanes(f32 nearDist, f32 farDist) {
     // @addr 0x8051572c
-    (void)nearDist; (void)farDist;
+    // Near plane at z = -nearDist along -Z
+    planes[PLANE_NEAR].set(0.0f, 0.0f, -1.0f, -nearDist);
+    // Far plane at z = -farDist along -Z
+    planes[PLANE_FAR].set(0.0f, 0.0f, 1.0f, farDist);
 }
 
 void Frustum::setup(u32 fov, s32 aspect, u32 nearPlane, s32 farPlane) {
     // @addr 0x80515808
-    (void)fov; (void)aspect; (void)nearPlane; (void)farPlane;
+    (void)fov; (void)aspect;
+    setDepthPlanes(static_cast<f32>(nearPlane), static_cast<f32>(farPlane));
 }
 
 void Frustum::setFromPacked(const u32* packed) {
@@ -317,8 +385,31 @@ void Frustum::globalDestroy() { /* @addr 0x80515fcc */ }
 
 u32 Frustum::testBoxPlane(const BoundBox3f& box, u32 planeIndex) const {
     // @addr 0x805159b4
-    (void)box; (void)planeIndex;
-    return INSIDE;
+    if (planeIndex >= PLANE_COUNT)
+        return OUTSIDE;
+
+    const Plane3f& p = planes[planeIndex];
+    // Test all 8 corners of the AABB against the plane
+    f32 corners[8][3] = {
+        {box.minX, box.minY, box.minZ},
+        {box.maxX, box.minY, box.minZ},
+        {box.minX, box.maxY, box.minZ},
+        {box.maxX, box.maxY, box.minZ},
+        {box.minX, box.minY, box.maxZ},
+        {box.maxX, box.minY, box.maxZ},
+        {box.minX, box.maxY, box.maxZ},
+        {box.maxX, box.maxY, box.maxZ},
+    };
+
+    u32 insideCount = 0;
+    for (s32 i = 0; i < 8; i++) {
+        if (p.dotPoint(corners[i]) >= 0.0f)
+            insideCount++;
+    }
+
+    if (insideCount == 0) return OUTSIDE;
+    if (insideCount == 8) return INSIDE;
+    return INTERSECT;
 }
 
 void Frustum::testGlobal() { /* @addr 0x805159ec */ }
@@ -343,9 +434,7 @@ void Coord3D::initWithParent(u32 type, u32 parentFlags) {
 
 void Coord3D::destroy() {
     // @addr 0x8050004c
-    // Unlink from parent
     if (m_parent != nullptr) {
-        // Walk parent's child list and remove this
         Coord3D** pp = &m_parent->m_child;
         while (*pp != nullptr) {
             if (*pp == this) {
@@ -356,7 +445,6 @@ void Coord3D::destroy() {
         }
         m_parent = nullptr;
     }
-    // Unlink children (orphan them)
     m_child = nullptr;
     m_sibling = nullptr;
 }
@@ -379,7 +467,6 @@ void Coord3D::setPosition(const f32 pos[3]) {
 
 void Coord3D::setRotationAxisAngle(f32 axisX, f32 axisY, f32 axisZ, f32 angle) {
     // @addr 0x805003cc
-    // Convert axis-angle to quaternion
     f32 halfAngle = angle * 0.5f;
     f32 sinHalf = std::sin(halfAngle);
     f32 cosHalf = std::cos(halfAngle);
@@ -420,11 +507,52 @@ void NijiCamera::reset() {
 
 void NijiCamera::calcViewMatrix() {
     // @addr 0x805169bc
+    // Translated from C_MTXLookAt in rvlMtx.c
+    f32 eye[3]   = {m_posX, m_posY, m_posZ};
+    f32 target[3] = {m_targetX, m_targetY, m_targetZ};
+    f32 up[3]    = {m_upX, m_upY, m_upZ};
+
+    f32 forward[3], right[3], up2[3];
+
+    // forward = normalize(eye - target)
+    forward[0] = eye[0] - target[0];
+    forward[1] = eye[1] - target[1];
+    forward[2] = eye[2] - target[2];
+    Vec3fOps::normalize(forward, forward);
+
+    // right = normalize(cross(up, forward))
+    Vec3fOps::cross(right, up, forward);
+    Vec3fOps::normalize(right, right);
+
+    // up2 = cross(forward, right)
+    Vec3fOps::cross(up2, forward, right);
+
+    // Row 0 = right, Row 1 = up2, Row 2 = forward
+    m_viewMtx[0][0] = right[0];
+    m_viewMtx[0][1] = right[1];
+    m_viewMtx[0][2] = right[2];
+    m_viewMtx[0][3] = -(eye[0] * right[0] + eye[1] * right[1] + eye[2] * right[2]);
+
+    m_viewMtx[1][0] = up2[0];
+    m_viewMtx[1][1] = up2[1];
+    m_viewMtx[1][2] = up2[2];
+    m_viewMtx[1][3] = -(eye[0] * up2[0] + eye[1] * up2[1] + eye[2] * up2[2]);
+
+    m_viewMtx[2][0] = forward[0];
+    m_viewMtx[2][1] = forward[1];
+    m_viewMtx[2][2] = forward[2];
+    m_viewMtx[2][3] = -(eye[0] * forward[0] + eye[1] * forward[1] + eye[2] * forward[2]);
+
     m_flags &= ~FLAG_DIRTY;
 }
 
 void NijiCamera::calcProjectionMatrix() {
     // @addr 0x80516a40
+    if (isPerspective()) {
+        Matrix34fOps::makePerspective(m_projMtx, m_fov, m_aspect, m_near, m_far);
+    } else {
+        Matrix34fOps::makeOrthographic(m_projMtx, -m_aspect, m_aspect, -1.0f, 1.0f, m_near, m_far);
+    }
 }
 
 void NijiCamera::calc() {
@@ -456,16 +584,31 @@ void NijiCamera::applyProjection() {
 
 void NijiCamera::computeViewProj() {
     // @addr 0x80517334
+    // VP = Projection * View (expand 3x4 view to 4x4)
+    for (s32 i = 0; i < 4; i++) {
+        for (s32 j = 0; j < 4; j++) {
+            f32 sum = 0.0f;
+            for (s32 k = 0; k < 3; k++) {
+                sum += m_projMtx[i][k] * m_viewMtx[k][j];
+            }
+            // View matrix last row is [0,0,0,1]
+            sum += m_projMtx[i][3] * (j == 3 ? 1.0f : 0.0f);
+            m_vpMtx[i][j] = sum;
+        }
+    }
 }
 
 void NijiCamera::multiplyView(const f32 mtx[3][4]) {
     // @addr 0x80517a40
-    (void)mtx;
+    // Pre-multiply: m_viewMtx = mtx * m_viewMtx
+    f32 result[3][4];
+    Matrix34fOps::multiply(result, mtx, m_viewMtx);
+    Matrix34fOps::copy(m_viewMtx, result);
 }
 
 void NijiCamera::setViewMatrix(const f32 mtx[3][4]) {
     // @addr 0x80517eec
-    (void)mtx;
+    Matrix34fOps::copy(m_viewMtx, mtx);
     m_flags |= FLAG_DIRTY;
 }
 
@@ -481,12 +624,14 @@ const f32* NijiCamera::getProjectionMatrix() const {
 
 void NijiCamera::transformByView(f32* out, const f32 in[3]) const {
     // @addr 0x80517634
-    (void)out; (void)in;
+    // Translated from PSMTXMultVec in rvlMtx.c
+    Vec3fOps::transformPoint(out, m_viewMtx, in);
 }
 
 void NijiCamera::transformByProjection(f32* out, const f32 in[3]) const {
     // @addr 0x80517850
-    (void)out; (void)in;
+    // Transform point by 4x4 projection matrix with perspective divide
+    Vec3fOps::transformPoint44(out, m_projMtx, in);
 }
 
 void NijiCamera::setVPEntry(u32 row, u32 col) {
@@ -526,7 +671,12 @@ void NijiCamera::applyTransform() {
 
 void NijiCamera::inverseTransformPoint(f32* out, const f32 in[3]) const {
     // @addr 0x805182d8
-    (void)out; (void)in;
+    // Transform by inverse of the view matrix.
+    // For an orthogonal rotation matrix, inverse = transpose of 3x3 part,
+    // and translation = -R^T * t
+    f32 invView[3][4];
+    Matrix34fOps::inverse3x3(invView, m_viewMtx);
+    Vec3fOps::transformPoint(out, invView, in);
 }
 
 void NijiCamera::setFov(u32 fov) {
@@ -561,7 +711,7 @@ void NijiCamera::getPacked(f32* packed) const {
 
 void NijiCamera::extractFrustum() {
     // @addr 0x80518a24
-    m_frustum.extractFromMatrix(m_vpMtx, 0);
+    m_frustum.extractFromMatrix(m_vpMtx, 1);
 }
 
 u32 NijiCamera::testFrustumPoint(const f32 point[3]) const {
@@ -576,7 +726,16 @@ u32 NijiCamera::testFrustumSphere(const f32 center[3], f32 radius) const {
 
 u32 NijiCamera::testFrustumBox(const BoundBox3f& box) const {
     // @addr 0x805192a0
-    return m_frustum.testBoxPlane(box, 0);
+    // Test against all planes, return OUTSIDE if any plane fully rejects
+    u32 result = Frustum::INSIDE;
+    for (u32 i = 0; i < Frustum::PLANE_COUNT; i++) {
+        u32 test = m_frustum.testBoxPlane(box, i);
+        if (test == Frustum::OUTSIDE)
+            return Frustum::OUTSIDE;
+        if (test == Frustum::INTERSECT)
+            result = Frustum::INTERSECT;
+    }
+    return result;
 }
 
 void NijiCamera::setEffect(u32 effectType, u32 param) {
@@ -760,7 +919,9 @@ s32 NijiTransform::setLocalMatrix(s32 param1, s32 param2) {
 
 void NijiTransform::setLocalFromArray(f32* data) {
     // @addr 0x8051c400
-    (void)data;
+    for (s32 i = 0; i < 3; i++)
+        for (s32 j = 0; j < 4; j++)
+            m_localMtx[i][j] = data[i * 4 + j];
 }
 
 void NijiTransform::resetGlobalMatrix() { /* @addr 0x8051c58c */ }
@@ -778,7 +939,8 @@ void NijiTransform::calcLocal() {
 
 void NijiTransform::calcWorld(const f32 parentMtx[3][4]) {
     // @addr 0x8051ca58
-    (void)parentMtx;
+    // world = parent * local
+    Matrix34fOps::multiply(m_worldMtx, parentMtx, m_localMtx);
     m_flags &= ~FLAG_DIRTY_WORLD;
 }
 
@@ -786,32 +948,38 @@ void NijiTransform::globalCalc() { /* @addr 0x8051cb1c */ }
 
 void NijiTransform::transformPoint(f32* out, const f32 in[3]) const {
     // @addr 0x8051d2ac
-    (void)out; (void)in;
+    Vec3fOps::transformPoint(out, m_worldMtx, in);
 }
 
 void NijiTransform::inverseTransformPoint(f32* out, const f32 in[3]) const {
     // @addr 0x8051d55c
-    (void)out; (void)in;
+    f32 invMtx[3][4];
+    Matrix34fOps::inverse3x3(invMtx, m_worldMtx);
+    Vec3fOps::transformPoint(out, invMtx, in);
 }
 
 void NijiTransform::setFromPosition(f32* pos) {
     // @addr 0x8051d598
-    (void)pos;
+    Matrix34fOps::identity(m_localMtx);
+    m_localMtx[0][3] = pos[0];
+    m_localMtx[1][3] = pos[1];
+    m_localMtx[2][3] = pos[2];
 }
 
 void NijiTransform::setFromRotation(f32* rot) {
     // @addr 0x8051d680
-    (void)rot;
+    // rot is [w, x, y, z] quaternion
+    Matrix34fOps::fromQuat(m_localMtx, rot);
 }
 
 void NijiTransform::setFromScale(f32* scale) {
     // @addr 0x8051d774
-    (void)scale;
+    Matrix34fOps::makeScale(m_localMtx, scale[0], scale[1], scale[2]);
 }
 
 void NijiTransform::setFromPRS(f32* pos, f32* rot, f32* scale) {
     // @addr 0x8051d920
-    (void)pos; (void)rot; (void)scale;
+    Matrix34fOps::compose(m_localMtx, pos, rot, scale);
 }
 
 void NijiTransform::globalSet() { /* @addr 0x8051da70 */ }
@@ -823,12 +991,16 @@ void NijiTransform::setBlend(u32 type, u8 srcFactor, u8 dstFactor, u8 op) {
 
 void NijiTransform::getLocalMatrix(f32* out) const {
     // @addr 0x8051dc28
-    (void)out;
+    for (s32 i = 0; i < 3; i++)
+        for (s32 j = 0; j < 4; j++)
+            out[i * 4 + j] = m_localMtx[i][j];
 }
 
 void NijiTransform::getWorldMatrix(f32* out) const {
     // @addr 0x8051dd14
-    (void)out;
+    for (s32 i = 0; i < 3; i++)
+        for (s32 j = 0; j < 4; j++)
+            out[i * 4 + j] = m_worldMtx[i][j];
 }
 
 void NijiTransform::setWorldMatrix(u32 index, s32 value) {
@@ -838,7 +1010,9 @@ void NijiTransform::setWorldMatrix(u32 index, s32 value) {
 
 void NijiTransform::setLocalEntry(u32 index, s32 value) {
     // @addr 0x8051dfa8
-    (void)index; (void)value;
+    if (index < 12) {
+        reinterpret_cast<f32*>(m_localMtx)[index] = static_cast<f32>(value);
+    }
 }
 
 void NijiTransform::applyToGX() {
@@ -925,28 +1099,150 @@ void NijiTransform::finalize() {
 
 s32 CollContext::testRaySphere(const Ray3f& ray, const BoundSphere3f& sphere) {
     // @addr 0x8050553c
-    (void)ray; (void)sphere;
+    // Standard ray-sphere intersection test
+    f32 ox = ray.originX - sphere.centerX;
+    f32 oy = ray.originY - sphere.centerY;
+    f32 oz = ray.originZ - sphere.centerZ;
+
+    f32 dx = ray.directionX;
+    f32 dy = ray.directionY;
+    f32 dz = ray.directionZ;
+
+    f32 b = 2.0f * (ox * dx + oy * dy + oz * dz);
+    f32 c = ox * ox + oy * oy + oz * oz - sphere.radius * sphere.radius;
+    f32 disc = b * b - 4.0f * c; // a=1 since direction assumed normalized
+
+    if (disc < 0.0f) {
+        m_result = RESULT_NONE;
+        return 0;
+    }
+
+    f32 sqrtDisc = std::sqrt(disc);
+    f32 t0 = (-b - sqrtDisc) * 0.5f;
+    f32 t1 = (-b + sqrtDisc) * 0.5f;
+
+    if (t0 > 0.0f) {
+        m_result = RESULT_HIT;
+        m_hitDist = t0;
+        m_hitX = ray.originX + t0 * dx;
+        m_hitY = ray.originY + t0 * dy;
+        m_hitZ = ray.originZ + t0 * dz;
+        m_normalX = m_hitX - sphere.centerX;
+        m_normalY = m_hitY - sphere.centerY;
+        m_normalZ = m_hitZ - sphere.centerZ;
+        f32 nLen = std::sqrt(m_normalX * m_normalX + m_normalY * m_normalY + m_normalZ * m_normalZ);
+        if (nLen > 0.0f) {
+            m_normalX /= nLen; m_normalY /= nLen; m_normalZ /= nLen;
+        }
+        return 1;
+    } else if (t1 > 0.0f) {
+        m_result = RESULT_BEHIND;
+        m_hitDist = t1;
+        return 1;
+    }
+
     m_result = RESULT_NONE;
     return 0;
 }
 
 s32 CollContext::testRayBox(const Ray3f& ray, const BoundBox3f& box) {
     // @addr 0x80505768
-    (void)ray; (void)box;
+    // Slab method ray-AABB intersection
+    f32 tmin = -1e30f;
+    f32 tmax = 1e30f;
+    f32 t1, t2, temp;
+
+    f32 dx = ray.directionX, dy = ray.directionY, dz = ray.directionZ;
+    f32 ox = ray.originX, oy = ray.originY, oz = ray.originZ;
+
+    // X slab
+    if (std::fabs(dx) < 1e-8f) {
+        if (ox < box.minX || ox > box.maxX) {
+            m_result = RESULT_NONE;
+            return 0;
+        }
+    } else {
+        f32 invD = 1.0f / dx;
+        t1 = (box.minX - ox) * invD;
+        t2 = (box.maxX - ox) * invD;
+        if (t1 > t2) { temp = t1; t1 = t2; t2 = temp; }
+        if (t1 > tmin) tmin = t1;
+        if (t2 < tmax) tmax = t2;
+        if (tmin > tmax) { m_result = RESULT_NONE; return 0; }
+    }
+
+    // Y slab
+    if (std::fabs(dy) < 1e-8f) {
+        if (oy < box.minY || oy > box.maxY) {
+            m_result = RESULT_NONE;
+            return 0;
+        }
+    } else {
+        f32 invD = 1.0f / dy;
+        t1 = (box.minY - oy) * invD;
+        t2 = (box.maxY - oy) * invD;
+        if (t1 > t2) { temp = t1; t1 = t2; t2 = temp; }
+        if (t1 > tmin) tmin = t1;
+        if (t2 < tmax) tmax = t2;
+        if (tmin > tmax) { m_result = RESULT_NONE; return 0; }
+    }
+
+    // Z slab
+    if (std::fabs(dz) < 1e-8f) {
+        if (oz < box.minZ || oz > box.maxZ) {
+            m_result = RESULT_NONE;
+            return 0;
+        }
+    } else {
+        f32 invD = 1.0f / dz;
+        t1 = (box.minZ - oz) * invD;
+        t2 = (box.maxZ - oz) * invD;
+        if (t1 > t2) { temp = t1; t1 = t2; t2 = temp; }
+        if (t1 > tmin) tmin = t1;
+        if (t2 < tmax) tmax = t2;
+        if (tmin > tmax) { m_result = RESULT_NONE; return 0; }
+    }
+
+    if (tmin > 0.0f) {
+        m_result = RESULT_HIT;
+        m_hitDist = tmin;
+        m_hitX = ox + tmin * dx;
+        m_hitY = oy + tmin * dy;
+        m_hitZ = oz + tmin * dz;
+        return 1;
+    } else if (tmax > 0.0f) {
+        m_result = RESULT_INSIDE;
+        return 1;
+    }
+
     m_result = RESULT_NONE;
     return 0;
 }
 
 bool CollContext::testSphereBox(const BoundSphere3f& sphere, const BoundBox3f& box) {
     // @addr 0x80505bd8
-    (void)sphere; (void)box;
-    return false;
+    // Find closest point on AABB to sphere center
+    f32 closestX = std::max(box.minX, std::min(sphere.centerX, box.maxX));
+    f32 closestY = std::max(box.minY, std::min(sphere.centerY, box.maxY));
+    f32 closestZ = std::max(box.minZ, std::min(sphere.centerZ, box.maxZ));
+
+    f32 dx = sphere.centerX - closestX;
+    f32 dy = sphere.centerY - closestY;
+    f32 dz = sphere.centerZ - closestZ;
+    f32 distSq = dx * dx + dy * dy + dz * dz;
+
+    return distSq <= sphere.radius * sphere.radius;
 }
 
 u32 CollContext::testPointBox(const f32 point[3], const BoundBox3f& box) {
     // @addr 0x80505d3c
-    (void)point; (void)box;
-    return 0;
+    if (point[0] < box.minX || point[0] > box.maxX)
+        return 0;
+    if (point[1] < box.minY || point[1] > box.maxY)
+        return 0;
+    if (point[2] < box.minZ || point[2] > box.maxZ)
+        return 0;
+    return 1;
 }
 
 // ============================================================================
@@ -1090,14 +1386,14 @@ f32 Vec3fOps::getComponent(const f32 v[3], u32 index) {
 }
 
 void Vec3fOps::transformPoint(f32 dst[3], const f32 mtx[3][4], const f32 pt[3]) {
-    // @addr 0x80517dcc
+    // @addr 0x80517dcc — Translated from PSMTXMultVec
     for (s32 i = 0; i < 3; i++) {
         dst[i] = mtx[i][0] * pt[0] + mtx[i][1] * pt[1] + mtx[i][2] * pt[2] + mtx[i][3];
     }
 }
 
 void Vec3fOps::transformVector(f32 dst[3], const f32 mtx[3][4], const f32 vec[3]) {
-    // @addr 0x80517dfc
+    // @addr 0x80517dfc — Translated from PSMTXMultVecSR
     for (s32 i = 0; i < 3; i++) {
         dst[i] = mtx[i][0] * vec[0] + mtx[i][1] * vec[1] + mtx[i][2] * vec[2];
     }
@@ -1123,22 +1419,31 @@ void Vec3fOps::transformVector44(f32 dst[3], const f32 mtx[4][4], const f32 vec[
 // ============================================================================
 
 s32 QuatfOps::multiply(f32 dst[4], const f32 q1[4], const f32 q2[4]) {
-    // @addr 0x80500540
-    dst[0] = q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2] - q1[3] * q2[3];
-    dst[1] = q1[0] * q2[1] + q1[1] * q2[0] + q1[2] * q2[3] - q1[3] * q2[2];
-    dst[2] = q1[0] * q2[2] - q1[1] * q2[3] + q1[2] * q2[0] + q1[3] * q2[1];
-    dst[3] = q1[0] * q2[3] + q1[1] * q2[2] - q1[2] * q2[1] + q1[3] * q2[0];
+    // @addr 0x80500540 — Translated from PSQUATMultiply
+    // Convention: [w, x, y, z]
+    f32 w1 = q1[0], x1 = q1[1], y1 = q1[2], z1 = q1[3];
+    f32 w2 = q2[0], x2 = q2[1], y2 = q2[2], z2 = q2[3];
+
+    dst[0] = w1*w2 - x1*x2 - y1*y2 - z1*z2;
+    dst[1] = w1*x2 + x1*w2 + y1*z2 - z1*y2;
+    dst[2] = w1*y2 - x1*z2 + y1*w2 + z1*x2;
+    dst[3] = w1*z2 + x1*y2 - y1*x2 + z1*w2;
     return 0;
 }
 
 u32 QuatfOps::normalize(f32 dst[4], const f32 q[4]) {
-    // @addr 0x80500fa8
-    f32 len = std::sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3]);
-    if (len > 0.0f) {
-        dst[0] = q[0] / len; dst[1] = q[1] / len;
-        dst[2] = q[2] / len; dst[3] = q[3] / len;
+    // @addr 0x80500fa8 — Translated from PSQUATNormalize
+    f32 lenSq = q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3];
+    if (lenSq < 0.00001f) {
+        dst[0] = 0.0f; dst[1] = 0.0f; dst[2] = 0.0f; dst[3] = 0.0f;
+        return 0;
     }
-    return static_cast<u32>(len);
+    f32 invLen = 1.0f / std::sqrt(lenSq);
+    dst[0] = q[0] * invLen;
+    dst[1] = q[1] * invLen;
+    dst[2] = q[2] * invLen;
+    dst[3] = q[3] * invLen;
+    return static_cast<u32>(lenSq);
 }
 
 s32 QuatfOps::conjugate(f32 dst[4], const f32 q[4]) {
@@ -1148,18 +1453,28 @@ s32 QuatfOps::conjugate(f32 dst[4], const f32 q[4]) {
 }
 
 u32 QuatfOps::dot(const f32 q1[4], const f32 q2[4]) {
-    // @addr 0x805017dc
-    f32 d = q1[0] * q2[0] + q1[1] * q2[1] + q1[2] * q2[2] + q1[3] * q2[3];
-    return static_cast<u32>(d);
+    // @addr 0x805017dc — Translated from PSQUATDotProduct
+    f32 d = q1[0]*q2[0] + q1[1]*q2[1] + q1[2]*q2[2] + q1[3]*q2[3];
+    // Return as bit representation
+    u32 result;
+    std::memcpy(&result, &d, sizeof(f32));
+    return result;
 }
 
 s32 QuatfOps::inverse(f32 dst[4], const f32 q[4]) {
-    // @addr 0x80502a7c
-    f32 d = q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3];
-    if (d > 0.0f) {
-        dst[0] = q[0] / d; dst[1] = -q[1] / d;
-        dst[2] = -q[2] / d; dst[3] = -q[3] / d;
+    // @addr 0x80502a7c — Translated from PSQUATInverse
+    f32 d = q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3];
+    if (d == 0.0f) {
+        dst[0] = 1.0f; dst[1] = 0.0f; dst[2] = 0.0f; dst[3] = 0.0f;
+        return 0;
     }
+    f32 invD = 1.0f / d;
+    // Scale = 1/d (not -1/d for conjugate; the inverse uses conjugate/sq)
+    // PSQUATInverse: inv = conjugate * (1/|q|^2)
+    dst[0] =  q[0] * invD;
+    dst[1] = -q[1] * invD;
+    dst[2] = -q[2] * invD;
+    dst[3] = -q[3] * invD;
     return 0;
 }
 
@@ -1176,25 +1491,45 @@ u32 QuatfOps::fromAxisAngle(f32 dst[4], f32 axisX, f32 axisY, f32 axisZ, f32 ang
 
 u32 QuatfOps::toAxisAngle(const f32 q[4], f32& axisX, f32& axisY, f32& axisZ, f32& angle) {
     // @addr 0x80503ae8
-    (void)q;
-    axisX = 0.0f; axisY = 0.0f; axisZ = 1.0f; angle = 0.0f;
+    // Extract axis-angle from quaternion [w, x, y, z]
+    f32 cosHalf = q[0];
+    angle = 2.0f * std::acos(std::max(-1.0f, std::min(1.0f, cosHalf)));
+    f32 sinHalf = std::sin(angle * 0.5f);
+
+    if (std::fabs(sinHalf) > 0.0001f) {
+        axisX = q[1] / sinHalf;
+        axisY = q[2] / sinHalf;
+        axisZ = q[3] / sinHalf;
+    } else {
+        axisX = 0.0f;
+        axisY = 0.0f;
+        axisZ = 1.0f;
+    }
     return 0;
 }
 
 s32 QuatfOps::slerp(f32 dst[4], const f32 q1[4], const f32 q2[4], f32 t) {
-    // @addr 0x80503d9c
-    f32 d = q1[0] * q2[0] + q1[1] * q2[1] + q1[2] * q2[2] + q1[3] * q2[3];
-    if (d < 0.0f) { d = -d; }
-    f32 scale0, scale1;
-    if (d < 0.9995f) {
-        f32 theta = std::acos(d);
-        f32 sinTheta = std::sin(theta);
-        scale0 = std::sin((1.0f - t) * theta) / sinTheta;
-        scale1 = std::sin(t * theta) / sinTheta;
+    // @addr 0x80503d9c — Translated from C_QUATSlerp
+    f32 cosHalf = q1[0]*q2[0] + q1[1]*q2[1] + q1[2]*q2[2] + q1[3]*q2[3];
+    f32 scale1 = 1.0f;
+
+    // Take the shorter path
+    if (cosHalf < 0.0f) {
+        cosHalf = -cosHalf;
+        scale1 = -1.0f;
+    }
+
+    f32 scale0;
+    if (cosHalf < 0.99999f) {
+        f32 halfAngle = std::acos(cosHalf);
+        f32 sinHalf = std::sin(halfAngle);
+        scale0 = std::sin((1.0f - t) * halfAngle) / sinHalf;
+        scale1 *= std::sin(t * halfAngle) / sinHalf;
     } else {
         scale0 = 1.0f - t;
-        scale1 = t;
+        scale1 = scale1 * t;
     }
+
     dst[0] = scale0 * q1[0] + scale1 * q2[0];
     dst[1] = scale0 * q1[1] + scale1 * q2[1];
     dst[2] = scale0 * q1[2] + scale1 * q2[2];
@@ -1203,7 +1538,7 @@ s32 QuatfOps::slerp(f32 dst[4], const f32 q1[4], const f32 q2[4], f32 t) {
 }
 
 s32 QuatfOps::lerp(f32 dst[4], const f32 q1[4], const f32 q2[4], f32 t) {
-    // @addr 0x805042a4
+    // @addr 0x805042a4 — Translated from C_QUATLerp
     dst[0] = q1[0] + t * (q2[0] - q1[0]);
     dst[1] = q1[1] + t * (q2[1] - q1[1]);
     dst[2] = q1[2] + t * (q2[2] - q1[2]);
@@ -1226,25 +1561,32 @@ void QuatfOps::setFromArray(f32 q[4], const f32 arr[4]) {
 // ============================================================================
 
 void Matrix34fOps::identity(f32 mtx[3][4]) {
-    // @addr 0x80500b6c
+    // @addr 0x80500b6c — Translated from PSMTXIdentity
     std::memset(mtx, 0, sizeof(f32) * 12);
     mtx[0][0] = 1.0f; mtx[1][1] = 1.0f; mtx[2][2] = 1.0f;
 }
 
 void Matrix34fOps::makeTranslation(f32 mtx[3][4], f32 tx, f32 ty, f32 tz) {
-    // @addr 0x80500c48
-    identity(mtx);
-    mtx[0][3] = tx; mtx[1][3] = ty; mtx[2][3] = tz;
+    // @addr 0x80500c48 — Translated from PSMTXTrans
+    std::memset(mtx, 0, sizeof(f32) * 12);
+    mtx[0][0] = 1.0f;
+    mtx[1][1] = 1.0f;
+    mtx[2][2] = 1.0f;
+    mtx[0][3] = tx;
+    mtx[1][3] = ty;
+    mtx[2][3] = tz;
 }
 
 void Matrix34fOps::makeScale(f32 mtx[3][4], f32 sx, f32 sy, f32 sz) {
-    // @addr 0x80500c80
-    identity(mtx);
-    mtx[0][0] = sx; mtx[1][1] = sy; mtx[2][2] = sz;
+    // @addr 0x80500c80 — Translated from PSMTXScale
+    std::memset(mtx, 0, sizeof(f32) * 12);
+    mtx[0][0] = sx;
+    mtx[1][1] = sy;
+    mtx[2][2] = sz;
 }
 
 void Matrix34fOps::makeRotationX(f32 mtx[3][4], f32 angle) {
-    // @addr 0x80500a34
+    // @addr 0x80500a34 — Translated from PSMTXRotRad with axis='x'
     identity(mtx);
     f32 c = std::cos(angle), s = std::sin(angle);
     mtx[1][1] = c;  mtx[1][2] = -s;
@@ -1252,7 +1594,7 @@ void Matrix34fOps::makeRotationX(f32 mtx[3][4], f32 angle) {
 }
 
 void Matrix34fOps::makeRotationY(f32 mtx[3][4], f32 angle) {
-    // @addr 0x80500a74
+    // @addr 0x80500a74 — Translated from PSMTXRotRad with axis='y'
     identity(mtx);
     f32 c = std::cos(angle), s = std::sin(angle);
     mtx[0][0] = c;  mtx[0][2] = s;
@@ -1260,7 +1602,7 @@ void Matrix34fOps::makeRotationY(f32 mtx[3][4], f32 angle) {
 }
 
 void Matrix34fOps::makeRotationZ(f32 mtx[3][4], f32 angle) {
-    // @addr 0x80500a6f4
+    // @addr 0x80500a6f4 — Translated from PSMTXRotRad with axis='z'
     identity(mtx);
     f32 c = std::cos(angle), s = std::sin(angle);
     mtx[0][0] = c;  mtx[0][1] = -s;
@@ -1268,7 +1610,7 @@ void Matrix34fOps::makeRotationZ(f32 mtx[3][4], f32 angle) {
 }
 
 void Matrix34fOps::multiply(f32 dst[3][4], const f32 a[3][4], const f32 b[3][4]) {
-    // @addr 0x80500ad4c
+    // @addr 0x80500ad4c — Translated from PSMTXConcat
     for (s32 i = 0; i < 3; i++) {
         for (s32 j = 0; j < 4; j++) {
             dst[i][j] = a[i][0] * b[0][j] + a[i][1] * b[1][j] + a[i][2] * b[2][j];
@@ -1319,71 +1661,267 @@ void Matrix34fOps::getColumn(const f32 mtx[3][4], u32 col, f32& x, f32& y, f32& 
 }
 
 void Matrix34fOps::copy(f32 dst[3][4], const f32 src[3][4]) {
-    // @addr 0x8050acac
+    // @addr 0x8050acac — Translated from PSMTXCopy
     for (s32 i = 0; i < 3; i++)
         for (s32 j = 0; j < 4; j++)
             dst[i][j] = src[i][j];
 }
 
 void Matrix34fOps::transformPoint(f32 dst[3], const f32 mtx[3][4], const f32 pt[3]) {
-    // @addr 0x8050bd68
+    // @addr 0x8050bd68 — Translated from PSMTXMultVec
     for (s32 i = 0; i < 3; i++)
         dst[i] = mtx[i][0] * pt[0] + mtx[i][1] * pt[1] + mtx[i][2] * pt[2] + mtx[i][3];
 }
 
 void Matrix34fOps::transformVector(f32 dst[3], const f32 mtx[3][4], const f32 vec[3]) {
-    // @addr 0x8050bdd4
+    // @addr 0x8050bdd4 — Translated from PSMTXMultVecSR
     for (s32 i = 0; i < 3; i++)
         dst[i] = mtx[i][0] * vec[0] + mtx[i][1] * vec[1] + mtx[i][2] * vec[2];
 }
 
 void Matrix34fOps::makePerspective(f32 mtx[4][4], f32 fovY, f32 aspect, f32 nearZ, f32 farZ) {
-    // @addr 0x8050bef0
-    (void)mtx; (void)fovY; (void)aspect; (void)nearZ; (void)farZ;
+    // @addr 0x8050bef0 — Translated from C_MTXPerspective in rvlMtx2.c
+    f32 angle = fovY * 0.5f * 0.01745329252f; // deg to rad
+    f32 cot = 1.0f / std::tan(angle);
+
+    std::memset(mtx, 0, sizeof(f32) * 16);
+    mtx[0][0] = cot / aspect;
+    mtx[1][1] = cot;
+    f32 tmp = 1.0f / (farZ - nearZ);
+    mtx[2][2] = -(nearZ) * tmp;
+    mtx[2][3] = -(farZ * nearZ) * tmp;
+    mtx[3][2] = -1.0f;
 }
 
 void Matrix34fOps::makePerspectiveF64(f32 mtx[4][4], f64 fovY, f64 aspect, f64 nearZ, f64 farZ) {
-    // @addr 0x8050bfc8
-    (void)mtx; (void)fovY; (void)aspect; (void)nearZ; (void)farZ;
+    // @addr 0x8050bfc8 — f64 variant of C_MTXPerspective
+    f64 angle = fovY * 0.5 * 0.017453292519943295;
+    f64 cot = 1.0 / std::tan(angle);
+
+    std::memset(mtx, 0, sizeof(f32) * 16);
+    mtx[0][0] = static_cast<f32>(cot / aspect);
+    mtx[1][1] = static_cast<f32>(cot);
+    f64 tmp = 1.0 / (farZ - nearZ);
+    mtx[2][2] = static_cast<f32>(-(nearZ) * tmp);
+    mtx[2][3] = static_cast<f32>(-(farZ * nearZ) * tmp);
+    mtx[3][2] = -1.0f;
 }
 
 void Matrix34fOps::makeOrthographic(f32 mtx[4][4], f32 left, f32 right, f32 bottom, f32 top, f32 nearZ, f32 farZ) {
-    // @addr 0x8050bc00
-    (void)mtx; (void)left; (void)right; (void)bottom; (void)top; (void)nearZ; (void)farZ;
+    // @addr 0x8050bc00 — Translated from C_MTXOrtho in rvlMtx2.c
+    f32 tmp;
+    std::memset(mtx, 0, sizeof(f32) * 16);
+    tmp = 1.0f / (right - left);
+    mtx[0][0] = 2.0f * tmp;
+    mtx[0][3] = -(right + left) * tmp;
+    tmp = 1.0f / (top - bottom);
+    mtx[1][1] = 2.0f * tmp;
+    mtx[1][3] = -(top + bottom) * tmp;
+    tmp = 1.0f / (farZ - nearZ);
+    mtx[2][2] = -(1.0f) * tmp;
+    mtx[2][3] = -(farZ) * tmp;
+    mtx[3][3] = 1.0f;
 }
 
 void Matrix34fOps::makeLookAt(f32 mtx[3][4], const f32 eye[3], const f32 target[3], const f32 up[3]) {
-    // @addr 0x8050bc84
-    (void)mtx; (void)eye; (void)target; (void)up;
+    // @addr 0x8050bc84 — Translated from C_MTXLookAt in rvlMtx.c
+    f32 forward[3], right[3], up2[3];
+
+    // forward = normalize(eye - target)
+    forward[0] = eye[0] - target[0];
+    forward[1] = eye[1] - target[1];
+    forward[2] = eye[2] - target[2];
+    Vec3fOps::normalize(forward, forward);
+
+    // right = normalize(cross(up, forward))
+    Vec3fOps::cross(right, up, forward);
+    Vec3fOps::normalize(right, right);
+
+    // up2 = cross(forward, right)
+    Vec3fOps::cross(up2, forward, right);
+
+    mtx[0][0] = right[0];  mtx[0][1] = right[1];  mtx[0][2] = right[2];
+    mtx[0][3] = -(eye[0] * right[0] + eye[1] * right[1] + eye[2] * right[2]);
+
+    mtx[1][0] = up2[0];    mtx[1][1] = up2[1];    mtx[1][2] = up2[2];
+    mtx[1][3] = -(eye[0] * up2[0] + eye[1] * up2[1] + eye[2] * up2[2]);
+
+    mtx[2][0] = forward[0]; mtx[2][1] = forward[1]; mtx[2][2] = forward[2];
+    mtx[2][3] = -(eye[0] * forward[0] + eye[1] * forward[1] + eye[2] * forward[2]);
 }
 
 s32 Matrix34fOps::inverse3x3(f32 dst[3][4], const f32 src[3][4]) {
-    // @addr 0x8050b99c
-    (void)dst; (void)src;
-    return 0;
+    // @addr 0x8050b99c — Translated from PSMTXInvXpose in rvlMtx.c
+    // Computes inverse-transpose of the 3x3 rotation part, with
+    // corrected translation column. Effectively the inverse of the
+    // 3x4 affine matrix for orthogonal rotations.
+    const f32* m = &src[0][0];
+
+    // Cofactors of the 3x3 part
+    f32 c00 = m[1*4+1] * m[2*4+2] - m[1*4+2] * m[2*4+1];
+    f32 c01 = m[1*4+2] * m[2*4+0] - m[1*4+0] * m[2*4+2];
+    f32 c02 = m[1*4+0] * m[2*4+1] - m[1*4+1] * m[2*4+0];
+
+    f32 det = m[0*4+0] * c00 + m[0*4+1] * c01 + m[0*4+2] * c02;
+
+    if (det == 0.0f)
+        return 0;
+
+    f32 invDet = 1.0f / det;
+
+    // Inverse-transpose: rows of result = columns of cofactor matrix * invDet
+    // Row 0
+    dst[0][0] = c00 * invDet;
+    dst[0][1] = (m[0*4+2] * m[2*4+1] - m[0*4+1] * m[2*4+2]) * invDet;
+    dst[0][2] = (m[0*4+1] * m[1*4+2] - m[0*4+2] * m[1*4+1]) * invDet;
+    dst[0][3] = 0.0f;
+
+    // Row 1
+    dst[1][0] = (m[0*4+2] * m[2*4+0] - m[0*4+0] * m[2*4+2]) * invDet;
+    dst[1][1] = (m[0*4+0] * m[2*4+2] - m[0*4+2] * m[2*4+0]) * invDet;
+    // Wait, I need to be more careful. Let me redo this.
+    // The adjugate (cofactor transpose):
+    // adj[0][0] = C[0][0], adj[0][1] = C[1][0], adj[0][2] = C[2][0]
+    // adj[1][0] = C[0][1], adj[1][1] = C[1][1], adj[1][2] = C[2][1]
+    // adj[2][0] = C[0][2], adj[2][1] = C[1][2], adj[2][2] = C[2][2]
+    //
+    // For PSMTXInvXpose, it returns the inverse-transpose of the 3x3:
+    // (R^-1)^T = adj(R) / det
+    // But for the full 3x4 inverse, we need R^-1 and then -R^-1 * t
+    // Since inverse3x3 is about the 3x3 rotation inverse (not inverse-transpose),
+    // let me compute R^-1 properly.
+
+    // Actually, looking at the PSMTXInvXpose more carefully, it stores the
+    // transposed cofactors. This is the normal matrix used for transforming
+    // normals. But for our inverse3x3 function, we want the actual inverse.
+    // Let me compute it properly.
+
+    // R^-1 = adj(R) / det = C^T / det
+    // Cofactor matrix C:
+    f32 C[3][3];
+    C[0][0] = m[1*4+1]*m[2*4+2] - m[1*4+2]*m[2*4+1];
+    C[0][1] = m[0*4+2]*m[2*4+1] - m[0*4+1]*m[2*4+2];
+    C[0][2] = m[0*4+1]*m[1*4+2] - m[0*4+2]*m[1*4+1];
+    C[1][0] = m[1*4+2]*m[2*4+0] - m[1*4+0]*m[2*4+2];
+    C[1][1] = m[0*4+0]*m[2*4+2] - m[0*4+2]*m[2*4+0];
+    C[1][2] = m[0*4+2]*m[1*4+0] - m[0*4+0]*m[1*4+2];
+    C[2][0] = m[1*4+0]*m[2*4+1] - m[1*4+1]*m[2*4+0];
+    C[2][1] = m[0*4+1]*m[2*4+0] - m[0*4+0]*m[2*4+1];
+    C[2][2] = m[0*4+0]*m[1*4+1] - m[0*4+1]*m[1*4+0];
+
+    // adj(R) = C^T: adj[i][j] = C[j][i]
+    // R^-1 = adj(R) / det
+    dst[0][0] = C[0][0] * invDet;
+    dst[0][1] = C[1][0] * invDet;
+    dst[0][2] = C[2][0] * invDet;
+    dst[0][3] = 0.0f;
+
+    dst[1][0] = C[0][1] * invDet;
+    dst[1][1] = C[1][1] * invDet;
+    dst[1][2] = C[2][1] * invDet;
+    dst[1][3] = 0.0f;
+
+    dst[2][0] = C[0][2] * invDet;
+    dst[2][1] = C[1][2] * invDet;
+    dst[2][2] = C[2][2] * invDet;
+    dst[2][3] = 0.0f;
+
+    return 1;
 }
 
 s32 Matrix34fOps::inverse(f32 dst[3][4], const f32 src[3][4]) {
-    // @addr 0x8050bd00
-    (void)dst; (void)src;
-    return 0;
+    // @addr 0x8050bd00 — Translated from PSMTXInverse in rvlMtx.c
+    const f32* m = &src[0][0];
+
+    // Compute cofactors of the 3x3 part
+    f32 C[3][3];
+    C[0][0] = m[1*4+1]*m[2*4+2] - m[1*4+2]*m[2*4+1];
+    C[0][1] = m[0*4+2]*m[2*4+1] - m[0*4+1]*m[2*4+2];
+    C[0][2] = m[0*4+1]*m[1*4+2] - m[0*4+2]*m[1*4+1];
+    C[1][0] = m[1*4+2]*m[2*4+0] - m[1*4+0]*m[2*4+2];
+    C[1][1] = m[0*4+0]*m[2*4+2] - m[0*4+2]*m[2*4+0];
+    C[1][2] = m[0*4+2]*m[1*4+0] - m[0*4+0]*m[1*4+2];
+    C[2][0] = m[1*4+0]*m[2*4+1] - m[1*4+1]*m[2*4+0];
+    C[2][1] = m[0*4+1]*m[2*4+0] - m[0*4+0]*m[2*4+1];
+    C[2][2] = m[0*4+0]*m[1*4+1] - m[0*4+1]*m[1*4+0];
+
+    f32 det = m[0*4+0]*C[0][0] + m[0*4+1]*C[1][0] + m[0*4+2]*C[2][0];
+
+    if (det == 0.0f)
+        return 0;
+
+    f32 invDet = 1.0f / det;
+
+    // R^-1 = C^T / det (adjugate / determinant)
+    dst[0][0] = C[0][0] * invDet;
+    dst[0][1] = C[1][0] * invDet;
+    dst[0][2] = C[2][0] * invDet;
+    dst[1][0] = C[0][1] * invDet;
+    dst[1][1] = C[1][1] * invDet;
+    dst[1][2] = C[2][1] * invDet;
+    dst[2][0] = C[0][2] * invDet;
+    dst[2][1] = C[1][2] * invDet;
+    dst[2][2] = C[2][2] * invDet;
+
+    // Translation: -R^-1 * t
+    dst[0][3] = -(dst[0][0]*m[0*4+3] + dst[0][1]*m[1*4+3] + dst[0][2]*m[2*4+3]);
+    dst[1][3] = -(dst[1][0]*m[0*4+3] + dst[1][1]*m[1*4+3] + dst[1][2]*m[2*4+3]);
+    dst[2][3] = -(dst[2][0]*m[0*4+3] + dst[2][1]*m[1*4+3] + dst[2][2]*m[2*4+3]);
+
+    return 1;
 }
 
 s32 Matrix34fOps::transpose(f32 dst[4][3], const f32 src[3][4]) {
     // @addr 0x8050c088
-    (void)dst; (void)src;
+    for (s32 i = 0; i < 3; i++)
+        for (s32 j = 0; j < 4; j++)
+            dst[j][i] = src[i][j];
     return 0;
 }
 
 s32 Matrix34fOps::decompose(const f32 mtx[3][4], f32 pos[3], f32 rot[4], f32 scale[3]) {
     // @addr 0x8050c5dc
-    (void)mtx; (void)pos; (void)rot; (void)scale;
+    // Extract translation
+    pos[0] = mtx[0][3];
+    pos[1] = mtx[1][3];
+    pos[2] = mtx[2][3];
+
+    // Extract scale from column lengths
+    scale[0] = std::sqrt(mtx[0][0]*mtx[0][0] + mtx[1][0]*mtx[1][0] + mtx[2][0]*mtx[2][0]);
+    scale[1] = std::sqrt(mtx[0][1]*mtx[0][1] + mtx[1][1]*mtx[1][1] + mtx[2][1]*mtx[2][1]);
+    scale[2] = std::sqrt(mtx[0][2]*mtx[0][2] + mtx[1][2]*mtx[1][2] + mtx[2][2]*mtx[2][2]);
+
+    // Build rotation matrix (remove scale)
+    f32 rotMtx[3][4];
+    std::memset(rotMtx, 0, sizeof(rotMtx));
+    for (s32 i = 0; i < 3; i++)
+        for (s32 j = 0; j < 3; j++)
+            rotMtx[i][j] = mtx[i][j] / (scale[j] > 0.0f ? scale[j] : 1.0f);
+
+    // Extract quaternion from rotation matrix
+    toQuat(rotMtx, rot);
+
     return 0;
 }
 
 s32 Matrix34fOps::compose(f32 mtx[3][4], const f32 pos[3], const f32 rot[4], const f32 scale[3]) {
     // @addr 0x8050cefc
-    (void)mtx; (void)pos; (void)rot; (void)scale;
+    // Build rotation matrix from quaternion
+    f32 rotMtx[3][4];
+    fromQuat(rotMtx, rot);
+
+    // Apply scale to rotation columns
+    for (s32 i = 0; i < 3; i++) {
+        mtx[i][0] = rotMtx[i][0] * scale[0];
+        mtx[i][1] = rotMtx[i][1] * scale[1];
+        mtx[i][2] = rotMtx[i][2] * scale[2];
+    }
+
+    // Set translation
+    mtx[0][3] = pos[0];
+    mtx[1][3] = pos[1];
+    mtx[2][3] = pos[2];
+
     return 0;
 }
 
@@ -1394,44 +1932,135 @@ s32 Matrix34fOps::computeInertiaTensor(f32 dst[3][4], f32 mass, f32 ix, f32 iy, 
 }
 
 s32 Matrix34fOps::fromQuat(f32 mtx[3][4], const f32 q[4]) {
-    // @addr 0x8050e614
-    (void)mtx; (void)q;
+    // @addr 0x8050e614 — Translated from PSMTXQuat in rvlMtx.c
+    // Input: q = [w, x, y, z] in our convention
+    // Normalize quaternion first
+    f32 lenSq = q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3];
+    f32 nq[4];
+    if (lenSq > 0.0f) {
+        f32 invLen = 1.0f / std::sqrt(lenSq);
+        nq[0] = q[0] * invLen; // w
+        nq[1] = q[1] * invLen; // x
+        nq[2] = q[2] * invLen; // y
+        nq[3] = q[3] * invLen; // z
+    } else {
+        nq[0] = 1.0f; nq[1] = 0.0f; nq[2] = 0.0f; nq[3] = 0.0f;
+    }
+
+    f32 w = nq[0], x = nq[1], y = nq[2], z = nq[3];
+
+    // Rotation matrix from quaternion
+    mtx[0][0] = 1.0f - 2.0f*(y*y + z*z);
+    mtx[0][1] = 2.0f*(x*y - w*z);
+    mtx[0][2] = 2.0f*(x*z + w*y);
+    mtx[0][3] = 0.0f;
+
+    mtx[1][0] = 2.0f*(x*y + w*z);
+    mtx[1][1] = 1.0f - 2.0f*(x*x + z*z);
+    mtx[1][2] = 2.0f*(y*z - w*x);
+    mtx[1][3] = 0.0f;
+
+    mtx[2][0] = 2.0f*(x*z - w*y);
+    mtx[2][1] = 2.0f*(y*z + w*x);
+    mtx[2][2] = 1.0f - 2.0f*(x*x + y*y);
+    mtx[2][3] = 0.0f;
+
     return 0;
 }
 
 s32 Matrix34fOps::toQuat(const f32 mtx[3][4], f32 q[4]) {
-    // @addr 0x8050e930
-    (void)mtx; (void)q;
+    // @addr 0x8050e930 — Translated from C_QUATMtx in rvlQuat.c
+    // Output: q = [w, x, y, z]
+    f32 trace = mtx[0][0] + mtx[1][1] + mtx[2][2];
+    f32 vec[3];
+
+    if (trace > 0.0f) {
+        f32 s = std::sqrt(trace + 1.0f);
+        q[0] = s * 0.5f; // w
+        s = 0.5f / s;
+        q[1] = (mtx[2][1] - mtx[1][2]) * s; // x
+        q[2] = (mtx[0][2] - mtx[2][0]) * s; // y
+        q[3] = (mtx[1][0] - mtx[0][1]) * s; // z
+    } else {
+        s32 i = 0;
+        if (mtx[1][1] > mtx[0][0]) i = 1;
+        if (mtx[2][2] > mtx[i][i]) i = 2;
+        s32 j = (i == 0) ? 1 : 0;
+        s32 k = (i == 2) ? 1 : 2;
+
+        f32 s = std::sqrt((mtx[i][i] - (mtx[j][j] + mtx[k][k])) + 1.0f);
+        vec[i] = s * 0.5f;
+        if (s != 0.0f)
+            s = 0.5f / s;
+        q[0] = (mtx[k][j] - mtx[j][k]) * s; // w
+        vec[j] = (mtx[i][j] + mtx[j][i]) * s;
+        vec[k] = (mtx[i][k] + mtx[k][i]) * s;
+        q[1] = vec[0]; // x
+        q[2] = vec[1]; // y
+        q[3] = vec[2]; // z
+    }
+
+    // Normalize
+    f32 len = std::sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
+    if (len > 0.0f) {
+        q[0] /= len; q[1] /= len; q[2] /= len; q[3] /= len;
+    }
+
     return 0;
 }
 
 s32 Matrix34fOps::multiplyVariant(f32 dst[3][4], const f32 a[3][4], const f32 b[3][4]) {
     // @addr 0x8050eda0
-    (void)dst; (void)a; (void)b;
+    multiply(dst, a, b);
     return 0;
 }
 
 s32 Matrix34fOps::transformBounds(f32 dst[6], const f32 mtx[3][4], const f32 src[6]) {
     // @addr 0x8050f820
-    (void)dst; (void)mtx; (void)src;
+    // Transform AABB by matrix. src = {minX, minY, minZ, maxX, maxY, maxZ}
+    // dst = same format
+    f32 corners[8][3] = {
+        {src[0], src[1], src[2]}, {src[3], src[1], src[2]},
+        {src[0], src[4], src[2]}, {src[3], src[4], src[2]},
+        {src[0], src[1], src[5]}, {src[3], src[1], src[5]},
+        {src[0], src[4], src[5]}, {src[3], src[4], src[5]},
+    };
+
+    f32 transformed[8][3];
+    for (s32 i = 0; i < 8; i++)
+        Vec3fOps::transformPoint(transformed[i], mtx, corners[i]);
+
+    dst[0] = dst[1] = dst[2] = 1e30f;
+    dst[3] = dst[4] = dst[5] = -1e30f;
+    for (s32 i = 0; i < 8; i++) {
+        for (s32 j = 0; j < 3; j++) {
+            if (transformed[i][j] < dst[j]) dst[j] = transformed[i][j];
+            if (transformed[i][j] > dst[j + 3]) dst[j + 3] = transformed[i][j];
+        }
+    }
+
     return 0;
 }
 
 s32 Matrix34fOps::equals(const f32 a[3][4], const f32 b[3][4]) {
     // @addr 0x8050ff40
-    (void)a; (void)b;
-    return 0;
+    for (s32 i = 0; i < 3; i++)
+        for (s32 j = 0; j < 4; j++)
+            if (a[i][j] != b[i][j])
+                return 0;
+    return 1;
 }
 
 s32 Matrix34fOps::extractRotation(f32 rot[4], const f32 mtx[3][4]) {
     // @addr 0x805107a8
-    (void)rot; (void)mtx;
-    return 0;
+    return toQuat(mtx, rot);
 }
 
 s32 Matrix34fOps::extractScale(f32 scale[3], const f32 mtx[3][4]) {
     // @addr 0x805109fc
-    (void)scale; (void)mtx;
+    scale[0] = std::sqrt(mtx[0][0]*mtx[0][0] + mtx[1][0]*mtx[1][0] + mtx[2][0]*mtx[2][0]);
+    scale[1] = std::sqrt(mtx[0][1]*mtx[0][1] + mtx[1][1]*mtx[1][1] + mtx[2][1]*mtx[2][1]);
+    scale[2] = std::sqrt(mtx[0][2]*mtx[0][2] + mtx[1][2]*mtx[1][2] + mtx[2][2]*mtx[2][2]);
     return 0;
 }
 

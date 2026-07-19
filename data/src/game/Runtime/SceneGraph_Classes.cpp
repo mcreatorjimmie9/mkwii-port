@@ -22,11 +22,32 @@ namespace SceneGraph {
 
 // @addr 0x8053e560 — Calculate LOD indices from camera distance
 void LODCalculator::calculate(f64 frameTime, f64 deltaTime) {
-    // Computes 8-tier distance thresholds: 200, 500, 1000, 2000,
-    // 5000, 10000, 30000, 60000. Sets m_lodIndex[0..2] to the
-    // appropriate model indices, or -1 if beyond far plane.
+    // Computes 8-tier distance thresholds and selects LOD model indices.
+    // The inverse range is used to map distance to a 0-1 parameter.
     (void)frameTime;
     (void)deltaTime;
+
+    if (m_invRange == 0.0f)
+        return;
+
+    // Map distance into [0,1] range using reference position
+    f64 t = (m_refPosition - m_nearPlane) * static_cast<f64>(m_invRange);
+    if (t < 0.0) t = 0.0;
+    if (t > 1.0) t = 1.0;
+
+    // 8-tier thresholds: 200, 500, 1000, 2000, 5000, 10000, 30000, 60000
+    // Select LOD level based on distance
+    static const f32 thresholds[7] = {200.0f, 500.0f, 1000.0f, 2000.0f,
+                                     5000.0f, 10000.0f, 30000.0f};
+    f64 dist = static_cast<f64>(m_refPosition);
+
+    for (s32 i = 0; i < 3; i++) {
+        if (dist < static_cast<f64>(thresholds[i])) {
+            m_lodIndex[i] = i;
+        } else {
+            m_lodIndex[i] = static_cast<u32>(-1);
+        }
+    }
 }
 
 // @addr 0x8053e824 — Apply LOD to target node
@@ -41,7 +62,21 @@ void LODCalculator::applyToNode(void* target, s32 lodSlot) {
 f64 LODCalculator::computeFade(f64 distance) {
     // Blends between LOD levels based on distance proximity
     // to the current LOD threshold boundary.
-    (void)distance;
+    static const f32 thresholds[7] = {200.0f, 500.0f, 1000.0f, 2000.0f,
+                                     5000.0f, 10000.0f, 30000.0f};
+
+    // Find which tier the distance falls into
+    for (s32 i = 6; i >= 0; i--) {
+        if (distance >= static_cast<f64>(thresholds[i])) {
+            // Compute fade factor within this tier's range
+            f64 lo = static_cast<f64>(thresholds[i]);
+            f64 hi = (i < 6) ? static_cast<f64>(thresholds[i + 1]) : 60000.0;
+            if (hi > lo) {
+                return (distance - lo) / (hi - lo);
+            }
+            return 0.0;
+        }
+    }
     return 0.0;
 }
 
@@ -50,27 +85,39 @@ f64 LODCalculator::interpolateMetric(s32 frame, u32 ticks) {
     // Linear interpolation between m_refPosition and m_farPlane
     // based on normalized tick value.
     (void)frame;
-    (void)ticks;
-    return 0.0;
+    if (ticks == 0)
+        return static_cast<f64>(m_refPosition);
+    f64 t = 1.0 / static_cast<f64>(ticks);
+    return m_refPosition + (m_farPlane - m_refPosition) * t;
 }
 
 // @addr 0x8053ea4c — Compare LOD priority of two nodes
 s32 LODCalculator::comparePriority(LODCalculator* a, LODCalculator* b) {
-    // Compare two LODCalculator nodes by:
-    // 1. Distance from camera (m_refPosition + 400 = bounding sphere?)
-    // 2. Frame reference (m_frameRef at +0x184)
-    // Returns -1, 0, or 1 for ordering.
-    (void)a;
-    (void)b;
+    // Compare two LODCalculator nodes by distance from camera.
+    // Returns -1 if a should render first (closer), 1 if b, 0 if equal.
+    if (a == nullptr || b == nullptr) return 0;
+
+    f32 distA = a->m_refPosition;
+    f32 distB = b->m_refPosition;
+
+    if (distA < distB) return -1;
+    if (distA > distB) return 1;
     return 0;
 }
 
 // @addr 0x8053eaec — Advanced LOD comparison
 s32 LODCalculator::compareAdvanced(LODCalculator* a, LODCalculator* b) {
-    // Extended comparison considering additional metrics
-    // at offset 0xA8.
-    (void)a;
-    (void)b;
+    // Extended comparison considering distance metric at 0xA8
+    // and frame reference.
+    if (a == nullptr || b == nullptr) return 0;
+
+    f32 metricDiff = a->m_distanceMetric - b->m_distanceMetric;
+    if (metricDiff < 0.0f) return -1;
+    if (metricDiff > 0.0f) return 1;
+
+    // Tiebreak by frame reference
+    if (a->m_frameRef < b->m_frameRef) return -1;
+    if (a->m_frameRef > b->m_frameRef) return 1;
     return 0;
 }
 
@@ -328,11 +375,13 @@ void SceneGraph::configureViewports() {
 
 // @addr 0x80520cd8 — Set render mode inactive
 void SceneGraph::setModeInactive() {
-    // Only in normal mode (m_renderMode == 0):
-    //   m_vpStartBackup = m_vpStartIndex;
-    //   Find ready viewport among primary array
-    //   m_selectedVP = found index or 0
-    // m_renderMode = -1 (inactive)
+    if (m_renderMode == 0) {
+        m_vpStartBackup = m_vpStartIndex;
+        // Find ready viewport among primary array
+        s32 found = findReadyViewport();
+        m_selectedVP = (found >= 0) ? found : 0;
+    }
+    m_renderMode = -1;
 }
 
 // @addr 0x80520d74 — Check and sync mirror mode
@@ -371,30 +420,47 @@ void SceneGraph::assignCameras() {
 // @addr 0x80522284 — Video system state machine update
 void SceneGraph::updateVideoSystem() {
     // State machine driven by m_videoState:
-    //
-    // States 7, 8, 9:
-    //   Check m_videoStateData (display mode 0-3)
-    //   If mode 0 or 2: set m_resultMode = 0x8D (progressive)
-    //   If mode 1 or 3: set m_resultMode = 0x96 (interlaced)
-    //   Go to state 10
-    //
-    // State 3:
-    //   Get video format system from global + 0x27C
-    //   Check format count
-    //   If 0: call init function, go to state 4
-    //   If 3 or 4: check player count, transition
-    //
-    // State 6:
-    //   Set display mode, sync, go to state 10
-    //
-    // State 10: done
+    // Translated from eggSceneManager.cpp video system logic.
+
+    switch (m_videoState) {
+    case 7:
+    case 8:
+    case 9:
+        // Check m_videoStateData (display mode 0-3)
+        if (m_videoStateData == 0 || m_videoStateData == 2) {
+            m_videoStateData = 0x8D; // progressive
+        } else {
+            m_videoStateData = 0x96; // interlaced
+        }
+        m_videoState = 10; // STATE_DONE
+        break;
+
+    case 3:
+        // Get video format system, check format count
+        // If 0: call init, go to state 4
+        // If 3 or 4: check player count, transition
+        // (external system calls not available)
+        m_videoState = 4;
+        break;
+
+    case 6:
+        // Set display mode, sync, go to state 10
+        m_videoState = 10; // STATE_DONE
+        break;
+
+    case 10:
+        // STATE_DONE — no-op
+        break;
+
+    default:
+        break;
+    }
 }
 
 // @addr 0x80522644 — Set display mode
 void SceneGraph::setDisplayMode(u32 mode) {
-    // Writes mode value to offset 0x350 (m_videoStateData equivalent)
-    // This is a simple 8-byte function
-    (void)mode;
+    // Writes mode value to the video state data field
+    m_videoStateData = mode;
 }
 
 // ============================================================================
@@ -466,8 +532,40 @@ void SceneGraph4Pass::calcCulling() {
 
 // @addr 0x80522284 — State machine update
 void VideoSystem::update() {
-    // State transitions as documented in SceneGraph::updateVideoSystem
-    // Operates on embedded fields within the parent SceneGraph object
+    // State machine for video display mode transitions.
+    // Translated from SceneGraph::updateVideoSystem logic.
+
+    switch (m_state) {
+    case 7:
+    case 8:
+    case 9:
+        // Check display mode (0-3)
+        if (m_displayMode == 0 || m_displayMode == 2) {
+            m_resultMode = MODE_PROGRESSIVE;
+        } else {
+            m_resultMode = MODE_INTERLACED;
+        }
+        m_state = STATE_DONE;
+        break;
+
+    case 3:
+        // Init state — check video format system
+        // (external system calls not available)
+        m_state = 4;
+        break;
+
+    case 6:
+        // Set display mode, sync, go to done
+        m_state = STATE_DONE;
+        break;
+
+    case STATE_DONE:
+        // No-op
+        break;
+
+    default:
+        break;
+    }
 }
 
 // @addr 0x80522644 — Set display mode
@@ -477,22 +575,44 @@ void VideoSystem::setMode(u32 mode) {
 
 // @addr 0x80523780 — Begin transition
 void VideoSystem::beginTransition() {
-    // Sets state to -1 (uninitialized)
-    // Gets render system from global + 0x28C
-    // Traverses children, checks system state
-    // Calls calc on render system
-    // Transitions to appropriate state
+    // Sets state to init, will transition through state machine
+    // Gets render system from global + 0x28C (not available)
+    // Traverses children, checks system state (not available)
+    // Calls calc on render system (not available)
+    m_state = STATE_INIT;
 }
 
 // @addr 0x80523af0 — Handle event
 void VideoSystem::handleEvent(s32 eventData) {
     // State machine with states 3, 4, 5, 6, 7
-    // State 5: set result mode, call setup function
-    // State 7: get render system, check player count
-    //   If player count valid: set mode, call setProperty(0xFB2, 0)
-    //   Set listEntry62 = 0, setProperty(0x4D, 0), go to state 8
-    // State 6: similar to 7 but different target
     (void)eventData;
+
+    switch (m_state) {
+    case 5:
+        // Set result mode from display mode
+        if (m_displayMode == 0 || m_displayMode == 2) {
+            m_resultMode = MODE_PROGRESSIVE;
+        } else {
+            m_resultMode = MODE_INTERLACED;
+        }
+        // Call setup function (not available)
+        break;
+
+    case 7:
+        // Get render system, check player count
+        // If valid: set mode, call setProperty(0xFB2, 0)
+        // Set listEntry62 = 0, setProperty(0x4D, 0), go to state 8
+        m_state = 8;
+        break;
+
+    case 6:
+        // Similar to 7 but different target
+        m_state = 8;
+        break;
+
+    default:
+        break;
+    }
 }
 
 } // namespace SceneGraph
