@@ -1,8 +1,9 @@
 {
-  "timestamp": "2026-07-18T23:03:40Z",
-  "cycle": 5,
-  "phase": "reconstruct_complete",
-  "status": "phase:review",
+  "timestamp": "2026-07-19T00:01:53Z",
+  "cycle": 6,
+  "phase": "blocked_ghidra_script",
+  "status": "phase:decompile_expand",
+  "notes": "Ghidra 12.1.2 Decompiler module inaccessible from headless post-scripts (OSGi classloader). Analysis/auto-disassembly works. Need workaround: Ghidra 11.x downgrade OR capstone-based approach.",
   "totals": {
     "functions_total": 18444,
     "decompiled": 607,
@@ -23,5 +24,5 @@
   "milestone": null,
   "open_issues": 0,
   "budget_pct": 0,
-  "next_action": "Phase 3.4 REVIEW \u2014 Audit reconstructed code against Ghidra pseudocode, then Phase 3.5 QBIT compilation test"
+  "next_action": "Resolve Ghidra decompiler access OR switch to capstone-based approach for remaining ~17,837 functions"
 }
