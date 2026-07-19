@@ -1,0 +1,1627 @@
+{
+  "module": "KartMovement",
+  "total_functions": 268,
+  "address_range": {
+    "min": "0x8058a80c",
+    "max": "0x805a6f4c"
+  },
+  "known_functions": [
+    {
+      "address": "0x8058a80c",
+      "name": "PlayerSub10Bike_getWheelieSoftSpeedLimitBonus",
+      "confidence": "certain",
+      "source_file": "/home/z/my-project/data/ghidra_staticr/FUN_segment_0__8058a80c.c",
+      "size": 252
+    }
+  ],
+  "all_functions": [
+    {
+      "address": "0x8058a80c",
+      "name": "PlayerSub10Bike_getWheelieSoftSpeedLimitBonus",
+      "confidence": "certain",
+      "size": 252
+    },
+    {
+      "address": "0x80590040",
+      "name": "KartPhysics_Wheel_validate_80590040",
+      "confidence": "address_range",
+      "size": 372
+    },
+    {
+      "address": "0x80590764",
+      "name": "kart_KartPhysics_Wheel_80590764",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x80590bf4",
+      "name": "kart_KartPhysics_Wheel_80590bf4",
+      "confidence": "address_range",
+      "size": 1472
+    },
+    {
+      "address": "0x80591278",
+      "name": "kart_KartPhysics_Wheel_80591278",
+      "confidence": "address_range",
+      "size": 424
+    },
+    {
+      "address": "0x80591420",
+      "name": "kart_KartPhysics_Wheel_80591420",
+      "confidence": "address_range",
+      "size": 24
+    },
+    {
+      "address": "0x80591438",
+      "name": "kart_KartPhysics_Wheel_80591438",
+      "confidence": "address_range",
+      "size": 280
+    },
+    {
+      "address": "0x80591550",
+      "name": "kart_KartPhysics_Wheel_80591550",
+      "confidence": "address_range",
+      "size": 160
+    },
+    {
+      "address": "0x805915f0",
+      "name": "KartPhysics_Wheel_assertFail_805915f0",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x80591780",
+      "name": "KartPhysics_Wheel_assertFail_80591780",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x805918e0",
+      "name": "kart_KartPhysics_Wheel_805918e0",
+      "confidence": "address_range",
+      "size": 84
+    },
+    {
+      "address": "0x80591934",
+      "name": "kart_KartPhysics_Wheel_80591934",
+      "confidence": "address_range",
+      "size": 84
+    },
+    {
+      "address": "0x80591988",
+      "name": "kart_KartPhysics_Wheel_80591988",
+      "confidence": "address_range",
+      "size": 220
+    },
+    {
+      "address": "0x80591a64",
+      "name": "kart_KartPhysics_Wheel_80591a64",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80591ac8",
+      "name": "KartPhysics_Wheel_validate_80591ac8",
+      "confidence": "address_range",
+      "size": 152
+    },
+    {
+      "address": "0x80591bf0",
+      "name": "kart_KartPhysics_Wheel_80591bf0",
+      "confidence": "address_range",
+      "size": 220
+    },
+    {
+      "address": "0x80591ccc",
+      "name": "kart_KartPhysics_Wheel_80591ccc",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80591d30",
+      "name": "kart_KartPhysics_Wheel_80591d30",
+      "confidence": "address_range",
+      "size": 220
+    },
+    {
+      "address": "0x80591e0c",
+      "name": "kart_KartPhysics_Wheel_80591e0c",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80591e70",
+      "name": "KartPhysics_Wheel_validate_80591e70",
+      "confidence": "address_range",
+      "size": 96
+    },
+    {
+      "address": "0x80591f60",
+      "name": "kart_KartPhysics_Wheel_80591f60",
+      "confidence": "address_range",
+      "size": 220
+    },
+    {
+      "address": "0x8059203c",
+      "name": "kart_KartPhysics_Wheel_8059203c",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x805920a0",
+      "name": "KartPhysics_Wheel_validate_805920a0",
+      "confidence": "address_range",
+      "size": 96
+    },
+    {
+      "address": "0x80592204",
+      "name": "KartPhysics_Wheel_validate_80592204",
+      "confidence": "address_range",
+      "size": 108
+    },
+    {
+      "address": "0x805922b8",
+      "name": "kart_KartPhysics_Wheel_805922b8",
+      "confidence": "address_range",
+      "size": 224
+    },
+    {
+      "address": "0x80592398",
+      "name": "kart_KartPhysics_Wheel_80592398",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x805923fc",
+      "name": "KartPhysics_Wheel_validate_805923fc",
+      "confidence": "address_range",
+      "size": 152
+    },
+    {
+      "address": "0x80592524",
+      "name": "kart_KartPhysics_Wheel_80592524",
+      "confidence": "address_range",
+      "size": 224
+    },
+    {
+      "address": "0x80592604",
+      "name": "kart_KartPhysics_Wheel_80592604",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80592668",
+      "name": "KartPhysics_Wheel_validate_80592668",
+      "confidence": "address_range",
+      "size": 152
+    },
+    {
+      "address": "0x80592790",
+      "name": "kart_KartPhysics_Wheel_80592790",
+      "confidence": "address_range",
+      "size": 156
+    },
+    {
+      "address": "0x80592848",
+      "name": "KartPhysics_Wheel_validate_80592848",
+      "confidence": "address_range",
+      "size": 108
+    },
+    {
+      "address": "0x805928fc",
+      "name": "kart_KartPhysics_Wheel_805928fc",
+      "confidence": "address_range",
+      "size": 288
+    },
+    {
+      "address": "0x80592a1c",
+      "name": "kart_KartPhysics_Wheel_80592a1c",
+      "confidence": "address_range",
+      "size": 136
+    },
+    {
+      "address": "0x80592b38",
+      "name": "kart_KartPhysics_Wheel_80592b38",
+      "confidence": "address_range",
+      "size": 532
+    },
+    {
+      "address": "0x80592d50",
+      "name": "kart_KartPhysics_Wheel_80592d50",
+      "confidence": "address_range",
+      "size": 76
+    },
+    {
+      "address": "0x80592d9c",
+      "name": "kart_KartPhysics_Wheel_80592d9c",
+      "confidence": "address_range",
+      "size": 228
+    },
+    {
+      "address": "0x80592e84",
+      "name": "kart_KartPhysics_Wheel_80592e84",
+      "confidence": "address_range",
+      "size": 328
+    },
+    {
+      "address": "0x80592fcc",
+      "name": "kart_KartPhysics_Wheel_80592fcc",
+      "confidence": "address_range",
+      "size": 240
+    },
+    {
+      "address": "0x805930bc",
+      "name": "KartPhysics_Wheel_validate_805930bc",
+      "confidence": "address_range",
+      "size": 152
+    },
+    {
+      "address": "0x805931e4",
+      "name": "kart_KartPhysics_Wheel_805931e4",
+      "confidence": "address_range",
+      "size": 76
+    },
+    {
+      "address": "0x80593230",
+      "name": "kart_KartPhysics_Wheel_80593230",
+      "confidence": "address_range",
+      "size": 176
+    },
+    {
+      "address": "0x805932e0",
+      "name": "KartPhysics_Wheel_validate_805932e0",
+      "confidence": "address_range",
+      "size": 96
+    },
+    {
+      "address": "0x805933d0",
+      "name": "kart_KartPhysics_Wheel_805933d0",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80593434",
+      "name": "kart_KartPhysics_Wheel_80593434",
+      "confidence": "address_range",
+      "size": 124
+    },
+    {
+      "address": "0x805934b0",
+      "name": "kart_KartPhysics_Wheel_805934b0",
+      "confidence": "address_range",
+      "size": 76
+    },
+    {
+      "address": "0x805934fc",
+      "name": "kart_KartPhysics_Wheel_805934fc",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80593560",
+      "name": "KartPhysics_Wheel_validate_80593560",
+      "confidence": "address_range",
+      "size": 272
+    },
+    {
+      "address": "0x805936dc",
+      "name": "KartPhysics_Wheel_validate_805936dc",
+      "confidence": "address_range",
+      "size": 428
+    },
+    {
+      "address": "0x80593960",
+      "name": "kart_KartPhysics_Wheel_80593960",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x80593ba8",
+      "name": "kart_KartPhysics_Wheel_80593ba8",
+      "confidence": "address_range",
+      "size": 144
+    },
+    {
+      "address": "0x80593c38",
+      "name": "kart_KartPhysics_Wheel_80593c38",
+      "confidence": "address_range",
+      "size": 144
+    },
+    {
+      "address": "0x80593cc8",
+      "name": "kart_KartPhysics_Wheel_80593cc8",
+      "confidence": "address_range",
+      "size": 156
+    },
+    {
+      "address": "0x80593d64",
+      "name": "KartPhysics_Wheel_validate_80593d64",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80593e60",
+      "name": "KartPhysics_Wheel_validate_80593e60",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80593f30",
+      "name": "kart_KartPhysics_Wheel_80593f30",
+      "confidence": "address_range",
+      "size": 156
+    },
+    {
+      "address": "0x80593fcc",
+      "name": "KartPhysics_Wheel_validate_80593fcc",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x805940c8",
+      "name": "KartPhysics_Wheel_validate_805940c8",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80594198",
+      "name": "kart_KartPhysics_Wheel_80594198",
+      "confidence": "address_range",
+      "size": 156
+    },
+    {
+      "address": "0x80594234",
+      "name": "KartPhysics_Wheel_validate_80594234",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80594330",
+      "name": "KartPhysics_Wheel_validate_80594330",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80594400",
+      "name": "kart_KartPhysics_Wheel_80594400",
+      "confidence": "address_range",
+      "size": 136
+    },
+    {
+      "address": "0x80594488",
+      "name": "kart_KartPhysics_Wheel_80594488",
+      "confidence": "address_range",
+      "size": 176
+    },
+    {
+      "address": "0x80594538",
+      "name": "KartPhysics_Wheel_validate_80594538",
+      "confidence": "address_range",
+      "size": 72
+    },
+    {
+      "address": "0x805945e0",
+      "name": "kart_KartPhysics_Wheel_805945e0",
+      "confidence": "address_range",
+      "size": 176
+    },
+    {
+      "address": "0x80594690",
+      "name": "KartPhysics_Wheel_validate_80594690",
+      "confidence": "address_range",
+      "size": 72
+    },
+    {
+      "address": "0x80594738",
+      "name": "kart_KartPhysics_Wheel_80594738",
+      "confidence": "address_range",
+      "size": 116
+    },
+    {
+      "address": "0x805947ac",
+      "name": "KartPhysics_Wheel_validate_805947ac",
+      "confidence": "address_range",
+      "size": 68
+    },
+    {
+      "address": "0x80594850",
+      "name": "kart_KartPhysics_Wheel_80594850",
+      "confidence": "address_range",
+      "size": 176
+    },
+    {
+      "address": "0x80594900",
+      "name": "KartPhysics_Wheel_validate_80594900",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x805949c4",
+      "name": "kart_KartPhysics_Wheel_805949c4",
+      "confidence": "address_range",
+      "size": 176
+    },
+    {
+      "address": "0x80594a74",
+      "name": "KartPhysics_Wheel_validate_80594a74",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80594b38",
+      "name": "kart_KartPhysics_Wheel_80594b38",
+      "confidence": "address_range",
+      "size": 176
+    },
+    {
+      "address": "0x80594be8",
+      "name": "KartPhysics_Wheel_validate_80594be8",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80594cac",
+      "name": "kart_KartPhysics_Wheel_80594cac",
+      "confidence": "address_range",
+      "size": 176
+    },
+    {
+      "address": "0x80594d5c",
+      "name": "KartPhysics_Wheel_validate_80594d5c",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80594e20",
+      "name": "KartPhysics_Wheel_validate_80594e20",
+      "confidence": "address_range",
+      "size": 136
+    },
+    {
+      "address": "0x80594ef0",
+      "name": "KartPhysics_Wheel_validate_80594ef0",
+      "confidence": "address_range",
+      "size": 68
+    },
+    {
+      "address": "0x80594f94",
+      "name": "kart_KartPhysics_Wheel_80594f94",
+      "confidence": "address_range",
+      "size": 340
+    },
+    {
+      "address": "0x805950e8",
+      "name": "KartPhysics_Wheel_validate_805950e8",
+      "confidence": "address_range",
+      "size": 248
+    },
+    {
+      "address": "0x80595278",
+      "name": "KartPhysics_Wheel_validate_80595278",
+      "confidence": "address_range",
+      "size": 240
+    },
+    {
+      "address": "0x80595594",
+      "name": "KartPhysics_Wheel_validate_80595594",
+      "confidence": "address_range",
+      "size": 32
+    },
+    {
+      "address": "0x80595618",
+      "name": "KartPhysics_Wheel_validate_80595618",
+      "confidence": "address_range",
+      "size": 240
+    },
+    {
+      "address": "0x805959c8",
+      "name": "KartPhysics_Wheel_validate_805959c8",
+      "confidence": "address_range",
+      "size": 32
+    },
+    {
+      "address": "0x80595a4c",
+      "name": "KartPhysics_Wheel_assertFail_80595a4c",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x80595dc8",
+      "name": "KartPhysics_Wheel_validate_80595dc8",
+      "confidence": "address_range",
+      "size": 32
+    },
+    {
+      "address": "0x80595e4c",
+      "name": "kart_KartPhysics_Wheel_80595e4c",
+      "confidence": "address_range",
+      "size": 112
+    },
+    {
+      "address": "0x80595ebc",
+      "name": "KartPhysics_Wheel_calcVec3_80595ebc",
+      "confidence": "address_range",
+      "size": 52
+    },
+    {
+      "address": "0x80595ef0",
+      "name": "kart_KartPhysics_Wheel_80595ef0",
+      "confidence": "address_range",
+      "size": 92
+    },
+    {
+      "address": "0x80595f4c",
+      "name": "KartPhysics_Wheel_calc_80595f4c",
+      "confidence": "address_range",
+      "size": 244
+    },
+    {
+      "address": "0x80596040",
+      "name": "KartPhysics_Wheel_assertFail_80596040",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x80596204",
+      "name": "kart_KartPhysics_Wheel_80596204",
+      "confidence": "address_range",
+      "size": 180
+    },
+    {
+      "address": "0x805962bc",
+      "name": "KartPhysics_Wheel_validate_805962bc",
+      "confidence": "address_range",
+      "size": 164
+    },
+    {
+      "address": "0x80596644",
+      "name": "kart_KartPhysics_Wheel_80596644",
+      "confidence": "address_range",
+      "size": 172
+    },
+    {
+      "address": "0x805966f0",
+      "name": "KartPhysics_Wheel_validate_805966f0",
+      "confidence": "address_range",
+      "size": 104
+    },
+    {
+      "address": "0x8059684c",
+      "name": "kart_KartPhysics_Wheel_8059684c",
+      "confidence": "address_range",
+      "size": 172
+    },
+    {
+      "address": "0x805968f8",
+      "name": "KartPhysics_Wheel_validate_805968f8",
+      "confidence": "address_range",
+      "size": 104
+    },
+    {
+      "address": "0x80596a54",
+      "name": "kart_KartPhysics_Wheel_80596a54",
+      "confidence": "address_range",
+      "size": 172
+    },
+    {
+      "address": "0x80596b00",
+      "name": "KartPhysics_Wheel_validate_80596b00",
+      "confidence": "address_range",
+      "size": 104
+    },
+    {
+      "address": "0x80596c5c",
+      "name": "kart_KartPhysics_Wheel_80596c5c",
+      "confidence": "address_range",
+      "size": 172
+    },
+    {
+      "address": "0x80596d08",
+      "name": "KartPhysics_Wheel_validate_80596d08",
+      "confidence": "address_range",
+      "size": 104
+    },
+    {
+      "address": "0x80596e64",
+      "name": "kart_KartPhysics_Wheel_80596e64",
+      "confidence": "address_range",
+      "size": 116
+    },
+    {
+      "address": "0x80596ed8",
+      "name": "KartPhysics_Wheel_validate_80596ed8",
+      "confidence": "address_range",
+      "size": 68
+    },
+    {
+      "address": "0x80596f7c",
+      "name": "kart_KartPhysics_Wheel_80596f7c",
+      "confidence": "address_range",
+      "size": 116
+    },
+    {
+      "address": "0x80596ff0",
+      "name": "KartPhysics_Wheel_validate_80596ff0",
+      "confidence": "address_range",
+      "size": 68
+    },
+    {
+      "address": "0x80597094",
+      "name": "kart_KartSettings_80597094",
+      "confidence": "address_range",
+      "size": 172
+    },
+    {
+      "address": "0x80597140",
+      "name": "KartSettings_validate_80597140",
+      "confidence": "address_range",
+      "size": 68
+    },
+    {
+      "address": "0x805971e4",
+      "name": "kart_KartSettings_805971e4",
+      "confidence": "address_range",
+      "size": 116
+    },
+    {
+      "address": "0x80597258",
+      "name": "KartSettings_validate_80597258",
+      "confidence": "address_range",
+      "size": 68
+    },
+    {
+      "address": "0x805972fc",
+      "name": "KartSettings_validate_805972fc",
+      "confidence": "address_range",
+      "size": 136
+    },
+    {
+      "address": "0x805973cc",
+      "name": "KartSettings_validate_805973cc",
+      "confidence": "address_range",
+      "size": 68
+    },
+    {
+      "address": "0x80597470",
+      "name": "kart_KartSettings_80597470",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8059760c",
+      "name": "KartSettings_validate_8059760c",
+      "confidence": "address_range",
+      "size": 88
+    },
+    {
+      "address": "0x805976fc",
+      "name": "KartSettings_validate_805976fc",
+      "confidence": "address_range",
+      "size": 60
+    },
+    {
+      "address": "0x80597780",
+      "name": "kart_KartSettings_80597780",
+      "confidence": "address_range",
+      "size": 160
+    },
+    {
+      "address": "0x80597820",
+      "name": "KartSettings_validate_80597820",
+      "confidence": "address_range",
+      "size": 60
+    },
+    {
+      "address": "0x805978a4",
+      "name": "kart_KartSettings_805978a4",
+      "confidence": "address_range",
+      "size": 164
+    },
+    {
+      "address": "0x80597948",
+      "name": "KartSettings_validate_80597948",
+      "confidence": "address_range",
+      "size": 68
+    },
+    {
+      "address": "0x805979ec",
+      "name": "kart_KartSettings_805979ec",
+      "confidence": "address_range",
+      "size": 208
+    },
+    {
+      "address": "0x80597abc",
+      "name": "kart_KartSettings_80597abc",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80597b20",
+      "name": "kart_KartSettings_80597b20",
+      "confidence": "address_range",
+      "size": 120
+    },
+    {
+      "address": "0x80597bb8",
+      "name": "kart_KartSettings_80597bb8",
+      "confidence": "address_range",
+      "size": 172
+    },
+    {
+      "address": "0x80597c64",
+      "name": "KartSettings_validate_80597c64",
+      "confidence": "address_range",
+      "size": 68
+    },
+    {
+      "address": "0x80597d08",
+      "name": "kart_KartSettings_80597d08",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80597d6c",
+      "name": "kart_KartSettings_80597d6c",
+      "confidence": "address_range",
+      "size": 112
+    },
+    {
+      "address": "0x80597ddc",
+      "name": "KartSettings_validate_80597ddc",
+      "confidence": "address_range",
+      "size": 92
+    },
+    {
+      "address": "0x80597e80",
+      "name": "kart_KartSettings_80597e80",
+      "confidence": "address_range",
+      "size": 276
+    },
+    {
+      "address": "0x80597f94",
+      "name": "kart_KartSettings_80597f94",
+      "confidence": "address_range",
+      "size": 288
+    },
+    {
+      "address": "0x805980fc",
+      "name": "KartSettings_validate_805980fc",
+      "confidence": "address_range",
+      "size": 92
+    },
+    {
+      "address": "0x805981a0",
+      "name": "kart_KartSettings_805981a0",
+      "confidence": "address_range",
+      "size": 244
+    },
+    {
+      "address": "0x80598294",
+      "name": "kart_KartSettings_80598294",
+      "confidence": "address_range",
+      "size": 256
+    },
+    {
+      "address": "0x80598394",
+      "name": "kart_KartSettings_80598394",
+      "confidence": "address_range",
+      "size": 160
+    },
+    {
+      "address": "0x80598434",
+      "name": "KartSettings_validate_80598434",
+      "confidence": "address_range",
+      "size": 68
+    },
+    {
+      "address": "0x80598510",
+      "name": "kart_KartSettings_80598510",
+      "confidence": "address_range",
+      "size": 160
+    },
+    {
+      "address": "0x805985b0",
+      "name": "KartSettings_validate_805985b0",
+      "confidence": "address_range",
+      "size": 56
+    },
+    {
+      "address": "0x80598630",
+      "name": "kart_KartSettings_80598630",
+      "confidence": "address_range",
+      "size": 188
+    },
+    {
+      "address": "0x805986ec",
+      "name": "kart_KartSettings_805986ec",
+      "confidence": "address_range",
+      "size": 476
+    },
+    {
+      "address": "0x805988c8",
+      "name": "KartSettings_validate_805988c8",
+      "confidence": "address_range",
+      "size": 408
+    },
+    {
+      "address": "0x80598b44",
+      "name": "kart_KartSettings_80598b44",
+      "confidence": "address_range",
+      "size": 324
+    },
+    {
+      "address": "0x80598c88",
+      "name": "KartSettings_validate_80598c88",
+      "confidence": "address_range",
+      "size": 92
+    },
+    {
+      "address": "0x80598ebc",
+      "name": "kart_KartSettings_80598ebc",
+      "confidence": "address_range",
+      "size": 132
+    },
+    {
+      "address": "0x80598f40",
+      "name": "KartSettings_validate_80598f40",
+      "confidence": "address_range",
+      "size": 56
+    },
+    {
+      "address": "0x80598fc0",
+      "name": "kart_KartSettings_80598fc0",
+      "confidence": "address_range",
+      "size": 132
+    },
+    {
+      "address": "0x80599044",
+      "name": "KartSub_validate_80599044",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80599168",
+      "name": "kart_KartSub_80599168",
+      "confidence": "address_range",
+      "size": 160
+    },
+    {
+      "address": "0x80599208",
+      "name": "KartSub_validate_80599208",
+      "confidence": "address_range",
+      "size": 68
+    },
+    {
+      "address": "0x805992e4",
+      "name": "kart_KartSub_805992e4",
+      "confidence": "address_range",
+      "size": 512
+    },
+    {
+      "address": "0x805994e4",
+      "name": "KartSub_validate_805994e4",
+      "confidence": "address_range",
+      "size": 408
+    },
+    {
+      "address": "0x80599760",
+      "name": "kart_KartSub_80599760",
+      "confidence": "address_range",
+      "size": 512
+    },
+    {
+      "address": "0x80599960",
+      "name": "KartSub_validate_80599960",
+      "confidence": "address_range",
+      "size": 408
+    },
+    {
+      "address": "0x80599bdc",
+      "name": "KartSub_validate_80599bdc",
+      "confidence": "address_range",
+      "size": 384
+    },
+    {
+      "address": "0x80599de0",
+      "name": "kart_KartSub_80599de0",
+      "confidence": "address_range",
+      "size": 172
+    },
+    {
+      "address": "0x80599e8c",
+      "name": "KartSub_validate_80599e8c",
+      "confidence": "address_range",
+      "size": 92
+    },
+    {
+      "address": "0x80599f54",
+      "name": "KartSub_validate_80599f54",
+      "confidence": "address_range",
+      "size": 36
+    },
+    {
+      "address": "0x8059a0e4",
+      "name": "kart_KartSub_8059a0e4",
+      "confidence": "address_range",
+      "size": 60
+    },
+    {
+      "address": "0x8059a148",
+      "name": "KartSub_validate_8059a148",
+      "confidence": "address_range",
+      "size": 488
+    },
+    {
+      "address": "0x8059a39c",
+      "name": "KartSub_validate_8059a39c",
+      "confidence": "address_range",
+      "size": 408
+    },
+    {
+      "address": "0x8059a5a0",
+      "name": "kart_KartSub_8059a5a0",
+      "confidence": "address_range",
+      "size": 164
+    },
+    {
+      "address": "0x8059a644",
+      "name": "KartSub_validate_8059a644",
+      "confidence": "address_range",
+      "size": 272
+    },
+    {
+      "address": "0x8059a810",
+      "name": "KartSub_validate_8059a810",
+      "confidence": "address_range",
+      "size": 92
+    },
+    {
+      "address": "0x8059a8fc",
+      "name": "KartSub_validate_8059a8fc",
+      "confidence": "address_range",
+      "size": 184
+    },
+    {
+      "address": "0x8059aa18",
+      "name": "KartSub_validate_8059aa18",
+      "confidence": "address_range",
+      "size": 36
+    },
+    {
+      "address": "0x8059ab1c",
+      "name": "KartSub_validate_8059ab1c",
+      "confidence": "address_range",
+      "size": 368
+    },
+    {
+      "address": "0x8059acec",
+      "name": "KartSub_validate_8059acec",
+      "confidence": "address_range",
+      "size": 32
+    },
+    {
+      "address": "0x8059adec",
+      "name": "KartSub_validate_8059adec",
+      "confidence": "address_range",
+      "size": 96
+    },
+    {
+      "address": "0x8059aeb0",
+      "name": "KartSub_validate_8059aeb0",
+      "confidence": "address_range",
+      "size": 60
+    },
+    {
+      "address": "0x8059af54",
+      "name": "KartSub_validate_8059af54",
+      "confidence": "address_range",
+      "size": 144
+    },
+    {
+      "address": "0x8059b080",
+      "name": "KartDynamics_Wheel_validate_8059b080",
+      "confidence": "address_range",
+      "size": 68
+    },
+    {
+      "address": "0x8059b124",
+      "name": "KartDynamics_Wheel_validate_8059b124",
+      "confidence": "address_range",
+      "size": 116
+    },
+    {
+      "address": "0x8059b224",
+      "name": "KartDynamics_Wheel_validate_8059b224",
+      "confidence": "address_range",
+      "size": 68
+    },
+    {
+      "address": "0x8059b2c8",
+      "name": "KartDynamics_Wheel_validate_8059b2c8",
+      "confidence": "address_range",
+      "size": 428
+    },
+    {
+      "address": "0x8059b4b8",
+      "name": "kart_KartDynamics_Wheel_8059b4b8",
+      "confidence": "address_range",
+      "size": 596
+    },
+    {
+      "address": "0x8059b774",
+      "name": "kart_KartDynamics_Wheel_8059b774",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8059b954",
+      "name": "KartDynamics_Wheel_validate_8059b954",
+      "confidence": "address_range",
+      "size": 324
+    },
+    {
+      "address": "0x8059bb28",
+      "name": "kart_KartDynamics_Wheel_8059bb28",
+      "confidence": "address_range",
+      "size": 152
+    },
+    {
+      "address": "0x8059bbc0",
+      "name": "KartDynamics_Wheel_validate_8059bbc0",
+      "confidence": "address_range",
+      "size": 104
+    },
+    {
+      "address": "0x8059bcd8",
+      "name": "KartDynamics_Wheel_validate_8059bcd8",
+      "confidence": "address_range",
+      "size": 56
+    },
+    {
+      "address": "0x8059bd58",
+      "name": "kart_KartDynamics_Wheel_8059bd58",
+      "confidence": "address_range",
+      "size": 208
+    },
+    {
+      "address": "0x8059be28",
+      "name": "kart_KartDynamics_Wheel_8059be28",
+      "confidence": "address_range",
+      "size": 168
+    },
+    {
+      "address": "0x8059bed0",
+      "name": "KartDynamics_Wheel_validate_8059bed0",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x8059c018",
+      "name": "kart_KartDynamics_Wheel_8059c018",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8059c230",
+      "name": "KartDynamics_Wheel_validate_8059c230",
+      "confidence": "address_range",
+      "size": 32
+    },
+    {
+      "address": "0x8059c2b4",
+      "name": "KartDynamics_Wheel_validate_8059c2b4",
+      "confidence": "address_range",
+      "size": 32
+    },
+    {
+      "address": "0x8059c354",
+      "name": "kart_KartDynamics_Wheel_8059c354",
+      "confidence": "address_range",
+      "size": 212
+    },
+    {
+      "address": "0x8059c428",
+      "name": "KartDynamics_Wheel_validate_8059c428",
+      "confidence": "address_range",
+      "size": 72
+    },
+    {
+      "address": "0x8059c53c",
+      "name": "KartDynamics_Wheel_validate_8059c53c",
+      "confidence": "address_range",
+      "size": 244
+    },
+    {
+      "address": "0x8059c734",
+      "name": "kart_KartDynamics_Wheel_8059c734",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8059cbd4",
+      "name": "kart_KartDynamics_Wheel_8059cbd4",
+      "confidence": "address_range",
+      "size": 204
+    },
+    {
+      "address": "0x8059cca0",
+      "name": "kart_KartDynamics_Wheel_8059cca0",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8059d130",
+      "name": "kart_KartDynamics_Tire_8059d130",
+      "confidence": "address_range",
+      "size": 204
+    },
+    {
+      "address": "0x8059d1fc",
+      "name": "kart_KartDynamics_Tire_8059d1fc",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8059d68c",
+      "name": "kart_KartDynamics_Tire_8059d68c",
+      "confidence": "address_range",
+      "size": 204
+    },
+    {
+      "address": "0x8059d758",
+      "name": "kart_KartDynamics_Tire_8059d758",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8059db0c",
+      "name": "kart_KartDynamics_Tire_8059db0c",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8059df84",
+      "name": "kart_KartDynamics_Tire_8059df84",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x8059df98",
+      "name": "kart_KartDynamics_Tire_8059df98",
+      "confidence": "address_range",
+      "size": 36
+    },
+    {
+      "address": "0x8059dfbc",
+      "name": "kart_KartDynamics_Tire_8059dfbc",
+      "confidence": "address_range",
+      "size": 488
+    },
+    {
+      "address": "0x8059e1a4",
+      "name": "kart_KartDynamics_Tire_8059e1a4",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8059e504",
+      "name": "kart_KartDynamics_Tire_8059e504",
+      "confidence": "address_range",
+      "size": 476
+    },
+    {
+      "address": "0x8059e6e0",
+      "name": "kart_KartDynamics_Tire_8059e6e0",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8059e9d4",
+      "name": "kart_KartDynamics_Tire_8059e9d4",
+      "confidence": "address_range",
+      "size": 460
+    },
+    {
+      "address": "0x8059eba0",
+      "name": "kart_KartDynamics_Tire_8059eba0",
+      "confidence": "address_range",
+      "size": 176
+    },
+    {
+      "address": "0x8059ec50",
+      "name": "kart_KartDynamics_Tire_8059ec50",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8059f0e8",
+      "name": "kart_KartDynamics_Tire_8059f0e8",
+      "confidence": "address_range",
+      "size": 664
+    },
+    {
+      "address": "0x8059f380",
+      "name": "kart_KartDynamics_Tire_8059f380",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8059f604",
+      "name": "KartDynamics_Tire_validate_8059f604",
+      "confidence": "address_range",
+      "size": 172
+    },
+    {
+      "address": "0x8059f81c",
+      "name": "kart_KartDynamics_Tire_8059f81c",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8059fb28",
+      "name": "kart_KartDynamics_Tire_8059fb28",
+      "confidence": "address_range",
+      "size": 392
+    },
+    {
+      "address": "0x8059fcb0",
+      "name": "kart_KartDynamics_Tire_8059fcb0",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8059ff4c",
+      "name": "kart_KartDynamics_Tire_8059ff4c",
+      "confidence": "address_range",
+      "size": 392
+    },
+    {
+      "address": "0x805a00d4",
+      "name": "kart_KartDynamics_Tire_805a00d4",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805a036c",
+      "name": "kart_KartDynamics_Tire_805a036c",
+      "confidence": "address_range",
+      "size": 388
+    },
+    {
+      "address": "0x805a04f0",
+      "name": "KartDynamics_Tire_assertFail_805a04f0",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x805a07cc",
+      "name": "kart_KartDynamics_Tire_805a07cc",
+      "confidence": "address_range",
+      "size": 592
+    },
+    {
+      "address": "0x805a0a1c",
+      "name": "kart_KartDynamics_Tire_805a0a1c",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805a1334",
+      "name": "kart_KartDynamics_805a1334",
+      "confidence": "address_range",
+      "size": 3728
+    },
+    {
+      "address": "0x805a21c4",
+      "name": "KartDynamics_assertFail_805a21c4",
+      "confidence": "address_range",
+      "size": 36
+    },
+    {
+      "address": "0x805a2334",
+      "name": "kart_KartDynamics_805a2334",
+      "confidence": "address_range",
+      "size": 72
+    },
+    {
+      "address": "0x805a237c",
+      "name": "KartDynamics_assertFail_805a237c",
+      "confidence": "address_range",
+      "size": 36
+    },
+    {
+      "address": "0x805a2498",
+      "name": "kart_KartDynamics_805a2498",
+      "confidence": "address_range",
+      "size": 72
+    },
+    {
+      "address": "0x805a24e0",
+      "name": "KartDynamics_assertFail_805a24e0",
+      "confidence": "address_range",
+      "size": 32
+    },
+    {
+      "address": "0x805a257c",
+      "name": "KartDynamics_validate_805a257c",
+      "confidence": "address_range",
+      "size": 428
+    },
+    {
+      "address": "0x805a2878",
+      "name": "kart_KartDynamics_805a2878",
+      "confidence": "address_range",
+      "size": 332
+    },
+    {
+      "address": "0x805a29c4",
+      "name": "kart_KartDynamics_805a29c4",
+      "confidence": "address_range",
+      "size": 1360
+    },
+    {
+      "address": "0x805a2f14",
+      "name": "KartDynamics_validate_805a2f14",
+      "confidence": "address_range",
+      "size": 40
+    },
+    {
+      "address": "0x805a2ff8",
+      "name": "kart_KartDynamics_805a2ff8",
+      "confidence": "address_range",
+      "size": 124
+    },
+    {
+      "address": "0x805a3074",
+      "name": "kart_KartDynamics_805a3074",
+      "confidence": "address_range",
+      "size": 572
+    },
+    {
+      "address": "0x805a32b0",
+      "name": "kart_KartDynamics_805a32b0",
+      "confidence": "address_range",
+      "size": 308
+    },
+    {
+      "address": "0x805a33e4",
+      "name": "kart_KartDynamics_805a33e4",
+      "confidence": "address_range",
+      "size": 220
+    },
+    {
+      "address": "0x805a34c0",
+      "name": "kart_KartDynamics_805a34c0",
+      "confidence": "address_range",
+      "size": 88
+    },
+    {
+      "address": "0x805a3518",
+      "name": "kart_KartDynamics_805a3518",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805a35f8",
+      "name": "kart_KartDynamics_805a35f8",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805a36dc",
+      "name": "KartDynamics_validate_805a36dc",
+      "confidence": "address_range",
+      "size": 64
+    },
+    {
+      "address": "0x805a3758",
+      "name": "kart_KartDynamics_805a3758",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805a38bc",
+      "name": "KartDynamics_validate_805a38bc",
+      "confidence": "address_range",
+      "size": 112
+    },
+    {
+      "address": "0x805a3a34",
+      "name": "kart_KartDynamics_805a3a34",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805a3b88",
+      "name": "kart_KartDynamics_805a3b88",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805a3d20",
+      "name": "KartDynamics_assertFail_805a3d20",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x805a3df8",
+      "name": "KartDynamics_validate_805a3df8",
+      "confidence": "address_range",
+      "size": 116
+    },
+    {
+      "address": "0x805a3ee0",
+      "name": "kart_KartDynamics_805a3ee0",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805a408c",
+      "name": "KartDynamics_assertFail_805a408c",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x805a41d0",
+      "name": "KartDynamics_validate_805a41d0",
+      "confidence": "address_range",
+      "size": 84
+    },
+    {
+      "address": "0x805a42bc",
+      "name": "kart_KartDynamics_805a42bc",
+      "confidence": "address_range",
+      "size": 84
+    },
+    {
+      "address": "0x805a4310",
+      "name": "kart_KartDynamics_805a4310",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x805a4374",
+      "name": "kart_KartDynamics_805a4374",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805a5148",
+      "name": "kart_KartDynamics_805a5148",
+      "confidence": "address_range",
+      "size": 148
+    },
+    {
+      "address": "0x805a51dc",
+      "name": "KartDynamics_updateBothVelocities",
+      "confidence": "uncertain",
+      "size": 16
+    },
+    {
+      "address": "0x805a55c0",
+      "name": "kart_KartDynamics_805a55c0",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x805a5624",
+      "name": "kart_KartDynamics_805a5624",
+      "confidence": "address_range",
+      "size": 36
+    },
+    {
+      "address": "0x805a5650",
+      "name": "kart_KartDynamics_805a5650",
+      "confidence": "address_range",
+      "size": 4
+    },
+    {
+      "address": "0x805a5658",
+      "name": "kart_KartDynamics_805a5658",
+      "confidence": "address_range",
+      "size": 136
+    },
+    {
+      "address": "0x805a56e0",
+      "name": "KartDynamics_validate_805a56e0",
+      "confidence": "address_range",
+      "size": 36
+    },
+    {
+      "address": "0x805a5740",
+      "name": "KartDynamics_validate_805a5740",
+      "confidence": "address_range",
+      "size": 36
+    },
+    {
+      "address": "0x805a57a0",
+      "name": "KartDynamics_validate_805a57a0",
+      "confidence": "address_range",
+      "size": 48
+    },
+    {
+      "address": "0x805a581c",
+      "name": "KartDynamics_validate_805a581c",
+      "confidence": "address_range",
+      "size": 48
+    },
+    {
+      "address": "0x805a589c",
+      "name": "KartDynamics_validate_805a589c",
+      "confidence": "address_range",
+      "size": 256
+    },
+    {
+      "address": "0x805a5a34",
+      "name": "KartDynamics_validate_805a5a34",
+      "confidence": "address_range",
+      "size": 84
+    },
+    {
+      "address": "0x805a5a98",
+      "name": "kart_KartDynamics_805a5a98",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805a5c44",
+      "name": "KartDynamics_validate_805a5c44",
+      "confidence": "address_range",
+      "size": 136
+    },
+    {
+      "address": "0x805a5d18",
+      "name": "KartDynamics_validate_805a5d18",
+      "confidence": "address_range",
+      "size": 304
+    },
+    {
+      "address": "0x805a5ea0",
+      "name": "kart_KartDynamics_805a5ea0",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805a6144",
+      "name": "kart_KartDynamics_805a6144",
+      "confidence": "address_range",
+      "size": 840
+    },
+    {
+      "address": "0x805a648c",
+      "name": "kart_KartDynamics_805a648c",
+      "confidence": "address_range",
+      "size": 304
+    },
+    {
+      "address": "0x805a6630",
+      "name": "KartDynamics_calc_805a6630",
+      "confidence": "address_range",
+      "size": 820
+    },
+    {
+      "address": "0x805a6ac4",
+      "name": "KartDynamics_validate_805a6ac4",
+      "confidence": "address_range",
+      "size": 312
+    },
+    {
+      "address": "0x805a6ce8",
+      "name": "KartDynamics_validate_805a6ce8",
+      "confidence": "address_range",
+      "size": 252
+    },
+    {
+      "address": "0x805a6f0c",
+      "name": "KartDynamics_validate_805a6f0c",
+      "confidence": "address_range",
+      "size": 64
+    },
+    {
+      "address": "0x805a6f4c",
+      "name": "kart_KartDynamics_805a6f4c",
+      "confidence": "address_range",
+      "size": 16
+    }
+  ]
+}

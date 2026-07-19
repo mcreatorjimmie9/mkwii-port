@@ -1,0 +1,209 @@
+{
+  "module": "ItemSystem",
+  "total_functions": 33,
+  "address_range": {
+    "min": "0x8065e1b0",
+    "max": "0x80660f4c"
+  },
+  "known_functions": [],
+  "all_functions": [
+    {
+      "address": "0x8065e1b0",
+      "name": "ItemBehaviour_assertFail_8065e1b0",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x8065e674",
+      "name": "ItemBehaviour_validate_8065e674",
+      "confidence": "address_range",
+      "size": 28
+    },
+    {
+      "address": "0x8065e930",
+      "name": "item_ItemBehaviour_8065e930",
+      "confidence": "address_range",
+      "size": 96
+    },
+    {
+      "address": "0x8065e990",
+      "name": "ItemBehaviour_validate_8065e990",
+      "confidence": "address_range",
+      "size": 36
+    },
+    {
+      "address": "0x8065eb44",
+      "name": "ItemBehaviour_validate_8065eb44",
+      "confidence": "address_range",
+      "size": 308
+    },
+    {
+      "address": "0x8065ec88",
+      "name": "ItemBehaviour_validate_8065ec88",
+      "confidence": "address_range",
+      "size": 756
+    },
+    {
+      "address": "0x8065f014",
+      "name": "item_ItemBehaviour_8065f014",
+      "confidence": "address_range",
+      "size": 24
+    },
+    {
+      "address": "0x8065f02c",
+      "name": "item_ItemBehaviour_8065f02c",
+      "confidence": "address_range",
+      "size": 296
+    },
+    {
+      "address": "0x8065f154",
+      "name": "item_ItemBehaviour_8065f154",
+      "confidence": "address_range",
+      "size": 208
+    },
+    {
+      "address": "0x8065f224",
+      "name": "item_ItemBehaviour_8065f224",
+      "confidence": "address_range",
+      "size": 216
+    },
+    {
+      "address": "0x8065f2fc",
+      "name": "item_ItemBehaviour_8065f2fc",
+      "confidence": "address_range",
+      "size": 328
+    },
+    {
+      "address": "0x8065f444",
+      "name": "item_ItemBehaviour_8065f444",
+      "confidence": "address_range",
+      "size": 60
+    },
+    {
+      "address": "0x8065f480",
+      "name": "item_ItemBehaviour_8065f480",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8065f69c",
+      "name": "ItemBehaviour_validate_8065f69c",
+      "confidence": "address_range",
+      "size": 236
+    },
+    {
+      "address": "0x8065f804",
+      "name": "ItemBehaviour_assertFail_8065f804",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x8065f9e8",
+      "name": "ItemBehaviour_validate_8065f9e8",
+      "confidence": "address_range",
+      "size": 64
+    },
+    {
+      "address": "0x8065faf8",
+      "name": "ItemBehaviour_assertFail_8065faf8",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x8065fc08",
+      "name": "item_ItemBehaviour_8065fc08",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8066013c",
+      "name": "item_ItemBehaviour_8066013c",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x806604e0",
+      "name": "item_ItemBehaviour_806604e0",
+      "confidence": "address_range",
+      "size": 168
+    },
+    {
+      "address": "0x80660588",
+      "name": "item_ItemBehaviour_80660588",
+      "confidence": "address_range",
+      "size": 236
+    },
+    {
+      "address": "0x80660674",
+      "name": "ItemBehaviour_validate_80660674",
+      "confidence": "address_range",
+      "size": 156
+    },
+    {
+      "address": "0x8066082c",
+      "name": "item_ItemBehaviour_8066082c",
+      "confidence": "address_range",
+      "size": 164
+    },
+    {
+      "address": "0x806608d0",
+      "name": "ItemBehaviour_validate_806608d0",
+      "confidence": "address_range",
+      "size": 120
+    },
+    {
+      "address": "0x80660958",
+      "name": "ItemBehaviour_validate_80660958",
+      "confidence": "address_range",
+      "size": 108
+    },
+    {
+      "address": "0x80660a0c",
+      "name": "ItemBehaviour_validate_80660a0c",
+      "confidence": "address_range",
+      "size": 48
+    },
+    {
+      "address": "0x80660a9c",
+      "name": "ItemBehaviour_validate_80660a9c",
+      "confidence": "address_range",
+      "size": 112
+    },
+    {
+      "address": "0x80660b50",
+      "name": "item_ItemBehaviour_80660b50",
+      "confidence": "address_range",
+      "size": 140
+    },
+    {
+      "address": "0x80660bdc",
+      "name": "ItemBehaviour_validate_80660bdc",
+      "confidence": "address_range",
+      "size": 56
+    },
+    {
+      "address": "0x80660d78",
+      "name": "item_ItemBehaviour_80660d78",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x80660e24",
+      "name": "ItemBehaviour_validate_80660e24",
+      "confidence": "address_range",
+      "size": 64
+    },
+    {
+      "address": "0x80660e64",
+      "name": "item_ItemBehaviour_80660e64",
+      "confidence": "address_range",
+      "size": 216
+    },
+    {
+      "address": "0x80660f4c",
+      "name": "ItemBehaviour_validate_80660f4c",
+      "confidence": "address_range",
+      "size": 248
+    }
+  ]
+}

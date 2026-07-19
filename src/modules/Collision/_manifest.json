@@ -1,0 +1,509 @@
+{
+  "module": "Collision",
+  "total_functions": 83,
+  "address_range": {
+    "min": "0x805701c0",
+    "max": "0x805bcfd0"
+  },
+  "known_functions": [],
+  "all_functions": [
+    {
+      "address": "0x805701c0",
+      "name": "KartCollide_validate_805701c0",
+      "confidence": "address_range",
+      "size": 72
+    },
+    {
+      "address": "0x80570274",
+      "name": "col_KartCollide_80570274",
+      "confidence": "address_range",
+      "size": 112
+    },
+    {
+      "address": "0x805702f4",
+      "name": "col_KartCollide_805702f4",
+      "confidence": "address_range",
+      "size": 84
+    },
+    {
+      "address": "0x80570348",
+      "name": "col_KartCollide_80570348",
+      "confidence": "address_range",
+      "size": 84
+    },
+    {
+      "address": "0x8057039c",
+      "name": "col_KartCollide_8057039c",
+      "confidence": "address_range",
+      "size": 84
+    },
+    {
+      "address": "0x80570408",
+      "name": "col_KartCollide_80570408",
+      "confidence": "address_range",
+      "size": 252
+    },
+    {
+      "address": "0x80570514",
+      "name": "col_KartCollide_80570514",
+      "confidence": "address_range",
+      "size": 252
+    },
+    {
+      "address": "0x80570620",
+      "name": "col_KartCollide_80570620",
+      "confidence": "address_range",
+      "size": 252
+    },
+    {
+      "address": "0x805707e4",
+      "name": "col_KartCollide_805707e4",
+      "confidence": "address_range",
+      "size": 184
+    },
+    {
+      "address": "0x8057089c",
+      "name": "col_KartCollide_8057089c",
+      "confidence": "address_range",
+      "size": 184
+    },
+    {
+      "address": "0x80570954",
+      "name": "col_KartCollide_80570954",
+      "confidence": "address_range",
+      "size": 184
+    },
+    {
+      "address": "0x80570a0c",
+      "name": "col_KartCollide_80570a0c",
+      "confidence": "address_range",
+      "size": 252
+    },
+    {
+      "address": "0x80570b08",
+      "name": "col_KartCollide_80570b08",
+      "confidence": "address_range",
+      "size": 252
+    },
+    {
+      "address": "0x80570c04",
+      "name": "col_KartCollide_80570c04",
+      "confidence": "address_range",
+      "size": 252
+    },
+    {
+      "address": "0x80570dc8",
+      "name": "col_KartCollide_80570dc8",
+      "confidence": "address_range",
+      "size": 184
+    },
+    {
+      "address": "0x80570e80",
+      "name": "col_KartCollide_80570e80",
+      "confidence": "address_range",
+      "size": 184
+    },
+    {
+      "address": "0x80570f38",
+      "name": "col_KartCollide_80570f38",
+      "confidence": "address_range",
+      "size": 184
+    },
+    {
+      "address": "0x80570ff0",
+      "name": "col_KartCollide_80570ff0",
+      "confidence": "address_range",
+      "size": 84
+    },
+    {
+      "address": "0x805710dc",
+      "name": "col_KartCollide_805710dc",
+      "confidence": "address_range",
+      "size": 68
+    },
+    {
+      "address": "0x80571120",
+      "name": "KartCollide_validate_80571120",
+      "confidence": "address_range",
+      "size": 48
+    },
+    {
+      "address": "0x805711b8",
+      "name": "col_KartCollide_805711b8",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805712f0",
+      "name": "col_KartCollide_805712f0",
+      "confidence": "address_range",
+      "size": 92
+    },
+    {
+      "address": "0x80571360",
+      "name": "col_KartCollide_80571360",
+      "confidence": "address_range",
+      "size": 84
+    },
+    {
+      "address": "0x805713cc",
+      "name": "col_KartCollide_805713cc",
+      "confidence": "address_range",
+      "size": 88
+    },
+    {
+      "address": "0x80571440",
+      "name": "KartCollide_validate_80571440",
+      "confidence": "address_range",
+      "size": 64
+    },
+    {
+      "address": "0x80571568",
+      "name": "KartCollide_assertFail_80571568",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x80571a3c",
+      "name": "KartCollide_validate_80571a3c",
+      "confidence": "address_range",
+      "size": 88
+    },
+    {
+      "address": "0x80571ab0",
+      "name": "KartCollide_assertFail_80571ab0",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x80571d78",
+      "name": "KartCollide_validate_80571d78",
+      "confidence": "address_range",
+      "size": 224
+    },
+    {
+      "address": "0x80572354",
+      "name": "KartCollide_validate_80572354",
+      "confidence": "address_range",
+      "size": 208
+    },
+    {
+      "address": "0x805725b8",
+      "name": "KartCollide_validate_805725b8",
+      "confidence": "address_range",
+      "size": 64
+    },
+    {
+      "address": "0x805725f8",
+      "name": "col_KartCollide_805725f8",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805733d4",
+      "name": "col_KartCollide_805733d4",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805741b0",
+      "name": "col_KartCollide_805741b0",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x80574f8c",
+      "name": "col_KartCollide_80574f8c",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805b7240",
+      "name": "Hitbox_validate_805b7240",
+      "confidence": "address_range",
+      "size": 844
+    },
+    {
+      "address": "0x805b75d4",
+      "name": "col_Hitbox_805b75d4",
+      "confidence": "address_range",
+      "size": 120
+    },
+    {
+      "address": "0x805b764c",
+      "name": "Hitbox_calc_805b764c",
+      "confidence": "address_range",
+      "size": 528
+    },
+    {
+      "address": "0x805b78c4",
+      "name": "col_Hitbox_805b78c4",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805b7ac4",
+      "name": "Hitbox_validate_805b7ac4",
+      "confidence": "address_range",
+      "size": 76
+    },
+    {
+      "address": "0x805b7b3c",
+      "name": "col_Hitbox_805b7b3c",
+      "confidence": "address_range",
+      "size": 136
+    },
+    {
+      "address": "0x805b7c50",
+      "name": "col_Hitbox_805b7c50",
+      "confidence": "address_range",
+      "size": 144
+    },
+    {
+      "address": "0x805b7ce8",
+      "name": "Hitbox_validate_805b7ce8",
+      "confidence": "address_range",
+      "size": 152
+    },
+    {
+      "address": "0x805b7dd8",
+      "name": "Hitbox_assertFail_805b7dd8",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x805b84b8",
+      "name": "Hitbox_validate_805b84b8",
+      "confidence": "address_range",
+      "size": 92
+    },
+    {
+      "address": "0x805b858c",
+      "name": "col_Hitbox_805b858c",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805b87fc",
+      "name": "col_Hitbox_805b87fc",
+      "confidence": "address_range",
+      "size": 284
+    },
+    {
+      "address": "0x805b892c",
+      "name": "col_Hitbox_805b892c",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805b8e1c",
+      "name": "col_Hitbox_805b8e1c",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805b916c",
+      "name": "col_Hitbox_805b916c",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805b932c",
+      "name": "col_Hitbox_805b932c",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805b94ec",
+      "name": "col_Hitbox_805b94ec",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805b982c",
+      "name": "col_Hitbox_805b982c",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805b9b6c",
+      "name": "Hitbox_assertFail_805b9b6c",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x805b9e00",
+      "name": "Hitbox_assertFail_805b9e00",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x805ba094",
+      "name": "col_Hitbox_805ba094",
+      "confidence": "address_range",
+      "size": 340
+    },
+    {
+      "address": "0x805ba1e8",
+      "name": "col_Hitbox_805ba1e8",
+      "confidence": "address_range",
+      "size": 340
+    },
+    {
+      "address": "0x805ba57c",
+      "name": "col_Hitbox_805ba57c",
+      "confidence": "address_range",
+      "size": 284
+    },
+    {
+      "address": "0x805ba698",
+      "name": "col_Hitbox_805ba698",
+      "confidence": "address_range",
+      "size": 280
+    },
+    {
+      "address": "0x805ba7b0",
+      "name": "col_Hitbox_805ba7b0",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805ba98c",
+      "name": "col_Hitbox_805ba98c",
+      "confidence": "address_range",
+      "size": 228
+    },
+    {
+      "address": "0x805baabc",
+      "name": "col_Hitbox_805baabc",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805babd0",
+      "name": "col_Hitbox_805babd0",
+      "confidence": "address_range",
+      "size": 452
+    },
+    {
+      "address": "0x805bad9c",
+      "name": "col_Hitbox_805bad9c",
+      "confidence": "address_range",
+      "size": 144
+    },
+    {
+      "address": "0x805bae5c",
+      "name": "Hitbox_validate_805bae5c",
+      "confidence": "address_range",
+      "size": 64
+    },
+    {
+      "address": "0x805baea4",
+      "name": "col_Hitbox_805baea4",
+      "confidence": "address_range",
+      "size": 144
+    },
+    {
+      "address": "0x805baf64",
+      "name": "Hitbox_validate_805baf64",
+      "confidence": "address_range",
+      "size": 64
+    },
+    {
+      "address": "0x805bafac",
+      "name": "col_Hitbox_805bafac",
+      "confidence": "address_range",
+      "size": 76
+    },
+    {
+      "address": "0x805bb028",
+      "name": "CollisionDetection_validate_805bb028",
+      "confidence": "address_range",
+      "size": 64
+    },
+    {
+      "address": "0x805bb070",
+      "name": "col_CollisionDetection_805bb070",
+      "confidence": "address_range",
+      "size": 76
+    },
+    {
+      "address": "0x805bb0ec",
+      "name": "CollisionDetection_validate_805bb0ec",
+      "confidence": "address_range",
+      "size": 64
+    },
+    {
+      "address": "0x805bb144",
+      "name": "col_CollisionDetection_805bb144",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805bbb18",
+      "name": "CollisionDetection_validate_805bbb18",
+      "confidence": "address_range",
+      "size": 84
+    },
+    {
+      "address": "0x805bbb7c",
+      "name": "CollisionDetection_validate_805bbb7c",
+      "confidence": "address_range",
+      "size": 108
+    },
+    {
+      "address": "0x805bbbe8",
+      "name": "col_CollisionDetection_805bbbe8",
+      "confidence": "address_range",
+      "size": 56
+    },
+    {
+      "address": "0x805bbc20",
+      "name": "col_CollisionDetection_805bbc20",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805bbd74",
+      "name": "CollisionDetection_assertFail_805bbd74",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x805bc12c",
+      "name": "CollisionDetection_validate_805bc12c",
+      "confidence": "address_range",
+      "size": 136
+    },
+    {
+      "address": "0x805bc588",
+      "name": "CollisionDetection_assertFail_805bc588",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x805bc9e0",
+      "name": "CollisionDetection_calc_805bc9e0",
+      "confidence": "address_range",
+      "size": 888
+    },
+    {
+      "address": "0x805bcd58",
+      "name": "CollisionDetection_validate_805bcd58",
+      "confidence": "address_range",
+      "size": 120
+    },
+    {
+      "address": "0x805bce58",
+      "name": "col_CollisionDetection_805bce58",
+      "confidence": "address_range",
+      "size": 256
+    },
+    {
+      "address": "0x805bcfd0",
+      "name": "col_CollisionDetection_805bcfd0",
+      "confidence": "address_range",
+      "size": 152
+    }
+  ]
+}

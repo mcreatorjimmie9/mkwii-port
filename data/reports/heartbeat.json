@@ -1,6 +1,6 @@
 {
-  "last_update": "2026-07-19T01:10:00Z",
-  "phase": "Phase 4 — StaticR.rel analysis COMPLETE",
+  "last_update": "2026-07-19T01:45:00Z",
+  "phase": "Phase 5 — Function Classification and Unified Source Tree COMPLETE",
   "status": "in_progress",
   "ghidra_installed": true,
   "ghidra_version": "11.2.1",
@@ -16,14 +16,48 @@
     "total_output_mb": 48,
     "notes": "Full decompilation complete. Output in data/ghidra_staticr/ (48MB, too large for git)."
   },
+  "phase5_classification": {
+    "script": "/home/z/my-project/scripts/classify_functions.py",
+    "total_classified": 11330,
+    "total_known_symbols_loaded": 601,
+    "known_symbol_exact_matches": 5,
+    "classification_method": "address_range",
+    "output_files": {
+      "classification_map": "data/reports/classification_map.json",
+      "source_tree": "src/modules/"
+    },
+    "module_distribution": {
+      "Runtime": 3827,
+      "UI": 2065,
+      "Scene": 1708,
+      "Rendering": 1130,
+      "Audio": 942,
+      "Data": 438,
+      "AIRace": 336,
+      "KartMovement": 268,
+      "Network": 171,
+      "RaceEngine": 168,
+      "Physics": 161,
+      "Collision": 83,
+      "ItemSystem": 33
+    },
+    "source_tree_modules": [
+      "Physics", "KartMovement", "Collision", "RaceEngine", "AIRace",
+      "ItemSystem", "Network", "UI", "Audio", "Rendering", "Scene",
+      "Runtime", "Data"
+    ],
+    "notes": "Most known symbols (from snailspeed3) reference addresses above 0x80780000, which is outside the Ghidra-decompiled range (0x80400000-0x80780000). Classification relies primarily on address range analysis."
+  },
   "tools": {
     "ghidra_headless": "/home/z/ghidra_11.2.1_PUBLIC/support/analyzeHeadless (JRE mode)",
     "dol2elf": "/home/z/my-project/scripts/dol2elf.py",
-    "rel2elf": "/home/z/my-project/scripts/rel2elf.py"
+    "rel2elf": "/home/z/my-project/scripts/rel2elf.py",
+    "classify_functions": "/home/z/my-project/scripts/classify_functions.py"
   },
   "next_steps": [
-    "Combine StaticR (11K functions) with main.dol (54 functions) into unified codebase",
-    "Phase 5: Function signature recovery + cross-module linking",
-    "Phase 6: Module reconstruction and validation"
+    "Phase 6: Module reconstruction — clean up generated names, resolve cross-references",
+    "Expand known symbol coverage by analyzing functions above 0x80780000",
+    "Cross-reference decompiled main.dol functions with StaticR functions",
+    "Begin type recovery for key classes (Player, KartDynamics, Racedata)"
   ]
 }

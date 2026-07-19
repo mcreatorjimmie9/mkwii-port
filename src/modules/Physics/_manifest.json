@@ -1,0 +1,977 @@
+{
+  "module": "Physics",
+  "total_functions": 161,
+  "address_range": {
+    "min": "0x80567350",
+    "max": "0x8058ff88"
+  },
+  "known_functions": [],
+  "all_functions": [
+    {
+      "address": "0x80567350",
+      "name": "EffectGroup_validate_80567350",
+      "confidence": "address_range",
+      "size": 160
+    },
+    {
+      "address": "0x805673f0",
+      "name": "phys_EffectGroup_805673f0",
+      "confidence": "address_range",
+      "size": 396
+    },
+    {
+      "address": "0x8056757c",
+      "name": "phys_EffectGroup_8056757c",
+      "confidence": "address_range",
+      "size": 144
+    },
+    {
+      "address": "0x8056760c",
+      "name": "phys_EffectGroup_8056760c",
+      "confidence": "address_range",
+      "size": 80
+    },
+    {
+      "address": "0x805676a0",
+      "name": "phys_EffectGroup_805676a0",
+      "confidence": "address_range",
+      "size": 124
+    },
+    {
+      "address": "0x80567780",
+      "name": "EffectGroup_validate_80567780",
+      "confidence": "address_range",
+      "size": 104
+    },
+    {
+      "address": "0x805677e8",
+      "name": "phys_EffectGroup_805677e8",
+      "confidence": "address_range",
+      "size": 116
+    },
+    {
+      "address": "0x8056785c",
+      "name": "phys_EffectGroup_8056785c",
+      "confidence": "address_range",
+      "size": 136
+    },
+    {
+      "address": "0x8056792c",
+      "name": "phys_EffectGroup_8056792c",
+      "confidence": "address_range",
+      "size": 944
+    },
+    {
+      "address": "0x80567cdc",
+      "name": "phys_EffectGroup_80567cdc",
+      "confidence": "address_range",
+      "size": 244
+    },
+    {
+      "address": "0x80567dd0",
+      "name": "EffectGroup_validate_80567dd0",
+      "confidence": "address_range",
+      "size": 156
+    },
+    {
+      "address": "0x80567e6c",
+      "name": "phys_EffectGroup_80567e6c",
+      "confidence": "address_range",
+      "size": 268
+    },
+    {
+      "address": "0x80567f78",
+      "name": "phys_EffectGroup_80567f78",
+      "confidence": "address_range",
+      "size": 384
+    },
+    {
+      "address": "0x805680f8",
+      "name": "phys_EffectGroup_805680f8",
+      "confidence": "address_range",
+      "size": 452
+    },
+    {
+      "address": "0x805682d4",
+      "name": "phys_EffectGroup_805682d4",
+      "confidence": "address_range",
+      "size": 104
+    },
+    {
+      "address": "0x8056833c",
+      "name": "phys_EffectGroup_8056833c",
+      "confidence": "address_range",
+      "size": 72
+    },
+    {
+      "address": "0x805683a8",
+      "name": "EffectGroup_validate_805683a8",
+      "confidence": "address_range",
+      "size": 28
+    },
+    {
+      "address": "0x805683d8",
+      "name": "EffectGroup_validate_805683d8",
+      "confidence": "address_range",
+      "size": 28
+    },
+    {
+      "address": "0x80568408",
+      "name": "EffectGroup_validate_80568408",
+      "confidence": "address_range",
+      "size": 28
+    },
+    {
+      "address": "0x80568458",
+      "name": "phys_EffectGroup_80568458",
+      "confidence": "address_range",
+      "size": 280
+    },
+    {
+      "address": "0x80568570",
+      "name": "EffectGroup_validate_80568570",
+      "confidence": "address_range",
+      "size": 160
+    },
+    {
+      "address": "0x80568610",
+      "name": "phys_EffectGroup_80568610",
+      "confidence": "address_range",
+      "size": 396
+    },
+    {
+      "address": "0x8056879c",
+      "name": "phys_EffectGroup_8056879c",
+      "confidence": "address_range",
+      "size": 84
+    },
+    {
+      "address": "0x80568808",
+      "name": "phys_EffectGroup_80568808",
+      "confidence": "address_range",
+      "size": 124
+    },
+    {
+      "address": "0x805688b4",
+      "name": "EffectGroup_validate_805688b4",
+      "confidence": "address_range",
+      "size": 68
+    },
+    {
+      "address": "0x80568910",
+      "name": "EffectGroup_validate_80568910",
+      "confidence": "address_range",
+      "size": 88
+    },
+    {
+      "address": "0x80568984",
+      "name": "EffectGroup_assertFail_80568984",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x80568adc",
+      "name": "phys_EffectGroup_80568adc",
+      "confidence": "address_range",
+      "size": 248
+    },
+    {
+      "address": "0x80568bd4",
+      "name": "phys_EffectGroup_80568bd4",
+      "confidence": "address_range",
+      "size": 152
+    },
+    {
+      "address": "0x80568c6c",
+      "name": "phys_EffectGroup_80568c6c",
+      "confidence": "address_range",
+      "size": 112
+    },
+    {
+      "address": "0x80568cdc",
+      "name": "phys_EffectGroup_80568cdc",
+      "confidence": "address_range",
+      "size": 96
+    },
+    {
+      "address": "0x80568d3c",
+      "name": "phys_EffectGroup_80568d3c",
+      "confidence": "address_range",
+      "size": 152
+    },
+    {
+      "address": "0x80568dd4",
+      "name": "phys_EffectGroup_80568dd4",
+      "confidence": "address_range",
+      "size": 56
+    },
+    {
+      "address": "0x80568e0c",
+      "name": "phys_EffectGroup_80568e0c",
+      "confidence": "address_range",
+      "size": 52
+    },
+    {
+      "address": "0x80568e40",
+      "name": "phys_EffectGroup_80568e40",
+      "confidence": "address_range",
+      "size": 228
+    },
+    {
+      "address": "0x80568f24",
+      "name": "phys_EffectGroup_80568f24",
+      "confidence": "address_range",
+      "size": 96
+    },
+    {
+      "address": "0x80568f94",
+      "name": "EffectGroup_assertFail_80568f94",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x80575d68",
+      "name": "phys_PlayerTrick_80575d68",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x80576188",
+      "name": "phys_PlayerTrick_80576188",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805765a0",
+      "name": "phys_PlayerTrick_805765a0",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x805768a4",
+      "name": "phys_PlayerTrick_805768a4",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x80576b9c",
+      "name": "PlayerTrick_assertFail_80576b9c",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x80576d94",
+      "name": "PlayerTrick_validate_80576d94",
+      "confidence": "address_range",
+      "size": 84
+    },
+    {
+      "address": "0x80576df8",
+      "name": "PlayerTrick_validate_80576df8",
+      "confidence": "address_range",
+      "size": 192
+    },
+    {
+      "address": "0x80576eb8",
+      "name": "phys_PlayerTrick_80576eb8",
+      "confidence": "address_range",
+      "size": 284
+    },
+    {
+      "address": "0x80576fd4",
+      "name": "phys_PlayerTrick_80576fd4",
+      "confidence": "address_range",
+      "size": 940
+    },
+    {
+      "address": "0x805780c4",
+      "name": "PlayerSub10_Core_validate_805780c4",
+      "confidence": "address_range",
+      "size": 64
+    },
+    {
+      "address": "0x80578104",
+      "name": "PlayerSub10_Core_calc_80578104",
+      "confidence": "address_range",
+      "size": 712
+    },
+    {
+      "address": "0x80578428",
+      "name": "PlayerSub10_Core_assertFail_80578428",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x80578810",
+      "name": "PlayerSub10_Core_validate_80578810",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x805788b4",
+      "name": "PlayerSub10_Core_validate_805788b4",
+      "confidence": "address_range",
+      "size": 112
+    },
+    {
+      "address": "0x805789c4",
+      "name": "phys_PlayerSub10_Core_805789c4",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x80578f18",
+      "name": "PlayerSub10_Core_validate_80578f18",
+      "confidence": "address_range",
+      "size": 224
+    },
+    {
+      "address": "0x80579690",
+      "name": "PlayerSub10_Core_validate_80579690",
+      "confidence": "address_range",
+      "size": 192
+    },
+    {
+      "address": "0x80579814",
+      "name": "phys_PlayerSub10_Core_80579814",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x80579e54",
+      "name": "phys_PlayerSub10_Core_80579e54",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8057a4a0",
+      "name": "phys_PlayerSub10_Core_8057a4a0",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8057ac00",
+      "name": "phys_PlayerSub10_Core_8057ac00",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8057b368",
+      "name": "PlayerSub10_Core_validate_8057b368",
+      "confidence": "address_range",
+      "size": 88
+    },
+    {
+      "address": "0x8057b3dc",
+      "name": "PlayerSub10_Core_validate_8057b3dc",
+      "confidence": "address_range",
+      "size": 220
+    },
+    {
+      "address": "0x8057b59c",
+      "name": "PlayerSub10_Core_validate_8057b59c",
+      "confidence": "address_range",
+      "size": 248
+    },
+    {
+      "address": "0x8057b780",
+      "name": "PlayerSub10_Core_validate_8057b780",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x8057b824",
+      "name": "phys_PlayerSub10_Core_8057b824",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8057b9e4",
+      "name": "PlayerSub10_Core_validate_8057b9e4",
+      "confidence": "address_range",
+      "size": 300
+    },
+    {
+      "address": "0x8057bbfc",
+      "name": "PlayerSub10_Core_validate_8057bbfc",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x8057bca0",
+      "name": "phys_PlayerSub10_Core_8057bca0",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8057be4c",
+      "name": "PlayerSub10_Core_assertFail_8057be4c",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x8057c07c",
+      "name": "PlayerSub10_Core_validate_8057c07c",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x8057c120",
+      "name": "phys_PlayerSub10_Core_8057c120",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8057c5f0",
+      "name": "PlayerSub10_Core_validate_8057c5f0",
+      "confidence": "address_range",
+      "size": 244
+    },
+    {
+      "address": "0x8057c7d0",
+      "name": "PlayerSub10_Core_validate_8057c7d0",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x8057c874",
+      "name": "phys_PlayerSub10_Core_8057c874",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8057caf4",
+      "name": "PlayerSub10_Core_validate_8057caf4",
+      "confidence": "address_range",
+      "size": 220
+    },
+    {
+      "address": "0x8057ce4c",
+      "name": "PlayerSub10_Core_validate_8057ce4c",
+      "confidence": "address_range",
+      "size": 64
+    },
+    {
+      "address": "0x8057ce8c",
+      "name": "phys_PlayerSub10_Core_8057ce8c",
+      "confidence": "address_range",
+      "size": 12
+    },
+    {
+      "address": "0x8057ce98",
+      "name": "phys_PlayerSub10_Core_8057ce98",
+      "confidence": "address_range",
+      "size": 4
+    },
+    {
+      "address": "0x8057ce9c",
+      "name": "phys_PlayerSub10_Core_8057ce9c",
+      "confidence": "address_range",
+      "size": 84
+    },
+    {
+      "address": "0x8057cef0",
+      "name": "phys_PlayerSub10_Core_8057cef0",
+      "confidence": "address_range",
+      "size": 84
+    },
+    {
+      "address": "0x8057cf44",
+      "name": "phys_PlayerSub10_Core_8057cf44",
+      "confidence": "address_range",
+      "size": 84
+    },
+    {
+      "address": "0x8057d008",
+      "name": "phys_PlayerSub10_Core_8057d008",
+      "confidence": "address_range",
+      "size": 40
+    },
+    {
+      "address": "0x8057d034",
+      "name": "phys_PlayerSub10_Core_8057d034",
+      "confidence": "address_range",
+      "size": 40
+    },
+    {
+      "address": "0x8057d060",
+      "name": "phys_PlayerSub10_Core_8057d060",
+      "confidence": "address_range",
+      "size": 40
+    },
+    {
+      "address": "0x8057d08c",
+      "name": "phys_PlayerSub10_Core_8057d08c",
+      "confidence": "address_range",
+      "size": 40
+    },
+    {
+      "address": "0x8057d0b8",
+      "name": "phys_PlayerSub10_Core_8057d0b8",
+      "confidence": "address_range",
+      "size": 40
+    },
+    {
+      "address": "0x8057d0e4",
+      "name": "phys_PlayerSub10_Core_8057d0e4",
+      "confidence": "address_range",
+      "size": 40
+    },
+    {
+      "address": "0x8057d110",
+      "name": "phys_PlayerSub10_Core_8057d110",
+      "confidence": "address_range",
+      "size": 120
+    },
+    {
+      "address": "0x8057d188",
+      "name": "phys_PlayerSub10_Core_8057d188",
+      "confidence": "address_range",
+      "size": 120
+    },
+    {
+      "address": "0x8057d200",
+      "name": "phys_PlayerSub10_Core_8057d200",
+      "confidence": "address_range",
+      "size": 28
+    },
+    {
+      "address": "0x8057d220",
+      "name": "phys_PlayerSub10_Core_8057d220",
+      "confidence": "address_range",
+      "size": 320
+    },
+    {
+      "address": "0x8057d360",
+      "name": "phys_PlayerSub10_Core_8057d360",
+      "confidence": "address_range",
+      "size": 56
+    },
+    {
+      "address": "0x8057d39c",
+      "name": "phys_PlayerSub10_Core_8057d39c",
+      "confidence": "address_range",
+      "size": 152
+    },
+    {
+      "address": "0x8057d434",
+      "name": "phys_PlayerSub10_Core_8057d434",
+      "confidence": "address_range",
+      "size": 40
+    },
+    {
+      "address": "0x8057d460",
+      "name": "phys_PlayerSub10_Core_8057d460",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8057d56c",
+      "name": "phys_PlayerSub10_Core_8057d56c",
+      "confidence": "address_range",
+      "size": 148
+    },
+    {
+      "address": "0x8057d600",
+      "name": "phys_PlayerSub10_Core_8057d600",
+      "confidence": "address_range",
+      "size": 240
+    },
+    {
+      "address": "0x8057d6f0",
+      "name": "phys_PlayerSub10_Core_8057d6f0",
+      "confidence": "address_range",
+      "size": 28
+    },
+    {
+      "address": "0x8057d70c",
+      "name": "phys_PlayerSub10_Core_8057d70c",
+      "confidence": "address_range",
+      "size": 152
+    },
+    {
+      "address": "0x8057d7a4",
+      "name": "PlayerSub10_Core_validate_8057d7a4",
+      "confidence": "address_range",
+      "size": 116
+    },
+    {
+      "address": "0x8057d920",
+      "name": "phys_PlayerSub10_Core_8057d920",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8057dbb0",
+      "name": "PlayerSub10_Core_validate_8057dbb0",
+      "confidence": "address_range",
+      "size": 1060
+    },
+    {
+      "address": "0x8057e448",
+      "name": "phys_PlayerSub10_Core_8057e448",
+      "confidence": "address_range",
+      "size": 12
+    },
+    {
+      "address": "0x8057e454",
+      "name": "phys_PlayerSub10_Core_8057e454",
+      "confidence": "address_range",
+      "size": 8
+    },
+    {
+      "address": "0x8057e460",
+      "name": "PlayerSub10_Core_validate_8057e460",
+      "confidence": "address_range",
+      "size": 64
+    },
+    {
+      "address": "0x8057e4a0",
+      "name": "PlayerSub10_Core_validate_8057e4a0",
+      "confidence": "address_range",
+      "size": 108
+    },
+    {
+      "address": "0x8057e5c0",
+      "name": "phys_PlayerSub10_Core_8057e5c0",
+      "confidence": "address_range",
+      "size": 176
+    },
+    {
+      "address": "0x8057e670",
+      "name": "phys_PlayerSub10_Core_8057e670",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8057ec5c",
+      "name": "PlayerSub10_Core_validate_8057ec5c",
+      "confidence": "address_range",
+      "size": 916
+    },
+    {
+      "address": "0x80583970",
+      "name": "phys_PlayerSub10_Misc_80583970",
+      "confidence": "address_range",
+      "size": 44
+    },
+    {
+      "address": "0x8058399c",
+      "name": "phys_PlayerSub10_Misc_8058399c",
+      "confidence": "address_range",
+      "size": 272
+    },
+    {
+      "address": "0x80583aac",
+      "name": "phys_PlayerSub10_Misc_80583aac",
+      "confidence": "address_range",
+      "size": 32
+    },
+    {
+      "address": "0x805842d4",
+      "name": "phys_PlayerSub10_Misc_805842d4",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x80584924",
+      "name": "PlayerSub10_Misc_validate_80584924",
+      "confidence": "address_range",
+      "size": 488
+    },
+    {
+      "address": "0x8058521c",
+      "name": "phys_PlayerSub10_Misc_8058521c",
+      "confidence": "address_range",
+      "size": 104
+    },
+    {
+      "address": "0x80585284",
+      "name": "phys_PlayerSub10_Misc_80585284",
+      "confidence": "address_range",
+      "size": 588
+    },
+    {
+      "address": "0x8058550c",
+      "name": "phys_PlayerSub10_Misc_8058550c",
+      "confidence": "address_range",
+      "size": 692
+    },
+    {
+      "address": "0x805857c0",
+      "name": "PlayerSub10_Misc_calc_805857c0",
+      "confidence": "address_range",
+      "size": 2328
+    },
+    {
+      "address": "0x80586908",
+      "name": "phys_PlayerSub10_Misc_80586908",
+      "confidence": "address_range",
+      "size": 556
+    },
+    {
+      "address": "0x80586b34",
+      "name": "phys_PlayerSub10_Misc_80586b34",
+      "confidence": "address_range",
+      "size": 160
+    },
+    {
+      "address": "0x80586bd4",
+      "name": "PlayerSub10_Misc_validate_80586bd4",
+      "confidence": "address_range",
+      "size": 56
+    },
+    {
+      "address": "0x80586c54",
+      "name": "PlayerSub10_Misc_validate_80586c54",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80586d50",
+      "name": "PlayerSub10_Misc_validate_80586d50",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x80586e4c",
+      "name": "phys_PlayerSub10_Misc_80586e4c",
+      "confidence": "address_range",
+      "size": 192
+    },
+    {
+      "address": "0x80586f0c",
+      "name": "phys_PlayerSub10_Misc_80586f0c",
+      "confidence": "address_range",
+      "size": 192
+    },
+    {
+      "address": "0x80586fcc",
+      "name": "PlayerSub10_Misc_validate_80586fcc",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x805870dc",
+      "name": "PlayerSub10Bike_validate_805870dc",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x805871ec",
+      "name": "phys_PlayerSub10Bike_805871ec",
+      "confidence": "address_range",
+      "size": 436
+    },
+    {
+      "address": "0x805873a0",
+      "name": "PlayerSub10Bike_validate_805873a0",
+      "confidence": "address_range",
+      "size": 116
+    },
+    {
+      "address": "0x80587594",
+      "name": "phys_PlayerSub10Bike_80587594",
+      "confidence": "address_range",
+      "size": 116
+    },
+    {
+      "address": "0x80587608",
+      "name": "PlayerSub10Bike_validate_80587608",
+      "confidence": "address_range",
+      "size": 108
+    },
+    {
+      "address": "0x80587744",
+      "name": "PlayerSub10Bike_validate_80587744",
+      "confidence": "address_range",
+      "size": 108
+    },
+    {
+      "address": "0x805877f8",
+      "name": "phys_PlayerSub10Bike_805877f8",
+      "confidence": "address_range",
+      "size": 804
+    },
+    {
+      "address": "0x80587c40",
+      "name": "PlayerSub10Bike_validate_80587c40",
+      "confidence": "address_range",
+      "size": 3188
+    },
+    {
+      "address": "0x80588b88",
+      "name": "PlayerSub10Bike_assertFail_80588b88",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x805898c8",
+      "name": "PlayerBoost_assertFail_805898c8",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x8058a350",
+      "name": "PlayerPhysics_validate_8058a350",
+      "confidence": "address_range",
+      "size": 208
+    },
+    {
+      "address": "0x8058a52c",
+      "name": "phys_PlayerPhysics_8058a52c",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8058a958",
+      "name": "phys_PlayerPhysics_8058a958",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8058ad2c",
+      "name": "PlayerPhysics_validate_8058ad2c",
+      "confidence": "address_range",
+      "size": 496
+    },
+    {
+      "address": "0x8058afac",
+      "name": "phys_PlayerPhysics_8058afac",
+      "confidence": "address_range",
+      "size": 948
+    },
+    {
+      "address": "0x8058b360",
+      "name": "PlayerPhysics_validate_8058b360",
+      "confidence": "address_range",
+      "size": 720
+    },
+    {
+      "address": "0x8058b710",
+      "name": "PlayerPhysics_validate_8058b710",
+      "confidence": "address_range",
+      "size": 896
+    },
+    {
+      "address": "0x8058bc58",
+      "name": "phys_PlayerPhysics_8058bc58",
+      "confidence": "address_range",
+      "size": 380
+    },
+    {
+      "address": "0x8058bdd4",
+      "name": "PlayerPhysics_validate_8058bdd4",
+      "confidence": "address_range",
+      "size": 232
+    },
+    {
+      "address": "0x8058bf04",
+      "name": "PlayerPhysics_validate_8058bf04",
+      "confidence": "address_range",
+      "size": 612
+    },
+    {
+      "address": "0x8058c260",
+      "name": "PlayerPhysics_calc_8058c260",
+      "confidence": "address_range",
+      "size": 328
+    },
+    {
+      "address": "0x8058c408",
+      "name": "phys_PlayerPhysics_8058c408",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8058cb30",
+      "name": "PlayerPhysics_validate_8058cb30",
+      "confidence": "address_range",
+      "size": 56
+    },
+    {
+      "address": "0x8058ccd4",
+      "name": "phys_PlayerPhysics_8058ccd4",
+      "confidence": "address_range",
+      "size": 100
+    },
+    {
+      "address": "0x8058cd38",
+      "name": "PlayerPhysics_validate_8058cd38",
+      "confidence": "address_range",
+      "size": 660
+    },
+    {
+      "address": "0x8058d754",
+      "name": "phys_PlayerPhysics_8058d754",
+      "confidence": "address_range",
+      "size": 104
+    },
+    {
+      "address": "0x8058d7bc",
+      "name": "PlayerPhysics_validate_8058d7bc",
+      "confidence": "address_range",
+      "size": 992
+    },
+    {
+      "address": "0x8058df1c",
+      "name": "PlayerPhysics_validate_8058df1c",
+      "confidence": "address_range",
+      "size": 376
+    },
+    {
+      "address": "0x8058e12c",
+      "name": "WheelPhysics_validate_8058e12c",
+      "confidence": "address_range",
+      "size": 364
+    },
+    {
+      "address": "0x8058e4c4",
+      "name": "WheelPhysics_validate_8058e4c4",
+      "confidence": "address_range",
+      "size": 440
+    },
+    {
+      "address": "0x8058e774",
+      "name": "WheelPhysics_validate_8058e774",
+      "confidence": "address_range",
+      "size": 1296
+    },
+    {
+      "address": "0x8058f034",
+      "name": "phys_WheelPhysics_8058f034",
+      "confidence": "address_range",
+      "size": 628
+    },
+    {
+      "address": "0x8058f2a8",
+      "name": "phys_WheelPhysics_8058f2a8",
+      "confidence": "address_range",
+      "size": 648
+    },
+    {
+      "address": "0x8058f530",
+      "name": "phys_WheelPhysics_8058f530",
+      "confidence": "address_range",
+      "size": 16
+    },
+    {
+      "address": "0x8058f908",
+      "name": "WheelPhysics_assertFail_8058f908",
+      "confidence": "address_range",
+      "size": 20
+    },
+    {
+      "address": "0x8058fefc",
+      "name": "phys_WheelPhysics_8058fefc",
+      "confidence": "address_range",
+      "size": 140
+    },
+    {
+      "address": "0x8058ff88",
+      "name": "WheelPhysics_validate_8058ff88",
+      "confidence": "address_range",
+      "size": 88
+    }
+  ]
+}
