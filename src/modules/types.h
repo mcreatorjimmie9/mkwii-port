@@ -2,8 +2,8 @@
 // Mario Kart Wii PC Port - Type Definitions
 // Basic Wii/PPC type aliases for PC platform
 
-#include <cstdint>
-#include <cstddef>
+#include <stdint.h>
+#include <stddef.h>
 
 // Basic integer types (matching PPC/SDK conventions)
 typedef uint8_t  u8;
@@ -25,12 +25,9 @@ typedef u8 BOOL;
 #define FALSE 0
 
 // NULL
-#ifndef NULL
-#define NULL nullptr
-#endif
+// NULL is provided by stddef.h
 
-// Size type
-typedef u32 size_t;
+// Size type - use stddef.h's size_t (may differ from Wii u32)
 
 // Memory alignment (Wii requires 32-byte alignment for many buffers)
 #define ALIGN32(val) (((val) + 31) & ~31)

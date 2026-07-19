@@ -1,8 +1,8 @@
 {
   "module": "KartMovement",
-  "total_functions": 268,
+  "total_functions": 366,
   "address_range": {
-    "min": "0x8058a80c",
+    "min": "0x80580128",
     "max": "0x805a6f4c"
   },
   "known_functions": [
@@ -1622,6 +1622,692 @@
       "name": "kart_KartDynamics_805a6f4c",
       "confidence": "address_range",
       "size": 16
+    },
+    {
+      "address": "0x80580128",
+      "name": "PlayerSub10_cancelWheelie",
+      "confidence": "main.dol_phase3",
+      "size": 4,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805814c8",
+      "name": "getMaxMtCharge__Q24Kart8KartMoveFv",
+      "confidence": "main.dol_phase3",
+      "size": 12,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805814d4",
+      "name": "getMaxSmtCharge__Q24Kart8KartMoveFv",
+      "confidence": "main.dol_phase3",
+      "size": 12,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805814e0",
+      "name": "getAppliedHopStickX__Q24Kart8KartMoveFv",
+      "confidence": "main.dol_phase3",
+      "size": 44,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80583c08",
+      "name": "setScale__Q24Kart8KartMoveFQ23EGG8Vector3f",
+      "confidence": "main.dol_phase3",
+      "size": 28,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80583f0c",
+      "name": "empty__Q24Kart8KartMoveFl",
+      "confidence": "main.dol_phase3",
+      "size": 4,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805857cc",
+      "name": "clearBoost__Q24Kart8KartMoveFv",
+      "confidence": "main.dol_phase3",
+      "size": 320,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80589a74",
+      "name": "PlayerSub10_updateWheelie",
+      "confidence": "main.dol_phase3",
+      "size": 4,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8058a24c",
+      "name": "PlayerSub10Bike_updateWheelie",
+      "confidence": "main.dol_phase3",
+      "size": 4,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8058a838",
+      "name": "PlayerSub10Bike_startWheelie",
+      "confidence": "main.dol_phase3",
+      "size": 116,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8058a8ac",
+      "name": "PlayerSub10Bike_cancelWheelie",
+      "confidence": "main.dol_phase3",
+      "size": 48,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8058ac80",
+      "name": "PlayerSub10Bike_tryStartWheelie",
+      "confidence": "main.dol_phase3",
+      "size": 200,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8058b4c8",
+      "name": "PlayerSub10Bike_checkWheelieSpeed",
+      "confidence": "main.dol_phase3",
+      "size": 68,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8058bc2c",
+      "name": "PlayerSub10_checkWheelie",
+      "confidence": "main.dol_phase3",
+      "size": 8,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80590ef4",
+      "name": "PlayerKart_createTires",
+      "confidence": "main.dol_phase3",
+      "size": 508,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805954a8",
+      "name": "__ct__Q24Kart12KartSettingsFv",
+      "confidence": "main.dol_phase3",
+      "size": 204,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059648c",
+      "name": "__ct__Q24Kart15KartCollideAreaFv",
+      "confidence": "main.dol_phase3",
+      "size": 240,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059689c",
+      "name": "__ct__Q24Kart9KartStateFPQ24Kart12KartSettings",
+      "confidence": "main.dol_phase3",
+      "size": 424,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80596a44",
+      "name": "init__Q24Kart9KartStateFv",
+      "confidence": "main.dol_phase3",
+      "size": 56,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80596a7c",
+      "name": "reset__Q24Kart9KartStateFv",
+      "confidence": "main.dol_phase3",
+      "size": 160,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80596b1c",
+      "name": "resetOob__Q24Kart9KartStateFv",
+      "confidence": "main.dol_phase3",
+      "size": 16,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80598230",
+      "name": "KartSub_createComponents",
+      "confidence": "main.dol_phase3",
+      "size": 560,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80598460",
+      "name": "KartSub_init",
+      "confidence": "main.dol_phase3",
+      "size": 388,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059aff0",
+      "name": "KartSus_ct",
+      "confidence": "main.dol_phase3",
+      "size": 72,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059b048",
+      "name": "KartSus_init",
+      "confidence": "main.dol_phase3",
+      "size": 116,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059b0bc",
+      "name": "KartSus_initPhysics",
+      "confidence": "main.dol_phase3",
+      "size": 8,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059b8f4",
+      "name": "__ct__Q24Kart16KartWheelPhysicsFUll",
+      "confidence": "main.dol_phase3",
+      "size": 100,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059b958",
+      "name": "init__Q24Kart16KartWheelPhysicsFv",
+      "confidence": "main.dol_phase3",
+      "size": 100,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059b9bc",
+      "name": "setBsp__Q24Kart16KartWheelPhysicsFv",
+      "confidence": "main.dol_phase3",
+      "size": 52,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059b9f0",
+      "name": "reset__Q24Kart16KartWheelPhysicsFv",
+      "confidence": "main.dol_phase3",
+      "size": 184,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059baa8",
+      "name": "setColState__Q24Kart16KartWheelPhysicsFffRCQ23EGG8Vector3f",
+      "confidence": "main.dol_phase3",
+      "size": 208,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059bb78",
+      "name": "calcCollision__Q24Kart16KartWheelPhysicsFRCQ23EGG8Vector3fRCQ23EGG8Vector3f",
+      "confidence": "main.dol_phase3",
+      "size": 1088,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059bfb8",
+      "name": "calc__Q24Kart16KartWheelPhysicsFRCQ23EGG8Vector3fRCQ23EGG8Vector3f",
+      "confidence": "main.dol_phase3",
+      "size": 716,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059c284",
+      "name": "updateEffectiveRadius__Q24Kart16KartWheelPhysicsFv",
+      "confidence": "main.dol_phase3",
+      "size": 36,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059c2a8",
+      "name": "unk80599dc0__Q24Kart16KartWheelPhysicsFRCQ23EGG8Vector3f",
+      "confidence": "main.dol_phase3",
+      "size": 236,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059c394",
+      "name": "hasFloorCollision__Q24Kart16KartWheelPhysicsCFv",
+      "confidence": "main.dol_phase3",
+      "size": 16,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059c3a4",
+      "name": "getCollisionFloorNrm__Q24Kart16KartWheelPhysicsCFv",
+      "confidence": "main.dol_phase3",
+      "size": 12,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059c3b0",
+      "name": "getKartCollisionInfo__Q24Kart16KartWheelPhysicsCFv",
+      "confidence": "main.dol_phase3",
+      "size": 12,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059c3bc",
+      "name": "__ct__Q24Kart14KartSusPhysicsFUlQ24Kart13KartWheelTypel",
+      "confidence": "main.dol_phase3",
+      "size": 128,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059c43c",
+      "name": "reset__Q24Kart14KartSusPhysicsFv",
+      "confidence": "main.dol_phase3",
+      "size": 76,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059c488",
+      "name": "init__Q24Kart14KartSusPhysicsFv",
+      "confidence": "main.dol_phase3",
+      "size": 140,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059c514",
+      "name": "setInitialState__Q24Kart14KartSusPhysicsFv",
+      "confidence": "main.dol_phase3",
+      "size": 588,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059c760",
+      "name": "calcCollision__Q24Kart14KartSusPhysicsFRCQ23EGG8Vector3fRCQ23EGG9Matrix34ff",
+      "confidence": "main.dol_phase3",
+      "size": 640,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059ca5c",
+      "name": "WheelPhysicsHolder_applySuspensions",
+      "confidence": "main.dol_phase3",
+      "size": 1104,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059cf2c",
+      "name": "KartTire_ct",
+      "confidence": "main.dol_phase3",
+      "size": 108,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059cf98",
+      "name": "KartTire_init",
+      "confidence": "main.dol_phase3",
+      "size": 100,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059cffc",
+      "name": "KartTire_createPhysics",
+      "confidence": "main.dol_phase3",
+      "size": 84,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059d050",
+      "name": "KartTire_initBsp",
+      "confidence": "main.dol_phase3",
+      "size": 8,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a1aa4",
+      "name": "__ct__Q24Kart11KartPhysicsFb",
+      "confidence": "main.dol_phase3",
+      "size": 188,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a1df0",
+      "name": "sub_805a1df0",
+      "confidence": "main.dol_phase3",
+      "size": 52,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a1e24",
+      "name": "sub_805a1e24",
+      "confidence": "main.dol_phase3",
+      "size": 48,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a1e54",
+      "name": "sub_805a1e54",
+      "confidence": "main.dol_phase3",
+      "size": 176,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a1f04",
+      "name": "sub_805a1f04",
+      "confidence": "main.dol_phase3",
+      "size": 424,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a20ac",
+      "name": "sub_805a20ac",
+      "confidence": "main.dol_phase3",
+      "size": 120,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a2124",
+      "name": "sub_805a2124",
+      "confidence": "main.dol_phase3",
+      "size": 448,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a22e4",
+      "name": "sub_805a22e4",
+      "confidence": "main.dol_phase3",
+      "size": 416,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a2484",
+      "name": "sub_805a2484",
+      "confidence": "main.dol_phase3",
+      "size": 604,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a26e0",
+      "name": "sub_805a26e0",
+      "confidence": "main.dol_phase3",
+      "size": 80,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a2730",
+      "name": "sub_805a2730",
+      "confidence": "main.dol_phase3",
+      "size": 64,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a2770",
+      "name": "sub_805a2770",
+      "confidence": "main.dol_phase3",
+      "size": 348,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a28cc",
+      "name": "sub_805a28cc",
+      "confidence": "main.dol_phase3",
+      "size": 572,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a2b08",
+      "name": "sub_805a2b08",
+      "confidence": "main.dol_phase3",
+      "size": 124,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a2b84",
+      "name": "sub_805a2b84",
+      "confidence": "main.dol_phase3",
+      "size": 628,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a2df8",
+      "name": "sub_805a2df8",
+      "confidence": "main.dol_phase3",
+      "size": 260,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a2efc",
+      "name": "sub_805a2efc",
+      "confidence": "main.dol_phase3",
+      "size": 92,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a2f58",
+      "name": "sub_805a2f58",
+      "confidence": "main.dol_phase3",
+      "size": 244,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a304c",
+      "name": "sub_805a304c",
+      "confidence": "main.dol_phase3",
+      "size": 2860,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a3b78",
+      "name": "sub_805a3b78",
+      "confidence": "main.dol_phase3",
+      "size": 152,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a3c10",
+      "name": "sub_805a3c10",
+      "confidence": "main.dol_phase3",
+      "size": 132,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a3c94",
+      "name": "sub_805a3c94",
+      "confidence": "main.dol_phase3",
+      "size": 2164,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a4508",
+      "name": "sub_805a4508",
+      "confidence": "main.dol_phase3",
+      "size": 184,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a45c0",
+      "name": "sub_805a45c0",
+      "confidence": "main.dol_phase3",
+      "size": 488,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a47a8",
+      "name": "sub_805a47a8",
+      "confidence": "main.dol_phase3",
+      "size": 144,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a4838",
+      "name": "sub_805a4838",
+      "confidence": "main.dol_phase3",
+      "size": 96,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a4898",
+      "name": "sub_805a4898",
+      "confidence": "main.dol_phase3",
+      "size": 584,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a4ae0",
+      "name": "sub_805a4ae0",
+      "confidence": "main.dol_phase3",
+      "size": 636,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a4d5c",
+      "name": "sub_805a4d5c",
+      "confidence": "main.dol_phase3",
+      "size": 472,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a4f34",
+      "name": "sub_805a4f34",
+      "confidence": "main.dol_phase3",
+      "size": 680,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a5390",
+      "name": "sub_805a5390",
+      "confidence": "main.dol_phase3",
+      "size": 64,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a53d0",
+      "name": "sub_805a53d0",
+      "confidence": "main.dol_phase3",
+      "size": 96,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a5430",
+      "name": "sub_805a5430",
+      "confidence": "main.dol_phase3",
+      "size": 180,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a54e4",
+      "name": "sub_805a54e4",
+      "confidence": "main.dol_phase3",
+      "size": 152,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a557c",
+      "name": "sub_805a557c",
+      "confidence": "main.dol_phase3",
+      "size": 404,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a5710",
+      "name": "sub_805a5710",
+      "confidence": "main.dol_phase3",
+      "size": 120,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a5788",
+      "name": "sub_805a5788",
+      "confidence": "main.dol_phase3",
+      "size": 492,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a5974",
+      "name": "sub_805a5974",
+      "confidence": "main.dol_phase3",
+      "size": 236,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a5a60",
+      "name": "sub_805a5a60",
+      "confidence": "main.dol_phase3",
+      "size": 1252,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a5f44",
+      "name": "sub_805a5f44",
+      "confidence": "main.dol_phase3",
+      "size": 216,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a601c",
+      "name": "sub_805a601c",
+      "confidence": "main.dol_phase3",
+      "size": 176,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a60cc",
+      "name": "sub_805a60cc",
+      "confidence": "main.dol_phase3",
+      "size": 76,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a6118",
+      "name": "sub_805a6118",
+      "confidence": "main.dol_phase3",
+      "size": 92,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a6174",
+      "name": "sub_805a6174",
+      "confidence": "main.dol_phase3",
+      "size": 188,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a6230",
+      "name": "sub_805a6230",
+      "confidence": "main.dol_phase3",
+      "size": 488,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a6418",
+      "name": "sub_805a6418",
+      "confidence": "main.dol_phase3",
+      "size": 128,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a6498",
+      "name": "sub_805a6498",
+      "confidence": "main.dol_phase3",
+      "size": 164,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a653c",
+      "name": "sub_805a653c",
+      "confidence": "main.dol_phase3",
+      "size": 604,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a6798",
+      "name": "sub_805a6798",
+      "confidence": "main.dol_phase3",
+      "size": 1552,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805a6da8",
+      "name": "sub_805a6da8",
+      "confidence": "main.dol_phase3",
+      "size": 8192,
+      "source": "main.dol"
     }
   ]
 }

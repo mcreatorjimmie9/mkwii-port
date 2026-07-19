@@ -1,6 +1,6 @@
 {
   "module": "Collision",
-  "total_functions": 83,
+  "total_functions": 130,
   "address_range": {
     "min": "0x805701c0",
     "max": "0x805bcfd0"
@@ -504,6 +504,335 @@
       "name": "col_CollisionDetection_805bcfd0",
       "confidence": "address_range",
       "size": 152
+    },
+    {
+      "address": "0x80570a54",
+      "name": "__ct__Q24Kart11KartCollideFv",
+      "confidence": "main.dol_phase3",
+      "size": 8,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80570b0c",
+      "name": "init__Q24Kart11KartCollideFv",
+      "confidence": "main.dol_phase3",
+      "size": 84,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80570bf4",
+      "name": "updateBbox__Q24Kart11KartCollideFv",
+      "confidence": "main.dol_phase3",
+      "size": 88,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80570c4c",
+      "name": "processBody__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoRCQ24Kart6HitboxRCQ25Field7ColInfoPUl",
+      "confidence": "main.dol_phase3",
+      "size": 52,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80570dbc",
+      "name": "processWheels__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoRCQ24Kart6HitboxRCQ25Field7ColInfoPUl",
+      "confidence": "main.dol_phase3",
+      "size": 92,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80570e18",
+      "name": "processMovingWater__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoPUl",
+      "confidence": "main.dol_phase3",
+      "size": 48,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80570eec",
+      "name": "processFloor__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoRCQ24Kart6HitboxRCQ25Field7ColInfoPUlb",
+      "confidence": "main.dol_phase3",
+      "size": 792,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8057130c",
+      "name": "updateHitboxes__Q24Kart11KartCollideFv",
+      "confidence": "main.dol_phase3",
+      "size": 208,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8057166c",
+      "name": "processWall__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoRCQ25Field7ColInfoPUl",
+      "confidence": "main.dol_phase3",
+      "size": 232,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80571754",
+      "name": "checkNeighborhood__Q24Kart11KartCollideFRQ24Kart17KartCollisionInfoRCQ24Kart6HitboxRCQ25Field7ColInfo",
+      "confidence": "main.dol_phase3",
+      "size": 548,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80571978",
+      "name": "processCannon__Q24Kart11KartCollideFPUl",
+      "confidence": "main.dol_phase3",
+      "size": 128,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80571cd8",
+      "name": "PlayerSub18_checkPlayerCollision",
+      "confidence": "main.dol_phase3",
+      "size": 2620,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80574a64",
+      "name": "PlayerSub18_checkItemCollision",
+      "confidence": "main.dol_phase3",
+      "size": 84,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80575108",
+      "name": "PlayerSub18_findCollision",
+      "confidence": "main.dol_phase3",
+      "size": 304,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805755bc",
+      "name": "PlayerSub18_initHitboxes",
+      "confidence": "main.dol_phase3",
+      "size": 156,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80575658",
+      "name": "PlayerSub18_handleNoopCollision",
+      "confidence": "main.dol_phase3",
+      "size": 8,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80575660",
+      "name": "PlayerSub18_handleBananaCollision",
+      "confidence": "main.dol_phase3",
+      "size": 24,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80575678",
+      "name": "PlayerSub18_handleShellCollision",
+      "confidence": "main.dol_phase3",
+      "size": 32,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80575698",
+      "name": "PlayerSub18_handleBlueShellCollision",
+      "confidence": "main.dol_phase3",
+      "size": 24,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805756b0",
+      "name": "PlayerSub18_handleBombCollision",
+      "confidence": "main.dol_phase3",
+      "size": 24,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805756c8",
+      "name": "PlayerSub18_handleMushroomCollision",
+      "confidence": "main.dol_phase3",
+      "size": 68,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8057570c",
+      "name": "PlayerSub18_handleStarCollision",
+      "confidence": "main.dol_phase3",
+      "size": 56,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80575744",
+      "name": "PlayerSub18_handleFibCollision",
+      "confidence": "main.dol_phase3",
+      "size": 360,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805764d8",
+      "name": "__dt__Q24Kart11KartCollideFv",
+      "confidence": "main.dol_phase3",
+      "size": 64,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8057d5f0",
+      "name": "PlayerSub10_computeWallCollisionSpeedFactor",
+      "confidence": "main.dol_phase3",
+      "size": 216,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8058681c",
+      "name": "PlayerSub10_doRespawn",
+      "confidence": "main.dol_phase3",
+      "size": 112,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059b9bc",
+      "name": "setBsp__Q24Kart16KartWheelPhysicsFv",
+      "confidence": "main.dol_phase3",
+      "size": 52,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059bb78",
+      "name": "calcCollision__Q24Kart16KartWheelPhysicsFRCQ23EGG8Vector3fRCQ23EGG8Vector3f",
+      "confidence": "main.dol_phase3",
+      "size": 1088,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059c3bc",
+      "name": "__ct__Q24Kart14KartSusPhysicsFUlQ24Kart13KartWheelTypel",
+      "confidence": "main.dol_phase3",
+      "size": 128,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059c43c",
+      "name": "reset__Q24Kart14KartSusPhysicsFv",
+      "confidence": "main.dol_phase3",
+      "size": 76,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059c760",
+      "name": "calcCollision__Q24Kart14KartSusPhysicsFRCQ23EGG8Vector3fRCQ23EGG9Matrix34ff",
+      "confidence": "main.dol_phase3",
+      "size": 16,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805b72ac",
+      "name": "setBspParams__Q24Kart12KartDynamicsFRCQ23EGG8Vector3fRCQ23EGG8Vector3fbf",
+      "confidence": "main.dol_phase3",
+      "size": 16,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805b8c0c",
+      "name": "PlayerSub18_findCollisionInner",
+      "confidence": "main.dol_phase3",
+      "size": 140,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805b9e10",
+      "name": "applySomeFloorMoment__Q24Kart11KartCollideFPQ24Kart12KartDynamicsPQ24Kart11HitboxGroupRCQ23EGG8Vector3fRCQ23EGG8Vector3fRCQ23EGG8Vector3fffbbb",
+      "confidence": "main.dol_phase3",
+      "size": 1392,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805ba430",
+      "name": "__ct__Q24Kart6HitboxFv",
+      "confidence": "main.dol_phase3",
+      "size": 60,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805ba46c",
+      "name": "reset__Q24Kart6HitboxFv",
+      "confidence": "main.dol_phase3",
+      "size": 56,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805ba4a4",
+      "name": "update__Q24Kart6HitboxFRCQ23EGG8Vector3fRCQ23EGG5QuatfRCQ23EGG8Vector3fff",
+      "confidence": "main.dol_phase3",
+      "size": 232,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805ba640",
+      "name": "create__Q24Kart6HitboxFRCQ23EGG8Vector3ff",
+      "confidence": "main.dol_phase3",
+      "size": 120,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805ba6b8",
+      "name": "setScale__Q24Kart6HitboxFf",
+      "confidence": "main.dol_phase3",
+      "size": 4,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805ba7a4",
+      "name": "__ct__Q24Kart11HitboxGroupFv",
+      "confidence": "main.dol_phase3",
+      "size": 108,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805ba818",
+      "name": "reset__Q24Kart11HitboxGroupFv",
+      "confidence": "main.dol_phase3",
+      "size": 156,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805ba8c0",
+      "name": "setHitboxScale__Q24Kart11HitboxGroupFf",
+      "confidence": "main.dol_phase3",
+      "size": 72,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805ba908",
+      "name": "createHitboxes__Q24Kart11HitboxGroupFl",
+      "confidence": "main.dol_phase3",
+      "size": 32,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805ba9a8",
+      "name": "initHitboxes__Q24Kart11HitboxGroupFPQ24Kart9BspHitboxPvl",
+      "confidence": "main.dol_phase3",
+      "size": 452,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805bab90",
+      "name": "setHitboxes__Q24Kart11HitboxGroupFPQ24Kart9BspHitbox",
+      "confidence": "main.dol_phase3",
+      "size": 176,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805bac44",
+      "name": "createSingleHitbox__Q24Kart11HitboxGroupFRCQ23EGG8Vector3ff",
+      "confidence": "main.dol_phase3",
+      "size": 188,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805bad24",
+      "name": "computeCollisionLimits__Q24Kart11HitboxGroupFv",
+      "confidence": "main.dol_phase3",
+      "size": 308,
+      "source": "main.dol"
     }
   ]
 }

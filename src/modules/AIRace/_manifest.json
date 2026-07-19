@@ -1,6 +1,6 @@
 {
   "module": "AIRace",
-  "total_functions": 336,
+  "total_functions": 394,
   "address_range": {
     "min": "0x805230b8",
     "max": "0x80739f5c"
@@ -2030,6 +2030,412 @@
       "name": "AI_Control_assertFail_80739f5c",
       "confidence": "address_range",
       "size": 20
+    },
+    {
+      "address": "0x80523e94",
+      "name": "setInputState__Q26System6KPadAIFPQ26System18KPadRaceInputState",
+      "confidence": "main.dol_phase3",
+      "size": 16,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80525988",
+      "name": "__ct__Q26System6KPadAIFv",
+      "confidence": "main.dol_phase3",
+      "size": 60,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80526f40",
+      "name": "calcInner__Q26System16KPadAIControllerFPQ26System18KPadRaceInputStatePQ26System16KPadUIInputState",
+      "confidence": "main.dol_phase3",
+      "size": 76,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807284c4",
+      "name": "__ct__Q25Enemy2AIFb",
+      "confidence": "main.dol_phase3",
+      "size": 128,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80728570",
+      "name": "__dt__Q25Enemy2AIFv",
+      "confidence": "main.dol_phase3",
+      "size": 124,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807285f8",
+      "name": "init__Q25Enemy2AIFv",
+      "confidence": "main.dol_phase3",
+      "size": 136,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807286a0",
+      "name": "update__Q25Enemy2AIFv",
+      "confidence": "main.dol_phase3",
+      "size": 36,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807286ec",
+      "name": "getStick__Q25Enemy2AIFv",
+      "confidence": "main.dol_phase3",
+      "size": 24,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80728734",
+      "name": "isCPU__Q25Enemy2AIFv",
+      "confidence": "main.dol_phase3",
+      "size": 56,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80728778",
+      "name": "isRealLocal__Q25Enemy2AIFv",
+      "confidence": "main.dol_phase3",
+      "size": 60,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807287b8",
+      "name": "isRealLocalAndCPU__Q25Enemy2AIFv",
+      "confidence": "main.dol_phase3",
+      "size": 36,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80728820",
+      "name": "isAICPU__Q25Enemy2AIFv",
+      "confidence": "main.dol_phase3",
+      "size": 4,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80728824",
+      "name": "isGhost__Q25Enemy2AIFv",
+      "confidence": "main.dol_phase3",
+      "size": 68,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80728868",
+      "name": "isSameTeam__Q25Enemy2AIFPQ25Enemy2AI",
+      "confidence": "main.dol_phase3",
+      "size": 16,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80728890",
+      "name": "endRace__Q25Enemy2AIFv",
+      "confidence": "main.dol_phase3",
+      "size": 8,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80728898",
+      "name": "onOutOfBounds__Q25Enemy2AIFRCQ26System17MapdataJugemPoint",
+      "confidence": "main.dol_phase3",
+      "size": 16,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807288ac",
+      "name": "forceRecalculation__Q25Enemy2AIFb",
+      "confidence": "main.dol_phase3",
+      "size": 8,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807288b4",
+      "name": "handleBump__Q25Enemy2AIFRCQ23EGG8Vector3fRCQ25Enemy2AI",
+      "confidence": "main.dol_phase3",
+      "size": 8,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807289d0",
+      "name": "isOnGround__Q25Enemy2AIFv",
+      "confidence": "main.dol_phase3",
+      "size": 20,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807289e4",
+      "name": "isAllWheelsCollision__Q25Enemy2AIFv",
+      "confidence": "main.dol_phase3",
+      "size": 20,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807289f8",
+      "name": "isDriftingOnGround__Q25Enemy2AIFv",
+      "confidence": "main.dol_phase3",
+      "size": 20,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80728a0c",
+      "name": "isHopping__Q25Enemy2AIFv",
+      "confidence": "main.dol_phase3",
+      "size": 20,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80728a20",
+      "name": "isAutoDrift__Q25Enemy2AIFv",
+      "confidence": "main.dol_phase3",
+      "size": 20,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80728a34",
+      "name": "isInBullet__Q25Enemy2AIFv",
+      "confidence": "main.dol_phase3",
+      "size": 20,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072a6f4",
+      "name": "setDoNotSelectBackward__Q25Enemy13AIControlBaseFv",
+      "confidence": "main.dol_phase3",
+      "size": 4,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072a6fc",
+      "name": "getAIProbability__Q25Enemy13AIControlBaseFv",
+      "confidence": "main.dol_phase3",
+      "size": 8,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072aab0",
+      "name": "setBattleType__Q25Enemy13AIControlBaseFv",
+      "confidence": "main.dol_phase3",
+      "size": 4,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072c284",
+      "name": "__ct__Q25Enemy13AIControlBaseFRCQ25Enemy6AIInfo",
+      "confidence": "main.dol_phase3",
+      "size": 184,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072c400",
+      "name": "__dt__Q25Enemy13AIControlBaseFv",
+      "confidence": "main.dol_phase3",
+      "size": 400,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072c5d0",
+      "name": "init__Q25Enemy13AIControlBaseFv",
+      "confidence": "main.dol_phase3",
+      "size": 308,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072c790",
+      "name": "onOutOfBoundsInner__Q25Enemy13AIControlBaseFRCQ26System17MapdataJugemPoint",
+      "confidence": "main.dol_phase3",
+      "size": 64,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072c7d0",
+      "name": "onForceRecalculation__Q25Enemy13AIControlBaseFRCQ23EGG8Vector3f",
+      "confidence": "main.dol_phase3",
+      "size": 8,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072c7d8",
+      "name": "onPlayerGoal__Q25Enemy13AIControlBaseFv",
+      "confidence": "main.dol_phase3",
+      "size": 8,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072c7e0",
+      "name": "onCpuGoal__Q25Enemy13AIControlBaseFv",
+      "confidence": "main.dol_phase3",
+      "size": 8,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072c7f8",
+      "name": "setStartDashTypeToKart__Q25Enemy13AIControlBaseFv",
+      "confidence": "main.dol_phase3",
+      "size": 92,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072c864",
+      "name": "setBasicDriveInfo___Q25Enemy13AIControlBaseFRCQ25Enemy9DriveInfo",
+      "confidence": "main.dol_phase3",
+      "size": 68,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072ca58",
+      "name": "doUpdate___Q25Enemy13AIControlBaseFRCQ25Enemy9DriveInfo",
+      "confidence": "main.dol_phase3",
+      "size": 224,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072cb38",
+      "name": "__ct__Q25Enemy16AIAirtimeTrackerFRCQ25Enemy6AIInfo",
+      "confidence": "main.dol_phase3",
+      "size": 36,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072cb9c",
+      "name": "init__Q25Enemy16AIAirtimeTrackerFl",
+      "confidence": "main.dol_phase3",
+      "size": 4,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072cbc4",
+      "name": "update__Q25Enemy16AIAirtimeTrackerFv",
+      "confidence": "main.dol_phase3",
+      "size": 28,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072cc28",
+      "name": "__ct__Q25Enemy12AIPowAvoiderFRCQ25Enemy6AIInfo",
+      "confidence": "main.dol_phase3",
+      "size": 12,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072cc7c",
+      "name": "init__Q25Enemy12AIPowAvoiderFv",
+      "confidence": "main.dol_phase3",
+      "size": 12,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072cc88",
+      "name": "update__Q25Enemy12AIPowAvoiderFv",
+      "confidence": "main.dol_phase3",
+      "size": 164,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072cd2c",
+      "name": "isSameTeam__Q25Enemy12AIPowAvoiderFl",
+      "confidence": "main.dol_phase3",
+      "size": 48,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072cd74",
+      "name": "isAllStopAfterGoal__Q25Enemy13AIControlBaseFv",
+      "confidence": "main.dol_phase3",
+      "size": 8,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072cd7c",
+      "name": "setAIRankTopOfPlayer__Q25Enemy13AIControlBaseFv",
+      "confidence": "main.dol_phase3",
+      "size": 4,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072cd88",
+      "name": "getAIRank__Q25Enemy13AIControlBaseFv",
+      "confidence": "main.dol_phase3",
+      "size": 8,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8072cd90",
+      "name": "onRaceStart__Q25Enemy13AIControlBaseFv",
+      "confidence": "main.dol_phase3",
+      "size": 4,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80734b60",
+      "name": "update__Q25Enemy8AIEngineFPCQ26System24MapdataEnemyPathAccessor",
+      "confidence": "main.dol_phase3",
+      "size": 16,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80734b70",
+      "name": "forceRecalculation__Q25Enemy8AIEngineFb",
+      "confidence": "main.dol_phase3",
+      "size": 8,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80734b78",
+      "name": "endRace__Q25Enemy8AIEngineFv",
+      "confidence": "main.dol_phase3",
+      "size": 12,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8073569c",
+      "name": "__ct__Q25Enemy12AIEngineBikeFRCQ25Enemy2AI",
+      "confidence": "main.dol_phase3",
+      "size": 132,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8073578c",
+      "name": "__ct__Q25Enemy12AIEngineKartFRCQ25Enemy2AI",
+      "confidence": "main.dol_phase3",
+      "size": 32,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807377e0",
+      "name": "avoidPow__Q25Enemy14AITrickHandlerFv",
+      "confidence": "main.dol_phase3",
+      "size": 16,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807377f0",
+      "name": "allowTricking__Q25Enemy14AITrickHandlerFv",
+      "confidence": "main.dol_phase3",
+      "size": 64,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80737830",
+      "name": "shouldTrick__Q25Enemy14AITrickHandlerFv",
+      "confidence": "main.dol_phase3",
+      "size": 176,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80737938",
+      "name": "calc__Q25Enemy14AITrickHandlerFv",
+      "confidence": "main.dol_phase3",
+      "size": 16,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8073794c",
+      "name": "update__Q25Enemy14AITrickHandlerFv",
+      "confidence": "main.dol_phase3",
+      "size": 248,
+      "source": "main.dol"
     }
   ]
 }

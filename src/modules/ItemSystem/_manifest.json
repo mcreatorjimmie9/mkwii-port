@@ -1,9 +1,9 @@
 {
   "module": "ItemSystem",
-  "total_functions": 33,
+  "total_functions": 83,
   "address_range": {
-    "min": "0x8065e1b0",
-    "max": "0x80660f4c"
+    "min": "0x80574a64",
+    "max": "0x807bded4"
   },
   "known_functions": [],
   "all_functions": [
@@ -204,6 +204,356 @@
       "name": "ItemBehaviour_validate_80660f4c",
       "confidence": "address_range",
       "size": 248
+    },
+    {
+      "address": "0x80574a64",
+      "name": "PlayerSub18_checkItemCollision",
+      "confidence": "main.dol_phase3",
+      "size": 1560,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805818c0",
+      "name": "PlayerSub10_activateMushroom",
+      "confidence": "main.dol_phase3",
+      "size": 600,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80582ffc",
+      "name": "PlayerSub10_activateMega",
+      "confidence": "main.dol_phase3",
+      "size": 456,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80587d94",
+      "name": "PlayerSub10_activateBullet",
+      "confidence": "main.dol_phase3",
+      "size": 344,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8059e600",
+      "name": "cancelBullet",
+      "confidence": "main.dol_phase3",
+      "size": 388,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8065e5d4",
+      "name": "createStaticInstance__Q23Net11ITEMHandlerFv",
+      "confidence": "main.dol_phase3",
+      "size": 636,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8065e890",
+      "name": "ITEMHandler_construct",
+      "confidence": "main.dol_phase3",
+      "size": 572,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8065ead0",
+      "name": "ITEMHandler_update",
+      "confidence": "main.dol_phase3",
+      "size": 216,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8065f704",
+      "name": "ITEMHandler_getPlayerStoredItem",
+      "confidence": "main.dol_phase3",
+      "size": 148,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8065fa50",
+      "name": "ITEMHandler_getPlayerMode",
+      "confidence": "main.dol_phase3",
+      "size": 160,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80660224",
+      "name": "ITEMHandler_importNewPackets",
+      "confidence": "main.dol_phase3",
+      "size": 868,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80792fe4",
+      "name": "initItemObjProperties",
+      "confidence": "main.dol_phase3",
+      "size": 800,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80793364",
+      "name": "copyItemObjProperties",
+      "confidence": "main.dol_phase3",
+      "size": 316,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80793df8",
+      "name": "ItemHolderPlayerb4_use",
+      "confidence": "main.dol_phase3",
+      "size": 760,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807966d8",
+      "name": "ItemHolderPlayerb4_calcRotatingItemObjs",
+      "confidence": "main.dol_phase3",
+      "size": 876,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807981b4",
+      "name": "ItemHolderItem_initObjs",
+      "confidence": "main.dol_phase3",
+      "size": 200,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807982ec",
+      "name": "ItemHolderItem_spawn",
+      "confidence": "main.dol_phase3",
+      "size": 292,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80798450",
+      "name": "ItemHolderItem_despawn",
+      "confidence": "main.dol_phase3",
+      "size": 648,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80798958",
+      "name": "ItemHolderItem_update",
+      "confidence": "main.dol_phase3",
+      "size": 1308,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80799bc8",
+      "name": "ItemHolderPlayer_init",
+      "confidence": "main.dol_phase3",
+      "size": 432,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80799e10",
+      "name": "ItemHolderPlayer_update",
+      "confidence": "main.dol_phase3",
+      "size": 2236,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8079b484",
+      "name": "ItemHolder_destroy",
+      "confidence": "main.dol_phase3",
+      "size": 412,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8079b7c0",
+      "name": "ItemHolder_construct",
+      "confidence": "main.dol_phase3",
+      "size": 516,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8079ba04",
+      "name": "ItemHolderPlayer_destroy",
+      "confidence": "main.dol_phase3",
+      "size": 148,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8079bc7c",
+      "name": "ItemHolder_init",
+      "confidence": "main.dol_phase3",
+      "size": 188,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8079bd38",
+      "name": "ItemHolder_update",
+      "confidence": "main.dol_phase3",
+      "size": 336,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8079c194",
+      "name": "ItemHolder_checkPlayerCollision",
+      "confidence": "main.dol_phase3",
+      "size": 420,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8079c338",
+      "name": "ItemHolder_initItemDirect",
+      "confidence": "main.dol_phase3",
+      "size": 364,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8079c614",
+      "name": "ItemHolder_spawnDirect",
+      "confidence": "main.dol_phase3",
+      "size": 364,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8079c780",
+      "name": "ItemHolder_spawnTc",
+      "confidence": "main.dol_phase3",
+      "size": 288,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807a070c",
+      "name": "ItemObj_init",
+      "confidence": "main.dol_phase3",
+      "size": 220,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807a0a38",
+      "name": "ItemObj_spawn",
+      "confidence": "main.dol_phase3",
+      "size": 164,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807a14d4",
+      "name": "ItemObj_update",
+      "confidence": "main.dol_phase3",
+      "size": 2248,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807a2868",
+      "name": "ItemObj_loadTeamsModel",
+      "confidence": "main.dol_phase3",
+      "size": 592,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807a39bc",
+      "name": "ItemObj_checkPlayerCollision",
+      "confidence": "main.dol_phase3",
+      "size": 428,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807a66ac",
+      "name": "ItemObjBomb_makeArray",
+      "confidence": "main.dol_phase3",
+      "size": 448,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807a762c",
+      "name": "ItemObjBomb_loadModel",
+      "confidence": "main.dol_phase3",
+      "size": 508,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807a9d90",
+      "name": "ItemObjFib_makeArray",
+      "confidence": "main.dol_phase3",
+      "size": 152,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807aa69c",
+      "name": "ItemHolderPlayer_useBlooper",
+      "confidence": "main.dol_phase3",
+      "size": 452,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807ac4d8",
+      "name": "ItemObjRed_makeArray",
+      "confidence": "main.dol_phase3",
+      "size": 456,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807adec8",
+      "name": "ItemObjBlue_makeArray",
+      "confidence": "main.dol_phase3",
+      "size": 564,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807ae4f0",
+      "name": "ItemObjBlue_loadModel",
+      "confidence": "main.dol_phase3",
+      "size": 416,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807b6a98",
+      "name": "ItemObjBlue_tryLockPlayer",
+      "confidence": "main.dol_phase3",
+      "size": 608,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807ba064",
+      "name": "ItemHolderPlayer_useLightning",
+      "confidence": "main.dol_phase3",
+      "size": 136,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807bc864",
+      "name": "ItemRoulette_update",
+      "confidence": "main.dol_phase3",
+      "size": 496,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807bcc64",
+      "name": "ItemSlotTable_createInstance",
+      "confidence": "main.dol_phase3",
+      "size": 152,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807bd208",
+      "name": "ItemSlotData_scaleTableForPlayerCount",
+      "confidence": "main.dol_phase3",
+      "size": 352,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807bd868",
+      "name": "ItemSlotData_checkSpawnTimer",
+      "confidence": "main.dol_phase3",
+      "size": 172,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807bd914",
+      "name": "ItemSlotData_decideItem",
+      "confidence": "main.dol_phase3",
+      "size": 1188,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807bded4",
+      "name": "ItemSlotData_updateTimers",
+      "confidence": "main.dol_phase3",
+      "size": 168,
+      "source": "main.dol"
     }
   ]
 }

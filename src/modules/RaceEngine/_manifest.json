@@ -1,9 +1,9 @@
 {
   "module": "RaceEngine",
-  "total_functions": 168,
+  "total_functions": 216,
   "address_range": {
-    "min": "0x80530074",
-    "max": "0x8053fd88"
+    "min": "0x8052ffd8",
+    "max": "0x80857bcc"
   },
   "known_functions": [
     {
@@ -1029,6 +1029,342 @@
       "name": "race_RaceFlow_8053fd88",
       "confidence": "address_range",
       "size": 956
+    },
+    {
+      "address": "0x8052ffd8",
+      "name": "computeGpRank__Q36System10RaceConfig6PlayerCFv",
+      "confidence": "main.dol_phase3",
+      "size": 216,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80530228",
+      "name": "init__Q26System10RaceConfigFv",
+      "confidence": "main.dol_phase3",
+      "size": 1772,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8053093c",
+      "name": "clear__Q26System10RaceConfigFv",
+      "confidence": "main.dol_phase3",
+      "size": 492,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80530b50",
+      "name": "clear__Q36System10RaceConfig8ScenarioFv",
+      "confidence": "main.dol_phase3",
+      "size": 252,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80530c58",
+      "name": "update__Q36System10RaceConfig8ScenarioFv",
+      "confidence": "main.dol_phase3",
+      "size": 256,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80530d58",
+      "name": "updateRating__Q26System10RaceConfigFUc",
+      "confidence": "main.dol_phase3",
+      "size": 224,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805313d8",
+      "name": "initGhost__Q36System10RaceConfig8ScenarioFUcSc",
+      "confidence": "main.dol_phase3",
+      "size": 228,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8053154c",
+      "name": "initPlayers__Q36System10RaceConfig8ScenarioFUc",
+      "confidence": "main.dol_phase3",
+      "size": 380,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805316c8",
+      "name": "copyPrevPositions__Q36System10RaceConfig8ScenarioFv",
+      "confidence": "main.dol_phase3",
+      "size": 776,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805319d0",
+      "name": "initControllers__Q36System10RaceConfig8ScenarioFUc",
+      "confidence": "main.dol_phase3",
+      "size": 672,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80531c70",
+      "name": "computePlayerCounts__Q36System10RaceConfig8ScenarioFRUcRUcRUc",
+      "confidence": "main.dol_phase3",
+      "size": 412,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80531e0c",
+      "name": "initRng__Q36System10RaceConfig8ScenarioFv",
+      "confidence": "main.dol_phase3",
+      "size": 232,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80531ef4",
+      "name": "initCompetitionSettings__Q36System10RaceConfig8ScenarioFv",
+      "confidence": "main.dol_phase3",
+      "size": 388,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80532078",
+      "name": "initRace__Q36System10RaceConfig8ScenarioFPQ36System10RaceConfig8Scenario",
+      "confidence": "main.dol_phase3",
+      "size": 712,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80532340",
+      "name": "createInstance__Q26System10RaceConfigFv",
+      "confidence": "main.dol_phase3",
+      "size": 400,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80532520",
+      "name": "__dt__Q26System10RaceConfigFv",
+      "confidence": "main.dol_phase3",
+      "size": 188,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80532644",
+      "name": "__ct__Q26System10RaceConfigFv",
+      "confidence": "main.dol_phase3",
+      "size": 360,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805327ac",
+      "name": "initRace__Q26System10RaceConfigFv",
+      "confidence": "main.dol_phase3",
+      "size": 744,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80532a94",
+      "name": "copy__Q36System10RaceConfig8ScenarioFRCQ36System10RaceConfig8Scenario",
+      "confidence": "main.dol_phase3",
+      "size": 696,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80532d4c",
+      "name": "Racedata_initAwards",
+      "confidence": "main.dol_phase3",
+      "size": 1704,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80533418",
+      "name": "setMii__Q36System10RaceConfig6PlayerFRCQ26System3Mii",
+      "confidence": "main.dol_phase3",
+      "size": 312,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80533558",
+      "name": "Racedata_initCredits",
+      "confidence": "main.dol_phase3",
+      "size": 3188,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805341cc",
+      "name": "update__Q26System10RaceConfigFv",
+      "confidence": "main.dol_phase3",
+      "size": 256,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805342cc",
+      "name": "appendParamFile__Q36System10RaceConfig8ScenarioFPQ26System10RaceConfig",
+      "confidence": "main.dol_phase3",
+      "size": 308,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80534670",
+      "name": "Raceinfo_initGamemode",
+      "confidence": "main.dol_phase3",
+      "size": 768,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80534c88",
+      "name": "Raceinfo_construct",
+      "confidence": "main.dol_phase3",
+      "size": 1444,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80535470",
+      "name": "Raceinfo_init",
+      "confidence": "main.dol_phase3",
+      "size": 260,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805363c0",
+      "name": "RaceinfoPlayer_construct",
+      "confidence": "main.dol_phase3",
+      "size": 700,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8053667c",
+      "name": "RaceinfoPlayer_init",
+      "confidence": "main.dol_phase3",
+      "size": 340,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80536cdc",
+      "name": "RaceinfoPlayer_endRace",
+      "confidence": "main.dol_phase3",
+      "size": 320,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80536ea0",
+      "name": "RaceinfoPlayer_endLap",
+      "confidence": "main.dol_phase3",
+      "size": 704,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805372e0",
+      "name": "RaceinfoPlayer_updateCheckpoint",
+      "confidence": "main.dol_phase3",
+      "size": 1044,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805377ec",
+      "name": "RaceinfoPlayer_update",
+      "confidence": "main.dol_phase3",
+      "size": 916,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80537c14",
+      "name": "RaceinfoPlayer_getLapSplit",
+      "confidence": "main.dol_phase3",
+      "size": 312,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805381fc",
+      "name": "TimeAttackGamemode_canEndRace",
+      "confidence": "main.dol_phase3",
+      "size": 212,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x805387c4",
+      "name": "Raceinfo_getInitialPosAndRotForPlayer",
+      "confidence": "main.dol_phase3",
+      "size": 748,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80538de0",
+      "name": "updateGpRankScore__Q26System17RaceManagerPlayerFv",
+      "confidence": "main.dol_phase3",
+      "size": 908,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8058d680",
+      "name": "RacedataHandler_processInputs",
+      "confidence": "main.dol_phase3",
+      "size": 764,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8058f018",
+      "name": "RacedataFactory_packRacedataRecord",
+      "confidence": "main.dol_phase3",
+      "size": 2204,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8063b488",
+      "name": "TimeAttackBackPage_onActivate",
+      "confidence": "main.dol_phase3",
+      "size": 420,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8063b634",
+      "name": "TimeAttackBackPage_afterCalc",
+      "confidence": "main.dol_phase3",
+      "size": 276,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8063b748",
+      "name": "TimeAttackBackPage_onRefocus",
+      "confidence": "main.dol_phase3",
+      "size": 360,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x8063b8b0",
+      "name": "TimeAttackBackPage_onReady",
+      "confidence": "main.dol_phase3",
+      "size": 548,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807f1db8",
+      "name": "CtrlRaceLap_load",
+      "confidence": "main.dol_phase3",
+      "size": 172,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807fa154",
+      "name": "CtrlRaceTime_initSelf",
+      "confidence": "main.dol_phase3",
+      "size": 504,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807fa3a8",
+      "name": "CtrlRaceTime_calcSelf",
+      "confidence": "main.dol_phase3",
+      "size": 940,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x807fa9a8",
+      "name": "CtrlRaceTime_refresh",
+      "confidence": "main.dol_phase3",
+      "size": 680,
+      "source": "main.dol"
+    },
+    {
+      "address": "0x80857bcc",
+      "name": "TimeAttackSplitsPage_ct",
+      "confidence": "main.dol_phase3",
+      "size": 368,
+      "source": "main.dol"
     }
   ]
 }
