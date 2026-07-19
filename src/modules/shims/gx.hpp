@@ -834,3 +834,26 @@ inline void GXCmd1u16(u16 v) { WGPIPE.s = v; }
 inline void GXCmd1u32(u32 v) { WGPIPE.i = v; }
 
 } // extern "C"
+// --- Additional GX functions (Phase 9 additions) ---
+
+// GXSetAlphaCompare — configure alpha test comparison
+inline void GXSetAlphaCompare(int comp0, int op, int ref0, int comp1, int a1) {
+    (void)comp0; (void)op; (void)ref0; (void)comp1; (void)a1;
+}
+
+// GXSetZCompLoc — set whether Z comparison happens before or after texturing
+inline void GXSetZCompLoc(u8 before) {
+    (void)before;
+}
+
+// GXSetCoPlanar — enable/disable coplanar polygon offset
+inline void GXSetCoPlanar(u8 enable) {
+    (void)enable;
+}
+
+// GXSetClipMode — set clip plane enable/disable
+inline void GXSetClipMode(u8 mode) {
+    (void)mode;
+}
+
+

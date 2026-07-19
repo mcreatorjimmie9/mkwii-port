@@ -105,6 +105,7 @@ enum PadButton {
 // Misc SDK type stubs
 typedef void* OSMessage;
 typedef u32   OSTick;
+typedef u64   OSTime;
 typedef s32   OSHeapHandle;
 
 #endif // __RK_TYPES_H_CANONICAL__

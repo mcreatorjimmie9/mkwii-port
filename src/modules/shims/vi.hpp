@@ -123,3 +123,8 @@ inline u32 SCGetProgressiveMode(void) { return 0; }
 inline u32 SCGetAspectRatio(void) { return SC_ASPECT_STD; }
 
 } // extern "C"
+// SCGetLanguage — get system language setting
+inline u32 SCGetLanguage(void) { return 1; }  // default English
+
+// SCGetVideoMode — get system video output mode
+inline u32 SCGetVideoMode(void) { return 0; }

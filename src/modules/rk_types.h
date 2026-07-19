@@ -105,6 +105,7 @@ enum PadButton {
 // Misc SDK type stubs
 typedef void* OSMessage;
 typedef u32   OSTick;
+typedef u64   OSTime;
 typedef s32   OSHeapHandle;
 
 extern "C" inline u32 OSGetTick() { return 0; }
