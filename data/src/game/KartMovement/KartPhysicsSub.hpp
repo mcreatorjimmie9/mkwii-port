@@ -46,6 +46,7 @@ public:
     float _14;
     // Position vec3 at 0x18
     float _18;
+    void* _28; // effect state buffer
     float _1c;
     float _20;
     // Float at 0x24

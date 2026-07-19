@@ -3,8 +3,9 @@
 #include <rk_types.h>
 #include <decomp.h>
 
+#include <game/kart/KartObjectProxy.hpp>
 namespace System {
-struct KPadRaceInputState;
+// Full definition in KartObjectProxy.hpp
 }
 
 namespace Kart {

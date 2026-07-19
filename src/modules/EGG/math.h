@@ -66,3 +66,4 @@ typedef EGG::Vector3f Vec;
 typedef EGG::Vector3f Vec3;
 typedef EGG::Vector2f Vec2;
 typedef EGG::Quaternion Quat;
+typedef EGG::Quaternion Quatf;
