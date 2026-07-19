@@ -15,7 +15,7 @@
 // Categorization: GENESIS Phase 5 (Runtime Module — Task 3a)
 // ============================================================================
 
-#include "rk_common.h"
+#include "rk_types.h"
 #include <cstring>
 
 namespace EGG {

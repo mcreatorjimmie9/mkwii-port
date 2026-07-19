@@ -195,10 +195,8 @@ set(UI_SOURCES
     data/src/game/UI/PageManager.cpp
 )
 
-# --- Runtime (18 files — Gfx/MathUtil classes) ---
+# --- Runtime (18 categorized files — function declarations) ---
 set(RUNTIME_SOURCES
-    data/src/game/Runtime/Gfx_Classes.cpp
-    data/src/game/Runtime/MathUtil_Classes.cpp
     data/src/game/Runtime/RuntimeOS.cpp
     data/src/game/Runtime/Memory.cpp
     data/src/game/Runtime/Heap.cpp
@@ -217,14 +215,32 @@ set(RUNTIME_SOURCES
     data/src/game/Runtime/System.cpp
 )
 
-# --- EGG Framework Classes (6 files) ---
-set(EGG_CLASSES_SOURCES
+# --- Runtime Deep-Rebuilt Classes (16 files — Phase 8 class hierarchy extraction) ---
+set(RUNTIME_CLASSES_SOURCES
+    # Phase 3a/2b: Original 5 subsystems
+    data/src/game/Runtime/Gfx_Classes.cpp
+    data/src/game/Runtime/MathUtil_Classes.cpp
     data/src/game/Runtime/Archive_Classes.cpp
     data/src/game/Runtime/Core_Classes.cpp
     data/src/game/Runtime/Heap_Classes.cpp
-    data/src/game/Runtime/Gfx_Classes.cpp
-    data/src/game/Runtime/MathUtil_Classes.cpp
+    # Phase 8: Scene3D, SceneGraph, Particle
+    data/src/game/Runtime/Scene3D_Classes.cpp
+    data/src/game/Runtime/SceneGraph_Classes.cpp
+    data/src/game/Runtime/Particle_Classes.cpp
+    # Phase 8: Animation, AudioEngine, DiscIO, System
+    data/src/game/Runtime/Animation_Classes.cpp
+    data/src/game/Runtime/AudioEngine_Classes.cpp
+    data/src/game/Runtime/DiscIO_Classes.cpp
+    data/src/game/Runtime/System_Classes.cpp
+    # Phase 8: Network, Memory, RuntimeOS, ArchiveExt
+    data/src/game/Runtime/Network_Classes.cpp
+    data/src/game/Runtime/Memory_Classes.cpp
+    data/src/game/Runtime/RuntimeOS_Classes.cpp
+    data/src/game/Runtime/ArchiveExt_Classes.cpp
 )
+
+# --- EGG Framework Classes (alias for backward compat) ---
+set(EGG_CLASSES_SOURCES ${RUNTIME_CLASSES_SOURCES})
 
 # --- Network (8 files) ---
 set(NETWORK_SOURCES
@@ -263,7 +279,7 @@ add_library(mkwii-genesis STATIC
     ${SCENE_SOURCES}
     ${UI_SOURCES}
     ${RUNTIME_SOURCES}
-    ${EGG_CLASSES_SOURCES}
+    ${RUNTIME_CLASSES_SOURCES}
     ${NETWORK_SOURCES}
     ${SAVEDATA_SOURCES}
 )

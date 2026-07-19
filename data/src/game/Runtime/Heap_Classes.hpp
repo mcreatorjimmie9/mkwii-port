@@ -13,7 +13,8 @@
 //
 // Categorization: GENESIS Phase 5 (Runtime Module, Task 2b)
 // ============================================================================
-#include "rk_common.h"
+#include "rk_types.h"
+#define UNUSED(x) (void)(x)
 
 namespace EGG {
 
