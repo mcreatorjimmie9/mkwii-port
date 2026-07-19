@@ -1,4 +1,6 @@
 #pragma once
+#ifndef __MKWII_DECOMP_H__
+#define __MKWII_DECOMP_H__
 // decomp.h — Decompilation support macros and utilities for MKWii PC port
 // Provides address-to-symbol helpers and decompilation annotations
 
@@ -50,3 +52,5 @@ typedef void* HeapHandle;
 #ifndef FRAC_HALF
 #define FRAC_HALF    (1 << 15)
 #endif
+
+#endif // __MKWII_DECOMP_H__

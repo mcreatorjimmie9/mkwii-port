@@ -1,4 +1,6 @@
 #pragma once
+#ifndef __MKWII_RK_COMMON_H__
+#define __MKWII_RK_COMMON_H__
 // rk_common.h — Common Wii SDK compatibility
 #include "rk_types.h"
 #include "decomp.h"
@@ -57,3 +59,5 @@ struct Time {
 #endif
 
 } // namespace System
+
+#endif // __MKWII_RK_COMMON_H__

@@ -1,4 +1,6 @@
 #pragma once
+#ifndef __MKWII_DECOMP_H__
+#define __MKWII_DECOMP_H__
 // decomp.h — Decomposition helpers for reconstructed MKWii code
 // Provides macros and utilities commonly used in decompiled output
 
@@ -57,3 +59,5 @@
 #ifndef __fabs
 #define __fabs fabsf
 #endif
+
+#endif // __MKWII_DECOMP_H__

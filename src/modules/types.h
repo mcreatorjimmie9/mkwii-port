@@ -1,4 +1,6 @@
 #pragma once
+#ifndef __MKWII_TYPES_H__
+#define __MKWII_TYPES_H__
 // Mario Kart Wii PC Port - Type Definitions
 // Basic Wii/PPC type aliases for PC platform
 
@@ -77,3 +79,5 @@ typedef void (*code)(...);
 
 // Memory base (for Ram references in decompiled code)
 #define RAM_BASE 0x80000000U
+
+#endif // __MKWII_TYPES_H__
