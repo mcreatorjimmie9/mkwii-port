@@ -42,12 +42,22 @@ add_compile_options(
 # =============================================================================
 
 include_directories(
-    ${CMAKE_SOURCE_DIR}/data/src/include
-    ${CMAKE_SOURCE_DIR}/data/src/types
-    ${CMAKE_SOURCE_DIR}/data/src
-    ${CMAKE_SOURCE_DIR}/data/src/game
     ${CMAKE_SOURCE_DIR}/src/modules
-    ${CMAKE_SOURCE_DIR}/data/src/modules
+    ${CMAKE_SOURCE_DIR}/src/modules/egg/core
+    ${CMAKE_SOURCE_DIR}/src/modules/egg/math
+    ${CMAKE_SOURCE_DIR}/src/modules/game/kart
+    ${CMAKE_SOURCE_DIR}/src/modules/game/field
+    ${CMAKE_SOURCE_DIR}/src/modules/game/system
+    ${CMAKE_SOURCE_DIR}/src/modules/game/util
+    ${CMAKE_SOURCE_DIR}/src/modules/system
+    ${CMAKE_SOURCE_DIR}/src/modules/util
+    ${CMAKE_SOURCE_DIR}/src/modules/host_system
+    ${CMAKE_SOURCE_DIR}/src/modules/shims
+    ${CMAKE_SOURCE_DIR}/src/modules/shims/ax_audio
+    ${CMAKE_SOURCE_DIR}/src/modules/rvl
+    ${CMAKE_SOURCE_DIR}/data/src/game
+    ${CMAKE_SOURCE_DIR}/data/src/game/UI
+    ${CMAKE_SOURCE_DIR}/data/src/game/Scene
 )
 
 # =============================================================================
