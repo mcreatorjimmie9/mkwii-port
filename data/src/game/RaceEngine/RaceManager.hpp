@@ -106,7 +106,7 @@ public:
 
 class MovingMask {
 public:
-    MovingMask(u32);
+    MovingMask(u32 val = 0) : mask(val), currentBit(0) {}
     int mask;
     int currentBit;
 };
@@ -116,6 +116,10 @@ public:
   RaceManagerPlayer(u8 idx, u8 lapCount);
   // @addr 0x80538de0
   void updateGpRankScore();
+  // @addr 0x80538a80 (approximate)
+  void init();
+  // @addr 0x80538b40 (approximate)
+  void reset();
   virtual ~RaceManagerPlayer();
 
   u32 field_0x4;
@@ -172,6 +176,24 @@ public:
   RaceMode* createCompetitionMode();
   u16 getBattleTimeLimit();
   KrtFile** getKrtFile();
+
+  // @addr 0x80538d00 (approximate)
+  void init();
+  // @addr 0x80538e20 (approximate)
+  void initRace();
+  // @addr 0x80539000 (approximate)
+  void endRace();
+  // @addr 0x80539100 (approximate)
+  void update();
+  // @addr 0x805391a0 (approximate)
+  RaceStage getRacePhase() const;
+  u8 getPlayerCount() const;
+  bool isRaceFinished() const;
+  const s8* getFinishOrder() const;
+  // @addr 0x80539300 (approximate)
+  void suspend();
+  // @addr 0x80539340 (approximate)
+  void resume();
 
   Util::Random* random1;
   Util::Random* random2;

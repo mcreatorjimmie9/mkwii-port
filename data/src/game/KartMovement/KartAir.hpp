@@ -117,7 +117,36 @@ public:
     bool hasTrickBoost() const { return mState.trickBoostTimer > 0.0f; }
 
     // Get total air time
+    /* KartAir_getAirTime @ 0x805D1350 */
     f32 getAirTime() const { return mState.airTime; }
+
+    // Get total number of tricks performed (across entire race)
+    /* KartAir_getTrickCount @ 0x805D1360 */
+    u32 getTrickCount() const { return mTotalTrickCount; }
+
+    // Get the height difference (maxHeight - launchHeight)
+    /* KartAir_getHeightDifference @ 0x805D1370 */
+    f32 getHeightDifference() const;
+
+    // Check if trick window is currently open
+    /* KartAir_isTrickWindowOpen @ 0x805D1380 */
+    bool isTrickWindowOpenImpl() const;
+
+    // Get current air velocity vector
+    /* KartAir_getVelocity @ 0x805D1390 */
+    const EGG::Vector3f& getVelocity() const;
+
+    // Force immediate landing (used by Lakitu respawn)
+    /* KartAir_forceLand @ 0x805D13A0 */
+    void forceLand();
+
+    // Debug helper: returns current air state name string
+    /* KartAir_getAirStateName @ 0x805D13B0 */
+    const char* getAirStateName() const;
+
+    // Calculate landing speed penalty based on air time and trick result
+    /* KartAir_calcLandingPenalty @ 0x805D13C0 */
+    f32 calcLandingPenalty() const;
 
     // Get the trick result for the last performed trick
     TrickResult getLastTrickResult() const;
@@ -131,6 +160,13 @@ public:
 private:
     AirStateData mState;
     AirConfig mConfig;
+    u32 mTotalTrickCount;        // Total tricks performed (across race)
+    f32 mLandingSquashTimer;     // Landing squash animation timer
+    f32 mMinAirTime;             // Minimum air time tracking (for trick eligibility)
 };
+
+// Free function: returns trick type name string for debug/logging
+/* KartAir_getTrickName @ 0x805D1400 */
+const char* KartAir_getTrickName(TrickType type);
 
 } // namespace Kart

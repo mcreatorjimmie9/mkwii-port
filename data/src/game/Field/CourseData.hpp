@@ -50,6 +50,19 @@ enum CourseTheme {
     COURSE_THEME_COUNT           = 32,
 };
 
+// Start position data (from KMP KPRT section)
+struct StartPosition {
+    EGG::Vector3f position;     // Grid position
+    EGG::Vector3f rotation;     // Facing direction (Euler angles)
+    u16 playerIndex;            // 0-11 for 12-player grid
+};
+
+// Route point (from KMP RPPN / RPKP sections)
+struct RoutePoint {
+    EGG::Vector3f position;
+    u8 pointType;               // 0=route, 1=respawn, 2=cannon
+};
+
 // Course area definition (from JMap "area" entries)
 struct CourseArea {
     EGG::Vector3f minBounds;    // AABB minimum corner
@@ -85,6 +98,12 @@ struct CourseProperties {
     char name[32];             // Internal course name
 };
 
+// World-space bounding box
+struct CourseBoundingBox {
+    EGG::Vector3f min;
+    EGG::Vector3f max;
+};
+
 // Course descriptor — full course metadata container
 class CourseData {
 public:
@@ -94,6 +113,7 @@ public:
     ~CourseData();
 
     // Load course data from JMap for a given course ID
+    // Parses course file header, reads section offsets (KCL, KMP, MDL, TEX)
     /* CourseData_load @ 0x804B1100 */
     bool load(u32 courseId);
 
@@ -148,10 +168,70 @@ public:
     /* CourseData_getCheckpointPos @ 0x804B1D00 */
     const EGG::Vector3f* getCheckpointPos(s32 cpIdx) const;
 
+    // --- Phase 37 additions ---
+
+    // Get KCL collision data pointer and size
+    // @addr 0x804B1E00
+    const u8* getKclData() const { return mpKclData; }
+    u32 getKclSize() const { return mKclSize; }
+
+    // Get KMP course map data
+    // @addr 0x804B1E40
+    const u8* getKmpData() const { return mpKmpData; }
+    u32 getKmpSize() const { return mKmpSize; }
+
+    // Get start positions from KMP KPRT section
+    // @addr 0x804B1E80
+    const StartPosition* getStartPositions() const { return mStartPositions; }
+    u32 getStartPositionCount() const { return mStartPositionCount; }
+
+    // Get checkpoint positions array
+    // @addr 0x804B1EC0
+    const EGG::Vector3f* getCheckpointPositions() const { return mCheckpointPositions; }
+
+    // Get route/respawn points from KMP
+    // @addr 0x804B1F00
+    const RoutePoint* getRoutePoints() const { return mRoutePoints; }
+    u32 getRoutePointCount() const { return mRoutePointCount; }
+
+    // Get area count (same as getAreaCount, alias for KMP compatibility)
+    // @addr 0x804B1F40
+    u32 getAreaCountU32() const { return (u32)mAreaCount; }
+
+    // Get object name from KMP GOBJ section
+    // @addr 0x804B1F80
+    const char* getObjectName(u32 index) const;
+
+    // Get enemy route paths from KMP ENPT section
+    // @addr 0x804B1FC0
+    const RoutePoint* getEnemyPaths() const { return mEnemyPaths; }
+    u32 getEnemyPathCount() const { return mEnemyPathCount; }
+
+    // Get cannon blast paths from KMP CNPT section
+    // @addr 0x804B2000
+    const RoutePoint* getCannonPaths() const { return mCannonPaths; }
+    u32 getCannonPathCount() const { return mCannonPathCount; }
+
+    // Get collision sphere count from KMP
+    // @addr 0x804B2040
+    u32 getSphereCount() const { return mSphereCount; }
+
+    // Get course world bounding box
+    // @addr 0x804B2080
+    CourseBoundingBox getBoundingBox() const { return mBoundingBox; }
+
+    // Get object count from KMP GOBJ section
+    u32 getObjectCount() const { return mObjectCount; }
+
 private:
     static const s32 MAX_COURSE_AREAS = 32;
     static const s32 MAX_SCENERY_ZONES = 64;
     static const s32 MAX_CHECKPOINTS = 64;
+    static const u32 MAX_START_POSITIONS = 12;  // MAX_PLAYER_COUNT
+    static const u32 MAX_ROUTE_POINTS = 256;
+    static const u32 MAX_ENEMY_PATHS = 128;
+    static const u32 MAX_CANNON_PATHS = 16;
+    static const u32 MAX_OBJECT_NAMES = 256;
 
     CourseProperties mProperties;
     CourseArea mAreas[MAX_COURSE_AREAS];
@@ -163,6 +243,42 @@ private:
     u8* mpJMapBuffer;          // Raw JMap data buffer
     u32 mJMapBufferSize;       // Size of loaded JMap data
     bool mbLoaded;              // Course data loaded flag
+
+    // --- Phase 37: KCL/KMP/Section data ---
+    const u8* mpKclData;        // KCL collision binary data
+    u32 mKclSize;               // KCL data size in bytes
+    const u8* mpKmpData;        // KMP course map binary data
+    u32 mKmpSize;               // KMP data size in bytes
+
+    // Start positions from KMP KPRT section
+    StartPosition mStartPositions[MAX_START_POSITIONS];
+    u32 mStartPositionCount;
+
+    // Route and respawn points from KMP RPPN/RPKP
+    RoutePoint mRoutePoints[MAX_ROUTE_POINTS];
+    u32 mRoutePointCount;
+
+    // Enemy paths from KMP ENPT
+    RoutePoint mEnemyPaths[MAX_ENEMY_PATHS];
+    u32 mEnemyPathCount;
+
+    // Cannon paths from KMP CNPT
+    RoutePoint mCannonPaths[MAX_CANNON_PATHS];
+    u32 mCannonPathCount;
+
+    // Collision sphere count from KMP
+    u32 mSphereCount;
+
+    // Course world bounds (computed from all areas)
+    CourseBoundingBox mBoundingBox;
+
+    // Object names from KMP GOBJ section
+    const char* mObjectNames[MAX_OBJECT_NAMES];
+    u32 mObjectCount;
 };
+
+// Validate course data integrity (checksum, magic, section offsets)
+// @addr 0x804B2100
+bool CourseData_verifyChecksum(const u8* data, u32 size);
 
 } // namespace Field

@@ -6,6 +6,8 @@
 #include "LayoutLoader.hpp"
 #include "UIManager.hpp"
 #include "ui_stubs.h"
+#include <KPadController.hpp>
+#include <string.h>
 
 namespace UI {
 
@@ -27,8 +29,11 @@ MessageBox::MessageBox()
     , mUserData(nullptr)
     , mTransitionState(0)
     , mInitFlag(0)
-    , mOverlayFlag(0) {
+    , mOverlayFlag(0)
+    , mFadeAlpha(0.0f)
+    , mFadeDirection(0.0f) {
     memset(&mConfig, 0, sizeof(mConfig));
+    memset(mMessageText, 0, sizeof(mMessageText));
 }
 
 MessageBox::~MessageBox() {
@@ -242,6 +247,113 @@ void MessageBox::onTimeout() {
     if (mCallback) {
         mCallback(mResult, mUserData);
     }
+}
+
+// --- New API ---
+
+void MessageBox::show(const char* message, u8 buttonMask) {
+    if (!message) return;
+
+    // Copy message text
+    u32 len = 0;
+    while (len < MAX_MESSAGE_LEN - 1 && message[len] != '\0') {
+        mMessageText[len] = message[len];
+        len++;
+    }
+    mMessageText[len] = '\0';
+
+    // Configure from button mask
+    memset(&mConfig, 0, sizeof(mConfig));
+    mConfig.type = MSGBOX_INFO;
+    mConfig.messageId = 0;
+    mConfig.showOkButton = (buttonMask & 0x01) ? 1 : 0;
+    mConfig.showCancelButton = (buttonMask & 0x02) ? 1 : 0;
+    mConfig.showYesButton = (buttonMask & 0x04) ? 1 : 0;
+    mConfig.showNoButton = (buttonMask & 0x08) ? 1 : 0;
+    mConfig.timeoutFrames = 0;
+
+    // Show with constructed config
+    show(mConfig);
+}
+
+void MessageBox::setMessage(const char* message) {
+    if (!message) return;
+
+    u32 len = 0;
+    while (len < MAX_MESSAGE_LEN - 1 && message[len] != '\0') {
+        mMessageText[len] = message[len];
+        len++;
+    }
+    mMessageText[len] = '\0';
+}
+
+void MessageBox::processInput(const System::KPadRaceInputState& input) {
+    if (!mIsShown || mIsAnimating) return;
+
+    // A button = confirm/OK/Yes
+    if (input.buttons & PAD_BUTTON_A) {
+        onConfirm();
+        return;
+    }
+
+    // B button = cancel/No
+    if (input.buttons & PAD_BUTTON_B) {
+        onCancel();
+        return;
+    }
+
+    // Start button = OK for single-button dialogs
+    if (input.buttons & PAD_BUTTON_START) {
+        if (!mConfig.showCancelButton && !mConfig.showNoButton) {
+            onConfirm();
+        }
+    }
+}
+
+void MessageBox::draw() {
+    if (!mIsShown) return;
+
+    // Full-screen message box rendering
+    drawBorder();
+    drawText();
+    drawButtonHints();
+}
+
+void MessageBox::animateIn(f32 dt) {
+    mFadeAlpha += dt * 4.0f; // Fade in speed
+    if (mFadeAlpha >= 1.0f) {
+        mFadeAlpha = 1.0f;
+        mIsAnimating = false;
+        onShowAnimationComplete();
+    }
+}
+
+void MessageBox::animateOut(f32 dt) {
+    mFadeAlpha -= dt * 4.0f; // Fade out speed
+    if (mFadeAlpha <= 0.0f) {
+        mFadeAlpha = 0.0f;
+        mIsAnimating = false;
+        onHideAnimationComplete();
+    }
+}
+
+void MessageBox::drawBorder() const {
+    // Draw the message box border/frame
+    // In real impl: submit GX quads for the rounded rectangle border
+    // Centered at (320, 240), roughly 400x200 pixels
+    // Color: dark semi-transparent background with light border
+}
+
+void MessageBox::drawText() const {
+    // Draw the message text within the box
+    // In real impl: set font, render mMessageText centered
+    // Text is wrapped within the box bounds
+}
+
+void MessageBox::drawButtonHints() const {
+    // Draw button hint icons at the bottom of the box
+    // e.g. "A: OK    B: Cancel" or "A: Yes    B: No"
+    // In real impl: render button icons + text via GX text renderer
 }
 
 } // namespace UI

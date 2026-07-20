@@ -26,7 +26,10 @@ FrameTimer::FrameTimer()
     , mCurrentFps(0.0f)
     , mVSyncInterval(0)
     , mVSyncEnabled(true)
-    , mPadding(0) {}
+    , mPadding(0)
+    , mAverageFps(0.0f)
+    , mAccumulatedTime(0.0f)
+    , mbPaused(false) {}
 
 // @addr 0x80174060
 FrameTimer::~FrameTimer() {}
@@ -42,6 +45,9 @@ void FrameTimer::init(u32 refreshRate) {
     mFpsFrameCount = 0;
     mFpsStartTick = 0;
     mCurrentFps = 0.0f;
+    mAverageFps = 0.0f;
+    mAccumulatedTime = 0.0f;
+    mbPaused = false;
 }
 
 // @addr 0x80174120 — Mark frame start, record tick
@@ -54,8 +60,31 @@ void FrameTimer::endFrame() {
     mEndTick = 0; // OSGetTick() in real SDK
     // Delta in seconds: OSDiffTick / OS_TIMER_CLOCK
     mDeltaTime = 1.0f / mFrameRate; // simplified
-    mFrameCount++;
-    mFpsFrameCount++;
+
+    if (!mbPaused) {
+        mFrameCount++;
+        mFpsFrameCount++;
+        mAccumulatedTime += mDeltaTime;
+
+        // Update FPS measurement periodically
+        // In the original: every ~30 frames, recalculate FPS
+        // using OSTicksToSeconds(OSGetTick() - mFpsStartTick)
+        if (mFpsFrameCount >= FPS_UPDATE_INTERVAL) {
+            // Simulated: if 30 frames took ~0.5s, FPS = 60
+            f32 elapsed = mFpsFrameCount / mFrameRate;
+            if (elapsed > 0.0f) {
+                mCurrentFps = (f32)mFpsFrameCount / elapsed;
+            }
+            // Rolling average: blend with previous measurement
+            if (mAverageFps > 0.0f) {
+                mAverageFps = mAverageFps * 0.7f + mCurrentFps * 0.3f;
+            } else {
+                mAverageFps = mCurrentFps;
+            }
+            mFpsFrameCount = 0;
+            mFpsStartTick = 0; // OSGetTick()
+        }
+    }
 }
 
 // @addr 0x80174220 — Get seconds elapsed since last frame
@@ -231,5 +260,82 @@ void fn_80174E50(void) {}
 s32 fn_80174E80(s32 a, s32 b) { (void)a; (void)b; return 0; }
 // @addr 0x80174EC0
 void fn_80174EC0(s32 a, u32 b) { (void)a; (void)b; }
+
+// ============================================================================
+// Phase 37 — FrameTimer extended methods
+// ============================================================================
+
+// @addr 0x80174540 — Check if running below target framerate
+bool FrameTimer::isRunningSlow() const {
+    if (mAverageFps <= 0.0f) {
+        return false;
+    }
+    // Consider "slow" if running at less than 90% of target
+    f32 threshold = mFrameRate * 0.9f;
+    return mAverageFps < threshold;
+}
+
+// @addr 0x80174580 — Reset all counters
+void FrameTimer::reset() {
+    mStartTick = 0;
+    mEndTick = 0;
+    mDeltaTime = 0.0f;
+    mFrameCount = 0;
+    mFpsFrameCount = 0;
+    mFpsStartTick = 0;
+    mCurrentFps = 0.0f;
+    mAverageFps = 0.0f;
+    mAccumulatedTime = 0.0f;
+    mbPaused = false;
+}
+
+// @addr 0x801745C0 — Pause timing
+void FrameTimer::pause() {
+    if (mbPaused) {
+        return;
+    }
+    mbPaused = true;
+    // Delta is zeroed while paused; frame count stops incrementing
+    mDeltaTime = 0.0f;
+}
+
+// @addr 0x80174600 — Resume timing
+void FrameTimer::resume() {
+    if (!mbPaused) {
+        return;
+    }
+    mbPaused = false;
+    // Reset frame-start tick so the next endFrame() computes
+    // delta from the resume point, not from before the pause
+    mStartTick = 0; // OSGetTick()
+}
+
+// @addr 0x80174640 — Change target framerate at runtime
+void FrameTimer::setTargetFPS(f32 fps) {
+    if (fps < 1.0f) {
+        fps = 1.0f; // Clamp to minimum 1 FPS
+    }
+    mFrameRate = fps;
+    // In the original: mVSyncInterval = OS_TIMER_CLOCK / fps;
+}
+
+// ============================================================================
+// Global Frame Timer
+// ============================================================================
+
+// The global frame timer is a singleton used by the main loop
+// to track frame timing across all game states.
+// In the original DOL, this is at a fixed address in .bss.
+static EGG::FrameTimer sGlobalFrameTimer;
+static bool sGlobalFrameTimerInitialized = false;
+
+// @addr 0x80174680
+EGG::FrameTimer* FrameTimer_getGlobalTimer() {
+    if (!sGlobalFrameTimerInitialized) {
+        sGlobalFrameTimer.init(60); // Default: NTSC 60Hz
+        sGlobalFrameTimerInitialized = true;
+    }
+    return &sGlobalFrameTimer;
+}
 
 } // namespace EGG

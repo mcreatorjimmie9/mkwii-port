@@ -274,3 +274,24 @@ Thickened 3 AIRace source files with AI input smoothing, path following logic, a
 - Fixed AIInfo.cpp to use `buttons` field (not `mButtons`) matching actual KPadRaceInputState layout
 - Fixed AIPath.cpp to use `EGG::TVector3<f32>::cross(a,b)` static form (TVector3 has no member cross)
 - All @addr annotations preserved; 64-bit safe; EGG::Vector3f.length() not used
+
+---
+Task ID: 2
+Agent: Phase 36 Main
+Task: Module deepening of 12 thin stubs across 4 modules
+
+Work Log:
+- Assessed all cpp files under 200 lines, identified 12 deepening targets
+- Agent 1 (SaveData): GhostFile 97→343L, RecordData 89→317L, License 197→335L, SaveData 235→643L
+- Agent 2 (Physics+Collision, timed out but files written): PlayerTrick 124→316L, KartSuspension 130→296L, KartGravity 132→266L, KartInput 139→299L
+- Agent 3 (Scene+Field): J2DPane 184→427L, ParticleEffect 190→393L, Skybox 199→366L, StartGrid 183→309L
+- Agent 4 (ItemSystem+AIRace): ItemObjFib 138→269L, AIItem 171→485L, AITrickHandler 162→333L
+- Fixed 7 build error categories: Vec3::length()→vec3Length(), PlayerPointers incomplete type→void* cast, duplicate setMovingRoadVel/setMovingWaterVel declarations, System::Time/RawGhostFile redefinition guards, Mii forward-decl copy, missing AITrickHandlerBike::allowWheelie() declaration
+- Build: 0 errors, 0 new warnings
+- Added System::Time::isZero(), toMilliseconds(), operator<, operator==, operator!= to rk_common.h
+
+Stage Summary:
+- Phase 36 committed as b8e01854, pushed to GitHub
+- 485 files / ~126,900 lines total / ~14,700 symbols
+- 30 files changed, +4,091 / -643 lines
+- All 12 targets thickened with real implementation logic

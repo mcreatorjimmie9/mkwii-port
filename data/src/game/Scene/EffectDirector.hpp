@@ -120,6 +120,15 @@ public:
     u32 getActiveEmitterCount() const { return m_activeEmitterCount; }
     u32 getTotalParticleCount() const { return m_totalParticleCount; }
 
+    // Effect management
+    u32 spawnEffect(u32 effectId, const Vec3& pos, const Vec3& dir);
+    void stopAll();
+    void stopById(u32 effectId);
+    void setGlobalScale(f32 scale);
+    void preload(u32 effectId);
+    void update(f32 dt);
+    f32 getGlobalScale() const { return m_globalScale; }
+
 private:
     static const u32 MAX_EMITTERS = 128;
     static const u32 MAX_PARTICLES = 8192;
@@ -128,12 +137,18 @@ private:
     void updateParticles(EffectEmitter& emitter, f32 dt);
     void spawnParticle(EffectEmitter& emitter);
     void updateScreenEffect(f32 dt);
+    void updateSingleParticle(Particle& p, f32 dt);
+    void emitParticle(EffectEmitter& emitter, const Vec3& dir);
+    f32 computeParticleLifetime(EffectType type) const;
+    f32 computeParticleSize(EffectType type) const;
+    void applyParticleColor(EffectType type, Particle& p) const;
 
     EffectEmitter* m_emitters;
     u32 m_activeEmitterCount;
     Particle* m_particlePool;
     u32 m_totalParticleCount;
     ScreenEffect m_screenEffect;
+    f32 m_globalScale;
     bool m_initialized;
 };
 

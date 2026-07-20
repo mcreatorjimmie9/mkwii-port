@@ -4,11 +4,18 @@
 // Address range: 0x8050dca4 - 0x8060a194
 
 #include "rk_common.h"
+#include <EGG/math.h>
 
 namespace UI {
 
 class Layout;
 class PaneWrapper;
+
+} // namespace UI
+
+namespace System { struct KPadRaceInputState; }
+
+namespace UI {
 
 // Page lifecycle states
 enum PageState {
@@ -117,6 +124,16 @@ public:
     virtual void onCancel();
     virtual void onBack();
 
+    // --- Menu item management ---
+    void addItem(u16 itemId, const char* text, u16 xPos, u16 yPos);
+    void removeItem(u16 itemId);
+    void selectItem(u16 index);
+    s32 getSelectedItem() const;
+    void handleInput(const System::KPadRaceInputState& input);
+    void animateSelection(f32 dt);
+    void scrollToItem(u16 index);
+    u32 getItemCount() const;
+
     // --- State queries ---
     PageState getPageState() const { return mState; }
     u32 getPageIdRaw() const { return mPageId; }
@@ -174,6 +191,20 @@ protected:
     u8 mCursorAnimating;       // 0xFB8
     u8 mCursorLocked;          // 0xFB9
     u16 _FBA;
+
+    // Menu items for list-based pages
+    static const u16 MAX_MENU_ITEMS = 64;
+    struct MenuItem {
+        u16 itemId;
+        u16 xPos;
+        u16 yPos;
+        u32 textMsgId;    // message ID for text binding
+        bool active;
+    };
+    MenuItem mItems[MAX_MENU_ITEMS];
+    u32 mItemCount;
+    f32 mSelectionAnimProgress;  // 0..1 for cursor lerp
+    f32 mSelectionTargetY;       // Target Y position for cursor
 
     static const u32 MAX_LAYERS = 5;
 };

@@ -220,9 +220,52 @@ public:
     static const u16 MAX_PAYLOAD_SIZE = 512;
     static const u16 FULL_BUFFER_SIZE = sizeof(PacketHeader) + MAX_PAYLOAD_SIZE;
 
+    // --- Phase 37 additions ---
+
+    // Serialize packet to byte buffer (writes header + payload)
+    // Returns number of bytes written
+    // @addr 0x8055b900
+    u32 serialize(u8* outBuffer, u32 bufferSize) const;
+
+    // Deserialize from byte buffer (reads header + payload)
+    // Returns true on success
+    // @addr 0x8055b980
+    bool deserialize(const u8* data, u32 size);
+
+    // Check if packet is valid (magic, length, CRC)
+    // @addr 0x8055ba00
+    bool isValid() const;
+
+    // Mark packet as reliable or unordered delivery
+    // @addr 0x8055ba40
+    void setReliable(bool reliable);
+
+    // Set network channel for this packet
+    // @addr 0x8055ba60
+    void setChannel(u8 channel);
+
+    // Get the monotonically increasing sequence number
+    // @addr 0x8055ba80
+    u32 getSequenceNumber() const { return mHeader.sequence; }
+
+    // Compute CRC16-CCITT checksum over header + payload
+    // @addr 0x8055bac0
+    u16 computeCRC() const;
+
+    // Check if packet is marked as reliable
+    bool isReliable() const { return mbReliable; }
+
+    // Get the network channel
+    u8 getChannel() const { return mChannel; }
+
+    // Set sequence number for this packet
+    void setSequence(u32 seq) { mHeader.sequence = seq; }
+
 private:
     PacketHeader mHeader;
     u8          mPayload[MAX_PAYLOAD_SIZE];
+    bool mbReliable;         // Reliable delivery flag
+    u8  mChannel;            // Network channel (0=default)
 };
 
 // ============================================================================
@@ -247,5 +290,48 @@ public:
     static Packet createCountdown(u8 senderId, u32 frame,
         u8 countdownValue, u8 playerIndex);
 };
+
+// PacketHeader utility methods
+namespace PacketHeaderUtil {
+    // Initialize header fields to safe defaults
+    // @addr 0x8055bb00
+    inline void init(PacketHeader& hdr) {
+        hdr.type = 0;
+        hdr.senderId = 0;
+        hdr.payloadSize = 0;
+        hdr.sequence = 0;
+        hdr.ackBits = 0;
+    }
+
+    // Get human-readable packet type name
+    // @addr 0x8055bb40
+    inline const char* getTypeName(u8 type) {
+        switch (type) {
+            case PACKET_NONE:           return "NONE";
+            case PACKET_PLAYER_JOIN:    return "PLAYER_JOIN";
+            case PACKET_PLAYER_LEAVE:   return "PLAYER_LEAVE";
+            case PACKET_RACE_STATE:     return "RACE_STATE";
+            case PACKET_ITEM_EVENT:     return "ITEM_EVENT";
+            case PACKET_PLAYER_UPDATE:  return "PLAYER_UPDATE";
+            case PACKET_LAP_COMPLETE:   return "LAP_COMPLETE";
+            case PACKET_RACE_END:       return "RACE_END";
+            case PACKET_ROOM_INFO:      return "ROOM_INFO";
+            case PACKET_ROOM_SETTINGS:  return "ROOM_SETTINGS";
+            case PACKET_COUNTDOWN:      return "COUNTDOWN";
+            case PACKET_CHARACTER_SELECT: return "CHARACTER_SELECT";
+            case PACKET_VEHICLE_SELECT: return "VEHICLE_SELECT";
+            case PACKET_COURSE_SELECT:  return "COURSE_SELECT";
+            case PACKET_GHOST_DATA:     return "GHOST_DATA";
+            case PACKET_HEARTBEAT:      return "HEARTBEAT";
+            case PACKET_ACK:            return "ACK";
+            case PACKET_ERROR:          return "ERROR";
+            default:                    return "UNKNOWN";
+        }
+    }
+}
+
+// Factory: create a reliable (ordered) packet with given type and payload
+// @addr 0x8055bc00
+Packet Packet_createReliable(PacketType type, const u8* payload, u32 size);
 
 } // namespace RKNet

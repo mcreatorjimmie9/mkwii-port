@@ -3,6 +3,7 @@
 
 #include "RaceManager.hpp"
 #include "RaceConfig.hpp"
+#include <cstring>
 
 // Stub: Kart namespace (deep accessor chain for GP rank scoring)
 namespace Kart {
@@ -14,9 +15,20 @@ namespace Kart {
         u16 numObjectCollision;
         u16 outOfBounds;
         u16 aiRankBonus;
+        u16 halfpipeTricks;
+        u16 trickCount;
+        u16 itemUsageCount;
+        u16 timesHitByItem;
     };
     struct RaceStats {
         u16 hitOthersWithItemsCount;
+        u16 timesHitByItem;
+        u16 itemUsageCount;
+        u16 offroadFrames;
+        u16 wallCollisions;
+        u16 objectCollisions;
+        u16 outOfBoundsCount;
+        u16 trickCount;
     };
     struct KartSettings {
         GpStats* gpStats;
@@ -55,6 +67,498 @@ public:
     KrtFile** krtFile;
 };
 
+class RaceModeTimeTrial : public RaceMode {
+public:
+    KrtFile** krtFile;
+};
+
+class RaceModeVs : public RaceMode {
+public:
+    KrtFile* krtFile;
+};
+
+class RaceModeBattle : public RaceMode {
+public:
+    KmgFile* kmgFile;
+};
+
+// ============================================================================
+// Static instance
+// ============================================================================
+
+RaceManager* RaceManager::spInstance = nullptr;
+
+// ============================================================================
+// Constructor / Destructor
+// ============================================================================
+
+RaceManager::RaceManager()
+    : random1(nullptr), random2(nullptr), players(nullptr),
+      raceMode(nullptr), timerManager(nullptr),
+      player_id_in_each_position(nullptr),
+      finished_player_count(0), disconnectedPlayerCount(0),
+      introTimer(0), timer(0), battleKtptStart(0),
+      field12_0x25(0), stage(INTRO_CAMERA),
+      introWasSkipped(false), spectatorMode(false),
+      canCountdownStart(false), cutSceneMode(false),
+      lapCountingIsEnabled(true),
+      kmgFile(nullptr), eline_control_manager(nullptr),
+      dpWaterHeightCheck(0.0f), dpDisableLowerRespawns(false) {}
+
+RaceManager::~RaceManager() {}
+
+// ============================================================================
+// RaceManagerPlayer
+// ============================================================================
+
+// @addr 0x80538a00 (approximate)
+RaceManagerPlayer::RaceManagerPlayer(u8 idx, u8 lapCount)
+    : field_0x4(0), idx(idx), checkpointId(0),
+      raceCompletion(0.0f), raceCompletionMax(0.0f),
+      checkpointFactor(0.0f), checkpointStartLapCompletion(0.0f),
+      lapCompletion(0.0f), position(0), respawn(0),
+      battleScore(0), currentLap(0), maxLap(lapCount),
+      currentKcp(0), maxKcp(0),
+      frameCounter(0), framesInFirstPlace(0),
+      unk34(0), flags((RaceManagerPlayerFlags)0),
+      lapFinishTimes(nullptr), raceFinishTime(nullptr),
+      somethingRaceEndMessageOnline(0), kpadPlayer(nullptr),
+      unk_4c_50{}, playersAheadFlags(0),
+      field36_0x52(0), finishingPosition(-1) {}
+
+// @addr 0x80538a80 (approximate)
+void RaceManagerPlayer::init() {
+    field_0x4 = 0;
+    checkpointId = 0;
+    raceCompletion = 0.0f;
+    raceCompletionMax = 0.0f;
+    checkpointFactor = 0.0f;
+    checkpointStartLapCompletion = 0.0f;
+    lapCompletion = 0.0f;
+    position = 0;
+    respawn = 0;
+    battleScore = 0;
+    currentLap = 0;
+    currentKcp = 0;
+    maxKcp = 0;
+    frameCounter = 0;
+    framesInFirstPlace = 0;
+    unk34 = 0;
+    flags = (RaceManagerPlayerFlags)0;
+    somethingRaceEndMessageOnline = 0;
+    kpadPlayer = nullptr;
+    playersAheadFlags = 0;
+    field36_0x52 = 0;
+    finishingPosition = -1;
+    memset(unk_4c_50, 0, sizeof(unk_4c_50));
+}
+
+// @addr 0x80538b40 (approximate)
+void RaceManagerPlayer::reset() {
+    raceCompletion = 0.0f;
+    raceCompletionMax = 0.0f;
+    checkpointFactor = 0.0f;
+    checkpointStartLapCompletion = 0.0f;
+    lapCompletion = 0.0f;
+    position = 0;
+    currentLap = 0;
+    currentKcp = 0;
+    maxKcp = 0;
+    frameCounter = 0;
+    framesInFirstPlace = 0;
+    flags = (RaceManagerPlayerFlags)0;
+    finishingPosition = -1;
+}
+
+// ============================================================================
+// RaceManager::createInstance
+// ============================================================================
+
+// @addr 0x80538c00 (approximate)
+RaceManager* RaceManager::createInstance() {
+    if (!spInstance) {
+        spInstance = new RaceManager();
+    }
+    return spInstance;
+}
+
+// ============================================================================
+// RaceManager::destroyInstance
+// ============================================================================
+
+void RaceManager::destroyInstance() {
+    if (spInstance) {
+        // Clean up player array
+        if (spInstance->players) {
+            for (u8 i = 0; i < MAX_PLAYER_COUNT; i++) {
+                if (spInstance->players[i]) {
+                    delete spInstance->players[i];
+                    spInstance->players[i] = nullptr;
+                }
+            }
+            delete[] spInstance->players;
+            spInstance->players = nullptr;
+        }
+
+        // Clean up race mode
+        if (spInstance->raceMode) {
+            delete spInstance->raceMode;
+            spInstance->raceMode = nullptr;
+        }
+
+        // Clean up timer manager
+        if (spInstance->timerManager) {
+            delete spInstance->timerManager;
+            spInstance->timerManager = nullptr;
+        }
+
+        // Clean up position array
+        if (spInstance->player_id_in_each_position) {
+            delete[] spInstance->player_id_in_each_position;
+            spInstance->player_id_in_each_position = nullptr;
+        }
+
+        // Clean up random instances
+        if (spInstance->random1) {
+            delete spInstance->random1;
+            spInstance->random1 = nullptr;
+        }
+        if (spInstance->random2) {
+            delete spInstance->random2;
+            spInstance->random2 = nullptr;
+        }
+
+        // Clean up KMG file
+        if (spInstance->kmgFile) {
+            delete spInstance->kmgFile;
+            spInstance->kmgFile = nullptr;
+        }
+
+        delete spInstance;
+    }
+    spInstance = nullptr;
+}
+
+// ============================================================================
+// RaceManager::init — Initialize race manager for a new session
+// ============================================================================
+
+// @addr 0x80538d00 (approximate)
+void RaceManager::init() {
+    finished_player_count = 0;
+    disconnectedPlayerCount = 0;
+    introTimer = 0;
+    timer = 0;
+    battleKtptStart = 0;
+    field12_0x25 = 0;
+    stage = INTRO_CAMERA;
+    introWasSkipped = false;
+    spectatorMode = false;
+    canCountdownStart = false;
+    cutSceneMode = false;
+    lapCountingIsEnabled = true;
+    dpWaterHeightCheck = 0.0f;
+    dpDisableLowerRespawns = false;
+
+    // Create race mode based on current game settings
+    if (RaceConfig::spInstance) {
+        raceMode = initGamemode(
+            RaceConfig::spInstance->mRaceScenario.mSettings.mGameMode);
+    }
+
+    // Initialize random number generators from scenario seeds
+    if (RaceConfig::spInstance) {
+        u32 seed1 = RaceConfig::spInstance->mRaceScenario.mSettings.mSeed1;
+        u32 seed2 = RaceConfig::spInstance->mRaceScenario.mSettings.mSeed2;
+        random1 = new Util::Random();
+        random1->state = seed1;
+        random2 = new Util::Random();
+        random2->state = seed2;
+    }
+}
+
+// ============================================================================
+// RaceManager::initGamemode — Create the appropriate RaceMode subclass
+// ============================================================================
+
+// @addr 0x80538d80 (approximate)
+RaceMode* RaceManager::initGamemode(
+    RaceConfig::Settings::GameMode mode) {
+    switch (mode) {
+    case RaceConfig::Settings::GAMEMODE_GRAND_PRIX:
+        return new RaceModeGrandPrix();
+    case RaceConfig::Settings::GAMEMODE_VS_RACE:
+        return new RaceModeVs();
+    case RaceConfig::Settings::GAMEMODE_TIME_TRIAL:
+    case RaceConfig::Settings::GAMEMODE_GHOST_RACE:
+        return new RaceModeTimeTrial();
+    case RaceConfig::Settings::GAMEMODE_BATTLE:
+        return new RaceModeBattle();
+    default:
+        return new RaceMode();
+    }
+}
+
+// ============================================================================
+// RaceManager::initRace — Initialize for a new race
+// ============================================================================
+
+// @addr 0x80538e20 (approximate)
+void RaceManager::initRace() {
+    if (!RaceConfig::spInstance) {
+        return;
+    }
+
+    u8 playerCount = RaceConfig::spInstance->mRaceScenario.mPlayerCount;
+    u8 lapCount = RaceConfig::spInstance->mRaceScenario.mSettings.mLapCount;
+
+    // Create player array
+    if (players) {
+        for (u8 i = 0; i < MAX_PLAYER_COUNT; i++) {
+            if (players[i]) {
+                delete players[i];
+            }
+        }
+        delete[] players;
+    }
+    players = new RaceManagerPlayer*[MAX_PLAYER_COUNT];
+    for (u8 i = 0; i < MAX_PLAYER_COUNT; i++) {
+        players[i] = new RaceManagerPlayer(i, lapCount);
+    }
+
+    // Create position tracking array
+    if (player_id_in_each_position) {
+        delete[] player_id_in_each_position;
+    }
+    player_id_in_each_position = new s8[MAX_PLAYER_COUNT];
+    for (u8 i = 0; i < MAX_PLAYER_COUNT; i++) {
+        player_id_in_each_position[i] = -1;
+    }
+
+    // Create timer manager
+    if (timerManager) {
+        delete timerManager;
+    }
+    timerManager = new TimerManager();
+
+    // For battle modes, set up the battle timer
+    u32 gameMode = RaceConfig::spInstance->mRaceScenario.mSettings.mGameMode;
+    if (gameMode == RaceConfig::Settings::GAMEMODE_BATTLE) {
+        u16 timeLimit = getBattleTimeLimit();
+        if (timeLimit > 0) {
+            u16 minutes = timeLimit / 60;
+            u8 seconds = timeLimit % 60;
+            timerManager->setLimit(minutes, seconds);
+        }
+    }
+
+    // Reset race state
+    finished_player_count = 0;
+    disconnectedPlayerCount = 0;
+    stage = INTRO_CAMERA;
+    introWasSkipped = false;
+    canCountdownStart = false;
+    lapCountingIsEnabled = true;
+    movingMask.mask = 0;
+    movingMask.currentBit = 0;
+
+    // Scenario initialization is handled by RaceConfig::initRace()
+    // which calls copyPrevPositions() and postInitControllers()
+}
+
+// ============================================================================
+// RaceManager::endRace — End the current race
+// ============================================================================
+
+// @addr 0x80539000 (approximate)
+void RaceManager::endRace() {
+    stage = FINISHED_RACE;
+
+    if (!RaceConfig::spInstance) {
+        return;
+    }
+
+    // Update GP rank scores for all local players
+    u32 gameMode =
+        RaceConfig::spInstance->mRaceScenario.mSettings.mGameMode;
+    if (gameMode == RaceConfig::Settings::GAMEMODE_GRAND_PRIX) {
+        for (u8 i = 0; i < MAX_PLAYER_COUNT; i++) {
+            if (players[i] != nullptr) {
+                const RaceConfig::Player::Type pType =
+                    RaceConfig::spInstance->mRaceScenario.getPlayer(i)
+                        .getPlayerType();
+                if (pType == RaceConfig::Player::TYPE_REAL_LOCAL) {
+                    players[i]->updateGpRankScore();
+                }
+            }
+        }
+    }
+
+    // Save race results: copy finish positions to menu scenario
+    // for persistence between races in a GP
+    for (u8 i = 0; i < MAX_PLAYER_COUNT; i++) {
+        if (players[i] != nullptr) {
+            RaceConfig::spInstance->mRaceScenario.getPlayer(i).mFinishPos =
+                players[i]->finishingPosition;
+        }
+    }
+}
+
+// ============================================================================
+// RaceManager::update — Main per-frame update
+// ============================================================================
+
+// @addr 0x80539100 (approximate)
+void RaceManager::update() {
+    // Update the timer manager
+    if (timerManager) {
+        timerManager->update();
+    }
+
+    // Advance race stage state machine
+    switch (stage) {
+    case INTRO_CAMERA:
+        // Increment intro timer; transition to countdown when done
+        introTimer++;
+        if (introTimer >= 180 || introWasSkipped) { // ~3 seconds at 60fps
+            stage = COUNTDOWN;
+            canCountdownStart = true;
+        }
+        break;
+
+    case COUNTDOWN:
+        // Countdown phase — handled by the race director
+        // The countdown timer decrements and transitions to RACE
+        break;
+
+    case RACE:
+        // Main race phase — update each player's race state
+        if (timerManager) {
+            timerManager->update();
+            timer++;
+        }
+
+        // Update moving mask (for spectating camera cycling)
+        movingMask.currentBit++;
+        if (movingMask.currentBit >= 32) {
+            movingMask.currentBit = 0;
+        }
+        break;
+
+    case FINISHED_RACE:
+        // Race is over — wait for results screen
+        break;
+    }
+
+    // Update race mode specific logic
+    if (raceMode) {
+        // Race mode subclasses handle mode-specific updates
+        // (e.g., GP score tracking, battle score accumulation)
+    }
+}
+
+// ============================================================================
+// RaceManager::getRacePhase — Return current race phase
+// ============================================================================
+
+RaceStage RaceManager::getRacePhase() const {
+    return stage;
+}
+
+// ============================================================================
+// RaceManager::getPlayerCount — Return number of active players
+// ============================================================================
+
+u8 RaceManager::getPlayerCount() const {
+    if (!RaceConfig::spInstance) {
+        return 0;
+    }
+    return RaceConfig::spInstance->mRaceScenario.mPlayerCount;
+}
+
+// ============================================================================
+// RaceManager::isRaceFinished — Check if the race has ended
+// ============================================================================
+
+bool RaceManager::isRaceFinished() const {
+    return stage == FINISHED_RACE;
+}
+
+// ============================================================================
+// RaceManager::getFinishOrder — Return player finish order array
+// ============================================================================
+
+const s8* RaceManager::getFinishOrder() const {
+    return player_id_in_each_position;
+}
+
+// ============================================================================
+// RaceManager::suspend / resume — Pause/resume the race
+// ============================================================================
+
+// @addr 0x80539300 (approximate)
+void RaceManager::suspend() {
+    if (stage == RACE) {
+        cutSceneMode = true;
+        // Pause timer during suspension
+        // Timer pause is handled by TimerManager::update() not
+        // being called while cutSceneMode is true
+        (void)timerManager;
+    }
+}
+
+// @addr 0x80539340 (approximate)
+void RaceManager::resume() {
+    cutSceneMode = false;
+    if (stage == RACE) {
+        // Timer resumes when cutSceneMode is false and update() is called
+        (void)timerManager;
+    }
+}
+
+// ============================================================================
+// RaceManager::getLapCount — Static helper for lap count
+// ============================================================================
+
+u8 RaceManager::getLapCount() {
+    if (!RaceConfig::spInstance) {
+        return 3;
+    }
+    return RaceConfig::spInstance->mRaceScenario.mSettings.mLapCount;
+}
+
+// ============================================================================
+// RaceManager::getBattleTimeLimit — Get time limit for battle mode
+// ============================================================================
+
+u16 RaceManager::getBattleTimeLimit() {
+    if (!kmgFile || !kmgFile->data) {
+        return 180; // Default 3 minutes
+    }
+
+    u32 courseId =
+        (u32)RaceConfig::spInstance->mRaceScenario.mSettings.mCourseId;
+    u32 engineClass =
+        RaceConfig::spInstance->mRaceScenario.mSettings.getEngineClass();
+
+    if (courseId < 10 && engineClass < 11) {
+        return kmgFile->data->balloonBattleTimeLimits[courseId][engineClass];
+    }
+    return 180;
+}
+
+// ============================================================================
+// RaceManager::createCompetitionMode — Create mode for competition
+// ============================================================================
+
+RaceMode* RaceManager::createCompetitionMode() {
+    return new RaceMode();
+}
+
+// ============================================================================
+// getKrtFile
+// ============================================================================
+
 KrtFile** RaceManager::getKrtFile() {
     KrtFile** files;
 
@@ -66,6 +570,100 @@ KrtFile** RaceManager::getKrtFile() {
         files = raceModeGP->krtFile;
         return (files[0] != nullptr) ? files : nullptr;
     }
+}
+
+// ============================================================================
+// calcGpRankScore — Shared scoring helper for GP rank calculation
+// Computes the hidden score for a single race based on performance metrics.
+// Returns a score clamped to [-50, 250].
+// ============================================================================
+
+// @addr 0x80538de0 (helper, shared by updateGpRankScore)
+s32 calcGpRankScore(u8 playerIdx, s32 frameCounter, s32 framesInFirstPlace,
+                    s32 krtTime) {
+    s32 score = 0;
+
+    if (krtTime <= 0) {
+        return 7; // No valid reference time
+    }
+
+    // Time bonus: proportional to how far under the KRT time the player finished
+    score += (s32)(1000.0f * (krtTime - frameCounter) / krtTime);
+
+    // First place time bonus
+    score += (framesInFirstPlace * 150) / krtTime;
+
+    // Rocket start bonus
+    if (Kart::KartObjectManager::spInstance) {
+        Kart::GpStats* gpStats =
+            Kart::KartObjectManager::spInstance->getObject(playerIdx)
+                ->mAccessor->settings->gpStats;
+        if (gpStats) {
+            if (gpStats->startBoostSuccessful) {
+                score += 25;
+            }
+
+            // Mini-turbo bonus
+            score += gpStats->miniturbos * 2;
+
+            // Offroad penalty
+            score -= gpStats->offroad / 3;
+
+            // Wall collision penalty
+            score -= gpStats->numWallCollision * 20;
+
+            // Object collision penalty
+            score -= gpStats->numObjectCollision * 30;
+
+            // Out of bounds (Lakitu respawn) penalty
+            score -= gpStats->outOfBounds * 70;
+
+            // AI rank bonus
+            score += gpStats->aiRankBonus;
+
+            // Trick bonus
+            score += gpStats->trickCount;
+
+            // Halfpipe trick bonus
+            score += gpStats->halfpipeTricks * 3;
+        }
+
+        Kart::RaceStats* raceStats =
+            Kart::KartObjectManager::spInstance->getObject(playerIdx)
+                ->mAccessor->settings->raceStats;
+        if (raceStats) {
+            // Item hit bonus
+            score += raceStats->hitOthersWithItemsCount * 5;
+
+            // Items used bonus (small)
+            score += raceStats->itemUsageCount;
+        }
+    }
+
+    // Controller type bonus
+    s8 playerInputIdx =
+        RaceConfig::spInstance->mRaceScenario.getPlayer(playerIdx)
+            .getPlayerInputIdx();
+    if (playerInputIdx != -1 && InputManager::spInstance) {
+        Controller* controller =
+            InputManager::spInstance->playerInputs[(u8)playerInputIdx]
+                .raceController;
+        if (controller) {
+            u32 controllerType = controller->getType();
+            if (controllerType == CONTROLLER_TYPE_WII_WHEEL) {
+                score += 10;
+            }
+            if (controller->driftIsAuto) {
+                score += 25;
+            }
+        }
+    }
+
+    // Clamp to [-50, 250]
+    if (score < -50) score = -50;
+    if (score > 250) score = 250;
+
+    return score;
 }
 
 // @addr 0x80538de0

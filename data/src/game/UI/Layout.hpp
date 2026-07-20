@@ -60,9 +60,21 @@ public:
 
     // Layout tree operations
     PaneWrapper* findPaneByName(const char* name);
+    PaneWrapper* getRootPane() const { return reinterpret_cast<PaneWrapper*>(mPaneTree); }
     void attachChild(PaneWrapper* child, LayoutGroup group);
     void detachChild(PaneWrapper* child);
     void setRootPane(PaneWrapper* root);
+
+    // Layout data parsing
+    void parse(const void* data, u32 size);
+
+    // Layout queries
+    u32 getPaneCount() const { return mGroupCount; }
+    u32 getAnimationCount() const { return 0; }
+    void animate(f32 frame);
+    void getBoundingBox(f32& x, f32& y, f32& w, f32& h) const;
+    void setAlpha(u8 alpha);
+    void setVisible(bool visible);
 
     // Animation operations
     void bindAnimation(const char* animName, u32 frame);
@@ -97,6 +109,8 @@ protected:
     u32 mTransitionId;         // transition message ID
     u32 mCancelFlag;           // cancellation flag
     u8 mFlags;                 // 0x6B5
+    u8 mGlobalAlpha;          // global alpha override
+    bool mVisible;             // global visibility
     u8 _6B6[2];
     u32 mGroupCount;           // 0x6B8
 };

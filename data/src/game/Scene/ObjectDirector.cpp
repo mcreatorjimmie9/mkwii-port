@@ -51,6 +51,71 @@ void ObjectDirector::draw() const {
     // Drawing is dispatched through virtual calls on each object instance
 }
 
+void* ObjectDirector::findObjectById(u32 objId) {
+    for (u32 i = 0; i < m_maxObjects; i++) {
+        if (m_objects[i].active && m_objects[i].typeId == objId) {
+            return m_objects[i].instance;
+        }
+    }
+    return nullptr;
+}
+
+void ObjectDirector::updateAll(f32 dt) {
+    if (!m_initialized) return;
+
+    for (u32 i = 0; i < m_maxObjects; i++) {
+        if (!m_objects[i].active) continue;
+        updateObject(i, dt);
+    }
+}
+
+void ObjectDirector::drawAll() {
+    if (!m_initialized) return;
+
+    for (u32 i = 0; i < m_maxObjects; i++) {
+        if (!m_objects[i].active) continue;
+        if (!isVisible(i)) continue;
+        drawObject(i);
+    }
+}
+
+void ObjectDirector::resetAll() {
+    if (!m_initialized) return;
+
+    for (u32 i = 0; i < m_maxObjects; i++) {
+        if (!m_objects[i].active) continue;
+
+        m_objects[i].animationFrame = 0;
+        m_objects[i].fadeState = 0;
+        m_objects[i].fadeTimer = FADE_TIMER_INVALID;
+        m_objects[i].colorR = 0xFF;
+        m_objects[i].colorG = 0xFF;
+        m_objects[i].colorB = 0xFF;
+        m_objects[i].colorA = 0xFF;
+        m_objects[i].flags = 4; // visible
+        m_objects[i].scale = Vec3(1.0f, 1.0f, 1.0f);
+        m_objects[i].rotation = Vec3(0.0f, 0.0f, 0.0f);
+    }
+}
+
+void ObjectDirector::updateObject(u32 index, f32 dt) {
+    if (index >= m_maxObjects || !m_objects[index].active) return;
+    updateColorFade(index, dt);
+
+    // Increment animation frame if active
+    if (m_objects[index].animationFrame < 0xFFFF) {
+        m_objects[index].animationFrame++;
+    }
+}
+
+void ObjectDirector::drawObject(u32 index) const {
+    if (index >= m_maxObjects || !m_objects[index].active) return;
+
+    // In real impl: set up model matrix from position/rotation/scale,
+    // then call the virtual draw method on the instance
+    (void)index;
+}
+
 u32 ObjectDirector::createObject(u32 typeId, void* initData, CreateFlag flag) {
     if (!m_initialized) return 0xFFFFFFFF;
 

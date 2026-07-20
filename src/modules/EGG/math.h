@@ -80,6 +80,7 @@ class Matrix44f {
 public:
     f32 m[4][4];
     Matrix44f() { std::memset(m, 0, sizeof(m)); m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.0f; }
+    void makeIdentity() { std::memset(m, 0, sizeof(m)); m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.0f; }
 };
 
 class Matrix34f {

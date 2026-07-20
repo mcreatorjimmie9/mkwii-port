@@ -48,6 +48,10 @@ public:
     u32 createObject(u32 typeId, void* initData, CreateFlag flag = CREATE_DEFAULT);
     void destroyObject(u32 objectId);
     void destroyAllObjects();
+    void* findObjectById(u32 objId);
+    void updateAll(f32 dt);
+    void drawAll();
+    void resetAll();
 
     // Validation (assert-fail guards from decompiled code)
     bool validateObject(u32 objectId) const;
@@ -85,6 +89,10 @@ public:
     // Resource loading (from 0x805b3a08, 0x805b3a90 — transform calc)
     void calculateWorldTransform(const Vec3& pos, const Vec3& scale,
                                  Vec3* outWorldPos);
+
+    // Per-object update/draw
+    void updateObject(u32 index, f32 dt);
+    void drawObject(u32 index) const;
 
 private:
     // Object entry stored in the pool

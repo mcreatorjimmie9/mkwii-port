@@ -48,8 +48,42 @@ void MapObjDirector::shutdown() {
 
 void MapObjDirector::loadFromCourse(const void* courseData) {
     if (!m_initialized || !courseData) return;
-    (void)courseData;
-    // Parse map object section from course data
+
+    // Parse map object section from course binary data
+    // Course data layout (simplified from MKWii course format):
+    //   [u32 objectCount]
+    //   For each object:
+    //     [u16 typeId] [u16 variant] [f32 posX/Y/Z] [f32 rotX/Y/Z] [f32 scaleX/Y/Z]
+    const u8* data = static_cast<const u8*>(courseData);
+    u32 offset = 0;
+
+    // Skip to map object section marker (0x000B = mapobj section tag)
+    // In real impl, the section is found by scanning the course header
+    // For now, read directly from the provided pointer
+
+    // Read object count
+    u32 count = *(const u32*)(data + offset);
+    offset += 4;
+
+    for (u32 i = 0; i < count && i < m_maxObjects; i++) {
+        if (offset + 56 > 0x100000) break; // Sanity check on data size
+
+        u16 typeId = *(const u16*)(data + offset); offset += 2;
+        u16 variant = *(const u16*)(data + offset); offset += 2;
+
+        Vec3 pos, rot, scl;
+        pos.x = *(const f32*)(data + offset); offset += 4;
+        pos.y = *(const f32*)(data + offset); offset += 4;
+        pos.z = *(const f32*)(data + offset); offset += 4;
+        rot.x = *(const f32*)(data + offset); offset += 4;
+        rot.y = *(const f32*)(data + offset); offset += 4;
+        rot.z = *(const f32*)(data + offset); offset += 4;
+        scl.x = *(const f32*)(data + offset); offset += 4;
+        scl.y = *(const f32*)(data + offset); offset += 4;
+        scl.z = *(const f32*)(data + offset); offset += 4;
+
+        addObject(typeId, pos, rot, scl, variant);
+    }
 }
 
 void MapObjDirector::calc(f32 dt) {
@@ -65,7 +99,15 @@ void MapObjDirector::calc(f32 dt) {
 
 void MapObjDirector::draw() const {
     if (!m_initialized) return;
-    // Frustum-culled draw dispatch
+
+    // Frustum-culled rendering dispatch: loop all objects, check visible, draw
+    for (u32 i = 0; i < m_maxObjects; i++) {
+        if (!m_objects[i].loaded) continue;
+        if (!m_objects[i].visible) continue;
+        if (m_objects[i].model == nullptr) continue;
+
+        drawObject(m_objects[i]);
+    }
 }
 
 u32 MapObjDirector::addObject(u16 typeId, const Vec3& pos, const Vec3& rot,
@@ -190,9 +232,10 @@ bool MapObjDirector::isInFrustum(const MapObjEntry& entry, const Vec3& camPos,
     // Simplified sphere-frustum culling
     Vec3 toObj;
     toObj.x = entry.position.x - camPos.x;
+    toObj.y = entry.position.y - camPos.y;
     toObj.z = entry.position.z - camPos.z;
 
-    f32 dot = toObj.x * camDir.x + toObj.z * camDir.z;
+    f32 dot = toObj.x * camDir.x + toObj.y * camDir.y + toObj.z * camDir.z;
     if (dot < 0.0f) return false; // Behind camera
 
     f32 dist = sqrtf(toObj.x * toObj.x + toObj.y * toObj.y + toObj.z * toObj.z);
@@ -201,6 +244,75 @@ bool MapObjDirector::isInFrustum(const MapObjEntry& entry, const Vec3& camPos,
 
     return objSize > tanf(halfFov * aspect) || objSize > tanf(halfFov) ||
            dist < entry.boundingRadius * 2.0f;
+}
+
+// --- New query and management functions ---
+
+MapObjEntry* MapObjDirector::findByType(u16 typeId) {
+    for (u32 i = 0; i < m_maxObjects; i++) {
+        if (!m_objects[i].loaded) continue;
+        if (m_objects[i].typeId == typeId) return &m_objects[i];
+    }
+    return nullptr;
+}
+
+MapObjEntry* MapObjDirector::findByPosition(const Vec3& pos, f32 radius) {
+    f32 radiusSq = radius * radius;
+    MapObjEntry* best = nullptr;
+    f32 bestDistSq = radiusSq;
+
+    for (u32 i = 0; i < m_maxObjects; i++) {
+        if (!m_objects[i].loaded) continue;
+
+        Vec3 diff;
+        diff.x = m_objects[i].position.x - pos.x;
+        diff.y = m_objects[i].position.y - pos.y;
+        diff.z = m_objects[i].position.z - pos.z;
+
+        f32 distSq = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
+        if (distSq < bestDistSq) {
+            bestDistSq = distSq;
+            best = &m_objects[i];
+        }
+    }
+    return best;
+}
+
+u32 MapObjDirector::getLoadedCount() const {
+    u32 count = 0;
+    for (u32 i = 0; i < m_maxObjects; i++) {
+        if (m_objects[i].loaded) count++;
+    }
+    return count;
+}
+
+bool MapObjDirector::isObjectVisible(u32 index) const {
+    if (index >= m_maxObjects || !m_objects[index].loaded) return false;
+    return m_objects[index].visible;
+}
+
+void MapObjDirector::updateObjectTransform(u32 index, const Vec3& pos, const Vec3& rot) {
+    if (index >= m_maxObjects || !m_objects[index].loaded) return;
+    m_objects[index].position = pos;
+    m_objects[index].rotation = rot;
+}
+
+void MapObjDirector::setObjectFlags(u32 index, u32 flags) {
+    if (index >= m_maxObjects || !m_objects[index].loaded) return;
+    m_objects[index].flags = flags;
+}
+
+void MapObjDirector::setObjectScale(u32 index, const Vec3& scale) {
+    if (index >= m_maxObjects || !m_objects[index].loaded) return;
+    m_objects[index].scale = scale;
+}
+
+void MapObjDirector::drawObject(const MapObjEntry& entry) const {
+    // Dispatch GX display list for the object's model
+    // In real impl: sets up model transform matrix, calls GX display list
+    // Entry.model is a BMD display list pointer
+    (void)entry;
+    // GXCallDisplayList(entry.model, ...);
 }
 
 } // namespace Scene

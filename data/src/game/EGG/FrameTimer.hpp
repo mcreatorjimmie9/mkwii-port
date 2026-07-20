@@ -46,6 +46,46 @@ public:
     // @addr 0x80174480
     bool waitVSync();
 
+    // --- Phase 37 additions ---
+
+    // Alias: startFrame (same as beginFrame)
+    // @addr 0x80174120
+    void startFrame() { beginFrame(); }
+
+    // Rolling average FPS (computed over FPS measurement window)
+    // @addr 0x801744C0
+    f32 getAverageFPS() const { return mAverageFps; }
+
+    // Instantaneous FPS (same as getFps)
+    // @addr 0x80174500
+    f32 getCurrentFPS() const { return mCurrentFps; }
+
+    // Check if running below target framerate
+    // @addr 0x80174540
+    bool isRunningSlow() const;
+
+    // Reset all counters (frame count, FPS, timing)
+    // @addr 0x80174580
+    void reset();
+
+    // Pause timing — freezes delta time accumulation
+    // @addr 0x801745C0
+    void pause();
+
+    // Resume timing after pause
+    // @addr 0x80174600
+    void resume();
+
+    // Change target framerate at runtime
+    // @addr 0x80174640
+    void setTargetFPS(f32 fps);
+
+    // Check if timer is currently paused
+    bool isPaused() const { return mbPaused; }
+
+    // Get accumulated time (total seconds elapsed)
+    f32 getAccumulatedTime() const { return mAccumulatedTime; }
+
     // Internal timer state
     s32 getStartTick() const { return mStartTick; }
     s32 getEndTick() const { return mEndTick; }
@@ -62,6 +102,11 @@ private:
     u32 mVSyncInterval;    // 0x20 — ticks between VSyncs
     bool mVSyncEnabled;    // 0x24
     u32 mPadding;          // 0x28
+    // --- Phase 37 additions ---
+    f32 mAverageFps;       // Rolling average FPS
+    f32 mAccumulatedTime;  // Total accumulated time (seconds)
+    bool mbPaused;         // Timer is paused
+    static const u32 FPS_UPDATE_INTERVAL = 30; // frames between FPS recalculations
 };
 
 // ============================================================================
@@ -108,5 +153,10 @@ private:
     void* mCopiedXfb;       // 0x08 — last XFB that was copied to
     void* mShowXfb;         // 0x0C — XFB currently displayed by VI
 };
+
+// Global frame timer instance — used by the main game loop
+// Accessed via FrameTimer_getGlobalTimer()
+// @addr 0x80174680 (data section)
+FrameTimer* FrameTimer_getGlobalTimer();
 
 } // namespace EGG

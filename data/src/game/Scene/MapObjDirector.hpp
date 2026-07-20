@@ -72,8 +72,11 @@ public:
 
     // Queries
     u32 getObjectCount() const { return m_objectCount; }
+    u32 getLoadedCount() const;
     MapObjEntry* getObject(u32 index);
     const MapObjEntry* getObject(u32 index) const;
+    MapObjEntry* findByType(u16 typeId);
+    MapObjEntry* findByPosition(const Vec3& pos, f32 radius);
 
     // Animation
     void setAnimation(u32 index, u16 frame, u16 maxFrame, f32 speed);
@@ -84,11 +87,20 @@ public:
     void setVisible(u32 index, bool visible);
     void cullAgainstFrustum(const Vec3& camPos, const Vec3& camDir,
                              f32 fov, f32 aspect);
+    bool isObjectVisible(u32 index) const;
+
+    // Transform / flag management
+    void updateObjectTransform(u32 index, const Vec3& pos, const Vec3& rot);
+    void setObjectFlags(u32 index, u32 flags);
+    void setObjectScale(u32 index, const Vec3& scale);
 
     // Resource management
     bool areResourcesLoaded() const { return m_resourcesLoaded; }
     void loadResources();
     void unloadResources();
+
+    // Low-level drawing for frustum-culled dispatch
+    void drawObject(const MapObjEntry& entry) const;
 
 private:
     static const u32 MAX_MAPOBJS = 4096;

@@ -1,48 +1,103 @@
 #include "KartHitbox.hpp"
+#include <cmath>
+#include <cstring>
+#include <algorithm>
 
 namespace Kart {
 
+// @addr 0x805B6900
 Hitbox::Hitbox() : bsp(nullptr), radius(0.0f), _8(0) {}
 
+// @addr 0x805B6930
 void Hitbox::reset() {
     pos.setAll(0);
     lastPos.setAll(0);
     relPos.setAll(0);
 }
 
+// @addr 0x805B6958
+// Transforms relative position to world space using quaternion rotation + per-axis scale.
+// Applies totalScale to the hitbox radius. Sets elevation offset on the Y component.
 void Hitbox::update(const EGG::Vector3f& scale, const EGG::Quatf& rot, const EGG::Vector3f& pos, f32 totalScale, f32 hitboxElevation) {
-    // Transforms relative position to world space using rotation and scale
-    // Updates hitbox radius with totalScale
-    // Sets elevation offset
+    // Scale the relative position per-axis (e.g. kart compression stretches hitbox)
+    EGG::Vector3f scaledRel = relPos;
+    scaledRel.x *= scale.x;
+    scaledRel.y *= scale.y;
+    scaledRel.z *= scale.z;
+
+    // Rotate scaled relative position into world space
+    EGG::Vector3f worldOffset;
+    rot.rotateVector(scaledRel, worldOffset);
+
+    // Translate by the kart's world position and add elevation
+    this->pos.x = pos.x + worldOffset.x;
+    this->pos.y = pos.y + worldOffset.y + hitboxElevation;
+    this->pos.z = pos.z + worldOffset.z;
+
+    // Apply total scale (e.g. mega mushroom growth) to hitbox radius
+    this->radius *= totalScale;
 }
 
+// @addr 0x805B6A00
+// Stores the current world-space position as lastPos for next-frame delta.
+// Uses the pose matrix column vectors for position extraction with scale applied.
 void Hitbox::setLastPos(const EGG::Vector3f& scale, const EGG::Matrix34f& pose) {
-    // Sets lastPos based on pose matrix and scale
+    // Extract translation from pose matrix (column 3)
+    EGG::Vector3f translation(pose.m[0][3], pose.m[1][3], pose.m[2][3]);
+
+    // Build a scaled version of the relative position
+    EGG::Vector3f scaledRel = relPos;
+    scaledRel.x *= scale.x;
+    scaledRel.y *= scale.y;
+    scaledRel.z *= scale.z;
+
+    // Apply rotation via the 3x3 part of the pose matrix
+    lastPos.x = pose.m[0][0] * scaledRel.x + pose.m[0][1] * scaledRel.y + pose.m[0][2] * scaledRel.z + translation.x;
+    lastPos.y = pose.m[1][0] * scaledRel.x + pose.m[1][1] * scaledRel.y + pose.m[1][2] * scaledRel.z + translation.y;
+    lastPos.z = pose.m[2][0] * scaledRel.x + pose.m[2][1] * scaledRel.y + pose.m[2][2] * scaledRel.z + translation.z;
 }
 
+// @addr 0x805B6AC8
+// Creates a BspHitbox at the given world position with the specified radius.
+// Links the BspHitbox into the BSP collision system for spatial queries.
 BspHitbox* Hitbox::create(const EGG::Vector3f& pos, f32 radius) {
     this->pos = pos;
     this->radius = radius;
-    return nullptr;
+
+    // Link to BSP collision system: store pointer into the BspHitbox
+    // The BspHitbox is set externally by the collision manager; we store
+    // the position and radius that the BSP system reads each frame.
+    if (bsp != nullptr) {
+        bsp->pos = pos;
+        bsp->radius = radius;
+        bsp->enabled = true;
+    }
+
+    return bsp;
 }
 
+// @addr 0x805B6B20
 void Hitbox::setScale(float s) {
     this->radius = s;
 }
 
+// @addr 0x805B6B38
 HitboxGroup::HitboxGroup() : hitboxCount(0), boundingRadius(0.0f), hitboxes(nullptr), _90(0), hitboxScale(1.0f), _98(0.0f) {
     colInfo.reset();
 }
 
+// @addr 0x805B6B80
 void HitboxGroup::reset() {
     colInfo.reset();
     hitboxScale = 1.0f;
 }
 
+// @addr 0x805B6BA0
 void HitboxGroup::setHitboxScale(f32 scale) {
     hitboxScale = scale;
 }
 
+// @addr 0x805B6BB8
 void HitboxGroup::createHitboxes(s32 n) {
     hitboxCount = n;
     hitboxes = new Hitbox[n];
@@ -51,9 +106,59 @@ void HitboxGroup::createHitboxes(s32 n) {
     }
 }
 
-f32 HitboxGroup::initHitboxes(BspHitbox* hitboxData, void* unused, s32 wheelCount) { return 0.0f; }
-f32 HitboxGroup::setHitboxes(BspHitbox* hitboxData) { return 0.0f; }
+// @addr 0x805B6C00
+// Initializes hitboxes from BspHitbox data array. Sets initial positions, radii,
+// and computes the bounding radius (maximum of all hitbox radii).
+// wheelCount is unused but passed from the caller for BSP compatibility.
+f32 HitboxGroup::initHitboxes(BspHitbox* hitboxData, void* unused, s32 wheelCount) {
+    (void)unused;
+    (void)wheelCount;
 
+    f32 maxRadius = 0.0f;
+
+    for (s16 i = 0; i < hitboxCount; i++) {
+        if (hitboxData && hitboxData[i].enabled) {
+            hitboxes[i].pos = hitboxData[i].pos;
+            hitboxes[i].relPos = hitboxData[i].pos;
+            hitboxes[i].radius = hitboxData[i].radius;
+            hitboxes[i].bsp = &hitboxData[i];
+
+            f32 r = hitboxData[i].radius;
+            if (r > maxRadius) {
+                maxRadius = r;
+            }
+        }
+    }
+
+    boundingRadius = maxRadius;
+    return maxRadius;
+}
+
+// @addr 0x805B6D00
+// Updates hitbox positions from BSP data (called each frame for dynamic hitboxes
+// such as wheel suspensions). Returns the current bounding radius.
+f32 HitboxGroup::setHitboxes(BspHitbox* hitboxData) {
+    f32 maxRadius = 0.0f;
+
+    for (s16 i = 0; i < hitboxCount; i++) {
+        if (hitboxData && hitboxData[i].enabled) {
+            hitboxes[i].pos = hitboxData[i].pos;
+
+            f32 r = hitboxData[i].radius * hitboxScale;
+            hitboxes[i].radius = r;
+            hitboxData[i].radius = r;
+
+            if (r > maxRadius) {
+                maxRadius = r;
+            }
+        }
+    }
+
+    boundingRadius = maxRadius;
+    return maxRadius;
+}
+
+// @addr 0x805B6DC0
 void HitboxGroup::createSingleHitbox(const EGG::Vector3f& pos, f32 radius) {
     hitboxCount = 1;
     hitboxes = new Hitbox[1];
@@ -62,10 +167,86 @@ void HitboxGroup::createSingleHitbox(const EGG::Vector3f& pos, f32 radius) {
     boundingRadius = radius;
 }
 
-f32 HitboxGroup::computeCollisionLimits() { return 0.0f; }
+// @addr 0x805B6E20
+// Computes collision limit planes from all hitboxes in the group.
+// Scans each hitbox's displacement from lastPos to pos, builds
+// min/max collision planes used by KartBody for wall and floor clamping.
+// Returns the maximum penetration depth found across all hitboxes.
+f32 HitboxGroup::computeCollisionLimits() {
+    f32 maxPenetration = 0.0f;
 
-KartCollisionInfo* KartCollisionInfo::initStatus() { this->reset(); return this; }
+    colInfo.reset();
 
+    for (s16 i = 0; i < hitboxCount; i++) {
+        Hitbox& hb = hitboxes[i];
+
+        // Compute displacement this frame
+        EGG::Vector3f delta = hb.pos - hb.lastPos;
+        f32 deltaLenSq = delta.squaredLength();
+
+        // Skip hitboxes that didn't move
+        if (deltaLenSq < 1.0e-8f) {
+            continue;
+        }
+
+        // Normalize the displacement direction
+        f32 invLen = 1.0f / std::sqrt(deltaLenSq);
+        EGG::Vector3f dir(delta.x * invLen, delta.y * invLen, delta.z * invLen);
+
+        // Compute a plane perpendicular to the displacement direction
+        // at the hitbox's position. The plane offset is the dot product
+        // of the hitbox position with the displacement direction.
+        f32 planeOffset = hb.pos.x * dir.x + hb.pos.y * dir.y + hb.pos.z * dir.z;
+
+        // For each hitbox, the collision plane normal is the movement direction.
+        // Accumulate the closest floor and wall planes across all hitboxes.
+        if (dir.y < -0.5f) {
+            // Predominantly downward movement — candidate floor plane
+            f32 penetration = hb.radius - (planeOffset - colInfo.floorNrm.dot(colInfo.relPos));
+            if (colInfo.floorKclTypeMask == 0 || dir.y < colInfo.floorNrm.y) {
+                colInfo.floorNrm = dir;
+                colInfo.floorKclTypeMask = COL_FLAG_FLOOR;
+                colInfo.relPos = hb.pos;
+            }
+        } else if (std::fabs(dir.y) < 0.5f) {
+            // Lateral movement — candidate wall plane
+            if (colInfo.wallKclType == 0) {
+                colInfo.wallNrm = dir;
+                colInfo.wallKclType = COL_FLAG_WALL;
+            }
+        }
+
+        // Track penetration depth for collision response
+        f32 travelDist = std::sqrt(deltaLenSq);
+        f32 penetration = travelDist + hb.radius;
+        if (penetration > maxPenetration) {
+            maxPenetration = penetration;
+        }
+    }
+
+    // Store movement vector for KartBody
+    if (hitboxCount > 0) {
+        colInfo.movement = hitboxes[0].pos - hitboxes[0].lastPos;
+    }
+
+    return maxPenetration;
+}
+
+// @addr 0x805B7000
+// Initializes KartCollisionInfo with default safe values:
+// Floor normal pointing up, zero velocity, speed factor 1.0.
+KartCollisionInfo* KartCollisionInfo::initStatus() {
+    this->reset();
+    // Set default safe floor normal (pointing up)
+    floorNrm.x = 0.0f;
+    floorNrm.y = 1.0f;
+    floorNrm.z = 0.0f;
+    // Default velocity is zero (already from reset)
+    // Default speed factor is 1.0 (already from reset)
+    return this;
+}
+
+// @addr 0x805B7040
 void KartCollisionInfo::reset() {
     flags = 0;
     tangentOff.setAll(0);
@@ -84,6 +265,29 @@ void KartCollisionInfo::reset() {
     wallKclVariant = 0;
     sinkDepth = 0;
     colPerpendicularity = 0.0f;
+}
+
+// @addr 0x805B7100
+// Free function: Sphere-AABB intersection test.
+// Returns true if a sphere centered at sphereCenter with given radius
+// intersects the axis-aligned bounding box defined by aabbMin and aabbMax.
+// Used by the BSP collision system for broad-phase hitbox checks.
+bool KartHitbox_testSphereVsAABB(
+    const EGG::Vector3f& sphereCenter, f32 sphereRadius,
+    const EGG::Vector3f& aabbMin, const EGG::Vector3f& aabbMax) {
+
+    // Find the closest point on the AABB to the sphere center
+    f32 closestX = std::max(aabbMin.x, std::min(sphereCenter.x, aabbMax.x));
+    f32 closestY = std::max(aabbMin.y, std::min(sphereCenter.y, aabbMax.y));
+    f32 closestZ = std::max(aabbMin.z, std::min(sphereCenter.z, aabbMax.z));
+
+    // Compute squared distance from closest point to sphere center
+    f32 dx = sphereCenter.x - closestX;
+    f32 dy = sphereCenter.y - closestY;
+    f32 dz = sphereCenter.z - closestZ;
+    f32 distSq = dx * dx + dy * dy + dz * dz;
+
+    return distSq <= sphereRadius * sphereRadius;
 }
 
 } // namespace Kart

@@ -103,3 +103,97 @@ BOOL AnmObjChr_IsFinished(const AnmObjChrData* obj);
 
 // @addr 0x80601AA0 — Parse character animation info from resource
 void AnmObjChr_GetAnimInfo(ResChrAnm* res, ChrAnimInfo* out);
+
+// ============================================================================
+// AnmObjChr — C++ class wrapper for character visibility animation
+// ============================================================================
+// Provides an object-oriented interface to the C-style AnmObjChrData.
+// Used by higher-level model animation systems in the kart/driver viewer.
+// ============================================================================
+
+// Forward declaration for 3D model skeleton
+class R3DModel;
+
+// Play mode enum
+enum AnmPlayMode {
+    ANM_PLAYMODE_FORWARD  = ANM_PLAY_ONCE,      // Play once then stop
+    ANM_PLAYMODE_BACKWARD = ANM_PLAY_REVERSE,   // Play in reverse once
+    ANM_PLAYMODE_ONCE     = ANM_PLAY_ONCE,      // Alias
+    ANM_PLAYMODE_LOOP     = ANM_PLAY_LOOP,      // Loop continuously
+    ANM_PLAYMODE_PINGPONG = ANM_PLAY_PINGPONG,  // Back and forth
+};
+
+// Joint transform for skeleton application
+struct JointTransform {
+    f32 translation[3];   // X, Y, Z position offset
+    f32 rotation[3];      // Euler angles (degrees)
+    f32 scale[3];         // Scale factors
+};
+
+class AnmObjChr {
+public:
+    AnmObjChr();
+    ~AnmObjChr();
+
+    // Initialize CHR animation from resource data
+    // @addr 0x80601B00
+    bool init(ResChrAnm* res);
+
+    // Update animation frame interpolation, apply to joints
+    // @addr 0x80601B40
+    void calc(f32 deltaTime);
+
+    // Per-frame animation calculation with easing
+    // Handles the per-frame step evaluation and visibility mask update
+    // @addr 0x80601B80
+    void calcAnimate(f32 deltaTime);
+
+    // Set current animation frame
+    // @addr 0x80601BC0
+    void setFrame(f32 frame);
+
+    // Get current frame
+    // @addr 0x80601BE0
+    f32 getFrame() const;
+
+    // Check if animation has reached the end (only for ONCE mode)
+    // @addr 0x80601C00
+    bool isFrameAtEnd() const;
+
+    // Get total frames in animation
+    // @addr 0x80601C20
+    f32 getFrameCount() const;
+
+    // Set play mode (Forward/Backward/Once/PingPong/Loop)
+    // @addr 0x80601C40
+    void setPlayMode(AnmPlayMode mode);
+
+    // Attach to a 3D model skeleton for joint updates
+    // @addr 0x80601C60
+    void attach(R3DModel* model);
+
+    // Detach from current model
+    // @addr 0x80601C80
+    void detach();
+
+    // Get animation name from resource
+    // @addr 0x80601CA0
+    const char* getName() const;
+
+    // Write interpolated transforms to skeleton joints
+    // For CHR animations, this applies visibility masks to shape draw flags
+    // @addr 0x80601CC0
+    void applyToJoints();
+
+    // Access underlying data (for compatibility with C functions)
+    AnmObjChrData* getData() { return &mData; }
+    const AnmObjChrData* getData() const { return &mData; }
+
+private:
+    AnmObjChrData mData;    // Underlying animation data
+    R3DModel* mpModel;      // Attached model (or nullptr)
+};
+
+// Factory: create AnmObjChr from raw resource data
+// @addr 0x80601D00
+AnmObjChr* AnmObjChr_createFromRes(const void* data, u32 size);

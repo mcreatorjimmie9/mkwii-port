@@ -5,10 +5,12 @@
 #include <egg/math/eggVector.hpp>
 #include <egg/math/eggQuat.hpp>
 #include <egg/math/eggMatrix.hpp>
+#include <modules/BSP.hpp>
 
 namespace Kart {
 
-class BspHitbox;
+// BspHitbox is defined in <modules/BSP.hpp> (global namespace as struct)
+using ::BspHitbox;
 
 // ===== Hitbox =====
 class Hitbox {
@@ -67,6 +69,12 @@ struct KartCollisionInfo {
 
     KartCollisionInfo* initStatus();
     void reset();
+
+    // Helper accessors
+    const EGG::Vector3f& getFloorNrm() const { return floorNrm; }
+    const EGG::Vector3f& getWallNrm() const { return wallNrm; }
+    bool hasFloorCollision() const { return floorKclTypeMask != 0; }
+    bool hasWallCollision() const { return wallKclType != 0; }
 };
 // static_assert(sizeof(KartCollisionInfo) == 0x84);
 
@@ -98,5 +106,10 @@ public:
     inline KartCollisionInfo& getKartCollisionInfo() { return colInfo; }
 };
 // static_assert(sizeof(HitboxGroup) == 0x9c);
+
+// Free function: Sphere-AABB intersection test used by collision system
+bool KartHitbox_testSphereVsAABB(
+    const EGG::Vector3f& sphereCenter, f32 sphereRadius,
+    const EGG::Vector3f& aabbMin, const EGG::Vector3f& aabbMax);
 
 } // namespace Kart

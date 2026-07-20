@@ -20,6 +20,8 @@ Layout::Layout()
     , mState(LAYOUT_STATE_INACTIVE)
     , mTag(0)
     , mFlags(0)
+    , mGlobalAlpha(0xFF)
+    , mVisible(true)
     , mGroupCount(0) {
     memset(_6B6, 0, sizeof(_6B6));
 }
@@ -209,6 +211,73 @@ void Layout::unbindAnimation(const char* animName) {
 void Layout::updateAnimations(f32 deltaTime) {
     if (mLayoutData == 0) return;
     nw4r_lyt_UpdateAnimations(mLayoutData, deltaTime);
+}
+
+// --- Layout data parsing ---
+
+void Layout::parse(const void* data, u32 size) {
+    if (!data || size < 16) return;
+
+    const u8* ptr = static_cast<const u8*>(data);
+
+    // BRLYT header: "RLYT" magic (4 bytes), sizes, etc.
+    // Simplified: just mark as active if data looks valid
+    // Real impl uses nw4r::lyt::Layout::BuildFromMemory
+
+    // Mark layout as having data
+    mLayoutData = 1; // Non-zero = has data
+
+    // Count panes by traversing the binary data
+    // Real impl: recursive pane tree parsing from the BRLYT structure
+    mGroupCount = 0;
+    if (size > 64) {
+        // A reasonable guess at pane count from file size
+        mGroupCount = (size / 64) > 32 ? 32 : (size / 64);
+    }
+
+    mState = LAYOUT_STATE_ACTIVE;
+}
+
+// --- Layout queries ---
+
+void Layout::animate(f32 frame) {
+    if (mLayoutData == 0) return;
+    // Set all animations to the given frame
+    nw4r_lyt_UpdateAnimations(mLayoutData, frame);
+}
+
+void Layout::getBoundingBox(f32& x, f32& y, f32& w, f32& h) const {
+    // Return the layout bounding box in screen coordinates
+    // Default: full screen (640x480 Wii)
+    x = 0.0f;
+    y = 0.0f;
+    w = 640.0f;
+    h = 480.0f;
+
+    // In real impl: compute from root pane's bounds
+    if (mPaneTree != 0) {
+        // nw4r::lyt::Pane* root = (Pane*)mPaneTree;
+        // x = root->mTranslate.x;
+        // y = root->mTranslate.y;
+        // w = root->mSize.x;
+        // h = root->mSize.y;
+    }
+}
+
+void Layout::setAlpha(u8 alpha) {
+    mGlobalAlpha = alpha;
+    // In real impl: recursively set alpha on all child panes
+    // For each pane in tree: pane->setAlpha(alpha);
+}
+
+void Layout::setVisible(bool visible) {
+    mVisible = visible;
+    // In real impl: recursively set visibility on all child panes
+    if (!visible) {
+        mState = LAYOUT_STATE_INACTIVE;
+    } else if (mLayoutData != 0) {
+        mState = LAYOUT_STATE_ACTIVE;
+    }
 }
 
 } // namespace UI

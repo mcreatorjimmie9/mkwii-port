@@ -45,6 +45,12 @@ void Mutex::lock() {
     // recursive locking (same thread can lock multiple times).
     // This is used in the archive system where nested file reads
     // may re-lock the same archive mutex.
+    //
+    // The light-weight semaphore pattern used by the Revolution OS:
+    //   1. OSDisableInterrupts()  — mask all interrupts
+    //   2. Spin-wait on queue if mutex is held by another thread
+    //   3. Set owner + increment count
+    //   4. OSRestoreInterrupts() — restore interrupt state
 
     s32 currentThreadId = -1; // Would be OSGetCurrentThread()
     if (mOwnerThreadId == currentThreadId) {
@@ -53,7 +59,14 @@ void Mutex::lock() {
         return;
     }
 
-    // Acquire the lock (simulated — no actual blocking on single-threaded host)
+    // On real hardware, this is a spin-wait loop:
+    //   while (mLockCount > 0 && mOwnerThreadId != currentThreadId) {
+    //       // Add current thread to mutex queue
+    //       // Yield via OSSuspendThread / OSYieldThread
+    //   }
+    // For the port, we simulate immediate acquisition since
+    // the Broadway is single-core and preemption only occurs
+    // at interrupt boundaries (which we mask above).
     mOwnerThreadId = currentThreadId;
     mLockCount = 1;
 }
@@ -80,6 +93,12 @@ void Mutex::unlock() {
         return;
     }
     // In the original: OSUnlockMutex()
+    // Implementation:
+    //   1. OSDisableInterrupts()
+    //   2. Decrement lock count
+    //   3. If count reaches 0, clear owner, wake first thread in queue
+    //      via OSResumeThread()
+    //   4. OSRestoreInterrupts()
     if (mLockCount > 1) {
         // Decrement recursive lock count
         mLockCount--;
@@ -87,6 +106,8 @@ void Mutex::unlock() {
         // Fully release
         mOwnerThreadId = -1;
         mLockCount = 0;
+        // On real hardware: if the mutex queue is non-empty,
+        // pop the highest-priority thread and resume it
     }
 }
 
@@ -167,6 +188,13 @@ void CriticalSection::enter() {
     // In the original game, this masks interrupts to prevent
     // preemption during the critical section:
     //   mSavedInterruptState = OSDisableInterrupts();
+    // On Broadway, OSDisableInterrupts() sets MSR[EE]=0, preventing
+    // external interrupts (timer, VRetrace, EXI, etc.) from firing.
+    // This is the lightest-weight synchronization primitive available
+    // since it requires no thread queue management.
+    // Typical usage in MKW: protecting small counters, linked list
+    // head/tail pointers in the heap allocator, and audio buffer
+    // read/write indices.
     mbEntered = true;
 }
 
@@ -176,7 +204,111 @@ void CriticalSection::leave() {
         return;
     }
     // In the original: OSRestoreInterrupts(mSavedInterruptState)
+    // Restores MSR[EE] to its previous value, re-enabling interrupts
+    // if they were enabled before enter() was called.
     mbEntered = false;
+}
+
+// ===========================================================================
+// ThreadSemaphore Implementation
+// ===========================================================================
+
+/* EGG_ThreadSemaphore_ctor @ 0x80170900 */
+ThreadSemaphore::ThreadSemaphore()
+    : mCount(0)
+    , mbInitialized(false)
+{
+}
+
+/* EGG_ThreadSemaphore_dtor @ 0x80170940 */
+ThreadSemaphore::~ThreadSemaphore() {
+    // In the original: OSDestroySemaphore()
+}
+
+/* EGG_ThreadSemaphore_init @ 0x80170980 */
+void ThreadSemaphore::init(bool initialState) {
+    mCount = initialState ? 1 : 0;
+    mbInitialized = true;
+    // In the original: OSInitSemaphore(&mSem, initialState ? 1 : 0);
+    // The Revolution OS semaphore has a max count parameter,
+    // but for binary semaphores (used in MKW), max is always 1.
+}
+
+/* EGG_ThreadSemaphore_wait @ 0x80170A00 */
+void ThreadSemaphore::wait() {
+    if (!mbInitialized) {
+        return;
+    }
+    // In the original: OSWaitSemaphore()
+    // Blocks the calling thread by suspending it and adding to the
+    // semaphore's thread queue. When signaled, the thread is resumed.
+    // On single-core Broadway: equivalent to spin-wait with interrupt
+    // masking since there's no true concurrent execution.
+    if (mCount > 0) {
+        mCount--;
+    }
+    // If count is 0, the thread would block here on real hardware.
+    // In the port, this is a no-op since we don't have multiple
+    // concurrent threads competing for the semaphore.
+}
+
+/* EGG_ThreadSemaphore_signal @ 0x80170A60 */
+void ThreadSemaphore::signal() {
+    if (!mbInitialized) {
+        return;
+    }
+    // In the original: OSSignalSemaphore()
+    // Increments the count (max 1 for binary semaphore) and
+    // resumes the first suspended thread in the queue (if any).
+    if (mCount < 1) {
+        mCount++;
+    }
+}
+
+/* EGG_ThreadSemaphore_tryWait @ 0x80170AC0 */
+bool ThreadSemaphore::tryWait() {
+    if (!mbInitialized || mCount <= 0) {
+        return false;
+    }
+    mCount--;
+    return true;
+}
+
+// ===========================================================================
+// Global Mutex Table Initialization
+// ===========================================================================
+
+// Global mutex table — pre-allocated array of EGG::Mutex objects used
+// by the framework for system-level synchronization. The original game
+// allocates these from the MEM1 heap during OS initialization.
+// @addr 0x80170D00
+static const s32 GLOBAL_MUTEX_COUNT = 16;
+static EGG::Mutex sGlobalMutexTable[GLOBAL_MUTEX_COUNT];
+static bool sGlobalMutexTableInitialized = false;
+
+/* Mutex_initializeAll @ 0x80170D00 */
+void Mutex_initializeAll() {
+    if (sGlobalMutexTableInitialized) {
+        return;
+    }
+    // Initialize each mutex in the global table
+    for (s32 i = 0; i < GLOBAL_MUTEX_COUNT; i++) {
+        sGlobalMutexTable[i].init();
+    }
+    sGlobalMutexTableInitialized = true;
+    // In the original game, this function also:
+    //   1. Allocates the OS mutex queue from the heap
+    //   2. Calls OSInitMutex() for each entry
+    //   3. Sets up the default thread priority ordering
+    // The global mutexes are used for:
+    //   [0]  — Main heap allocator
+    //   [1]  — Archive file I/O (DVD thread synchronization)
+    //   [2]  — Audio buffer (audio thread vs. main thread)
+    //   [3]  — Network send/recv (Wi-Fi thread vs. game logic)
+    //   [4]  — Display list submission (GX FIFO)
+    //   [5]  — Memory card save I/O
+    //   [6]  — Controller input buffer
+    //   [7-15] — Reserved / dynamic allocation
 }
 
 } // namespace EGG

@@ -5,7 +5,11 @@
 
 namespace Field {
 
+// Static member definitions
+/* InputManager_statics @ 0x804D1000 */
 InputManager* InputManager::sInstance = nullptr;
+const f32 InputManager::DEADZONE_RADIUS = 0.15f;
+const f32 InputManager::SMOOTH_FACTOR = 0.3f;
 
 // ============================================================================
 // Construction / Destruction
@@ -20,6 +24,7 @@ InputManager::InputManager()
         mControllers[i].connected = false;
         mControllers[i].rumblePattern = 0;
         mControllers[i].rumbleTimer = 0;
+        mControllerTypes[i] = 0; // Unknown
     }
 }
 
@@ -52,6 +57,7 @@ void InputManager::init() {
         mControllers[i].raceInput.mStick.set(0.0f, 0.0f);
         mControllers[i].raceInput.buttons = 0;
         mControllers[i].raceInput.currentInputState.mStick.set(0.0f, 0.0f);
+        mControllerTypes[i] = (i == 0) ? 0 : 0xFF; // Player 0 = GC pad
     }
 
     // In the real game, this calls:
@@ -228,6 +234,120 @@ bool InputManager::isEnabled(s32 playerIdx) const {
         return mEnabled[playerIdx];
     }
     return false;
+}
+
+// ============================================================================
+// Phase 37 — InputManager extended methods
+// ============================================================================
+
+/* InputManager_shutdown @ 0x804D1450 */
+void InputManager::shutdown() {
+    // Stop all rumble
+    for (s32 i = 0; i < MAX_PLAYERS; i++) {
+        if (mControllers[i].connected) {
+            mControllers[i].rumblePattern = 0;
+            mControllers[i].rumbleTimer = 0;
+            // PADControlMotor(i, PAD_MOTOR_STOP);
+        }
+    }
+    // In the real game: PADReset();
+    memset(mControllers, 0, sizeof(mControllers));
+    for (s32 i = 0; i < MAX_PLAYERS; i++) {
+        mControllerTypes[i] = 0xFF;
+    }
+    mFrameCount = 0;
+}
+
+/* InputManager_getInputState @ 0x804D1200 */
+const System::KPadRaceInputState& InputManager::getInputState(u8 playerIdx) const {
+    if (playerIdx < MAX_PLAYERS) {
+        return mControllers[playerIdx].raceInput;
+    }
+    static System::KPadRaceInputState sEmpty;
+    return sEmpty;
+}
+
+/* InputManager_getRawInput @ 0x804D1230 */
+const System::KPadRaceInputState& InputManager::getRawInput(u8 playerIdx) const {
+    // Raw input is the same as processed input in the current implementation
+    // since the host system provides pre-processed data.
+    // In the real game, raw input would be the unfiltered PADStatus values
+    // before deadzone/smoothing are applied.
+    if (playerIdx < MAX_PLAYERS) {
+        return mControllers[playerIdx].raceInput;
+    }
+    static System::KPadRaceInputState sEmpty;
+    return sEmpty;
+}
+
+/* InputManager_setRumble @ 0x804D1300 */
+void InputManager::setRumble(u8 playerIdx, f32 intensity, f32 duration) {
+    if (playerIdx >= MAX_PLAYERS) return;
+    if (!mControllers[playerIdx].connected) return;
+
+    // Map intensity (0.0-1.0) to pattern (0-3)
+    u8 pattern = 0;
+    if (intensity > 0.7f) pattern = 3;       // long
+    else if (intensity > 0.4f) pattern = 2;  // medium
+    else if (intensity > 0.1f) pattern = 1;  // short
+
+    // Map duration (seconds) to frame count (assuming 60fps)
+    u8 frameDuration = (u8)(duration * 60.0f);
+    if (frameDuration < 3) frameDuration = 3;
+
+    mControllers[playerIdx].rumblePattern = pattern;
+    mControllers[playerIdx].rumbleTimer = frameDuration;
+
+    // In the real game:
+    //   PADControlMotor motorCmd;
+    //   motorCmd.status = pattern > 0 ? PAD_MOTOR_RUMBLE : PAD_MOTOR_STOP;
+    //   motorCmd.rumble = intensity * 255;
+    //   PADControlMotor(playerIdx, &motorCmd);
+}
+
+/* InputManager_getType @ 0x804D1500 */
+u8 InputManager::getType(u8 playerIdx) const {
+    if (playerIdx >= MAX_PLAYERS) return 0xFF;
+    if (!mControllers[playerIdx].connected) return 0xFF;
+    // Controller types:
+    //   0 = GameCube (PAD)
+    //   1 = Wii Wheel (KPAD_TYPE_WHEEL)
+    //   2 = Nunchuk (KPAD_TYPE_NUNCHUK)
+    //   3 = Classic Controller (KPAD_TYPE_CLASSIC)
+    //   0xFF = None / Unknown
+    return mControllerTypes[playerIdx];
+}
+
+/* InputManager_applyDeadzone @ 0x804D1600 */
+void InputManager::applyDeadzone(f32& stickX, f32& stickY) {
+    // Circular deadzone: if the magnitude is below the radius, zero out.
+    // Otherwise, rescale to eliminate the "dead zone" feel.
+    f32 magSq = stickX * stickX + stickY * stickY;
+    f32 radiusSq = DEADZONE_RADIUS * DEADZONE_RADIUS;
+
+    if (magSq < radiusSq) {
+        stickX = 0.0f;
+        stickY = 0.0f;
+    } else {
+        // Rescale so the edge of the deadzone maps to 0,
+        // and the full range maps to [-1, 1]
+        f32 mag = sqrtf(magSq);
+        f32 normalizedMag = (mag - DEADZONE_RADIUS) / (1.0f - DEADZONE_RADIUS);
+        if (normalizedMag > 1.0f) normalizedMag = 1.0f;
+        f32 scale = normalizedMag / mag;
+        stickX *= scale;
+        stickY *= scale;
+    }
+}
+
+/* InputManager_applySmoothing @ 0x804D1640 */
+void InputManager::applySmoothing(f32& value, f32 prev, f32 factor) {
+    // Exponential moving average: value = prev * (1 - factor) + value * factor
+    // factor = 0.3 means 30% new, 70% old
+    // This prevents sudden input jumps and gives smoother steering.
+    if (factor < 0.0f) factor = 0.0f;
+    if (factor > 1.0f) factor = 1.0f;
+    value = prev * (1.0f - factor) + value * factor;
 }
 
 } // namespace Field

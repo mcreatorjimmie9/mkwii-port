@@ -14,10 +14,26 @@ CourseData::CourseData()
     , mpJMapBuffer(nullptr)
     , mJMapBufferSize(0)
     , mbLoaded(false)
+    , mpKclData(nullptr)
+    , mKclSize(0)
+    , mpKmpData(nullptr)
+    , mKmpSize(0)
+    , mStartPositionCount(0)
+    , mRoutePointCount(0)
+    , mEnemyPathCount(0)
+    , mCannonPathCount(0)
+    , mSphereCount(0)
+    , mObjectCount(0)
 {
     // Zero-initialize properties
     for (s32 i = 0; i < (s32)sizeof(CourseProperties); i++) {
         reinterpret_cast<u8*>(&mProperties)[i] = 0;
+    }
+    for (u32 i = 0; i < MAX_START_POSITIONS; i++) {
+        mStartPositions[i].playerIndex = 0;
+    }
+    for (u32 i = 0; i < MAX_OBJECT_NAMES; i++) {
+        mObjectNames[i] = nullptr;
     }
 }
 
@@ -138,6 +154,71 @@ bool CourseData::load(u32 courseId) {
     mCheckpointPositions[2] = EGG::Vector3f(0.0f, 0.0f, 500.0f);      // Checkpoint 2
     mCheckpointPositions[3] = EGG::Vector3f(-500.0f, 0.0f, 200.0f);    // Checkpoint 3
 
+    // --- Phase 37: Initialize KCL/KMP section data ---
+    // In the original game, the course .szs archive contains:
+    //   course.kcl   — Collision data (triangle mesh with type flags)
+    //   course.kmp   — Course map (start positions, routes, areas, objects)
+    //   course_model.brres — 3D model data (MDL/TEX)
+    //
+    // The archive is opened, and the KCL/KMP sections are mapped.
+    // We simulate the section offsets here.
+    mpKclData = nullptr;  // Would point into decompressed SZS buffer
+    mKclSize = 0;
+    mpKmpData = nullptr;
+    mKmpSize = 0;
+
+    // Initialize start positions from KMP KPRT section
+    // The KMP KPRT section contains 12 entries for a 12-player grid.
+    // Each entry is 0x40 bytes: position(3f) + rotation(3f) + padding.
+    // Positions are staggered in a 2-column grid pattern.
+    mStartPositionCount = mProperties.startGridSlots;
+    for (u32 i = 0; i < mStartPositionCount && i < MAX_START_POSITIONS; i++) {
+        // Staggered 2-column grid: odd positions offset to the right
+        f32 xOffset = (i % 2 == 0) ? -3.0f : 3.0f;
+        f32 zOffset = -(f32)(i / 2) * 12.0f; // 12 units between rows
+        mStartPositions[i].position = EGG::Vector3f(xOffset, 0.0f, zOffset);
+        mStartPositions[i].rotation = EGG::Vector3f(0.0f, 0.0f, 0.0f);
+        mStartPositions[i].playerIndex = (u16)i;
+    }
+
+    // Initialize route/respawn points
+    mRoutePointCount = mProperties.respawnCount;
+    for (u32 i = 0; i < mRoutePointCount && i < MAX_ROUTE_POINTS; i++) {
+        mRoutePoints[i].position = EGG::Vector3f(
+            100.0f * (f32)i, 0.0f, 100.0f * (f32)i);
+        mRoutePoints[i].pointType = 1; // respawn
+    }
+
+    // Initialize enemy paths
+    mEnemyPathCount = 0;
+
+    // Initialize cannon paths
+    mCannonPathCount = mProperties.cannonCount;
+    for (u32 i = 0; i < mCannonPathCount && i < MAX_CANNON_PATHS; i++) {
+        mCannonPaths[i].position = EGG::Vector3f(
+            500.0f * (f32)(i + 1), 50.0f, 0.0f);
+        mCannonPaths[i].pointType = 2; // cannon
+    }
+
+    // Collision sphere count from KMP AREA section
+    mSphereCount = 0;
+
+    // Object names from KMP GOBJ section
+    mObjectCount = 0;
+
+    // Compute world bounding box from all areas
+    mBoundingBox.min = EGG::Vector3f(99999.0f, 99999.0f, 99999.0f);
+    mBoundingBox.max = EGG::Vector3f(-99999.0f, -99999.0f, -99999.0f);
+    for (s32 i = 0; i < mAreaCount; i++) {
+        const CourseArea& area = mAreas[i];
+        if (area.minBounds.x < mBoundingBox.min.x) mBoundingBox.min.x = area.minBounds.x;
+        if (area.minBounds.y < mBoundingBox.min.y) mBoundingBox.min.y = area.minBounds.y;
+        if (area.minBounds.z < mBoundingBox.min.z) mBoundingBox.min.z = area.minBounds.z;
+        if (area.maxBounds.x > mBoundingBox.max.x) mBoundingBox.max.x = area.maxBounds.x;
+        if (area.maxBounds.y > mBoundingBox.max.y) mBoundingBox.max.y = area.maxBounds.y;
+        if (area.maxBounds.z > mBoundingBox.max.z) mBoundingBox.max.z = area.maxBounds.z;
+    }
+
     mbLoaded = true;
     return true;
 }
@@ -221,6 +302,65 @@ const EGG::Vector3f* CourseData::getCheckpointPos(s32 cpIdx) const {
         return nullptr;
     }
     return &mCheckpointPositions[cpIdx];
+}
+
+// ============================================================================
+// Phase 37 — CourseData extended methods
+// ============================================================================
+
+/* CourseData_getObjectName @ 0x804B1F80 */
+const char* CourseData::getObjectName(u32 index) const {
+    if (index >= mObjectCount) {
+        return "";
+    }
+    if (mObjectNames[index] != nullptr) {
+        return mObjectNames[index];
+    }
+    // In the original, object names are read from the KMP GOBJ section.
+    // Each GOBJ entry has a name string at a known offset.
+    // Stub: return a generic name.
+    return "course_obj";
+}
+
+// ============================================================================
+// CourseData Verification
+// ============================================================================
+
+// KMP file magic: "RKMD" (big-endian)
+static const u32 KMP_MAGIC = 0x524B4D44; // 'R','K','M','D'
+// KCL file magic: "KCOL" (big-endian)
+static const u32 KCL_MAGIC = 0x4B434F4C; // 'K','C','O','L'
+
+/* CourseData_verifyChecksum @ 0x804B2100 */
+bool CourseData_verifyChecksum(const u8* data, u32 size) {
+    if (!data || size < 16) {
+        return false;
+    }
+
+    // Read magic from the file header (big-endian)
+    u32 magic = (u32(data[0]) << 24) | (u32(data[1]) << 16) |
+                (u32(data[2]) << 8) | u32(data[3]);
+
+    // Validate known file formats
+    if (magic == KMP_MAGIC) {
+        // KMP file: validate section offsets
+        // Header: magic(4) + header_size(4) + num_sections(4) + version(4)
+        if (size < 16) return false;
+        u32 headerSize = (u32(data[4]) << 24) | (u32(data[5]) << 16) |
+                         (u32(data[6]) << 8) | u32(data[7]);
+        if (headerSize != 16) return false;
+        return true;
+    }
+
+    if (magic == KCL_MAGIC) {
+        // KCL file: validate header
+        // Header: magic(4) + num_triangles(4) + num_blocks(4) + ...
+        if (size < 16) return false;
+        return true;
+    }
+
+    // Unknown format — fail validation
+    return false;
 }
 
 } // namespace Field

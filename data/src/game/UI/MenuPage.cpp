@@ -5,6 +5,8 @@
 #include "Layout.hpp"
 #include "LayoutLoader.hpp"
 #include "ui_stubs.h"
+#include <KPadController.hpp>
+#include <string.h>
 
 namespace UI {
 
@@ -37,7 +39,11 @@ MenuPage::MenuPage()
     , mCursorY(0)
     , mCursorAnimating(0)
     , mCursorLocked(0)
-    , _FBA(0) {
+    , _FBA(0)
+    , mItemCount(0)
+    , mSelectionAnimProgress(0.0f)
+    , mSelectionTargetY(0.0f) {
+    memset(mItems, 0, sizeof(mItems));
 }
 
 MenuPage::~MenuPage() {
@@ -239,6 +245,105 @@ void MenuPage::onBack() {
     if (mPrevPageId != -1) {
         requestTransition(mPrevPageId, 0);
     }
+}
+
+// --- Menu item management ---
+
+void MenuPage::addItem(u16 itemId, const char* text, u16 xPos, u16 yPos) {
+    if (mItemCount >= MAX_MENU_ITEMS) return;
+
+    MenuItem& item = mItems[mItemCount];
+    item.itemId = itemId;
+    item.xPos = xPos;
+    item.yPos = yPos;
+    item.textMsgId = 0; // Will be set by text binding
+    item.active = true;
+    mItemCount++;
+}
+
+void MenuPage::removeItem(u16 itemId) {
+    for (u32 i = 0; i < mItemCount; i++) {
+        if (mItems[i].itemId == itemId) {
+            // Shift remaining items down
+            for (u32 j = i; j < mItemCount - 1; j++) {
+                mItems[j] = mItems[j + 1];
+            }
+            mItems[mItemCount - 1].active = false;
+            mItemCount--;
+            return;
+        }
+    }
+}
+
+void MenuPage::selectItem(u16 index) {
+    if (index >= mItemCount) return;
+    mSelectedIndex = (s32)index;
+    mSelectionAnimProgress = 0.0f;
+    mSelectionTargetY = (f32)mItems[index].yPos;
+    mCursorY = mItems[index].yPos;
+}
+
+s32 MenuPage::getSelectedItem() const {
+    return mSelectedIndex;
+}
+
+void MenuPage::handleInput(const System::KPadRaceInputState& input) {
+    if (!isActive() || mCursorLocked) return;
+
+    // Check stick Y for up/down navigation
+    f32 stickY = input.stickY;
+
+    // Digital button checks
+    if (input.buttons & PAD_BUTTON_UP || stickY > 0.5f) {
+        if (mSelectedIndex > 0) {
+            selectItem((u16)(mSelectedIndex - 1));
+            onCursorMove(-1);
+        }
+    } else if (input.buttons & PAD_BUTTON_DOWN || stickY < -0.5f) {
+        if (mSelectedIndex < (s32)(mItemCount - 1)) {
+            selectItem((u16)(mSelectedIndex + 1));
+            onCursorMove(1);
+        }
+    }
+
+    // Confirm (A button)
+    if (input.buttons & PAD_BUTTON_A) {
+        if (mSelectedIndex >= 0 && mSelectedIndex < (s32)mItemCount) {
+            onConfirm();
+        }
+    }
+
+    // Cancel (B button)
+    if (input.buttons & PAD_BUTTON_B) {
+        onCancel();
+    }
+}
+
+void MenuPage::animateSelection(f32 dt) {
+    if (mSelectionAnimProgress >= 1.0f) return;
+
+    mSelectionAnimProgress += dt * 8.0f; // Animation speed
+    if (mSelectionAnimProgress > 1.0f) mSelectionAnimProgress = 1.0f;
+
+    // Smoothstep easing
+    f32 t = mSelectionAnimProgress;
+    t = t * t * (3.0f - 2.0f * t);
+
+    // Interpolate cursor Y position
+    f32 currentY = (f32)mCursorY;
+    currentY += (mSelectionTargetY - currentY) * t;
+    mCursorY = (u32)currentY;
+}
+
+void MenuPage::scrollToItem(u16 index) {
+    if (index >= mItemCount) return;
+    mSelectionTargetY = (f32)mItems[index].yPos;
+    mSelectionAnimProgress = 0.0f;
+    selectItem(index);
+}
+
+u32 MenuPage::getItemCount() const {
+    return mItemCount;
 }
 
 } // namespace UI

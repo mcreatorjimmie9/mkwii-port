@@ -10,6 +10,12 @@ namespace UI {
 class Layout;
 class MenuPage;
 
+} // namespace UI
+
+namespace System { struct KPadRaceInputState; }
+
+namespace UI {
+
 enum MessageBoxType {
     MSGBOX_INFO = 0,
     MSGBOX_WARNING = 1,
@@ -63,6 +69,12 @@ public:
     bool isShown() const { return mIsShown; }
     bool isAnimating() const { return mIsAnimating; }
 
+    // New API
+    void show(const char* message, u8 buttonMask);
+    void setMessage(const char* message);
+    void processInput(const System::KPadRaceInputState& input);
+    void draw();
+
     // Callback
     typedef void (*CallbackFunc)(MessageBoxResult result, void* userData);
     void setCallback(CallbackFunc callback, void* userData) {
@@ -112,11 +124,26 @@ private:
     u8 mInitFlag;              // 0x10
     u8 mOverlayFlag;           // 0x93
 
+    // Animation state
+    f32 mFadeAlpha;             // Current fade alpha 0..1
+    f32 mFadeDirection;         // +1 fading in, -1 fading out
+
+    // Message string (stored copy)
+    static const u32 MAX_MESSAGE_LEN = 256;
+    char mMessageText[MAX_MESSAGE_LEN];
+
     void startShowAnimation();
     void startHideAnimation();
     void onShowAnimationComplete();
     void onHideAnimationComplete();
     void onTimeout();
+    void animateIn(f32 dt);
+    void animateOut(f32 dt);
+
+    // Drawing
+    void drawBorder() const;
+    void drawText() const;
+    void drawButtonHints() const;
 };
 
 } // namespace UI

@@ -16,6 +16,8 @@ namespace RKNet {
 Packet::Packet() {
     memset(&mHeader, 0, sizeof(PacketHeader));
     memset(mPayload, 0, sizeof(mPayload));
+    mbReliable = false;
+    mChannel = 0;
 }
 
 Packet::~Packet() {
@@ -244,6 +246,139 @@ Packet PacketBuilder::createCountdown(u8 senderId, u32 frame,
     p.playerIndex = playerIndex;
     pkt.init(PACKET_COUNTDOWN, senderId);
     pkt.setCountdown(p);
+    return pkt;
+}
+
+// ============================================================================
+// Phase 37 — Packet extended methods
+// ============================================================================
+
+/* Packet_serialize @ 0x8055b900 */
+u32 Packet::serialize(u8* outBuffer, u32 bufferSize) const {
+    u32 totalSize = sizeof(PacketHeader) + mHeader.payloadSize;
+    if (bufferSize < totalSize) {
+        return 0;
+    }
+    if (!outBuffer) {
+        return 0;
+    }
+
+    // Write header (big-endian for network byte order)
+    // In the original game, the Broadway is big-endian, so no conversion needed.
+    // For the PC port, we write in the same format for protocol compatibility.
+    const u8* hdrBytes = reinterpret_cast<const u8*>(&mHeader);
+    for (u32 i = 0; i < sizeof(PacketHeader); i++) {
+        outBuffer[i] = hdrBytes[i];
+    }
+
+    // Write payload
+    for (u16 i = 0; i < mHeader.payloadSize; i++) {
+        outBuffer[sizeof(PacketHeader) + i] = mPayload[i];
+    }
+
+    return totalSize;
+}
+
+/* Packet_deserialize @ 0x8055b980 */
+bool Packet::deserialize(const u8* data, u32 size) {
+    if (!data || size < sizeof(PacketHeader)) {
+        return false;
+    }
+
+    // Read header
+    const PacketHeader* hdr = reinterpret_cast<const PacketHeader*>(data);
+    if (hdr->payloadSize > MAX_PAYLOAD_SIZE) {
+        return false;
+    }
+    if (size < sizeof(PacketHeader) + hdr->payloadSize) {
+        return false;
+    }
+
+    memcpy(&mHeader, hdr, sizeof(PacketHeader));
+
+    // Read payload
+    if (hdr->payloadSize > 0) {
+        memcpy(mPayload, data + sizeof(PacketHeader), hdr->payloadSize);
+    }
+
+    return true;
+}
+
+/* Packet_isValid @ 0x8055ba00 */
+bool Packet::isValid() const {
+    // Validate packet type is known
+    if (mHeader.type == PACKET_NONE && mHeader.payloadSize == 0) {
+        return false; // Empty/idle packet
+    }
+
+    // Validate payload size matches expected for type
+    u16 expected = getExpectedPayloadSize((PacketType)mHeader.type);
+    if (expected > 0 && mHeader.payloadSize != expected) {
+        return false;
+    }
+
+    // Validate payload doesn't exceed max
+    if (mHeader.payloadSize > MAX_PAYLOAD_SIZE) {
+        return false;
+    }
+
+    return true;
+}
+
+/* Packet_setReliable @ 0x8055ba40 */
+void Packet::setReliable(bool reliable) {
+    mbReliable = reliable;
+    // In the original game, reliable packets are sent on the
+    // reliable channel of the NWC24 socket, which provides
+    // in-order, guaranteed delivery. Unreliable packets use
+    // UDP datagrams with no retransmission.
+}
+
+/* Packet_setChannel @ 0x8055ba60 */
+void Packet::setChannel(u8 channel) {
+    mChannel = channel;
+    // The network layer uses the channel to multiplex different
+    // traffic types over the same socket:
+    //   0 = default / race state
+    //   1 = room management
+    //   2 = item events (high priority)
+    //   3 = heartbeat / keepalive
+}
+
+/* Packet_computeCRC @ 0x8055bac0 */
+u16 Packet::computeCRC() const {
+    // CRC16-CCITT (poly 0x1021, init 0xFFFF)
+    // Computed over the entire serialized packet (header + payload)
+    u16 crc = 0xFFFF;
+    const u8* data = reinterpret_cast<const u8*>(&mHeader);
+    u32 totalLen = sizeof(PacketHeader) + mHeader.payloadSize;
+
+    for (u32 i = 0; i < totalLen; i++) {
+        crc ^= u16(data[i] << 8);
+        for (s32 j = 0; j < 8; j++) {
+            if (crc & 0x8000) {
+                crc = (crc << 1) ^ 0x1021;
+            } else {
+                crc = crc << 1;
+            }
+        }
+    }
+
+    return crc;
+}
+
+// ============================================================================
+// Packet Factory
+// ============================================================================
+
+/* Packet_createReliable @ 0x8055bc00 */
+Packet Packet_createReliable(PacketType type, const u8* payload, u32 size) {
+    Packet pkt;
+    pkt.init(type, 0); // senderId set by caller later
+    if (payload && size > 0) {
+        pkt.setPayload(payload, (u16)size);
+    }
+    pkt.setReliable(true);
     return pkt;
 }
 

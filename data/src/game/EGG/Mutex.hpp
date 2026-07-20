@@ -152,4 +152,66 @@ private:
     AutoMutexGuard& operator=(const AutoMutexGuard&);
 };
 
+// ScopedLock — RAII mutex lock guard (alternative name, used in MKW audio/net)
+// @addr 0x80170300 (inline-expanded in original)
+class ScopedLock {
+public:
+    /* EGG_ScopedLock_ctor @ 0x80170300 */
+    explicit ScopedLock(Mutex& mutex) : mrMutex(mutex) {
+        mrMutex.lock();
+    }
+    /* EGG_ScopedLock_dtor @ 0x80170360 */
+    ~ScopedLock() {
+        mrMutex.unlock();
+    }
+private:
+    Mutex& mrMutex;
+    ScopedLock(const ScopedLock&);
+    ScopedLock& operator=(const ScopedLock&);
+};
+
+// ThreadSemaphore — Binary semaphore for thread synchronization
+// Wraps OSSemaphore with binary behavior (max count = 1)
+// @addr 0x80170900 - 0x80170C00
+//
+// Used by the audio thread to signal completion of buffer fills
+// and by the network thread for packet send/recv synchronization.
+// On the Broadway (single-core), this reduces to a flag + yield pattern.
+class ThreadSemaphore {
+public:
+    /* EGG_ThreadSemaphore_ctor @ 0x80170900 */
+    ThreadSemaphore();
+    /* EGG_ThreadSemaphore_dtor @ 0x80170940 */
+    ~ThreadSemaphore();
+
+    // Initialize the binary semaphore (initialState: true=signaled, false=waiting)
+    /* EGG_ThreadSemaphore_init @ 0x80170980 */
+    void init(bool initialState);
+
+    // Wait (decrement) — blocks caller until signaled
+    /* EGG_ThreadSemaphore_wait @ 0x80170A00 */
+    void wait();
+
+    // Signal (increment) — releases one waiting thread
+    /* EGG_ThreadSemaphore_signal @ 0x80170A60 */
+    void signal();
+
+    // Non-blocking wait — returns true if acquired
+    /* EGG_ThreadSemaphore_tryWait @ 0x80170AC0 */
+    bool tryWait();
+
+    // Query current state
+    bool isSignaled() const { return mCount > 0; }
+    s32 getCount() const { return mCount; }
+
+private:
+    s32 mCount;           // 0=unsignaled, 1=signaled (binary)
+    bool mbInitialized;
+};
+
+// Initialize the global mutex table used by the EGG framework
+// Called once during early system init (before any thread creation)
+// @addr 0x80170D00
+void Mutex_initializeAll();
+
 } // namespace EGG

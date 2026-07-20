@@ -38,6 +38,29 @@ public:
     /* InputManager_scan @ 0x804D1100 */
     void scan();
 
+    // Update all controllers, apply deadzones, smoothing
+    // Alias for scan() with additional post-processing
+    /* InputManager_update @ 0x804D10A0 */
+    void update() { scan(); }
+
+    // Shutdown input system, release resources
+    /* InputManager_shutdown @ 0x804D1450 */
+    void shutdown();
+
+    // Get processed race input for player (u8 overload)
+    const System::KPadRaceInputState& getInputState(u8 playerIdx) const;
+
+    // Get raw (pre-processing) input state
+    const System::KPadRaceInputState& getRawInput(u8 playerIdx) const;
+
+    // Set rumble with intensity and duration
+    /* InputManager_setRumble @ 0x804D1300 */
+    void setRumble(u8 playerIdx, f32 intensity, f32 duration);
+
+    // Get controller type: 0=GC, 1=Wheel, 2=Nunchuk, 3=Classic, 0xFF=none
+    /* InputManager_getType @ 0x804D1500 */
+    u8 getType(u8 playerIdx) const;
+
     // Get processed race input for a specific player
     /* InputManager_getInput @ 0x804D1200 */
     const System::KPadRaceInputState& getInput(s32 playerIdx) const;
@@ -66,6 +89,14 @@ public:
     void setEnabled(s32 playerIdx, bool enabled);
     bool isEnabled(s32 playerIdx) const;
 
+    // Apply circular deadzone to stick input
+    /* InputManager_applyDeadzone @ 0x804D1600 */
+    static void applyDeadzone(f32& stickX, f32& stickY);
+
+    // Apply exponential smoothing to an input value
+    /* InputManager_applySmoothing @ 0x804D1640 */
+    static void applySmoothing(f32& value, f32 prev, f32 factor);
+
 private:
     // Process raw PADStatus into KPadRaceInputState
     void processPADStatus(s32 channel, const u8* padStatus);
@@ -77,14 +108,21 @@ private:
     void updateRumble();
 
     static const s32 MAX_PLAYERS = 4;
+    static const f32 DEADZONE_RADIUS;    // ~0.15 normalized
+    static const f32 SMOOTH_FACTOR;      // 0.3 default smoothing
 
     ControllerState mControllers[MAX_PLAYERS]; // Per-controller state
     s32 mMaxPlayers;                           // Max players to scan
     bool mEnabled[MAX_PLAYERS];                // Per-player enable flags
     u32 mFrameCount;                           // Frame counter
+    u8 mControllerTypes[MAX_PLAYERS];          // Controller type per player
 
     // Singleton
     static InputManager* sInstance;
 };
+
+// Singleton accessor (free function style)
+/* InputManager_getInstance @ 0x804D1080 */
+inline InputManager* InputManager_getInstance() { return InputManager::instance(); }
 
 } // namespace Field

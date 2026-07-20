@@ -9,6 +9,9 @@
 #include "rk_common.h"
 #include <EGG/math.h>
 
+using EGG::Matrix44f;
+using EGG::Matrix34f;
+
 namespace Scene {
 
 // Forward declarations
@@ -115,6 +118,26 @@ public:
     // Frame counter (from 0x8075ef28 pattern)
     u32 getFrameCount() const { return m_frameCount; }
 
+    // Matrix computation
+    void calcProjection();
+    void calcView();
+    const EGG::Matrix44f& getProjection() const { return m_projection; }
+    const EGG::Matrix34f& getView() const { return m_view; }
+
+    // Camera mode updates
+    void updateAutoCamera(f32 dt);
+    void updateReplay(f32 dt);
+    void updateCinematic(f32 dt);
+
+    // Coordinate conversion
+    Vec3 screenToWorld(const Vec3& screenPos);
+    Vec3 worldToScreen(const Vec3& worldPos);
+
+    // Camera basis vectors
+    Vec3 getForward() const;
+    Vec3 getRight() const;
+    Vec3 getUp() const;
+
 private:
     void updateShake(f32 dt);
     void applySmoothing(f32 dt);
@@ -132,12 +155,28 @@ private:
     CameraShake m_shake;
     CameraViewport m_viewport;
 
+    EGG::Matrix34f m_view;
+    EGG::Matrix44f m_projection;
+
     bool m_autoCamera;
     u32 m_autoCameraPoint;
     bool m_cinematic;
 
     f32 m_positionSmoothing;
     f32 m_targetSmoothing;
+
+    // Cinematic keyframe state
+    f32 m_cinematicTime;
+    u32 m_cinematicKeyframe;
+
+    // Replay camera state
+    f32 m_replayLerp;
+    Vec3 m_replayPos;
+    Vec3 m_replayTarget;
+
+    // Speed-dependent FOV state
+    f32 m_baseFov;
+    f32 m_currentSpeed;
 
     u32 m_frameCount;
     bool m_initialized;

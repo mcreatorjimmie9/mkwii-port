@@ -88,6 +88,10 @@ public:
     /* KartDrift_cancel @ 0x805C1200 */
     void cancel();
 
+    // Full state reset to initial values
+    /* KartDrift_reset @ 0x805C1250 */
+    void reset();
+
     // Get current drift state
     DriftState getDriftState() const { return mState.mState; }
 
@@ -97,20 +101,44 @@ public:
     // Get current drift direction
     s32 getDriftDirection() const { return mState.driftDirection; }
 
+    // Get current drift angle in radians (based on direction and outside amount)
+    /* KartDrift_getDriftAngle @ 0x805C1280 */
+    f32 getDriftAngle() const;
+
+    // Get particle emission parameters based on turbo level
+    /* KartDrift_getDriftParticles @ 0x805C12B0 */
+    f32 getDriftParticles() const;
+
+    // Check if in any drift state (starting, active, charging, boosting)
+    /* KartDrift_isActive @ 0x805C12E0 */
+    bool isActive() const;
+
+    // Check if currently boosting from mini-turbo
+    bool isBoosting() const { return mState.mbIsBoosting; }
+
     // Get speed boost from active mini-turbo
     f32 getSpeedBoost() const;
 
     // Get turn bonus from drift
     f32 getTurnBonus() const;
 
-    // Check if currently boosting from mini-turbo
-    bool isBoosting() const { return mState.mbIsBoosting; }
-
     // Check if drifting
     bool isDrifting() const {
         return mState.mState != DRIFT_STATE_NONE &&
                mState.mState != DRIFT_STATE_BOOSTING;
     }
+
+    // Allow runtime configuration changes
+    /* KartDrift_setConfig @ 0x805C1300 */
+    void setConfig(const DriftConfig& config);
+
+    // Debug helper: returns current drift state name string
+    /* KartDrift_getDriftStateName @ 0x805C1310 */
+    const char* getDriftStateName() const;
+
+    // Calculate drift score for ranking (time drifting * charge level)
+    /* KartDrift_calcDriftScore @ 0x805C1340 */
+    f32 calcDriftScore() const;
 
     // Get the turbo boost data for a given level
     static TurboBoostData getTurboBoostData(TurboLevel level);
