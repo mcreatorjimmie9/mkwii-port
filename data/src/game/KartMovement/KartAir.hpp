@@ -1,0 +1,136 @@
+#pragma once
+// KartAir.hpp — Airborne / Trick State Machine
+// GENESIS Phase 30: Manages kart behavior while airborne (off ramps,
+// after being hit, falling off edges). Includes:
+//   - Airborne detection and state management
+//   - Trick system (perform stunts during airtime for speed boost)
+//   - Landing detection and impact handling
+//   - Fall boundary detection and Lakitu rescue trigger
+// Original addresses: 0x805Dxxxx-0x805Exxxx
+
+#include <rk_types.h>
+#include <rk_common.h>
+#include <egg/math/eggVector.hpp>
+
+namespace Kart {
+
+// Airborne state enum
+enum AirState {
+    AIR_STATE_GROUNDED   = 0,  // On the ground
+    AIR_STATE_RISING     = 1,  // Going up (after ramp launch)
+    AIR_STATE_APEX       = 2,  // At peak of arc
+    AIR_STATE_FALLING    = 3,  // Coming down
+    AIR_STATE_TRICK      = 4,  // Performing a trick (mid-air animation)
+    AIR_STATE_LANDED     = 5,  // Just landed (landing lag)
+};
+
+// Trick type enum
+enum TrickType {
+    TRICK_NONE          = 0,
+    TRICK_FRONT_FLIP    = 1,  // D-pad Up + shake
+    TRICK_BACK_FLIP     = 2,  // D-pad Down + shake
+    TRICK_LEFT_SPIN     = 3,  // D-pad Left + shake
+    TRICK_RIGHT_SPIN    = 4,  // D-pad Right + shake
+    TRICK_SIDE_FLIP_L   = 5,  // Side flip left
+    TRICK_SIDE_FLIP_R   = 6,  // Side flip right
+};
+
+// Trick result
+struct TrickResult {
+    TrickType type;
+    f32 speedBoostMultiplier;   // Speed boost after landing
+    f32 trickScore;             // Points awarded for trick (VS mode)
+    u32 animationFrames;        // Duration of trick animation
+};
+
+// Air configuration
+struct AirConfig {
+    f32 gravity;                 // Gravity acceleration
+    f32 maxFallSpeed;            // Terminal velocity
+    f32 trickWindowStart;        // Time after launch when tricks are possible (frames)
+    f32 trickWindowEnd;          // Time before landing when tricks are locked (frames)
+    f32 landingLagTime;         // Landing recovery time (frames)
+    f32 bumpLaunchUpSpeed;      // Upward speed when bumped
+    f32 normalLaunchUpSpeed;    // Upward speed from normal ramp
+    f32 boostRampUpSpeed;       // Upward speed from boost ramp
+};
+
+// Per-frame air state
+struct AirStateData {
+    AirState mState;
+    f32 airTime;                 // Total time spent airborne (seconds)
+    f32 stateTimer;              // Time in current state
+    EGG::Vector3f velocity;      // Current air velocity
+    EGG::Vector3f lastGroundPos; // Last ground contact position
+    f32 launchHeight;            // Height at launch
+    f32 maxHeight;               // Maximum height reached
+    TrickType trickType;         // Selected trick type
+    bool mbTrickPerformed;       // Trick successfully performed
+    bool mbTrickWindowOpen;      // Can still perform a trick
+    f32 landingLagTimer;         // Landing recovery timer
+    f32 trickBoostTimer;         // Trick speed boost timer
+    f32 trickBoostMultiplier;   // Current trick boost multiplier
+};
+
+// KartAir — manages airborne behavior
+class KartAir {
+public:
+    /* KartAir_ctor @ 0x805D1000 */
+    KartAir();
+    /* KartAir_dtor @ 0x805D1040 */
+    ~KartAir();
+
+    // Initialize air system
+    /* KartAir_init @ 0x805D1080 */
+    void init(const AirConfig& config);
+
+    // Launch the kart into the air (from ramp, bump, etc.)
+    /* KartAir_launch @ 0x805D1100 */
+    void launch(const EGG::Vector3f& position, const EGG::Vector3f& velocity,
+                f32 upSpeed, bool fromBoostRamp);
+
+    // Update air state each frame
+    /* KartAir_update @ 0x805D1200 */
+    void update(const EGG::Vector3f& position, bool groundContact,
+                f32 groundHeight);
+
+    // Attempt a trick (called when player shakes Wii Remote + D-pad)
+    /* KartAir_attemptTrick @ 0x805D1300 */
+    bool attemptTrick(TrickType trickType);
+
+    // Get current air state
+    AirState getAirState() const { return mState.mState; }
+
+    // Check if currently airborne
+    bool isAirborne() const {
+        return mState.mState != AIR_STATE_GROUNDED &&
+               mState.mState != AIR_STATE_LANDED;
+    }
+
+    // Check if in trick window
+    bool isTrickWindowOpen() const { return mState.mbTrickWindowOpen; }
+
+    // Get trick speed boost (if any)
+    f32 getTrickBoost() const { return mState.trickBoostMultiplier; }
+
+    // Check if trick boost is active
+    bool hasTrickBoost() const { return mState.trickBoostTimer > 0.0f; }
+
+    // Get total air time
+    f32 getAirTime() const { return mState.airTime; }
+
+    // Get the trick result for the last performed trick
+    TrickResult getLastTrickResult() const;
+
+    // Default air config
+    static AirConfig getDefaultConfig();
+
+    // Default trick result for each trick type
+    static TrickResult getTrickResult(TrickType type);
+
+private:
+    AirStateData mState;
+    AirConfig mConfig;
+};
+
+} // namespace Kart

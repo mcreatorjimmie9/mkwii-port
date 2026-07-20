@@ -100,6 +100,9 @@ set(KARTMOVEMENT_SOURCES
     data/src/game/KartMovement/KartWheelPhysics.cpp
     data/src/game/KartMovement/KartPhysicsSub.cpp
     data/src/game/KartMovement/PlayerSub10.cpp
+    data/src/game/KartMovement/KartWheelie.cpp
+    data/src/game/KartMovement/KartDrift.cpp
+    data/src/game/KartMovement/KartAir.cpp
 )
 
 # --- RaceEngine (10 files) ---
@@ -148,6 +151,9 @@ set(COLLISION_SOURCES
     data/src/game/Collision/KartBoost.cpp
     data/src/game/Collision/KartRespawn.cpp
     data/src/game/Collision/KartGravity.cpp
+    data/src/game/Collision/WaterCollision.cpp
+    data/src/game/Collision/MovingColObj.cpp
+    data/src/game/Collision/ColResponse.cpp
 )
 
 # --- ItemSystem (16 files) ---
@@ -348,6 +354,9 @@ set(EGG_SOURCES
     data/src/game/EGG/Utility.cpp
     data/src/game/EGG/FrameTimer.cpp
     data/src/game/EGG/ArchiveHeap.cpp
+    data/src/game/EGG/TaskScheduler.cpp
+    data/src/game/EGG/Mutex.cpp
+    data/src/game/EGG/FileLoader.cpp
 )
 
 # =============================================================================
