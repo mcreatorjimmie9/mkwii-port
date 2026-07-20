@@ -57,6 +57,18 @@ struct MovingColObj {
     s32 groupId;                 // JMap group this object belongs to
     bool isActive;               // Object is currently active
     bool mbHasCollision;         // Has collision volume when active
+
+    // Per-object methods
+    void init(s32 id, MovingColObjType typeVal, const EGG::Vector3f& pos, f32 radius);
+    void update(f32 dt);
+    void setVelocity(const EGG::Vector3f& vel);
+    const EGG::Vector3f& getVelocity() const { return velocity; }
+    bool isMoving() const;
+    MovingColObjType getObjectType() const { return (MovingColObjType)objType; }
+    void calcBounds(EGG::Vector3f& outMin, EGG::Vector3f& outMax) const;
+    bool testCollision(const EGG::Vector3f& point, f32 pointRadius) const;
+    void activate();
+    void deactivate();
 };
 
 // Per-player interaction state with moving objects

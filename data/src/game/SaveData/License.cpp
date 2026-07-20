@@ -25,6 +25,9 @@ License::License()
     , mGhostCount(0)
     , mStats()
     , mDirty(false)
+    , mCreatedYear(0)
+    , mCreatedMonth(0)
+    , mCreatedDay(0)
 {
     mName[0] = '\0';
     memset(&mStats, 0, sizeof(LicenseStats));
@@ -333,4 +336,141 @@ u32 License::deserialize(const u8* buffer, u32 bufferSize) {
 
     mDirty = false;
     return offset;
+}
+
+// ============================================================================
+// init() — Reset license to default state
+// @addr 0x804F7000
+// ============================================================================
+
+void License::init() {
+    mName[0] = '\0';
+    mVR = DEFAULT_VR;
+    mBR = DEFAULT_BR;
+    mGhostCount = 0;
+    mDirty = false;
+    mCreatedYear = 0;
+    mCreatedMonth = 0;
+    mCreatedDay = 0;
+
+    memset(&mStats, 0, sizeof(LicenseStats));
+
+    if (mMiiData) {
+        delete mMiiData;
+        mMiiData = nullptr;
+    }
+
+    for (u32 i = 0; i < MAX_RECORDS; i++) {
+        mRecords[i].reset();
+    }
+    for (u32 i = 0; i < MAX_GHOSTS_PER_LICENSE; i++) {
+        mGhosts[i].reset();
+    }
+}
+
+// ============================================================================
+// load() — Load license from a buffer (delegates to deserialize)
+// @addr 0x804F7020
+// ============================================================================
+
+u32 License::load(const u8* buffer, u32 bufferSize) {
+    return deserialize(buffer, bufferSize);
+}
+
+// ============================================================================
+// save() — Save license to a buffer (delegates to serialize)
+// @addr 0x804F7040
+// ============================================================================
+
+u32 License::save(u8* buffer, u32 bufferSize) const {
+    return serialize(buffer, bufferSize);
+}
+
+// ============================================================================
+// getMiiData() — Get raw Mii data pointer
+// @addr 0x804F70C0
+// (Inline in hpp)
+// ============================================================================
+
+// ============================================================================
+// setMiiData() — Set raw Mii data pointer (takes ownership)
+// @addr 0x804F70D0
+// (Inline in hpp)
+// ============================================================================
+
+// ============================================================================
+// getLicenseName() — Get the license display name
+// @addr 0x804F7080
+// (Inline in hpp)
+// ============================================================================
+
+// ============================================================================
+// setLicenseName() — Set the license display name
+// @addr 0x804F70A0
+// (Inline in hpp)
+// ============================================================================
+
+// ============================================================================
+// isValid() — Check if this license contains valid data
+// @addr 0x804F7100
+//
+// A license is valid if:
+//   - It has a non-empty name
+//   - VR is within valid range (1000-9999)
+//   - BR is within valid range (1000-9999)
+// ============================================================================
+
+bool License::isValid() const {
+    // Name must not be empty
+    if (mName[0] == '\0') return false;
+
+    // VR must be in valid range
+    if (mVR < 1000 || mVR > MAX_VR) return false;
+
+    // BR must be in valid range
+    if (mBR < 1000 || mBR > MAX_BR) return false;
+
+    return true;
+}
+
+// ============================================================================
+// getCreatedDate() — Get packed creation date (year | month | day)
+// @addr 0x804F7120
+//
+// Returns a packed u32: bits 16-31 = year, bits 8-15 = month, bits 0-7 = day
+// ============================================================================
+
+u32 License::getCreatedDate() const {
+    return ((u32)mCreatedYear << 16) | ((u32)mCreatedMonth << 8) | (u32)mCreatedDay;
+}
+
+// ============================================================================
+// getTotalRaceCount() — Get total number of races completed
+// @addr 0x804F7140
+// ============================================================================
+
+u32 License::getTotalRaceCount() const {
+    return mStats.totalRaces;
+}
+
+// ============================================================================
+// incrementRaceCount() — Increment the total race counter
+// @addr 0x804F7160
+// ============================================================================
+
+void License::incrementRaceCount() {
+    mStats.totalRaces++;
+    mDirty = true;
+}
+
+// ============================================================================
+// License_resetLicense() — Free function to reset a license to defaults
+// @addr 0x804F7180
+//
+// Used by the save system when creating or resetting a license slot.
+// ============================================================================
+
+void License_resetLicense(License* license) {
+    if (license == nullptr) return;
+    license->init();
 }

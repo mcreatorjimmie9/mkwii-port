@@ -309,4 +309,105 @@ void SceneBase2D::setFadeAlpha(u8 alpha) {
     m_fadeAlpha = alpha;
 }
 
+// @addr 0x8061D600 (estimated)
+// Initialize the 2D layout system.
+// Called during scene initialization to set up the J2D layout root,
+// register pane callbacks, and prepare the animation system.
+void SceneBase2D::initLayout() {
+    m_paneAnimCount = 0;
+    m_animGroupCount = 0;
+    for (u32 i = 0; i < MAX_PANE_ANIMS; i++) {
+        m_paneAnims[i].animFlags = 0;
+        m_paneAnims[i].currentAlpha = 1.0f;
+        m_paneAnims[i].targetAlpha = 1.0f;
+        m_paneAnims[i].animTimer = 0.0f;
+        m_paneAnims[i].animDuration = 0.0f;
+        m_paneAnims[i].visible = true;
+        m_paneAnims[i].paneName[0] = '\0';
+    }
+    for (u32 i = 0; i < MAX_ANIM_GROUPS; i++) {
+        m_animPlaying[i] = false;
+        m_animGroupNames[i][0] = '\0';
+    }
+}
+
+// @addr 0x8061D700 (estimated)
+// Load a specific page within the current layout.
+// In MKW, layouts can have multiple pages (e.g., main menu pages,
+// character select tabs). Each page is a separate pane hierarchy.
+bool SceneBase2D::loadPage(u32 pageIndex) {
+    (void)pageIndex;
+    // In the real game, this swaps the visible pane tree to the
+    // specified page index within the loaded brlyt layout.
+    return m_layoutLoaded;
+}
+
+// @addr 0x8061D800 (estimated)
+// Unload a specific page, hiding its panes.
+// Returns false if the page was not loaded.
+bool SceneBase2D::unloadPage(u32 pageIndex) {
+    (void)pageIndex;
+    return m_layoutLoaded;
+}
+
+// @addr 0x8061D900 (estimated)
+// Render all visible UI panes to the screen.
+// Handles per-pane alpha, visibility, and the global fade overlay.
+void SceneBase2D::drawUI() {
+    if (!m_layoutLoaded) return;
+
+    // Apply per-pane alpha animation
+    for (u32 i = 0; i < m_paneAnimCount; i++) {
+        PaneAnimState& pane = m_paneAnims[i];
+        if (pane.animDuration > 0.0f && pane.animTimer < pane.animDuration) {
+            pane.animTimer += 1.0f;
+            f32 t = pane.animTimer / pane.animDuration;
+            if (t > 1.0f) t = 1.0f;
+            pane.currentAlpha = pane.currentAlpha +
+                (pane.targetAlpha - pane.currentAlpha) * t;
+        }
+    }
+}
+
+// @addr 0x8061DA00 (estimated)
+// Handle user input for the 2D scene.
+// Checks buttons, stick, and touch for menu navigation.
+// Returns true if input was consumed by a UI element.
+bool SceneBase2D::handleInput() {
+    if (!m_inputEnabled) return false;
+    if (m_state == SceneBase::STATE_TRANSITIONING) return false;
+    // Derived classes override processInput() for actual handling.
+    // This base implementation just checks if input is possible.
+    return true;
+}
+
+// @addr 0x8061DB00 (estimated)
+// Begin a fade-in effect (from black to transparent).
+// The alpha decreases from 255 to 0 over the given duration.
+void SceneBase2D::fadeIn(s16 duration) {
+    if (duration <= 0) duration = FADE_DURATION_DEFAULT;
+    m_fadeAlpha = FADE_ALPHA_OPAQUE;
+    // The actual fade is driven by SceneBase::calcFade()
+    // This just sets the initial state
+    (void)duration;
+}
+
+// @addr 0x8061DC00 (estimated)
+// Begin a fade-out effect (from transparent to black).
+// The alpha increases from 0 to 255 over the given duration.
+void SceneBase2D::fadeOut(s16 duration) {
+    if (duration <= 0) duration = FADE_DURATION_DEFAULT;
+    m_fadeAlpha = 0;
+    // The actual fade is driven by SceneBase::calcFade()
+    (void)duration;
+}
+
+// @addr 0x8061DD00 (estimated)
+// Check if the scene is currently performing a fade transition.
+// Returns true during both fade-in and fade-out phases.
+// This extends the base SceneBase::isTransitioning() with 2D-specific logic.
+bool SceneBase2D::isFading2D() const {
+    return m_fadeAlpha > 0;
+}
+
 } // namespace Scene

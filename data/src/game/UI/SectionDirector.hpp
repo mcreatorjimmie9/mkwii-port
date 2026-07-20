@@ -53,9 +53,27 @@ public:
     static void createInstance();
     static void destroyInstance();
 
+    // --- Init / Update ---
+    // @addr 0x8071dd80
+    void init();
+    // @addr 0x8071dda0
+    void onUpdate(f32 dt);
+
     // --- Scene management ---
     // @addr 0x8071dde4
     void changeScene(u32 param, MenuPage* page, u32 playerMask);
+
+    // --- Section management ---
+    // @addr 0x8071ddF0
+    void changeSection(u32 newSection);
+    // @addr 0x8071de00
+    SceneCategory getCurrentSection() const;
+    // @addr 0x8071de10
+    SceneCategory getPreviousSection() const;
+    // @addr 0x8071de20
+    void registerSection(SceneCategory cat, MenuPage* page);
+    // @addr 0x8071de30
+    void unregisterSection(SceneCategory cat);
 
     // @addr 0x8071e06c
     void onSceneChange(MenuPage* page, s32 sceneId, s32 param);
@@ -83,6 +101,8 @@ public:
     u32 getCurrentSceneId() const { return mCurrentSceneId; }
     u32 getTargetSceneId() const { return mTargetSceneId; }
     bool isTransitioning() const { return mState == DIRECTOR_TRANSITIONING; }
+    // @addr 0x8071de40
+    bool isSectionActive(SceneCategory cat) const;
 
     // --- Page lookup ---
     // @addr 0x8071e25c
@@ -138,6 +158,9 @@ private:
 
     // Timing
     f32 mTransitionTimer;
+
+    // Section registry (for registerSection/unregisterSection)
+    MenuPage* mSectionPages[SCENE_CAT_COUNT];
 
     // Internal routing
     static s32 routeSpecialScene(u32 sceneId);

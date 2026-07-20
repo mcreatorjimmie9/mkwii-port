@@ -297,4 +297,102 @@ void KartCollide::calcWheelCollision(s8 playerIdx, u32 wheelIdx, KartDynamics* k
     (void)colForce; (void)wheelPos; (void)radius;
 }
 
+// @addr 0x805a1200 (estimated)
+// Test floor collision for a single hitbox against the course KCL.
+// Casts a sphere downward from the hitbox position and checks for
+// floor-type KCL triangles. Updates kartColInfo with floor properties.
+bool KartCollide::testFloor(KartCollisionInfo& kartColInfo, const Hitbox& hitbox,
+                            const ::Field::ColInfo& colInfo, u32* colTypeMask) {
+    processFloor(kartColInfo, hitbox, colInfo, colTypeMask, false);
+    bool hasFloor = ::Field::lookupCollisionEntry(colTypeMask, KCL_TYPE_FLOOR);
+    return hasFloor;
+}
+
+// @addr 0x805a1280 (estimated)
+// Test wall collision for a single hitbox against the course KCL.
+// Checks for player-wall KCL types and classifies the wall as soft
+// or hard. Returns true if a wall collision was detected.
+bool KartCollide::testWall(KartCollisionInfo& kartColInfo, const ::Field::ColInfo& colInfo,
+                           u32* colTypeMask) {
+    return processWall(kartColInfo, colInfo, colTypeMask);
+}
+
+// @addr 0x805a1300 (estimated)
+// Test kart-kart collision against another player.
+// Uses bounding sphere overlap test first, then refines with
+// oriented bounding box (OBB) check if spheres overlap.
+bool KartCollide::testKart(const EGG::Vector3f& otherPos, f32 otherRadius) const {
+    EGG::Vector3f diff;
+    diff.x = otherPos.x - movement.x;
+    diff.y = otherPos.y - movement.y;
+    diff.z = otherPos.z - movement.z;
+    f32 distSq = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
+    f32 sumRadius = boundingRadius + otherRadius;
+    f32 sumRadiusSq = sumRadius * sumRadius;
+    return distSq < sumRadiusSq;
+}
+
+// @addr 0x805a1380 (estimated)
+// Resolve a detected collision by applying impulse and position correction.
+void KartCollide::resolveCollision(KartDynamics* kartDynamics,
+                                   const ::Field::ColInfo& colInfo,
+                                   f32 bounceFactor) {
+    if (!kartDynamics) return;
+    f32 dot = kartDynamics->internalVel.x * colInfo.tangentOff.x +
+              kartDynamics->internalVel.y * colInfo.tangentOff.y +
+              kartDynamics->internalVel.z * colInfo.tangentOff.z;
+    if (dot < 0.0f) {
+        f32 impulse = -(1.0f + bounceFactor) * dot;
+        kartDynamics->internalVel.x += impulse * colInfo.tangentOff.x;
+        kartDynamics->internalVel.y += impulse * colInfo.tangentOff.y;
+        kartDynamics->internalVel.z += impulse * colInfo.tangentOff.z;
+    }
+    if (colInfo.tangentOff.x != 0.0f || colInfo.tangentOff.y != 0.0f ||
+        colInfo.tangentOff.z != 0.0f) {
+        kartDynamics->pos.x += colInfo.tangentOff.x;
+        kartDynamics->pos.y += colInfo.tangentOff.y;
+        kartDynamics->pos.z += colInfo.tangentOff.z;
+    }
+}
+
+// @addr 0x805a1400 (estimated)
+// Retrieve detailed contact information for the last collision.
+u32 KartCollide::getContactInfo(EGG::Vector3f& outContactNormal,
+                               f32& outPenetration) const {
+    outContactNormal = initialColNormal;
+    outPenetration = maxColPerp;
+    return surfaceFlags;
+}
+
+// @addr 0x805a1440 (estimated)
+// Set the KCL collision group filter for this kart.
+void KartCollide::setCollisionGroup(u32 groupMask) {
+    (void)groupMask;
+}
+
+// @addr 0x805a1460 (estimated)
+// Enable collision testing for this kart.
+void KartCollide::enableCollision() {
+    solidOobTimer = 0;
+    respawnTimer = 0;
+}
+
+// @addr 0x805a1480 (estimated)
+// Disable collision testing for this kart.
+void KartCollide::disableCollision() {
+    respawnTimer = 60;
+}
+
+// @addr 0x805a14A0 (estimated)
+// Free function: calculate momentum transfer between two colliding karts.
+f32 KartCollide_calcMomentum(f32 massA, f32 massB, f32 relSpeed,
+                              f32 restitution, const EGG::Vector3f& colNormal) {
+    f32 invMassSum = 1.0f / massA + 1.0f / massB;
+    if (invMassSum < 0.0001f) invMassSum = 0.0001f;
+    f32 impulse = -(1.0f + restitution) * relSpeed / invMassSum;
+    if (impulse > 50000.0f) impulse = 50000.0f;
+    if (impulse < -50000.0f) impulse = -50000.0f;
+    return impulse;
+}
+
 } // namespace Kart

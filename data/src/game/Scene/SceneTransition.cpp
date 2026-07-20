@@ -294,4 +294,171 @@ void SceneTransition::fireCallback() {
     }
 }
 
+// ===========================================================================
+// Extended SceneTransition Implementation
+// ===========================================================================
+
+// @addr 0x80610AC0 — Start a fade transition to a target scene
+void SceneTransition::startFade(s32 targetScene, f32 duration) {
+    (void)targetScene;
+    m_type = TRANS_TYPE_FADE;
+    m_phase = PHASE_FADE_OUT;
+    m_fadeOutDuration = static_cast<s32>(duration * 60.0f);
+    m_fadeInDuration = static_cast<s32>(duration * 60.0f);
+    m_frameTimer = 0;
+    m_progress = 0.0f;
+    m_alpha = 0;
+}
+
+// @addr 0x80610B00 — Start a wipe transition
+void SceneTransition::startWipe(s32 targetScene, f32 duration) {
+    (void)targetScene;
+    m_type = TRANS_TYPE_WIPE;
+    m_phase = PHASE_FADE_OUT;
+    m_fadeOutDuration = static_cast<s32>(duration * 60.0f);
+    m_fadeInDuration = static_cast<s32>(duration * 60.0f);
+    m_frameTimer = 0;
+    m_progress = 0.0f;
+    m_alpha = 0;
+}
+
+// @addr 0x80610B40 — Per-frame update with delta time
+void SceneTransition::update(f32 dt) {
+    if (m_phase == PHASE_IDLE) return;
+
+    // Convert dt to frame count based on 60fps
+    s32 framesThisUpdate = static_cast<s32>(dt * 60.0f * m_speed);
+    if (framesThisUpdate < 1) framesThisUpdate = 1;
+
+    switch (m_phase) {
+    case PHASE_FADE_OUT:
+        m_frameTimer += framesThisUpdate;
+        updateFade();
+        if (m_frameTimer >= m_fadeOutDuration) {
+            if (m_holdDuration > 0) {
+                m_phase = PHASE_HOLD;
+                m_frameTimer = 0;
+            } else {
+                fireCallback();
+                m_phase = PHASE_FADE_IN;
+                m_frameTimer = 0;
+            }
+        }
+        break;
+
+    case PHASE_HOLD:
+        m_frameTimer += framesThisUpdate;
+        m_alpha = 255;
+        m_progress = 1.0f;
+        if (m_frameTimer >= m_holdDuration) {
+            fireCallback();
+            m_phase = PHASE_FADE_IN;
+            m_frameTimer = 0;
+        }
+        break;
+
+    case PHASE_FADE_IN:
+        m_frameTimer += framesThisUpdate;
+        updateFade();
+        if (m_frameTimer >= m_fadeInDuration) {
+            m_phase = PHASE_IDLE;
+            m_alpha = 0;
+            m_progress = 1.0f;
+        }
+        break;
+
+    default:
+        break;
+    }
+}
+
+// @addr 0x80610BC0 — Set the transition color (RGB)
+void SceneTransition::setColor(u8 r, u8 g, u8 b) {
+    (void)r; (void)g; (void)b;
+    // In real impl: set the overlay quad's color
+    // Currently all transitions use black (0,0,0)
+}
+
+// @addr 0x80610C00 — Set the duration for both fade-out and fade-in
+void SceneTransition::setDuration(f32 durationSeconds) {
+    s32 frames = static_cast<s32>(durationSeconds * 60.0f);
+    if (frames < 1) frames = 1;
+    m_fadeOutDuration = frames;
+    m_fadeInDuration = frames;
+}
+
+// @addr 0x80610C40 — Set the hold duration (time at full black)
+void SceneTransition::setHoldDuration(f32 holdSeconds) {
+    m_holdDuration = static_cast<s32>(holdSeconds * 60.0f);
+}
+
+// @addr 0x80610C80 — Get the hold duration in seconds
+f32 SceneTransition::getHoldDuration() const {
+    return static_cast<f32>(m_holdDuration) / 60.0f;
+}
+
+// @addr 0x80610CC0 — Start a dissolve transition
+void SceneTransition::startDissolve(f32 duration) {
+    m_type = TRANS_TYPE_DISSOLVE;
+    m_phase = PHASE_FADE_OUT;
+    m_fadeOutDuration = static_cast<s32>(duration * 60.0f);
+    m_fadeInDuration = static_cast<s32>(duration * 60.0f);
+    m_frameTimer = 0;
+    m_progress = 0.0f;
+    m_alpha = 0;
+}
+
+// @addr 0x80610D00 — Start a slide transition
+void SceneTransition::startSlide(f32 duration, f32 direction) {
+    m_type = TRANS_TYPE_SLIDE;
+    m_slideParams.direction = direction;
+    m_phase = PHASE_FADE_OUT;
+    m_fadeOutDuration = static_cast<s32>(duration * 60.0f);
+    m_fadeInDuration = static_cast<s32>(duration * 60.0f);
+    m_frameTimer = 0;
+    m_progress = 0.0f;
+    m_alpha = 0;
+}
+
+// @addr 0x80610D40 — Get the wipe parameters
+const Scene::WipeParams& SceneTransition::getWipeParams() const {
+    return m_wipeParams;
+}
+
+// @addr 0x80610D80 — Get the dissolve parameters
+const Scene::DissolveParams& SceneTransition::getDissolveParams() const {
+    return m_dissolveParams;
+}
+
+// @addr 0x80610DC0 — Get the slide parameters
+const Scene::SlideParams& SceneTransition::getSlideParams() const {
+    return m_slideParams;
+}
+
+// @addr 0x80610E00 — Set the transition flags
+void SceneTransition::setFlags(u32 flags) {
+    m_flags = flags;
+}
+
+// @addr 0x80610E20 — Get the transition flags
+u32 SceneTransition::getFlags() const {
+    return m_flags;
+}
+
+// @addr 0x80610E40 — Get the fade-out duration
+f32 SceneTransition::getFadeOutDurationSec() const {
+    return static_cast<f32>(m_fadeOutDuration) / 60.0f;
+}
+
+// @addr 0x80610E60 — Get the fade-in duration
+f32 SceneTransition::getFadeInDurationSec() const {
+    return static_cast<f32>(m_fadeInDuration) / 60.0f;
+}
+
 } // namespace Scene
+
+// @addr 0x80610E80 — Get the current scene ID (free function)
+u32 SceneTransition_getCurrentScene() {
+    // In real impl: query SceneDirector for the current scene ID
+    return 0;
+}

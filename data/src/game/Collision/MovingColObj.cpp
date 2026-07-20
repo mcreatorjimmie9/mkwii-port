@@ -316,4 +316,117 @@ const PlayerMovingColState& MovingColObjManager::getPlayerState(s32 playerIdx) c
     return mPlayerStates[playerIdx];
 }
 
+// ============================================================================
+// MovingColObj — Per-object methods
+// ============================================================================
+
+/* MovingColObj::init */
+void MovingColObj::init(s32 id, MovingColObjType typeVal,
+                          const EGG::Vector3f& pos, f32 radius) {
+    objId = id;
+    objType = (s32)typeVal;
+    position = pos;
+    initialPos = pos;
+    targetPos = pos;
+    velocity = EGG::Vector3f::zero;
+    size = EGG::Vector3f(radius, radius, radius);
+    boundingRadius = radius;
+    state = MCOBJ_STATE_IDLE;
+    timer = 0.0f;
+    animDuration = 1.0f;
+    damageFlags = 0x01;
+    invulnFlags = 0;
+    routeId = -1;
+    groupId = 0;
+    isActive = true;
+    mbHasCollision = true;
+}
+
+/* MovingColObj::update */
+void MovingColObj::update(f32 dt) {
+    if (!isActive) {
+        return;
+    }
+    // Apply velocity to position
+    position.x += velocity.x * dt;
+    position.y += velocity.y * dt;
+    position.z += velocity.z * dt;
+
+    // Update state timer
+    timer += dt;
+
+    // Check if the object has reached its target
+    if (velocity.squaredLength() > 0.0001f) {
+        state = MCOBJ_STATE_MOVING;
+
+        // Check proximity to target
+        EGG::Vector3f toTarget(
+            targetPos.x - position.x,
+            targetPos.y - position.y,
+            targetPos.z - position.z
+        );
+        if (toTarget.squaredLength() < 1.0f) {
+            // Reached target — stop and optionally reverse
+            velocity = EGG::Vector3f::zero;
+            state = MCOBJ_STATE_IDLE;
+            mbHasCollision = (objType == MCOBJ_MOVING_PLATFORM);
+        }
+    }
+}
+
+/* MovingColObj::setVelocity */
+void MovingColObj::setVelocity(const EGG::Vector3f& vel) {
+    velocity = vel;
+}
+
+/* MovingColObj::isMoving */
+bool MovingColObj::isMoving() const {
+    return isActive && velocity.squaredLength() > 0.0001f;
+}
+
+/* MovingColObj::calcBounds — Compute AABB from position and size */
+void MovingColObj::calcBounds(EGG::Vector3f& outMin,
+                               EGG::Vector3f& outMax) const {
+    outMin = EGG::Vector3f(
+        position.x - size.x,
+        position.y - size.y,
+        position.z - size.z
+    );
+    outMax = EGG::Vector3f(
+        position.x + size.x,
+        position.y + size.y,
+        position.z + size.z
+    );
+}
+
+/* MovingColObj::testCollision — Sphere vs this object's bounding sphere */
+bool MovingColObj::testCollision(const EGG::Vector3f& point,
+                                  f32 pointRadius) const {
+    if (!isActive || !mbHasCollision) {
+        return false;
+    }
+    f32 dx = point.x - position.x;
+    f32 dy = point.y - position.y;
+    f32 dz = point.z - position.z;
+    f32 distSq = dx * dx + dy * dy + dz * dz;
+    f32 combinedRadius = pointRadius + boundingRadius;
+    return distSq <= combinedRadius * combinedRadius;
+}
+
+/* MovingColObj::activate */
+void MovingColObj::activate() {
+    isActive = true;
+    mbHasCollision = true;
+    state = MCOBJ_STATE_IDLE;
+    timer = 0.0f;
+}
+
+/* MovingColObj::deactivate */
+void MovingColObj::deactivate() {
+    isActive = false;
+    mbHasCollision = false;
+    state = MCOBJ_STATE_DISABLED;
+    velocity = EGG::Vector3f::zero;
+}
+
 } // namespace Collision

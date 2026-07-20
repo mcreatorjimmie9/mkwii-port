@@ -160,6 +160,30 @@ public:
     /// Get the current fade alpha.
     u8 getFadeAlpha() const { return m_fadeAlpha; }
 
+    /// Initialize the 2D layout system (reset pane anims, groups)
+    void initLayout();
+
+    /// Load a specific page within the layout
+    bool loadPage(u32 pageIndex);
+
+    /// Unload a specific page
+    bool unloadPage(u32 pageIndex);
+
+    /// Render all visible UI panes with alpha animation
+    void drawUI();
+
+    /// Handle user input for menu navigation
+    bool handleInput();
+
+    /// Begin fade-in (from black to transparent)
+    void fadeIn(s16 duration);
+
+    /// Begin fade-out (from transparent to black)
+    void fadeOut(s16 duration);
+
+    /// Check if 2D fade is active
+    bool isFading2D() const;
+
 protected:
     // --- Subclass hooks ---
 

@@ -304,4 +304,96 @@ void* SceneBase::getUserData() const {
     return m_userData;
 }
 
+// @addr 0x805b01e0 (estimated)
+// Scene lifecycle hook: called once when the scene is first initialized.
+// Derived classes override this to perform one-time setup such as
+// allocating sub-systems, loading configuration, and registering callbacks.
+// The base implementation transitions from UNINITIALIZED to LOADING.
+void SceneBase::onInit() {
+    m_state = STATE_LOADING;
+    m_frameCount = 0;
+    m_isTransitioning = false;
+    m_transitionFlags = 0;
+    m_alphaFade = FADE_ALPHA_OPAQUE;
+    m_fadeTimerA = -1;
+    m_fadeTimerB = -1;
+    m_fadeCompleteA = 0;
+    m_fadeCompleteB = 0;
+}
+
+// @addr 0x805b0200 (estimated)
+// Called when the scene becomes the active scene (after transition completes).
+// Derived classes use this to resume paused systems, show UI, start timers.
+void SceneBase::onEnter() {
+    m_state = STATE_ACTIVE;
+    m_isTransitioning = false;
+    m_transitionFlags = 0;
+}
+
+// @addr 0x805b0220 (estimated)
+// Called when the scene is being replaced (before transition starts).
+// Derived classes should pause systems, save state, release exclusive resources.
+void SceneBase::onExit() {
+    m_state = STATE_TRANSITIONING;
+    m_isTransitioning = true;
+}
+
+// @addr 0x805b0240 (estimated)
+// Per-frame update with explicit delta time.
+// In MKW, dt is always ~1/60 second (fixed timestep).
+// Calls calcFade() to advance transition animations.
+void SceneBase::onUpdate(f32 dt) {
+    (void)dt;
+    calcFade();
+    m_frameCount++;
+}
+
+// @addr 0x805b0260 (estimated)
+// Render the scene. Base implementation does nothing.
+// Derived 2D/3D scenes override to render their content.
+void SceneBase::onDraw() {
+    // Base: no rendering
+}
+
+// @addr 0x805b0280 (estimated)
+// Check if the scene is currently in an active, interactive state.
+// Returns true if the scene is fully loaded and not transitioning.
+bool SceneBase::isActive() const {
+    return m_state == STATE_ACTIVE && !m_isTransitioning;
+}
+
+// @addr 0x805b02A0 (estimated)
+// Manually activate or deactivate a scene.
+// Used by SceneDirector to force a scene into the desired state.
+void SceneBase::setActive(bool active) {
+    if (active) {
+        m_state = STATE_ACTIVE;
+        m_isTransitioning = false;
+    } else {
+        m_state = STATE_READY;
+    }
+}
+
+// @addr 0x805b02C0 (estimated)
+// Get the scene identifier — duplicate removed, already defined above.
+
+// @addr 0x805b02E0 (estimated)
+// Request a scene transition to another scene.
+// Sets up the fade-out and notifies the SceneDirector.
+void SceneBase::requestTransition(u32 targetSceneId) {
+    (void)targetSceneId;
+    beginTransition();
+}
+
+// @addr 0x805b0300 (estimated)
+// Free function: print debug info about a scene to the debug console.
+// Displays scene state, frame count, load progress, fade state, and
+// scene ID. Used during development for debugging scene transitions.
+void SceneBase_printDebugInfo(const Scene::SceneBase* scene) {
+    if (!scene) return;
+    // In the real game, this writes to the OSReport console.
+    // Format: "Scene[id=%u state=%d frame=%u load=%u/%u fade=%u]\n"
+    (void)scene;
+}
+
 } // namespace Scene

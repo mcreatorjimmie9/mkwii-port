@@ -150,6 +150,56 @@ protected:
     void checkPointerHit(f32 x, f32 y);
     // @addr 0x80649644
     void updateInputState();
+
+    // Extended API
+    // @addr 0x80647e00
+    void onCalc();
+    // @addr 0x80647e30
+    void onDraw();
+    // @addr 0x80647e60
+    void addChild(UIControl* child);
+    // @addr 0x80647e90
+    void removeChild(UIControl* child);
+    // @addr 0x80647ec0
+    void setVisible(bool visible);
+    // @addr 0x80647ef0
+    void setAlpha(u8 alpha);
+    // @addr 0x80647f20
+    PaneWrapper* getPane() const;
+    // @addr 0x80647f50
+    UIControl* findControl(const char* name) const;
+    // @addr 0x80647f80
+    void transitionIn(f32 duration);
+    // @addr 0x80647fb0
+    void transitionOut(f32 duration);
+    // @addr 0x80647fe0
+    u32 getResultValue() const;
+    // @addr 0x80648000
+    bool isEnabled() const;
+    // @addr 0x80648020
+    void setEnabled(bool enabled);
+    // @addr 0x80648040
+    u32 getSceneRef() const;
+    // @addr 0x80648060
+    void setSceneRef(u32 sceneRef);
+    // @addr 0x80648080
+    u32 getChildCount() const;
+    // @addr 0x806480a0
+    u32 getActiveChildIndex() const;
+    // @addr 0x806480c0
+    void setActiveChildIndex(u32 index);
+    // @addr 0x806480e0
+    u32 getPanelCount() const;
+    // @addr 0x80648100
+    bool isInputCaptured() const;
+    // @addr 0x80648120
+    void setAnimStateCount(u32 count);
+    // @addr 0x80648140
+    u32 getAnimStateCount() const;
+    // @addr 0x80648160
+    f32 getTotalAnimDuration() const;
+    // @addr 0x80648180
+    f32 getAnimTimer() const;
 };
 
 } // namespace UI

@@ -29,6 +29,9 @@ public:
     void setLastPos(const EGG::Vector3f& scale, const EGG::Matrix34f& pose);
     BspHitbox* create(const EGG::Vector3f& pos, f32 radius);
     void setScale(float);
+    f32 getWorldPosition(EGG::Vector3f& out) const;
+    bool testSphere(const EGG::Vector3f& center, f32 radius) const;
+    bool testAABB(const EGG::Vector3f& aabbMin, const EGG::Vector3f& aabbMax) const;
 };
 // static_assert(sizeof(Hitbox) == 0x30);
 
@@ -75,6 +78,18 @@ struct KartCollisionInfo {
     const EGG::Vector3f& getWallNrm() const { return wallNrm; }
     bool hasFloorCollision() const { return floorKclTypeMask != 0; }
     bool hasWallCollision() const { return wallKclType != 0; }
+
+    // Get the contact normal (floor if present, else wall).
+    const EGG::Vector3f& getContactNormal() const;
+
+    // Get the penetration depth from the most recent collision.
+    f32 getPenetrationDepth() const { return colPerpendicularity; }
+
+    // Serialize collision info to a flat buffer (for ghost replay).
+    void serialize(u8* buf, u32& outSize) const;
+
+    // Deserialize collision info from a flat buffer.
+    bool deserialize(const u8* buf, u32 size);
 };
 // static_assert(sizeof(KartCollisionInfo) == 0x84);
 
@@ -104,6 +119,8 @@ public:
     inline f32 getBoundingRadius() const { return boundingRadius; }
     inline const KartCollisionInfo& getKartCollisionInfo() const { return colInfo; }
     inline KartCollisionInfo& getKartCollisionInfo() { return colInfo; }
+    inline const Hitbox* getAllHitboxes() const { return hitboxes; }
+    inline s32 getHitboxArraySize() const { return hitboxCount; }
 };
 // static_assert(sizeof(HitboxGroup) == 0x9c);
 
@@ -111,5 +128,12 @@ public:
 bool KartHitbox_testSphereVsAABB(
     const EGG::Vector3f& sphereCenter, f32 sphereRadius,
     const EGG::Vector3f& aabbMin, const EGG::Vector3f& aabbMax);
+
+// Free function: Capsule vs plane intersection test
+// Returns true if the capsule (defined by two endpoints and radius) intersects the plane.
+// outPenetration receives the penetration depth on collision.
+bool KartHitbox_testCapsuleVsPlane(
+    const EGG::Vector3f& capA, const EGG::Vector3f& capB, f32 capRadius,
+    const EGG::Vector3f& planeNormal, f32 planeD, f32* outPenetration);
 
 } // namespace Kart

@@ -81,6 +81,60 @@ public:
     void unbindAnimation(const char* animName);
     void updateAnimations(f32 deltaTime);
 
+    // Extended operations
+    // @addr 0x8050bdc0
+    PaneWrapper* findPaneByTag(u32 tag);
+    // @addr 0x8050be00
+    void setAnimSpeed(f32 speed);
+    // @addr 0x8050be40
+    f32 getAnimFrame(const char* animName) const;
+    // @addr 0x8050be80
+    bool isAnimPlaying(const char* animName) const;
+    // @addr 0x8050bec0
+    void stopAllAnimations();
+    // @addr 0x8050bf00
+    void setTag(u32 tag);
+    // @addr 0x8050bf20
+    u32 getTag() const;
+    // @addr 0x8050bf40
+    u32 calcMemoryUsage() const;
+    // @addr 0x8050bf80
+    u32 getNameHash() const;
+    // @addr 0x8050bd40
+    void attachToScene();
+    // @addr 0x8050bd80
+    void detachFromScene();
+    // @addr 0x8050bfc0
+    u32 countPanesOfType(u32 paneType) const;
+    // @addr 0x8050c000
+    u8 getAlpha() const;
+    // @addr 0x8050c020
+    bool isVisible() const;
+    // @addr 0x8050c040
+    void setSubTag(u32 subTag);
+    // @addr 0x8050c060
+    u32 getSubTag() const;
+    // @addr 0x8050c080
+    u32 getResourceHolder() const;
+    // @addr 0x8050c0a0
+    void setResourceHolder(u32 holder);
+    // @addr 0x8050c0c0
+    bool isInitialized() const;
+    // @addr 0x8050c0e0
+    void setFlags(u8 flags);
+    // @addr 0x8050c100
+    u8 getFlags() const;
+    // @addr 0x8050c120
+    void setTransitionId(u32 id);
+    // @addr 0x8050c140
+    u32 getTransitionId() const;
+    // @addr 0x8050c160
+    void setCancelFlag(u32 flag);
+    // @addr 0x8050c180
+    u32 getCancelFlag() const;
+    // @addr 0x8050c1a0
+    u32 getGroupCount() const;
+
     // State queries
     bool isActive() const { return mState == LAYOUT_STATE_ACTIVE; }
     LayoutState getState() const { return mState; }

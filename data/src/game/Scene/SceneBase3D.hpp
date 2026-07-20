@@ -188,6 +188,27 @@ public:
     /// @addr 0x80621C00
     void configureRenderPasses(u32 passMask);
 
+    /// Full 3D scene initialization (graph, camera, defaults)
+    void initScene();
+
+    /// Load course 3D model and collision data
+    void loadCourse(const char* coursePath);
+
+    /// Unload course resources
+    void unloadCourse();
+
+    /// Perform 3D draw for all viewports
+    void draw3D();
+
+    /// Update camera with explicit dt
+    void updateCamera(f32 dt);
+
+    /// Configure GX lighting
+    void setupLighting();
+
+    /// Configure GX fog from stored params
+    void setupFog();
+
     // --- Viewport ---
 
     /// Set up viewports for the given player count (split-screen).

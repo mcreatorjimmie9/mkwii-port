@@ -137,6 +137,14 @@ public:
     RacingNet();
     ~RacingNet();
 
+    // --- Init / Connect / Disconnect ---
+    // @addr 0x805A0000
+    void init();
+    // @addr 0x805A0020
+    u32 connect(const FriendCode& fc);
+    // @addr 0x805A0040
+    u32 disconnect();
+
     // --- NWFC Login / Logout ---
     // @addr referenced in EGG::Network stubs (0x805a0000+)
     u32 login(const FriendCode& fc);
@@ -163,6 +171,24 @@ public:
     void onRaceFrame();
     void onRaceComplete();
 
+    // --- Race Data ---
+    // @addr 0x805A0100
+    u32 sendRaceData(const void* data, u32 size);
+    // @addr 0x805A0120
+    u32 recvRaceData(void* outBuffer, u32 maxSize, u32* outSize);
+    // @addr 0x805A0140
+    u32 broadcastPosition(f32 x, f32 y, f32 z, u16 itemId);
+
+    // --- Network info ---
+    // @addr 0x805A0160
+    u32 getPeerCount() const;
+    // @addr 0x805A0180
+    u32 getLatency(u32 peerIndex) const;
+    // @addr 0x805A01A0
+    bool isConnected() const;
+    // @addr 0x805A01C0
+    u32 ping(u32 peerIndex);
+
     // --- State Queries ---
     OnlineState getOnlineState() const { return mState; }
     Room& getRoom() { return mRoom; }
@@ -180,8 +206,15 @@ private:
     Matchmaking          mMatchmaking;
     RKNetConnectionManager* mConnMgr;
     PacketHandler*       mPacketHandler;
-    u32                  mFrameCounter;
+    // Frame counter
+    u32  mFrameCounter;
+    u32  mPeerCount;
+    u32  mLatencies[NET_MAX_PLAYERS];
 };
+
+// --- Free function ---
+// @addr 0x805A01E0
+RacingNet::OnlineState RacingNet_getInstanceState();
 
 // ============================================================================
 // FriendList — Friend Roster Manager

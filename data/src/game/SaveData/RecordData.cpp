@@ -316,3 +316,121 @@ u32 RecordData::deserialize(const u8* buffer, u32 bufferSize) {
 
     return offset;
 }
+
+// ============================================================================
+// init() — Initialize record to default state
+// @addr 0x804F69C0
+// ============================================================================
+
+void RecordData::init() {
+    reset();
+}
+
+// ============================================================================
+// load() — Load record from a save buffer (delegates to deserialize)
+// @addr 0x804F69D0
+// ============================================================================
+
+u32 RecordData::load(const u8* buffer, u32 bufferSize) {
+    return deserialize(buffer, bufferSize);
+}
+
+// ============================================================================
+// save() — Save record to a save buffer (delegates to serialize)
+// @addr 0x804F69F0
+// ============================================================================
+
+u32 RecordData::save(u8* buffer, u32 bufferSize) const {
+    return serialize(buffer, bufferSize);
+}
+
+// ============================================================================
+// getTime() — Alias for getBestTime(), returns the best race time
+// @addr 0x804F6A00
+// (Inline in hpp)
+// ============================================================================
+
+// ============================================================================
+// setTime() — Set the best race time directly
+// @addr 0x804F6A20
+// (Inline in hpp)
+// ============================================================================
+
+// ============================================================================
+// getDate() — Extract the date the record was achieved
+// @addr 0x804F6A40
+// ============================================================================
+
+void RecordData::getDate(u16* year, u8* month, u8* day) const {
+    if (year)  *year  = mMeta.year;
+    if (month) *month = mMeta.month;
+    if (day)   *day   = mMeta.day;
+}
+
+// ============================================================================
+// setDate() — Set the date the record was achieved
+// @addr 0x804F6A80
+// ============================================================================
+
+void RecordData::setDate(u16 year, u8 month, u8 day) {
+    mMeta.year  = year;
+    mMeta.month = month;
+    mMeta.day   = day;
+    // Clamp month/day to valid ranges
+    if (mMeta.month == 0)  mMeta.month = 1;
+    if (mMeta.month > 12)  mMeta.month = 12;
+    if (mMeta.day == 0)    mMeta.day   = 1;
+    if (mMeta.day > 31)    mMeta.day   = 31;
+}
+
+// ============================================================================
+// isPersonalBest() — Check if this record represents a personal best
+// @addr 0x804F6AC0
+//
+// A record is considered a personal best if:
+//   - It has a valid race time (not zero)
+//   - It is not a staff ghost record
+//   - The time is strictly better than zero
+// ============================================================================
+
+bool RecordData::isPersonalBest() const {
+    if (!hasRecord()) return false;
+    if (mMeta.isStaffGhost) return false;
+    // A personal best means a non-zero, non-staff time
+    s32 ms = mBestTime.toMilliseconds();
+    return ms > 0;
+}
+
+// ============================================================================
+// compare() — Compare this record's time against a given race time
+// @addr 0x804F6B00
+//
+// Returns:
+//   <0 if this record is faster than the given time
+//    0 if equal
+//   >0 if this record is slower
+// ============================================================================
+
+s32 RecordData::compare(const System::Time& raceTime) const {
+    if (!hasRecord()) return 1; // no record is slower than any time
+
+    s32 thisMs  = mBestTime.toMilliseconds();
+    s32 otherMs = raceTime.toMilliseconds();
+
+    if (thisMs < otherMs) return -1;
+    if (thisMs > otherMs) return 1;
+    return 0;
+}
+
+// ============================================================================
+// RecordData_getEmpty() — Free function returning a zeroed RecordData
+// @addr 0x804F6B40
+//
+// Used by the save system to initialize empty record slots.
+// ============================================================================
+
+RecordData RecordData_getEmpty() {
+    RecordData empty;
+    empty.reset();
+    return empty;
+}

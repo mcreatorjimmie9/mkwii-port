@@ -309,4 +309,115 @@ void SceneBase3D::configureRenderPasses(u32 passMask) {
     // Bit 6: UI pass
 }
 
+// @addr 0x80621D00 (estimated)
+// Initialize the 3D scene graph, camera, and rendering state.
+// This is the primary setup entry point called by RaceScene::init().
+void SceneBase3D::initScene() {
+    // Reset all 3D state
+    m_sceneGraphReady = false;
+    m_fogEnabled = false;
+    m_renderPassMask = 0x7F;
+
+    // Set up default projection
+    m_projParams.fov = 60.0f;
+    m_projParams.nearPlane = 10.0f;
+    m_projParams.farPlane = 20000.0f;
+    m_projParams.aspectRatio = 16.0f / 9.0f;
+    m_projParams.perspective = true;
+
+    // Set up scene graph with default config
+    SceneGraphConfig config;
+    config.passCount = 7;
+    config.viewportCount = m_viewportCount;
+    config.enableCulling = true;
+    config.enableFog = false;
+    config.enablePostProcess = true;
+    config.enableShadows = false;
+    setupSceneGraph(config);
+
+    // Default camera setup
+    setupCamera(m_projParams.fov, m_projParams.nearPlane, m_projParams.farPlane);
+}
+
+// @addr 0x80621E00 (estimated)
+// Load the course 3D model and collision data.
+// In the real game, this loads the course BMD, KCL, and associated
+// resources from the archive system.
+void SceneBase3D::loadCourse(const char* coursePath) {
+    (void)coursePath;
+    // In the real game:
+    // 1. Load course BMD model from archive
+    // 2. Parse and set up KCL collision data
+    // 3. Load course-specific texture overrides
+    // 4. Register course objects (item boxes, boost pads, etc.)
+    // 5. Initialize course-specific particle emitters
+    setLoadProgress(1, 0);
+}
+
+// @addr 0x80621F00 (estimated)
+// Unload the course 3D model and free associated resources.
+void SceneBase3D::unloadCourse() {
+    // In the real game:
+    // 1. Remove course model from scene graph
+    // 2. Free course texture memory
+    // 3. Destroy course-specific particle emitters
+    // 4. Unload KCL collision data
+    m_sceneGraphReady = false;
+}
+
+// @addr 0x80622000 (estimated)
+// Perform the 3D draw pass for all enabled viewports.
+// This is called from draw() after preDraw() has set up the GX state.
+void SceneBase3D::draw3D() {
+    if (!m_sceneGraphReady) return;
+
+    // In the real game:
+    // 1. For each viewport (split-screen):
+    //    a. Set GX viewport and scissor
+    //    b. Load camera view-projection matrix
+    //    c. Set fog parameters if enabled
+    //    d. Submit opaque geometry
+    //    e. Submit transparent geometry (back-to-front)
+    // 2. Draw shadow pass if enabled
+    // 3. Draw particle effects
+}
+
+// @addr 0x80622100 (estimated)
+// Update the camera for the current frame.
+// Processes camera shake, interpolation, and attachment.
+void SceneBase3D::updateCamera(f32 dt) {
+    if (!m_camera) return;
+    m_camera->calc(dt);
+}
+
+// @addr 0x80622200 (estimated)
+// Configure GX lighting for the scene.
+// Sets up to 8 directional/point/spot lights.
+// In MKW, courses typically use 2-3 lights: key, fill, ambient.
+void SceneBase3D::setupLighting() {
+    // In the real game:
+    // 1. GX_SetChanAmbColor(GX_COLOR0A0, m_ambientColor)
+    // 2. GX_SetChanMatColor(GX_COLOR0A0, {255,255,255,255})
+    // 3. Configure directional light (sun/moon)
+    // 4. Configure fill light (bounce light from ground)
+    // 5. GX_SetNumChans(1) // MKW uses single-channel lighting
+}
+
+// @addr 0x80622300 (estimated)
+// Configure GX fog parameters for the scene.
+// Uses the stored FogParams to set up linear or exponential fog.
+void SceneBase3D::setupFog() {
+    if (!m_fogEnabled) {
+        disableFog();
+        return;
+    }
+
+    // Configure fog based on type
+    // In the real game:
+    // GX_SetFog(GX_FOG_LINEAR, m_fogParams.startZ, m_fogParams.endZ,
+    //          m_fogParams.nearZ, m_fogParams.farZ,
+    //          {r, g, b, a})
+    enableFog();
+}
+
 } // namespace Scene

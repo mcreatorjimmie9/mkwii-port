@@ -52,6 +52,10 @@ public:
     /// @return Compression distance (0 = at rest length, positive = compressed)
     f32 getCompression(s32 idx) const;
 
+    /// Get average compression across all grounded wheels.
+    /// @return Average compression (0 if none grounded)
+    f32 getCompression() const;
+
     /// Check if a wheel is touching the ground.
     bool isWheelGrounded(s32 idx) const { return m_wheelGrounded[idx]; }
 
@@ -85,6 +89,24 @@ public:
     /// @return Bitmask (e.g. 0x5 = RL+FL, 0xF = all four)
     u32 getGroundContactMask() const;
 
+    /// Compute spring force for a single wheel (Hooke's law: F = -k * x)
+    f32 calcSpringForce(s32 wheelIdx) const;
+
+    /// Compute damping force for a single wheel (F = -c * v)
+    f32 calcDampingForce(s32 wheelIdx) const;
+
+    /// Simplified update without dynamics pointer, returns total vertical force
+    f32 update();
+
+    /// Set spring stiffness with clamping [1000, 200000]
+    void setStiffness(f32 k);
+
+    /// Check if any wheel is at maximum compression
+    bool isBottomedOut() const;
+
+    /// Apply rough terrain effects (extra damping, perturbation)
+    void handleRoughTerrain(f32 roughness, f32 kartSpeed);
+
     /// Suspension parameters (can be tuned per vehicle)
     void setSpringConstant(f32 k) { m_springK = k; }
     void setDampingRatio(f32 zeta) { m_dampingRatio = zeta; }
@@ -93,12 +115,13 @@ public:
     f32 getDampingRatio() const { return m_dampingRatio; }
     f32 getRestLength() const { return m_restLength; }
 
-private:
     static const f32 DEFAULT_SPRING_K;
     static const f32 DEFAULT_DAMPING_RATIO;
     static const f32 DEFAULT_REST_LENGTH;
     static const f32 MAX_COMPRESSION;
     static const f32 MIN_EXTENSION;
+
+private:
 
     struct WheelSuspState {
         EGG::Vector3f contactPoint;   // World-space contact position
@@ -120,5 +143,9 @@ private:
     bool m_wheelGrounded[WHEEL_COUNT];
     f32 m_wheelForce[WHEEL_COUNT];
 };
+
+// Free function: return default suspension tuning parameters
+void KartSuspension_getDefaultParams(f32* outSpringK, f32* outDampingRatio,
+                                      f32* outRestLength);
 
 } // namespace Kart

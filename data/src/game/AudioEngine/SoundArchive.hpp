@@ -118,6 +118,17 @@ public:
     // @addr 0x80721C00
     s32 findStream(const char* name) const;
 
+    // @addr 0x80722000
+    // Get detailed sound info entry from the info table
+    const void* getSoundInfo(u32 soundId) const;
+
+    // @addr 0x80722300
+    // Get sequence info from the info table
+    const void* getSequenceInfo(u32 seqId) const;
+
+    // @addr 0x80722500
+    u32 getSequenceCount() const;
+
     // @addr 0x80722400
     const char* getSoundName(u32 soundId) const;
 

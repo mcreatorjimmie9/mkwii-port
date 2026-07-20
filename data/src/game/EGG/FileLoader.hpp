@@ -109,6 +109,41 @@ public:
     /* EGG_FileLoader_flush @ 0x80174400 */
     void flush();
 
+    // Extended file operations
+    /* EGG_FileLoader_open @ 0x80174780 */
+    bool open(const char* path);
+    /* EGG_FileLoader_read @ 0x80174800 */
+    s32 read(void* buf, u32 size);
+    /* EGG_FileLoader_seek @ 0x80174880 */
+    bool seek(s32 offset);
+    /* EGG_FileLoader_tell @ 0x80174900 */
+    u32 tell() const;
+    /* EGG_FileLoader_close @ 0x80174980 */
+    void close();
+    /* EGG_FileLoader_getSize @ 0x801749C0 */
+    u32 getSize() const;
+
+    // Convenience methods
+    /* EGG_FileLoader_loadToMemory @ 0x80174A00 */
+    void* loadToMemory(const char* fileName);
+    /* EGG_FileLoader_asyncLoad @ 0x80174A80 */
+    s32 asyncLoad(const char* fileName, void* buffer, u32 bufSize,
+                 FileLoadCallback callback, void* userData);
+    /* EGG_FileLoader_getProgress @ 0x80174B00 */
+    f32 getProgress() const;
+    /* EGG_FileLoader_isLoaded @ 0x80174B40 */
+    bool isLoaded(s32 requestId) const;
+    /* EGG_FileLoader_getPendingCount @ 0x80174B80 */
+    s32 getPendingCount() const;
+    /* EGG_FileLoader_cancelAll @ 0x80174BC0 */
+    void cancelAll();
+    /* EGG_FileLoader_getHeapFree @ 0x80174C00 */
+    u32 getHeapFree() const;
+    /* EGG_FileLoader_getHeapUsed @ 0x80174C40 */
+    u32 getHeapUsed() const;
+    /* EGG_FileLoader_reset @ 0x80174C80 */
+    void reset();
+
     // Singleton access
     static FileLoader* getInstance() { return spInstance; }
     static void createInstance();
@@ -143,3 +178,6 @@ private:
 };
 
 } // namespace EGG
+
+// @addr 0x80174D00
+bool FileLoader_isLoaded(EGG::FileLoader* loader, s32 requestId);

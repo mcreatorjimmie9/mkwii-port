@@ -31,6 +31,28 @@ public:
     u8 getCurrentLap() const;
     u8 getMaxLaps() const;
 
+    // Called when the player crosses the lap finish line.
+    void onLapComplete();
+
+    // Get pointer to ghost input buffer (for ghost kart driver).
+    const u8* getGhost() const;
+    u32 getGhostSize() const;
+
+    // Save ghost data to persistent storage (Wii save data).
+    void saveGhost();
+
+    // Load the best ghost for the current course from save data.
+    void loadBestGhost();
+
+    // Check if the current race time is a new record.
+    bool isNewRecord() const;
+
+    // Get the best recorded time for this course (ms), or 0xFFFFFFFF if none.
+    u32 getRecordTime() const;
+
+    // Get the number of laps configured for this race.
+    u8 getLapCount() const;
+
     // Pointer to Raceinfo (0x00)
     Raceinfo* raceinfo;
     // Player/hud data (0x0c, 0x20) - arrays
@@ -51,6 +73,9 @@ public:
     u8 mGhostInputBuffer[0x4000]; // Buffer for ghost input recording
     u32 mGhostInputCount;     // Number of recorded ghost inputs
     u32 mFrameCounter;        // Per-frame counter
+    u32 mRecordLapTimes[10];  // Best lap times for this course (ms)
+    u32 mRecordTotalMs;       // Best total race time (ms)
+    bool mNewRecord;          // Whether current race set a new record
 };
 
 } // namespace System

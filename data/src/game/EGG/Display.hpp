@@ -74,12 +74,56 @@ public:
     // @addr 0x8016C640
     void calcFrequency();
 
+    // --- Extended methods ---
+    // @addr 0x8016C800
+    void setGamma(f32 gamma);
+    // @addr 0x8016C830
+    void setAntiAliasing(bool enable);
+    // @addr 0x8016C860
+    u16 getWidth() const;
+    // @addr 0x8016C890
+    u16 getHeight() const;
+    // @addr 0x8016C8C0
+    bool isWidescreen() const;
+    // @addr 0x8016C900
+    void setFramebufferEx(void* xfb, u16 width, u16 height);
+    // @addr 0x8016C940
+    u32 getVideoMode() const;
+    // @addr 0x8016C980
+    void waitRetrace();
+    // @addr 0x8016C9B0
+    void setMaxRetraces(u8 count);
+    // @addr 0x8016C9E0
+    f32 getDeltaTime() const;
+    // @addr 0x8016CA10
+    void setClearColor(u32 color);
+    // @addr 0x8016CA40
+    void setClearZ(u32 depth);
+    // @addr 0x8016CA70
+    bool isProgressive() const;
+    // @addr 0x8016CAA0
+    void setInterlaced(bool enable);
+    // @addr 0x8016CAD0
+    u32 getFramebufferFormat() const;
+    // @addr 0x8016CB00
+    bool isBlackedOut() const;
+    // @addr 0x8016CB30
+    void registerRetraceCallback();
+    // @addr 0x8016CB70
+    void unregisterRetraceCallback();
+    // @addr 0x8016CBA0
+    void shutdown();
+    // @addr 0x8016CBD0
+    bool isInitialized() const;
+    // @addr 0x8016CC00
+    u32 getCurrentRetrace() const;
+
     // --- VRetrace callback ---
     // @addr 0x8016C6C0
     void onVRetrace();
 
     // --- Flag accessors ---
-    bool hasFlag(u8 idx) volatile { return mFlag & (1 << idx); }
+    bool hasFlag(u8 idx) const { return mFlag & (1 << idx); }
     void setFlag(u8 idx) volatile { mFlag |= (1 << idx); }
     void clearFlag(u8 idx) volatile { mFlag &= ~(1 << idx); }
 
@@ -126,3 +170,61 @@ private:
 };
 
 } // namespace EGG
+
+// @addr 0x8016CC30
+void Display_setResolution(u16 width, u16 height, bool progressive);
+
+// @addr 0x8016CC60
+f32 Display_getAspectRatio();
+// @addr 0x8016CC90
+u32 Display_getFieldsPerFrame();
+// @addr 0x8016CCC0
+bool Display_isPAL();
+// @addr 0x8016CCF0
+u32 Display_getXfbSize(u16 width, u16 height, bool isProgressive);
+// @addr 0x8016CD20
+f32 Display_getRefreshRate();
+// @addr 0x8016CD60
+bool Display_isTVModeSupported(u32 tvMode);
+// @addr 0x8016CD90
+void Display_setBorderColor(u8 r, u8 g, u8 b);
+// @addr 0x8016CDC0
+u16 Display_getFramebufferPitch();
+// @addr 0x8016CDF0
+void Display_setFlickerFilter(bool enable);
+// @addr 0x8016CE20
+void Display_getSafeArea(f32& left, f32& top, f32& right, f32& bottom);
+// @addr 0x8016CE60
+void Display_screenToNDC(f32 screenX, f32 screenY, f32& ndcX, f32& ndcY);
+// @addr 0x8016CE90
+void Display_ndcToScreen(f32 ndcX, f32 ndcY, f32& screenX, f32& screenY);
+// @addr 0x8016CEC0
+u16 Display_getLetterboxHeight();
+// @addr 0x8016CF00
+bool Display_isDoubleBuffered();
+// @addr 0x8016CF30
+u32 Display_getCurrentField();
+// @addr 0x8016CF60
+void Display_configureRenderMode();
+// @addr 0x8016CF90
+void Display_setVerticalScale(f32 scale);
+// @addr 0x8016CFC0
+void Display_setBorderEnable(bool enable);
+// @addr 0x8016CFF0
+f32 Display_getPixelAspectRatio();
+// @addr 0x8016D020
+void Display_suspend();
+// @addr 0x8016D050
+void Display_resume();
+// @addr 0x8016D080
+u32 Display_getColorDepth();
+// @addr 0x8016D0C0
+void Display_copyEFBRegion(u16 x, u16 y, u16 width, u16 height, bool clear);
+// @addr 0x8016D0F0
+void Display_setGammaTable(const u8* rLUT, const u8* gLUT, const u8* bLUT, u32 size);
+// @addr 0x8016D120
+void Display_resetGamma();
+// @addr 0x8016D150
+u32 Display_getCurrentBufferIndex();
+// @addr 0x8016D180
+u32 Display_measureFrameTime();

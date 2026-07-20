@@ -32,6 +32,12 @@ public:
     // @addr 0x80594150
     f32 getStickY(f32 deadzone) const;
 
+    // Get stick X with default deadzone
+    f32 getStickX() const;
+
+    // Get stick Y with default deadzone
+    f32 getStickY() const;
+
     // Get trigger value normalized to [0, 1]
     // @addr 0x80594200
     f32 getTrigger(u32 triggerIdx) const;
@@ -79,6 +85,33 @@ public:
 
     // Get the per-kart analog deadzone radius.
     f32 getDeadzone() const { return m_deadzone; }
+
+    // Full initialization of input system
+    void init();
+
+    // Per-frame input update (read + process)
+    void update();
+
+    // Check if brake button is held
+    bool isBraking() const;
+
+    // Check if accelerate button is held
+    bool isAccelerating() const;
+
+    // Check if drifting (steering + drift button)
+    bool isDrifting() const;
+
+    // Get L trigger value
+    f32 getTriggerL();
+
+    // Get R trigger value
+    f32 getTriggerR();
+
+    // Apply deadzone to raw stick values in-place
+    void applyDeadzone();
+
+    // Check if item use button pressed this frame
+    bool isItemUse() const;
 
     u8 field_0x04[36];
     System::KPadRaceInputState currentInputState;

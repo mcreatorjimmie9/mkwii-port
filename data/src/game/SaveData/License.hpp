@@ -88,12 +88,29 @@ public:
     License();
     ~License();
 
+    // --- Init / Load / Save ---
+    // @addr 0x804F7000
+    void init();
+    // @addr 0x804F7020
+    u32 load(const u8* buffer, u32 bufferSize);
+    // @addr 0x804F7040
+    u32 save(u8* buffer, u32 bufferSize) const;
+
     // --- Identity ---
     void setName(const char* name);
     const char* getName() const { return mName; }
 
+    // @addr 0x804F7080
+    const char* getLicenseName() const { return mName; }
+    // @addr 0x804F70A0
+    void setLicenseName(const char* name) { setName(name); }
+
     void setMii(System::Mii* mii);
     System::Mii* getMii() { return mMiiData; }
+    // @addr 0x804F70C0
+    System::Mii* getMiiData() { return mMiiData; }
+    // @addr 0x804F70D0
+    void setMiiData(System::Mii* mii) { setMii(mii); }
 
     // --- Rating ---
     void setVR(u32 vr) { mVR = vr > MAX_VR ? MAX_VR : vr; }
@@ -133,6 +150,18 @@ public:
     LicenseStats* getStats() { return &mStats; }
     const LicenseStats* getStats() const { return &mStats; }
 
+    // --- Validation ---
+    // @addr 0x804F7100
+    bool isValid() const;
+    // @addr 0x804F7120
+    u32 getCreatedDate() const;
+
+    // --- Race count ---
+    // @addr 0x804F7140
+    u32 getTotalRaceCount() const;
+    // @addr 0x804F7160
+    void incrementRaceCount();
+
     void recordRaceFinish(u32 position);
     void recordGrandPrix(u32 overallPosition);
     void recordDisconnect();
@@ -154,6 +183,11 @@ public:
     bool isDirty() const { return mDirty; }
     void markClean() { mDirty = false; }
 
+    // --- Creation date ---
+    void setCreatedDate(u16 year, u8 month, u8 day) {
+        mCreatedYear = year; mCreatedMonth = month; mCreatedDay = day;
+    }
+
 private:
     char            mName[LICENSE_NAME_MAX + 1];
     System::Mii*    mMiiData;
@@ -166,4 +200,9 @@ private:
 
     LicenseStats    mStats;
     bool            mDirty;
+
+    // Creation date tracking
+    u16 mCreatedYear;
+    u8  mCreatedMonth;
+    u8  mCreatedDay;
 };

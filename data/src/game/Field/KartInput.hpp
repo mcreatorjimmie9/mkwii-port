@@ -103,6 +103,33 @@ public:
     // Trick input state
     s32 getTrickState() const { return mTrickState; } // 0=none, 1=up, 2=down, 3=left, 4=right
 
+    // ---- Surface / collision state (cached from KCL queries) ----
+
+    // Get the ground normal from the last KCL ray cast.
+    const EGG::Vector3f& getGroundNormal() const { return mGroundNormal; }
+
+    // Get the surface type index from KCL collision result.
+    u32 getSurfaceType() const { return mSurfaceType; }
+
+    // Get the KCL type attribute from the floor collision.
+    u32 getKCLType() const { return mKCLType; }
+
+    // Check if the kart is on a road surface.
+    bool isOnRoad() const { return mOnRoad; }
+
+    // Get the slope angle of the ground beneath the kart (radians).
+    f32 getSlopeAngle() const { return mSlopeAngle; }
+
+    // Apply a surface effect (e.g. off-road speed reduction) to acceleration.
+    void applySurfaceEffect(f32 effectMult);
+
+    // Check if the kart is on a boost panel and return boost value.
+    f32 checkBoostPanel() const { return mBoostPanelValue; }
+
+    // Get the KCL collision mask used for ray queries.
+    u32 getCollisionMask() const { return mCollisionMask; }
+    void setCollisionMask(u32 mask) { mCollisionMask = mask; }
+
 private:
     // Apply deadzone and rescale analog stick values
     /* KartInput_applyDeadzone @ 0x804C1500 */
@@ -149,6 +176,15 @@ private:
     // Trigger pressure [0.0, 1.0]
     f32 mTriggerL;           // 0x38: left trigger analog pressure
     f32 mTriggerR;           // 0x3C: right trigger analog pressure
+
+    // Cached surface/collision state
+    EGG::Vector3f mGroundNormal;  // Floor normal from KCL
+    u32 mSurfaceType;            // Surface type attribute
+    u32 mKCLType;                // KCL type code
+    bool mOnRoad;                // True when on a road surface
+    f32 mSlopeAngle;             // Ground slope angle (rad)
+    f32 mBoostPanelValue;        // Boost panel strength if on one
+    u32 mCollisionMask;          // KCL collision mask for queries
 };
 
 } // namespace Field

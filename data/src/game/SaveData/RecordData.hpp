@@ -50,6 +50,11 @@ class RecordData {
 public:
     RecordData();
 
+    // --- Init / Load / Save ---
+    void init();
+    u32 load(const u8* buffer, u32 bufferSize);
+    u32 save(u8* buffer, u32 bufferSize) const;
+
     // --- Best Times ---
     const System::Time& getBestTime() const { return mBestTime; }
     const System::Time& getBestLap() const { return mBestLap; }
@@ -79,10 +84,28 @@ public:
     const RecordMeta& getMeta() const { return mMeta; }
     RecordMeta& getMeta() { return mMeta; }
 
+    // --- Direct time access ---
+    // @addr 0x804F6A00
+    const System::Time& getTime() const { return mBestTime; }
+    // @addr 0x804F6A20
+    void setTime(const System::Time& t) { mBestTime = t; }
+
+    // --- Date access ---
+    // @addr 0x804F6A40
+    void getDate(u16* year, u8* month, u8* day) const;
+    // @addr 0x804F6A80
+    void setDate(u16 year, u8 month, u8 day);
+
+    // --- Personal best check ---
+    // @addr 0x804F6AC0
+    bool isPersonalBest() const;
+
     // --- Comparison ---
     // Returns <0 if this time is faster, 0 if equal, >0 if slower
     s32 compareRecord(const RecordData& other) const;
     s32 compareLapRecord(const RecordData& other) const;
+    // @addr 0x804F6B00
+    s32 compare(const System::Time& raceTime) const;
     bool operator==(const RecordData& other) const;
     bool operator!=(const RecordData& other) const { return !(*this == other); }
 

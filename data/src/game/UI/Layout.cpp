@@ -280,4 +280,151 @@ void Layout::setVisible(bool visible) {
     }
 }
 
+// --- Extended Layout methods ---
+
+// @addr 0x8050bb30 — Get the number of animations in this layout
+// Note: Also defined inline in Layout.hpp; this out-of-line version
+// provides the full implementation. Keep only one definition.
+// u32 Layout::getAnimationCount() const { ... } — moved inline
+
+// @addr 0x8050bd40 — Attach this layout to the scene for rendering
+void Layout::attachToScene() {
+    if (mLayoutData == 0) return;
+    mState = LAYOUT_STATE_ACTIVE;
+    mVisible = true;
+}
+
+// @addr 0x8050bd80 — Detach this layout from the scene
+void Layout::detachFromScene() {
+    mState = LAYOUT_STATE_TRANSITIONING_OUT;
+    mVisible = false;
+}
+
+// @addr 0x8050bdc0 — Find a pane by its user data tag
+PaneWrapper* Layout::findPaneByTag(u32 tag) {
+    (void)tag;
+    // In real impl: traverse pane tree, compare each pane's user data
+    return nullptr;
+}
+
+// @addr 0x8050be00 — Set the animation playback speed multiplier
+void Layout::setAnimSpeed(f32 speed) {
+    (void)speed;
+    // In real impl: set a global speed factor for all animations
+}
+
+// @addr 0x8050be40 — Get the current animation frame for a named animation
+f32 Layout::getAnimFrame(const char* animName) const {
+    if (mLayoutData == 0 || animName == nullptr) return 0.0f;
+    return 0.0f;
+}
+
+// @addr 0x8050be80 — Check if a specific animation is playing
+bool Layout::isAnimPlaying(const char* animName) const {
+    if (mLayoutData == 0 || animName == nullptr) return false;
+    return false;
+}
+
+// @addr 0x8050bec0 — Stop all animations in this layout
+void Layout::stopAllAnimations() {
+    if (mLayoutData == 0) return;
+}
+
+// @addr 0x8050bf00 — Set the user data tag for the root pane
+void Layout::setTag(u32 tag) {
+    mTag = tag;
+}
+
+// @addr 0x8050bf20 — Get the user data tag for the root pane
+u32 Layout::getTag() const {
+    return mTag;
+}
+
+// @addr 0x8050bf40 — Calculate the total memory used by this layout
+u32 Layout::calcMemoryUsage() const {
+    return mGroupCount * 128;
+}
+
+// @addr 0x8050bf80 — Get the name hash of this layout
+u32 Layout::getNameHash() const {
+    return 0;
+}
+
+// @addr 0x8050bfc0 — Count child panes of a specific type
+u32 Layout::countPanesOfType(u32 paneType) const {
+    (void)paneType;
+    if (mLayoutData == 0) return 0;
+    return 0;
+}
+
+// @addr 0x8050c000 — Get the layout's global alpha value
+u8 Layout::getAlpha() const {
+    return mGlobalAlpha;
+}
+
+// @addr 0x8050c020 — Check if the layout is visible
+bool Layout::isVisible() const {
+    return mVisible;
+}
+
+// @addr 0x8050c040 — Set the sub-tag value (used for display info)
+void Layout::setSubTag(u32 subTag) {
+    mSubTag = subTag;
+}
+
+// @addr 0x8050c060 — Get the sub-tag value
+u32 Layout::getSubTag() const {
+    return mSubTag;
+}
+
+// @addr 0x8050c080 — Get the layout's resource holder
+u32 Layout::getResourceHolder() const {
+    return mResourceHolder;
+}
+
+// @addr 0x8050c0a0 — Set the layout's resource holder
+void Layout::setResourceHolder(u32 holder) {
+    mResourceHolder = holder;
+}
+
+// @addr 0x8050c0c0 — Check if the layout has been initialized
+bool Layout::isInitialized() const {
+    return mInitFlag != 0;
+}
+
+// @addr 0x8050c0e0 — Set the layout's flags
+void Layout::setFlags(u8 flags) {
+    mFlags = flags;
+}
+
+// @addr 0x8050c100 — Get the layout's flags
+u8 Layout::getFlags() const {
+    return mFlags;
+}
+
+// @addr 0x8050c120 — Set the transition message ID
+void Layout::setTransitionId(u32 id) {
+    mTransitionId = id;
+}
+
+// @addr 0x8050c140 — Get the transition message ID
+u32 Layout::getTransitionId() const {
+    return mTransitionId;
+}
+
+// @addr 0x8050c160 — Set the cancel flag
+void Layout::setCancelFlag(u32 flag) {
+    mCancelFlag = flag;
+}
+
+// @addr 0x8050c180 — Get the cancel flag
+u32 Layout::getCancelFlag() const {
+    return mCancelFlag;
+}
+
+// @addr 0x8050c1a0 — Get the number of groups in the layout
+u32 Layout::getGroupCount() const {
+    return mGroupCount;
+}
+
 } // namespace UI

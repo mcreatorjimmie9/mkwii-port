@@ -126,6 +126,19 @@ public:
     // @addr 0x80579E40
     void resetVR(s32 newVR);
 
+    // --- Score management ---
+    void addScore(s32 score, VRContext context, u16 courseId, u8 position, u8 playerCount);
+    void removeScore(u32 index);
+    u32 getRank() const;
+    u32 getTotalPlayers() const;
+    void getTopN(u32 n, LeaderboardEntry* outEntries, u32* outCount) const;
+    void updateRankings();
+    void resetRankings();
+
+    // --- Persistence ---
+    void exportData(u8* buf, u32& outSize) const;
+    bool importData(const u8* buf, u32 size);
+
 private:
     static const u32 MAX_HISTORY = 200;
     static const u32 MAX_LEADERBOARD = 100;
@@ -156,5 +169,9 @@ private:
     f32 eloKFactor(VRContext context) const;
     s32 clampVR(s32 vr) const;
 };
+
+// Free function: Calculate new VR from a race result (standalone, no instance needed)
+s32 RankingSystem_calculateVR(s32 currentVR, s32 opponentAvgVR,
+                               s32 finishingPosition, u32 playerCount);
 
 } // namespace SaveData

@@ -69,6 +69,9 @@ public:
     // Initialize collision state, set default hitbox radii.
     void init();
 
+    // Per-frame update: refreshes hitbox positions from player state.
+    void update();
+
     // ========================================================================
     // Collision mask
     // ========================================================================
@@ -107,6 +110,9 @@ public:
                                   const EGG::Vector3f& minB,
                                   const EGG::Vector3f& maxB);
 
+    // Get the hitbox radius for a specific hitbox group.
+    f32 getHitboxRadius(u32 groupIdx) const;
+
 private:
     // Bitmask of item types this player can collide with
     u32 mCollisionMask;
@@ -120,6 +126,9 @@ private:
     // Hitbox group data (simplified — original uses external arrays)
     static const u32 MAX_HITBOX_GROUPS = 4;
     HitboxGroup mHitboxGroups[MAX_HITBOX_GROUPS];
+
+    // Cached player world position for per-frame collision checks
+    EGG::Vector3f mPlayerPos;
 };
 
 } // namespace Item

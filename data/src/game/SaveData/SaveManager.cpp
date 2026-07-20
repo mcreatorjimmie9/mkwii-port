@@ -228,7 +228,7 @@ s32 SaveManager::restoreBackup(const char* backupPath) {
 
 // --- Integrity ---
 
-SaveError SaveManager::verifyIntegrity(const u8* data, u32 size) {
+SaveError SaveManager::verifyIntegrity(const u8* data, u32 size) const {
     if (!data || size < sizeof(SaveHeader)) return SAVE_ERR_CORRUPT;
 
     SaveHeader header;
@@ -336,6 +336,232 @@ s32 SaveManager::nandWrite(s32 fd, const void* buffer, u32 size) {
 s32 SaveManager::nandClose(s32 fd) {
     (void)fd;
     return -1; // ISFS_Close
+}
+
+// ============================================================================
+// init() — Initialize the save manager
+// @addr 0x804F8000
+// ============================================================================
+
+s32 SaveManager::init() {
+    mMounted = false;
+    mSavePath[0] = '\0';
+    return mount();
+}
+
+// ============================================================================
+// mountSave() — Mount the Wii NAND save filesystem
+// @addr 0x804F8020
+//
+// On Wii: calls ISFS_Mount() for the title's NAND directory.
+// On PC:  delegates to mount() which sets up the file path.
+// ============================================================================
+
+s32 SaveManager::mountSave() {
+    if (mMounted) return SAVE_OK;
+    return mount();
+}
+
+// ============================================================================
+// unmountSave() — Unmount the save filesystem
+// @addr 0x804F8040
+//
+// On Wii: calls ISFS_Unmount(). On PC: marks as unmounted.
+// ============================================================================
+
+s32 SaveManager::unmountSave() {
+    if (!mMounted) return SAVE_ERR_IO;
+    mMounted = false;
+    return SAVE_OK;
+}
+
+// ============================================================================
+// readBlock() — Read a specific block from the save file
+// @addr 0x804F8060
+//
+// The Wii NAND is organized in 8KB blocks. This reads a specific
+// block by seeking to the appropriate offset.
+// ============================================================================
+
+s32 SaveManager::readBlock(u32 blockIndex, u8* outBuffer, u32 blockSize) {
+    if (!mMounted) return SAVE_ERR_IO;
+    if (outBuffer == nullptr) return SAVE_ERR_INVALID_PARAM;
+
+    // Calculate byte offset from block index (8KB blocks on Wii NAND)
+    u32 offset = blockIndex * 0x2000;
+    u32 endOffset = offset + blockSize;
+
+    if (endOffset > SAVE_FILE_SIZE_LOCAL) return SAVE_ERR_TOO_LARGE;
+
+    // Read the full save file and extract the block
+    u8* fullBuffer = nullptr;
+    u32 fullSize = 0;
+    s32 result = readSave(&fullBuffer, &fullSize);
+    if (result != SAVE_OK) return result;
+
+    if (offset >= fullSize || endOffset > fullSize) {
+        delete[] fullBuffer;
+        return SAVE_ERR_CORRUPT;
+    }
+
+    memcpy(outBuffer, fullBuffer + offset, blockSize);
+    delete[] fullBuffer;
+    return SAVE_OK;
+}
+
+// ============================================================================
+// writeBlock() — Write a specific block to the save file
+// @addr 0x804F8080
+//
+// Reads the full save, patches the block, and writes back.
+// ============================================================================
+
+s32 SaveManager::writeBlock(u32 blockIndex, const u8* data, u32 blockSize) {
+    if (!mMounted) return SAVE_ERR_IO;
+    if (data == nullptr) return SAVE_ERR_INVALID_PARAM;
+
+    u32 offset = blockIndex * 0x2000;
+    u32 endOffset = offset + blockSize;
+
+    if (endOffset > SAVE_FILE_SIZE_LOCAL) return SAVE_ERR_TOO_LARGE;
+
+    // Read the full save file
+    u8* fullBuffer = nullptr;
+    u32 fullSize = 0;
+    s32 result = readSave(&fullBuffer, &fullSize);
+    if (result != SAVE_OK) return result;
+
+    // If save is smaller than needed, reject
+    if (endOffset > fullSize) {
+        delete[] fullBuffer;
+        return SAVE_ERR_CORRUPT;
+    }
+
+    // Patch the block
+    memcpy(fullBuffer + offset, data, blockSize);
+
+    // Write back
+    result = writeSave(fullBuffer, fullSize);
+    delete[] fullBuffer;
+    return result;
+}
+
+// ============================================================================
+// getFreeBlocks() — Get the number of free blocks in the save file
+// @addr 0x804F80A0
+//
+// On Wii NAND, the save area is 128KB (0x20000 bytes) divided into
+// 8KB blocks. Returns the count of blocks not yet used.
+// ============================================================================
+
+s32 SaveManager::getFreeBlocks() const {
+    if (!mMounted) return 0;
+
+    // Read file info
+    SaveFileInfo info;
+    // Cast away const for getFileInfo (it only reads)
+    SaveManager* self = const_cast<SaveManager*>(this);
+    s32 result = self->getFileInfo(&info);
+    if (result != SAVE_OK) return 0;
+
+    // Calculate free blocks
+    u32 totalBlocks = SAVE_FILE_SIZE_LOCAL / 0x2000;
+    u32 usedBlocks = (info.size + 0x1FFF) / 0x2000;
+    if (usedBlocks > totalBlocks) usedBlocks = totalBlocks;
+
+    return (s32)(totalBlocks - usedBlocks);
+}
+
+// ============================================================================
+// getSaveSize() — Get the current save file size
+// @addr 0x804F80C0
+// ============================================================================
+
+u32 SaveManager::getSaveSize() const {
+    if (!mMounted) return 0;
+
+    SaveFileInfo info;
+    SaveManager* self = const_cast<SaveManager*>(this);
+    s32 result = self->getFileInfo(&info);
+    if (result != SAVE_OK) return 0;
+
+    return info.size;
+}
+
+// ============================================================================
+// checkCorruption() — Check if the save file is corrupted
+// @addr 0x804F80E0
+//
+// Reads the save file and verifies integrity. Returns true if corrupted.
+// ============================================================================
+
+bool SaveManager::checkCorruption() const {
+    if (!mMounted) return true; // unmounted = effectively corrupted
+
+    u8* buffer = nullptr;
+    u32 size = 0;
+    SaveManager* self = const_cast<SaveManager*>(this);
+    s32 result = self->readSave(&buffer, &size);
+    if (result != SAVE_OK) return true;
+
+    SaveError integrity = verifyIntegrity(buffer, size);
+    delete[] buffer;
+
+    return integrity != SAVE_OK;
+}
+
+// ============================================================================
+// repairSave() — Attempt to repair a corrupted save file
+// @addr 0x804F8100
+//
+// Strategy:
+//   1. Try to read the existing save
+//   2. If readable but checksum mismatch, recalculate checksum
+//   3. If unreadable, create a new default save
+// ============================================================================
+
+s32 SaveManager::repairSave() {
+    if (!mMounted) return SAVE_ERR_IO;
+
+    u8* buffer = nullptr;
+    u32 size = 0;
+    s32 result = readSave(&buffer, &size);
+
+    if (result != SAVE_OK) {
+        // File is unreadable — create a new default
+        return createSaveFile();
+    }
+
+    // Check if the header is at least readable
+    if (size >= sizeof(SaveHeader)) {
+        SaveHeader header;
+        memcpy(&header, buffer, sizeof(SaveHeader));
+
+        if (header.magic == SAVE_MAGIC_LOCAL) {
+            // Magic is OK but checksum may be wrong — recalculate
+            u32 newCrc = calculateCRC32(buffer + sizeof(u32), size - sizeof(u32));
+            header.checksum = newCrc;
+            memcpy(buffer, &header, sizeof(SaveHeader));
+
+            result = writeSave(buffer, size);
+            delete[] buffer;
+            return result;
+        }
+    }
+
+    // Magic is wrong — file is too corrupted, recreate
+    delete[] buffer;
+    deleteSaveFile();
+    return createSaveFile();
+}
+
+// ============================================================================
+// SaveManager_getInstance() — Free function returning the singleton
+// @addr 0x804F8120
+// ============================================================================
+
+Save::SaveManager& SaveManager_getInstance() {
+    return Save::SaveManager::getInstance();
 }
 
 } // namespace Save

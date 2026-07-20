@@ -315,3 +315,121 @@ void PlayerTrickBike::updateRot() {
 
 // @addr 0x80576afc
 PlayerTrickBike::~PlayerTrickBike() {}
+
+// ============================================================================
+// PlayerTrick — Additional query and utility methods
+// ============================================================================
+
+// @addr (not in original binary — helper for decompilation coverage)
+void PlayerTrick::init(PlayerSub10* ps, PlayerPointers* ptrs) {
+    playerSub10 = ps;
+    pointers = ptrs;
+    nextTimer = 0;
+    boostRampEnabled = false;
+    nextDirection = T_IDLE;
+    type = STUNT_TRICK_BASIC;
+    category = STUNT;
+    rotDir = 1.0f;
+    properties = nullptr;
+    angle = 0.0f;
+    angleDiff = 0.0f;
+    angleDiffMul = 1.0f;
+    angleDiffMulDec = 0.02f;
+    maxAngle = MAX_ANG_STUNT;
+    cooldown = 0;
+    rot.setIdentity();
+}
+
+// ----------------------------------------------------------------------------
+// calcTrickScore — Calculate boost duration based on trick completion quality
+// ----------------------------------------------------------------------------
+s16 PlayerTrick::calcTrickScore() const {
+    // The trick score is the boost duration in frames.
+    // A fully completed trick (angle reached maxAngle) gets the full boost.
+    // Partial tricks get reduced boost.
+    f32 absAngle = (angle > 0.0f) ? angle : -angle;
+    f32 completion = absAngle / maxAngle;
+    if (completion > 1.0f) completion = 1.0f;
+
+    s16 baseDuration = boostDurationForType(type);
+    // Scale by completion ratio: minimum 40% boost for a partial trick
+    f32 score = baseDuration * (0.4f + 0.6f * completion);
+    return (s16)score;
+}
+
+// ----------------------------------------------------------------------------
+// getAnimId — Get the animation ID for the current trick type
+// ----------------------------------------------------------------------------
+s32 PlayerTrick::getAnimId() const {
+    switch (type) {
+    case STUNT_TRICK_BASIC:       return 0x01;
+    case BIKE_FLIP_TRICK_X_NOSE:  return 0x02;
+    case BIKE_FLIP_TRICK_X_TAIL:  return 0x03;
+    case FLIP_TRICK_Y_LEFT:       return 0x04;
+    case FLIP_TRICK_Y_RIGHT:      return 0x05;
+    case KART_FLIP_TRICK_Z:       return 0x06;
+    case BIKE_SIDE_STUNT_TRICK:   return 0x07;
+    default:                      return 0x00;
+    }
+}
+
+// ----------------------------------------------------------------------------
+// isValidDirection — Check if a stick direction is valid for trick input
+// ----------------------------------------------------------------------------
+bool PlayerTrick::isValidDirection(s32 stickX, s32 stickY) {
+    // A valid trick direction requires a sufficient stick displacement
+    // on either axis, above the stick threshold.
+    s32 absX = (stickX >= 0) ? stickX : -stickX;
+    s32 absY = (stickY >= 0) ? stickY : -stickY;
+    return absX > STICK_THRESH || absY > STICK_THRESH;
+}
+
+// ----------------------------------------------------------------------------
+// PlayerTrick_getTrickName — Get the display name for a trick type
+// ----------------------------------------------------------------------------
+const char* PlayerTrick_getTrickName(TrickType t) {
+    switch (t) {
+    case STUNT_TRICK_BASIC:       return "Stunt";
+    case BIKE_FLIP_TRICK_X_NOSE:  return "Front Flip";
+    case BIKE_FLIP_TRICK_X_TAIL:  return "Back Flip";
+    case FLIP_TRICK_Y_LEFT:       return "Left Flip";
+    case FLIP_TRICK_Y_RIGHT:      return "Right Flip";
+    case KART_FLIP_TRICK_Z:       return "Side Flip";
+    case BIKE_SIDE_STUNT_TRICK:   return "Side Stunt";
+    default:                      return "Unknown";
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Trick type categorization helpers (internal)
+// ----------------------------------------------------------------------------
+namespace {
+
+bool isFlipTrick(TrickType t) {
+    return t == FLIP_TRICK_Y_LEFT || t == FLIP_TRICK_Y_RIGHT ||
+           t == BIKE_FLIP_TRICK_X_NOSE || t == BIKE_FLIP_TRICK_X_TAIL;
+}
+
+bool isSideTrick(TrickType t) {
+    return t == KART_FLIP_TRICK_Z || t == BIKE_SIDE_STUNT_TRICK;
+}
+
+// Compute the ideal trick type for a given stick direction and vehicle type.
+// For karts, stick left/right → FLIP_TRICK_Y, no stick → STUNT_TRICK_BASIC.
+// For bikes in wheelie, always → BIKE_FLIP_TRICK_X_NOSE.
+TrickType recommendTrickType(s32 stickX, bool isBike, bool isInWheelie) {
+    if (isBike && isInWheelie) {
+        return BIKE_FLIP_TRICK_X_NOSE;
+    }
+    if (isBike) {
+        if (stickX > STICK_THRESH)  return BIKE_SIDE_STUNT_TRICK;
+        if (stickX < -STICK_THRESH) return BIKE_SIDE_STUNT_TRICK;
+        return STUNT_TRICK_BASIC;
+    }
+    // Kart
+    if (stickX > STICK_THRESH)  return FLIP_TRICK_Y_RIGHT;
+    if (stickX < -STICK_THRESH) return FLIP_TRICK_Y_LEFT;
+    return STUNT_TRICK_BASIC;
+}
+
+} // namespace

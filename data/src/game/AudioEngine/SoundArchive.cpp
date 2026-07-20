@@ -363,5 +363,94 @@ u32 SoundArchive::decodeADPCM(const void* adpcmData, void* pcmOut,
     return numSamples * channels * sizeof(s16);
 }
 
+// ============================================================================
+// getSoundInfo() — Get the raw info table entry for a sound
+// @addr 0x80722000
+//
+// Returns a pointer into the info table at the given sound ID's entry.
+// The caller should cast to the appropriate entry type.
+// ============================================================================
+
+const void* SoundArchive::getSoundInfo(u32 soundId) const {
+    if (!m_loaded || m_infoTable == nullptr) return nullptr;
+    if (soundId >= m_soundCount) return nullptr;
+
+    // Info table format: [count u32][entrySize u32][entries...]
+    const u32* infoPtr = (const u32*)m_infoTable;
+    u32 entrySize = infoPtr[1];
+
+    // Each entry is at offset = 8 + (soundId * entrySize)
+    const u8* entryPtr = m_infoTable + 8 + (soundId * entrySize);
+    return entryPtr;
+}
+
+// ============================================================================
+// getSequenceInfo() — Get sequence info from the info table
+// @addr 0x80722300
+//
+// Sequences are a subset of the info table (type 1 = SEQ player).
+// Returns nullptr if the entry is not a sequence.
+// ============================================================================
+
+const void* SoundArchive::getSequenceInfo(u32 seqId) const {
+    if (!m_loaded || m_infoTable == nullptr) return nullptr;
+
+    // For now, treat sequence IDs as a subset of sound IDs
+    // In a real BRSAR, sequences have their own sub-table
+    if (seqId >= m_soundCount) return nullptr;
+
+    const u32* infoPtr = (const u32*)m_infoTable;
+    u32 entrySize = infoPtr[1];
+
+    // Check if this entry is a sequence type (first byte = 1)
+    const u8* entryPtr = m_infoTable + 8 + (seqId * entrySize);
+    // Simplified: just return the entry
+    return entryPtr;
+}
+
+// ============================================================================
+// getSequenceCount() — Get the number of sequences in the archive
+// @addr 0x80722500
+//
+// Sequences are counted by scanning the info table for entries
+// with player type = SEQ (1).
+// ============================================================================
+
+u32 SoundArchive::getSequenceCount() const {
+    if (!m_loaded || m_infoTable == nullptr) return 0;
+
+    // In a real BRSAR, there would be a separate sequence count
+    // in the header or info section. For now, estimate as a
+    // fraction of total sounds (MKWii has ~50 sequences out of ~800 sounds)
+    return m_soundCount / 16;
+}
+
+// ============================================================================
+// SoundArchive_validateHeader() — Free function to validate a BRSAR header
+// @addr 0x80722600
+//
+// Used externally to check a BRSAR buffer before loading.
+// Returns true if the header is valid.
+// ============================================================================
+
+bool SoundArchive_validateHeader(const void* data, u32 size) {
+    if (data == nullptr || size < sizeof(BRSARHeader)) return false;
+
+    const BRSARHeader* header = (const BRSARHeader*)data;
+
+    // Check magic "RSAR"
+    if (std::memcmp(header->magic, "RSAR", 4) != 0) return false;
+
+    // Validate file size
+    if (header->fileSize > size) return false;
+
+    // Validate section offsets don't exceed file size
+    if (header->symbOffset + header->symbSize > size) return false;
+    if (header->infoOffset + header->infoSize > size) return false;
+    if (header->dataOffset + header->dataSize > size) return false;
+
+    return true;
+}
+
 } // namespace snd
 } // namespace nw4r

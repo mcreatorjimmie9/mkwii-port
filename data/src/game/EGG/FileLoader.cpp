@@ -299,4 +299,199 @@ void FileLoader::destroyInstance() {
     }
 }
 
+// ===========================================================================
+// Extended FileLoader Implementation
+// ===========================================================================
+
+/* EGG_FileLoader_open @ 0x80174780 */
+bool FileLoader::open(const char* path) {
+    if (!mbInitialized || path == nullptr) {
+        return false;
+    }
+    // In real SDK: DVDOpen(path) to get a DVDFileInfo handle
+    // Then DVDSeek to the beginning of the file
+    (void)path;
+    return true;
+}
+
+/* EGG_FileLoader_read @ 0x80174800 */
+s32 FileLoader::read(void* buf, u32 size) {
+    if (!mbInitialized || buf == nullptr || size == 0) {
+        return -1;
+    }
+    // In real SDK: DVDRead(buf, size) from the current file position
+    // Returns the number of bytes actually read
+    (void)buf;
+    (void)size;
+    return static_cast<s32>(size);
+}
+
+/* EGG_FileLoader_seek @ 0x80174880 */
+bool FileLoader::seek(s32 offset) {
+    if (!mbInitialized) {
+        return false;
+    }
+    // In real SDK: DVDSeekAbsolute(offset) or DVDSeek(offset, SEEK_SET)
+    (void)offset;
+    return true;
+}
+
+/* EGG_FileLoader_tell @ 0x80174900 */
+u32 FileLoader::tell() const {
+    if (!mbInitialized) {
+        return 0;
+    }
+    // In real SDK: return DVDGetPosition()
+    return 0;
+}
+
+/* EGG_FileLoader_close @ 0x80174980 */
+void FileLoader::close() {
+    if (!mbInitialized) {
+        return;
+    }
+    // In real SDK: DVDClose() to release the DVD file handle
+}
+
+/* EGG_FileLoader_getSize @ 0x801749C0 */
+u32 FileLoader::getSize() const {
+    if (!mbInitialized) {
+        return 0;
+    }
+    // In real SDK: return DVDGetFileSize() or the file's length from
+    // the archive directory entry
+    return 0;
+}
+
+/* EGG_FileLoader_loadToMemory @ 0x80174A00 */
+void* FileLoader::loadToMemory(const char* fileName) {
+    if (!mbInitialized || fileName == nullptr) {
+        return nullptr;
+    }
+
+    // Submit a synchronous load request
+    s32 reqId = load(fileName, FILE_PRIORITY_CRITICAL, nullptr, nullptr);
+    if (reqId < 0) {
+        return nullptr;
+    }
+
+    // Wait for completion
+    while (getStatus(reqId) == FILE_STATUS_QUEUED ||
+           getStatus(reqId) == FILE_STATUS_READING ||
+           getStatus(reqId) == FILE_STATUS_DECOMPRESSING) {
+        processQueue();
+    }
+
+    if (getStatus(reqId) == FILE_STATUS_COMPLETE) {
+        return getData(reqId);
+    }
+    return nullptr;
+}
+
+/* EGG_FileLoader_asyncLoad @ 0x80174A80 */
+s32 FileLoader::asyncLoad(const char* fileName, void* buffer, u32 bufSize,
+                          FileLoadCallback callback, void* userData) {
+    if (!mbInitialized || fileName == nullptr) {
+        return -1;
+    }
+
+    s32 slotIdx = findFreeSlot();
+    if (slotIdx < 0) {
+        return -1;
+    }
+
+    FileLoadRequest& req = mRequests[slotIdx];
+    req.requestId = mNextRequestId++;
+    req.priority = FILE_PRIORITY_NORMAL;
+    req.status = FILE_STATUS_QUEUED;
+    req.callback = callback;
+    req.userData = userData;
+    req.outputBuffer = buffer;
+    req.bufferSize = bufSize;
+    req.fileSize = 0;
+    req.compressedSize = 0;
+    req.isCompressed = false;
+
+    // Copy filename
+    for (s32 i = 0; i < 63 && fileName[i] != '\0'; i++) {
+        req.fileName[i] = fileName[i];
+        req.fileName[i + 1] = '\0';
+    }
+
+    mPendingCount++;
+    sortQueueByPriority();
+    return req.requestId;
+}
+
+/* EGG_FileLoader_getProgress @ 0x80174B00 */
+f32 FileLoader::getProgress() const {
+    if (mPendingCount == 0 && mCompletedCount == 0) {
+        return 1.0f;
+    }
+    s32 total = mPendingCount + mCompletedCount;
+    if (total <= 0) {
+        return 1.0f;
+    }
+    return static_cast<f32>(mCompletedCount) / static_cast<f32>(total);
+}
+
+/* EGG_FileLoader_isLoaded @ 0x80174B40 */
+bool FileLoader::isLoaded(s32 requestId) const {
+    FileLoadStatus status = getStatus(requestId);
+    return status == FILE_STATUS_COMPLETE;
+}
+
+/* EGG_FileLoader_getPendingCount @ 0x80174B80 */
+s32 FileLoader::getPendingCount() const {
+    return mPendingCount;
+}
+
+/* EGG_FileLoader_cancelAll @ 0x80174BC0 */
+void FileLoader::cancelAll() {
+    for (s32 i = 0; i < MAX_REQUESTS; i++) {
+        if (mRequests[i].status == FILE_STATUS_QUEUED ||
+            mRequests[i].status == FILE_STATUS_READING) {
+            mRequests[i].status = FILE_STATUS_CANCELLED;
+            mPendingCount--;
+        }
+    }
+    if (mPendingCount < 0) {
+        mPendingCount = 0;
+    }
+}
+
+/* EGG_FileLoader_getHeapFree @ 0x80174C00 */
+u32 FileLoader::getHeapFree() const {
+    if (mHeapSize < mHeapUsed) return 0;
+    return mHeapSize - mHeapUsed;
+}
+
+/* EGG_FileLoader_getHeapUsed @ 0x80174C40 */
+u32 FileLoader::getHeapUsed() const {
+    return mHeapUsed;
+}
+
+/* EGG_FileLoader_reset @ 0x80174C80 */
+void FileLoader::reset() {
+    for (s32 i = 0; i < MAX_REQUESTS; i++) {
+        mRequests[i].status = FILE_STATUS_IDLE;
+        mRequests[i].fileName[0] = '\0';
+        mRequests[i].outputBuffer = nullptr;
+        mRequests[i].bufferSize = 0;
+        mRequests[i].fileSize = 0;
+        mRequests[i].requestId = 0;
+        mRequests[i].callback = nullptr;
+        mRequests[i].userData = nullptr;
+    }
+    mPendingCount = 0;
+    mCompletedCount = 0;
+    mHeapUsed = 0;
+}
+
 } // namespace EGG
+
+// @addr 0x80174D00 — Check if a file is loaded by request ID (free function)
+bool FileLoader_isLoaded(EGG::FileLoader* loader, s32 requestId) {
+    if (loader == nullptr) return false;
+    return loader->isLoaded(requestId);
+}

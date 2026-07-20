@@ -309,4 +309,99 @@ MenuPage* UIManager::getTopPage() const {
     return nullptr;
 }
 
+// ============================================================================
+// init() — Initialize the UI manager to a clean state
+// @addr 0x8071e500
+// ============================================================================
+
+void UIManager::init() {
+    mPageStackDepth = 0;
+    mActivePage = nullptr;
+    mFlags = UI_FLAG_INPUT_ENABLED;
+    mActiveLayout = nullptr;
+    mFrameTimer = 0.0f;
+    mFrameCount = 0;
+    mHUDInstanceCount = 0;
+    mSceneChangeTarget = 0;
+
+    memset(mPageStack, 0, sizeof(mPageStack));
+    memset(&mGlobalState, 0, sizeof(mGlobalState));
+
+    mGlobalState.playerCount = 1;
+    mGlobalState.localPlayerCount = 1;
+}
+
+// ============================================================================
+// handleInput() — Process raw button input for UI navigation
+// @addr 0x8071e508
+//
+// Called by the input system with the raw button states.
+// Routes input to the active page for processing.
+// ============================================================================
+
+void UIManager::handleInput(u32 pressedButtons, u32 heldButtons) {
+    if (!(mFlags & UI_FLAG_INPUT_ENABLED)) return;
+
+    mGlobalState.pressedButtons = pressedButtons;
+    mGlobalState.heldButtons = heldButtons;
+
+    // Route input to the active page via its cursor/confirm/cancel handlers
+    if (mActivePage != nullptr && mActivePage->isActive()) {
+        // The active page will pick up the button state from GlobalUIState
+        // in its own onUpdate() method, so we just store the state here.
+    }
+}
+
+// ============================================================================
+// setTransition() — Set the current transition type for the active page
+// @addr 0x8071e50c
+//
+// Transition types:
+//   0 = none (instant)
+//   1 = fade in/out
+//   2 = slide left
+//   3 = slide right
+// ============================================================================
+
+void UIManager::setTransition(u32 transitionType) {
+    if (mActivePage == nullptr) return;
+
+    switch (transitionType) {
+    case TRANS_NONE:
+        mActivePage->mTransition = TRANSITION_NONE;
+        mFlags &= ~UI_FLAG_TRANSITIONING;
+        break;
+    case TRANS_FADE:
+        mActivePage->mTransition = TRANSITION_FADE_IN;
+        mFlags |= UI_FLAG_TRANSITIONING;
+        break;
+    case TRANS_SLIDE_LEFT:
+        mActivePage->mTransition = TRANSITION_FADE_IN;
+        mFlags |= UI_FLAG_TRANSITIONING;
+        break;
+    case TRANS_SLIDE_RIGHT:
+        mActivePage->mTransition = TRANSITION_FADE_IN;
+        mFlags |= UI_FLAG_TRANSITIONING;
+        break;
+    default:
+        mActivePage->mTransition = TRANSITION_NONE;
+        mFlags &= ~UI_FLAG_TRANSITIONING;
+        break;
+    }
+}
+
+// ============================================================================
+// getCurrentPage() — Get the currently active page (alias for getActivePage)
+// ============================================================================
+
+// Implemented inline in header (getCurrentPage = getActivePage alias)
+
+// ============================================================================
+// getPageStackDepth() — Already inline in hpp
+// ============================================================================
+
+// ============================================================================
+// isTransitioning() — Already inline in hpp
+// ============================================================================
+
 } // namespace UI

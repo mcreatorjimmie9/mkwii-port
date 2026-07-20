@@ -10,6 +10,8 @@
 #include "rk_common.h"
 #include <EGG/math.h>
 
+typedef EGG::Vector3f Vec3;
+
 namespace Scene {
 
 // Forward declarations
@@ -76,10 +78,10 @@ public:
     u16 getAnimationFrame(u32 objectId) const;
 
     // Position / transform helpers (from 0x805b18fc, 0x805b1db4)
-    void setTransform(u32 objectId, const Vec3& position, const Vec3& rotation,
-                      const Vec3& scale);
-    void getTransform(u32 objectId, Vec3& position, Vec3& rotation,
-                      Vec3& scale) const;
+    void setTransform(u32 objectId, const EGG::Vector3f& position, const EGG::Vector3f& rotation,
+                      const EGG::Vector3f& scale);
+    void getTransform(u32 objectId, EGG::Vector3f& position, EGG::Vector3f& rotation,
+                      EGG::Vector3f& scale) const;
 
     // Color management (from 0x805b0c64, 0x805b0da0 — alpha fade)
     void startColorFade(u32 objectId, u8 alpha, u8 delay);
@@ -87,12 +89,48 @@ public:
     void setColor(u32 objectId, u8 r, u8 g, u8 b, u8 a);
 
     // Resource loading (from 0x805b3a08, 0x805b3a90 — transform calc)
-    void calculateWorldTransform(const Vec3& pos, const Vec3& scale,
-                                 Vec3* outWorldPos);
+    void calculateWorldTransform(const EGG::Vector3f& pos, const EGG::Vector3f& scale,
+                                 EGG::Vector3f* outWorldPos);
 
     // Per-object update/draw
     void updateObject(u32 index, f32 dt);
     void drawObject(u32 index) const;
+
+    // Extended API
+    // @addr 0x805b3a90
+    u32 createObject(u32 typeId);
+    // @addr 0x805b3ac0
+    bool destroyObjectByInstance(void* instance);
+    // @addr 0x805b3b00
+    void* findObjectByType(u32 typeId) const;
+    // @addr 0x805b3b40
+    void pauseAll();
+    // @addr 0x805b3b80
+    void resumeAll();
+    // @addr 0x805b3bc0
+    void sortByDistance(const EGG::Vector3f& reference);
+    // @addr 0x805b3c80
+    void getPosition(u32 objectId, EGG::Vector3f& outPos) const;
+    // @addr 0x805b3cc0
+    void setPosition(u32 objectId, const EGG::Vector3f& pos);
+    // @addr 0x805b3d00
+    void getScale(u32 objectId, EGG::Vector3f& outScale) const;
+    // @addr 0x805b3d40
+    void setScale(u32 objectId, const EGG::Vector3f& scale);
+    // @addr 0x805b3d80
+    u32 getTypeId(u32 objectId) const;
+    // @addr 0x805b3dc0
+    u32 getGroupId(u32 objectId) const;
+    // @addr 0x805b3e00
+    void getColor(u32 objectId, u8& r, u8& g, u8& b, u8& a) const;
+    // @addr 0x805b3e40
+    bool isFading(u32 objectId) const;
+    // @addr 0x805b3e80
+    u32 getObjectsInRange(const EGG::Vector3f& center, f32 radius) const;
+    // @addr 0x805b3f00
+    u32 destroyGroup(u32 groupId);
+    // @addr 0x805b3f40
+    bool hasActiveFades() const;
 
 private:
     // Object entry stored in the pool
@@ -101,9 +139,9 @@ private:
         u32 typeId;            // Object type identifier
         u16 animationFrame;    // Current animation frame
         u16 flags;             // Visibility and state flags
-        Vec3 position;
-        Vec3 rotation;
-        Vec3 scale;
+        EGG::Vector3f position;
+        EGG::Vector3f rotation;
+        EGG::Vector3f scale;
         u8 colorR, colorG, colorB, colorA;
         u8 fadeState;          // 0 = none, 1 = fading out, 2 = fading in
         u16 fadeTimer;
@@ -121,3 +159,6 @@ private:
 };
 
 } // namespace Scene
+
+// @addr 0x805b3f80
+void ObjectDirector_sortByDistance(Scene::ObjectDirector* director, const Vec3& ref);

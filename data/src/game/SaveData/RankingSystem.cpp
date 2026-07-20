@@ -322,4 +322,210 @@ s32 RankingSystem::clampVR(s32 vr) const {
     return vr;
 }
 
+// ============================================================================
+// Score Management
+// ============================================================================
+
+// @addr 0x8057A000
+void RankingSystem::addScore(s32 score, VRContext context,
+                              u16 courseId, u8 position, u8 playerCount) {
+    // Calculate the VR change based on the score/performance
+    s32 change = calculateVRChange(mCurrentVR, score, (s32)position,
+                                    playerCount, context);
+    applyVRChange(change, context, courseId, position, playerCount);
+}
+
+// @addr 0x8057A200
+void RankingSystem::removeScore(u32 index) {
+    if (index >= mHistoryCount) {
+        return;
+    }
+
+    // Reverse the VR change from the removed entry
+    s32 change = -mHistory[index].changeAmount;
+    mCurrentVR = clampVR(mCurrentVR + change);
+
+    // Shift remaining entries
+    for (u32 i = index; i < mHistoryCount - 1; i++) {
+        mHistory[i] = mHistory[i + 1];
+    }
+    mHistoryCount--;
+
+    // Clear the vacated slot
+    memset(&mHistory[mHistoryCount], 0, sizeof(VRChangeRecord));
+
+    // Update stats
+    if (mTotalRaces > 0) {
+        mTotalRaces--;
+        // Note: we can't perfectly reverse win/loss count, so approximate
+        if (mTotalLosses > 0) {
+            mTotalLosses--;
+        }
+    }
+}
+
+// @addr 0x8057A400
+u32 RankingSystem::getRank() const {
+    // The player's rank among all leaderboard entries.
+    // Linear scan; returns 1-based rank.
+    u32 rank = 1;
+    for (u32 i = 0; i < mLeaderboardCount; i++) {
+        if (mLeaderboard[i].vr > mCurrentVR) {
+            rank++;
+        }
+    }
+    return rank;
+}
+
+// @addr 0x8057A500
+u32 RankingSystem::getTotalPlayers() const {
+    return mLeaderboardCount + 1; // +1 for the local player
+}
+
+// @addr 0x8057A600
+void RankingSystem::getTopN(u32 n, LeaderboardEntry* outEntries,
+                              u32* outCount) const {
+    u32 count = (n > mLeaderboardCount) ? mLeaderboardCount : n;
+    *outCount = count;
+
+    // Copy the top N entries (leaderboard is pre-sorted)
+    for (u32 i = 0; i < count; i++) {
+        outEntries[i] = mLeaderboard[i];
+    }
+}
+
+// @addr 0x8057A800
+void RankingSystem::updateRankings() {
+    // Add the local player as a leaderboard entry and re-sort
+    LeaderboardEntry localEntry;
+    memset(&localEntry, 0, sizeof(localEntry));
+    localEntry.vr = mCurrentVR;
+    localEntry.totalRaces = mTotalRaces;
+    localEntry.totalWins = mTotalWins;
+    localEntry.winRate = getWinRate();
+    localEntry.tier = getTier(mCurrentVR);
+
+    updateLeaderboardEntry(localEntry);
+    sortLeaderboard();
+}
+
+// @addr 0x8057AA00
+void RankingSystem::resetRankings() {
+    mLeaderboardCount = 0;
+    memset(mLeaderboard, 0, sizeof(mLeaderboard));
+}
+
+// ============================================================================
+// Persistence
+// ============================================================================
+
+// @addr 0x8057AC00
+void RankingSystem::exportData(u8* buf, u32& outSize) const {
+    outSize = 0;
+
+    // Header: VR values (4 × s32 = 16 bytes)
+    memcpy(buf, &mCurrentVR, 4);
+    memcpy(buf + 4, &mPeakVR, 4);
+    memcpy(buf + 8, &mLowestVR, 4);
+    memcpy(buf + 12, &mTotalRaces, 4);
+    outSize += 16;
+
+    // Stats: wins, losses (2 × u32 = 8 bytes)
+    memcpy(buf + outSize, &mTotalWins, 4);
+    memcpy(buf + outSize + 4, &mTotalLosses, 4);
+    outSize += 8;
+
+    // History count (u32 = 4 bytes)
+    memcpy(buf + outSize, &mHistoryCount, 4);
+    outSize += 4;
+
+    // History entries (each VRChangeRecord = ~24 bytes)
+    u32 historyBytes = mHistoryCount * sizeof(VRChangeRecord);
+    if (historyBytes > 0) {
+        memcpy(buf + outSize, mHistory, historyBytes);
+        outSize += historyBytes;
+    }
+}
+
+// @addr 0x8057AE00
+bool RankingSystem::importData(const u8* buf, u32 size) {
+    u32 offset = 0;
+
+    // Minimum size check: header (16) + stats (8) + count (4) = 28 bytes
+    if (size < 28) {
+        return false;
+    }
+
+    // Read header
+    memcpy(&mCurrentVR, buf + offset, 4); offset += 4;
+    memcpy(&mPeakVR, buf + offset, 4); offset += 4;
+    memcpy(&mLowestVR, buf + offset, 4); offset += 4;
+    memcpy(&mTotalRaces, buf + offset, 4); offset += 4;
+
+    // Read stats
+    memcpy(&mTotalWins, buf + offset, 4); offset += 4;
+    memcpy(&mTotalLosses, buf + offset, 4); offset += 4;
+
+    // Read history count
+    u32 histCount = 0;
+    memcpy(&histCount, buf + offset, 4); offset += 4;
+
+    // Validate history count
+    if (histCount > MAX_HISTORY) {
+        histCount = MAX_HISTORY;
+    }
+
+    // Read history entries
+    u32 historyBytes = histCount * sizeof(VRChangeRecord);
+    if (offset + historyBytes > size) {
+        // Truncated data — read what we can
+        historyBytes = size - offset;
+        histCount = historyBytes / sizeof(VRChangeRecord);
+    }
+
+    if (histCount > 0) {
+        memcpy(mHistory, buf + offset, historyBytes);
+        mHistoryCount = histCount;
+    } else {
+        mHistoryCount = 0;
+    }
+
+    // Clamp VR values to valid range
+    mCurrentVR = clampVR(mCurrentVR);
+    mPeakVR = clampVR(mPeakVR);
+    mLowestVR = clampVR(mLowestVR);
+
+    return true;
+}
+
 } // namespace SaveData
+
+// ============================================================================
+// RankingSystem_calculateVR — Free function for external VR computation
+// ============================================================================
+
+s32 RankingSystem_calculateVR(s32 currentVR, s32 opponentAvgVR,
+                               s32 finishingPosition, u32 playerCount) {
+    // ELO-based VR change for the given race result.
+    // Uses online K-factor (32.0) as default.
+    f32 exponent = (f32)(opponentAvgVR - currentVR) / 400.0f;
+    f32 power = exponent * 2.302585f;
+    f32 expVal = 1.0f + power + (power * power) / 2.0f +
+                 (power * power * power) / 6.0f;
+    f32 expectedScore = 1.0f / (1.0f + expVal);
+
+    // Compute actual score from position
+    f32 score = 1.0f - (f32)finishingPosition / (f32)(playerCount - 1);
+    if (score < 0.0f) score = 0.0f;
+    if (score > 1.0f) score = 1.0f;
+
+    f32 K = 32.0f;
+    f32 delta = K * (score - expectedScore);
+    s32 change = (s32)(delta >= 0.0f ? delta + 0.5f : delta - 0.5f);
+
+    s32 newVR = currentVR + change;
+    if (newVR < 100) newVR = 100;
+    if (newVR > 9999) newVR = 9999;
+
+    return newVR;
+}

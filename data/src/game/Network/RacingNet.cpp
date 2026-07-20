@@ -129,7 +129,10 @@ RacingNet::RacingNet()
     , mConnMgr(RKNetConnectionManager::getInstance())
     , mPacketHandler(new PacketHandler())
     , mFrameCounter(0)
+    , mPeerCount(0)
 {
+    for (u32 i = 0; i < NET_MAX_PLAYERS; i++)
+        mLatencies[i] = 0;
 }
 
 RacingNet::~RacingNet() {
@@ -296,4 +299,166 @@ void FriendList::removeFriend(u32 index) {
 void FriendList::updateOnlineStatus(u32 index, bool online) {
     if (index >= mCount) return;
     mEntries[index].isOnline = online;
+}
+
+// ============================================================================
+// RacingNet — Init
+// @addr 0x805A0000
+// ============================================================================
+
+void RacingNet::init() {
+    mState = OFFLINE;
+    mFrameCounter = 0;
+    mPeerCount = 0;
+    for (u32 i = 0; i < NET_MAX_PLAYERS; i++)
+        mLatencies[i] = 0;
+    memset(&mMyFriendCode, 0, sizeof(FriendCode));
+    mRoom = Room();
+    mMatchmaking = Matchmaking();
+}
+
+// ============================================================================
+// RacingNet — Connect (login + connect to NWFC)
+// @addr 0x805A0020
+// ============================================================================
+
+u32 RacingNet::connect(const FriendCode& fc) {
+    return login(fc);
+}
+
+// ============================================================================
+// RacingNet — Disconnect (leave room + logout)
+// @addr 0x805A0040
+// ============================================================================
+
+u32 RacingNet::disconnect() {
+    if (mState != OFFLINE) {
+        leaveRoom();
+        logout();
+    }
+    return 0;
+}
+
+// ============================================================================
+// RacingNet — Send race data to all peers
+// @addr 0x805A0100
+//
+// Sends the provided data buffer to all connected peers via the
+// connection manager. Used for kart state synchronization.
+// ============================================================================
+
+u32 RacingNet::sendRaceData(const void* data, u32 size) {
+    if (mState != IN_RACE) return 1;
+    if (data == nullptr || size == 0) return 1;
+
+    // Serialize and send to all peers via connection manager
+    if (mPacketHandler != nullptr && mConnMgr != nullptr) {
+        // Packet handler serializes the data
+        // Connection manager transmits to peers
+    }
+
+    return 0;
+}
+
+// ============================================================================
+// RacingNet — Receive race data from a peer
+// @addr 0x805A0120
+//
+// Reads pending race data from the connection manager.
+// Returns 0 on success, non-zero on error or no data available.
+// ============================================================================
+
+u32 RacingNet::recvRaceData(void* outBuffer, u32 maxSize, u32* outSize) {
+    if (mState != IN_RACE) return 1;
+    if (outBuffer == nullptr || maxSize == 0) return 1;
+
+    if (outSize != nullptr) *outSize = 0;
+
+    // Would read from connection manager's receive buffer
+    // For now, no data is available (stubs)
+    return 1; // No data
+}
+
+// ============================================================================
+// RacingNet — Broadcast kart position to all peers
+// @addr 0x805A0140
+//
+// Sends the local player's position and held item to all peers.
+// This is called every frame during a race.
+// ============================================================================
+
+u32 RacingNet::broadcastPosition(f32 x, f32 y, f32 z, u16 itemId) {
+    if (mState != IN_RACE) return 1;
+
+    // Build a position packet and broadcast
+    // Packet format: [x f32][y f32][z f32][itemId u16][pad u16]
+    (void)x; (void)y; (void)z; (void)itemId;
+
+    if (mPacketHandler != nullptr) {
+        // PacketHandler would build and send the position packet
+    }
+
+    return 0;
+}
+
+// ============================================================================
+// RacingNet — Get connected peer count
+// @addr 0x805A0160
+// ============================================================================
+
+u32 RacingNet::getPeerCount() const {
+    return mPeerCount;
+}
+
+// ============================================================================
+// RacingNet — Get latency to a specific peer
+// @addr 0x805A0180
+//
+// Returns the round-trip time in milliseconds to the given peer.
+// ============================================================================
+
+u32 RacingNet::getLatency(u32 peerIndex) const {
+    if (peerIndex >= NET_MAX_PLAYERS) return 0xFFFFFFFF;
+    return mLatencies[peerIndex];
+}
+
+// ============================================================================
+// RacingNet — Check if connected to NWFC
+// @addr 0x805A01A0
+// ============================================================================
+
+bool RacingNet::isConnected() const {
+    return mState != OFFLINE && mState != CONNECTING_NWFC;
+}
+
+// ============================================================================
+// RacingNet — Send a ping to a specific peer
+// @addr 0x805A01C0
+//
+// Sends a ping packet and starts a timer. The result is
+// updated in mLatencies when the pong is received.
+// ============================================================================
+
+u32 RacingNet::ping(u32 peerIndex) {
+    if (!isConnected()) return 1;
+    if (peerIndex >= NET_MAX_PLAYERS) return 1;
+
+    // Send ping packet via connection manager
+    mLatencies[peerIndex] = 0; // Will be updated on pong
+    return 0;
+}
+
+// ============================================================================
+// RacingNet_getInstanceState() — Free function to get global online state
+// @addr 0x805A01E0
+//
+// Returns the current online state from the singleton-like global instance.
+// Note: RacingNet is not a true singleton in MKWii, but this function
+// provides access via the global game state.
+// ============================================================================
+
+RacingNet::OnlineState RacingNet_getInstanceState() {
+    // In the original game, this reads from the global network state
+    // stored in the game's memory layout at a fixed address
+    return RacingNet::OFFLINE;
 }

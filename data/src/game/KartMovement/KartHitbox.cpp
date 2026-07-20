@@ -290,4 +290,170 @@ bool KartHitbox_testSphereVsAABB(
     return distSq <= sphereRadius * sphereRadius;
 }
 
+// ============================================================================
+// Hitbox::getWorldPosition — Copy current world position to output
+// ============================================================================
+
+f32 Hitbox::getWorldPosition(EGG::Vector3f& out) const {
+    out = pos;
+    return radius;
+}
+
+// ============================================================================
+// Hitbox::testSphere — Sphere-sphere intersection test
+// ============================================================================
+// Tests whether this hitbox's sphere overlaps with another sphere.
+// Used for kart-to-kart body collision broadphase.
+
+bool Hitbox::testSphere(const EGG::Vector3f& center, f32 radius) const {
+    f32 dx = pos.x - center.x;
+    f32 dy = pos.y - center.y;
+    f32 dz = pos.z - center.z;
+    f32 distSq = dx * dx + dy * dy + dz * dz;
+    f32 radSum = this->radius + radius;
+    return distSq <= radSum * radSum;
+}
+
+// ============================================================================
+// Hitbox::testAABB — Sphere-AABB intersection test for this hitbox
+// ============================================================================
+// Tests whether this hitbox's sphere intersects an axis-aligned box.
+// Used for kart vs. course geometry broadphase checks.
+
+bool Hitbox::testAABB(const EGG::Vector3f& aabbMin,
+                       const EGG::Vector3f& aabbMax) const {
+    f32 closestX = std::max(aabbMin.x, std::min(pos.x, aabbMax.x));
+    f32 closestY = std::max(aabbMin.y, std::min(pos.y, aabbMax.y));
+    f32 closestZ = std::max(aabbMin.z, std::min(pos.z, aabbMax.z));
+
+    f32 dx = pos.x - closestX;
+    f32 dy = pos.y - closestY;
+    f32 dz = pos.z - closestZ;
+    f32 distSq = dx * dx + dy * dy + dz * dz;
+
+    return distSq <= radius * radius;
+}
+
+// ============================================================================
+// KartCollisionInfo::getContactNormal — Return the dominant collision normal
+// ============================================================================
+
+const EGG::Vector3f& KartCollisionInfo::getContactNormal() const {
+    // Floor collision takes priority over wall collision
+    if (floorKclTypeMask != 0) {
+        return floorNrm;
+    }
+    return wallNrm;
+}
+
+// ============================================================================
+// KartCollisionInfo::serialize — Write collision info to a flat buffer
+// ============================================================================
+// Used by the ghost replay system to record per-frame collision state.
+// Layout: floorNrm(12) + wallNrm(12) + speedFactor(4) + floorKclType(4) +
+//         wallKclType(4) + handlingFactor(4) = 40 bytes
+
+void KartCollisionInfo::serialize(u8* buf, u32& outSize) const {
+    outSize = 40;
+
+    // Floor normal (3 × f32)
+    memcpy(buf + 0,  &floorNrm.x, 4);
+    memcpy(buf + 4,  &floorNrm.y, 4);
+    memcpy(buf + 8,  &floorNrm.z, 4);
+
+    // Wall normal (3 × f32)
+    memcpy(buf + 12, &wallNrm.x, 4);
+    memcpy(buf + 16, &wallNrm.y, 4);
+    memcpy(buf + 20, &wallNrm.z, 4);
+
+    // Speed and handling factors
+    memcpy(buf + 24, &speedFactor, 4);
+    memcpy(buf + 28, &handlingFactor, 4);
+
+    // KCL type codes
+    memcpy(buf + 32, &floorKclTypeMask, 4);
+    memcpy(buf + 36, &wallKclType, 4);
+}
+
+// ============================================================================
+// KartCollisionInfo::deserialize — Read collision info from a flat buffer
+// ============================================================================
+
+bool KartCollisionInfo::deserialize(const u8* buf, u32 size) {
+    if (size < 40) {
+        return false;
+    }
+
+    memcpy(&floorNrm.x, buf + 0, 4);
+    memcpy(&floorNrm.y, buf + 4, 4);
+    memcpy(&floorNrm.z, buf + 8, 4);
+
+    memcpy(&wallNrm.x, buf + 12, 4);
+    memcpy(&wallNrm.y, buf + 16, 4);
+    memcpy(&wallNrm.z, buf + 20, 4);
+
+    memcpy(&speedFactor, buf + 24, 4);
+    memcpy(&handlingFactor, buf + 28, 4);
+
+    memcpy(&floorKclTypeMask, buf + 32, 4);
+    memcpy(&wallKclType, buf + 36, 4);
+
+    return true;
+}
+
+// ============================================================================
+// KartHitbox_testCapsuleVsPlane — Capsule vs. plane intersection test
+// ============================================================================
+// Tests whether a capsule (line segment + radius) intersects an infinite
+// plane. The plane is defined by a normal and a distance from origin
+// (planeD). On collision, outPenetration receives the penetration depth.
+// Used for wheel contact vs. moving platform surfaces.
+
+bool KartHitbox_testCapsuleVsPlane(
+    const EGG::Vector3f& capA, const EGG::Vector3f& capB, f32 capRadius,
+    const EGG::Vector3f& planeNormal, f32 planeD, f32* outPenetration) {
+
+    // Signed distances of capsule endpoints from the plane
+    f32 distA = capA.x * planeNormal.x + capA.y * planeNormal.y +
+                capA.z * planeNormal.z - planeD;
+    f32 distB = capB.x * planeNormal.x + capB.y * planeNormal.y +
+                capB.z * planeNormal.z - planeD;
+
+    // The capsule intersects the plane if the interval [distA, distB]
+    // is within [-capRadius, +capRadius].
+    f32 minDist, maxDist;
+    if (distA < distB) {
+        minDist = distA;
+        maxDist = distB;
+    } else {
+        minDist = distB;
+        maxDist = distA;
+    }
+
+    // No intersection: both endpoints are on the same side
+    // and beyond the capsule radius from the plane
+    if (minDist > capRadius || maxDist < -capRadius) {
+        return false;
+    }
+
+    // Compute penetration depth
+    f32 penetration = 0.0f;
+    if (minDist >= 0.0f && maxDist >= 0.0f) {
+        // Both on positive side — closest approach is minDist
+        penetration = capRadius - minDist;
+    } else if (minDist <= 0.0f && maxDist <= 0.0f) {
+        // Both on negative side — closest approach is -maxDist
+        penetration = capRadius - (-maxDist);
+    } else {
+        // Straddling the plane — guaranteed intersection
+        penetration = capRadius + (maxDist - minDist) * 0.5f;
+    }
+
+    if (outPenetration != nullptr) {
+        *outPenetration = penetration;
+    }
+
+    return true;
+}
+
 } // namespace Kart

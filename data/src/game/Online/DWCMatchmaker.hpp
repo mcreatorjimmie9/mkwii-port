@@ -88,6 +88,10 @@ public:
     static void createInstance();
     static void destroyInstance();
 
+    // --- Init ---
+    // @addr 0x80625E80
+    void init();
+
     // --- Authentication ---
     // @addr 0x80625EC0
     u32 authenticate(const char* friendCode, u32 profileId);
@@ -97,6 +101,8 @@ public:
     // --- Match search ---
     // @addr 0x806261C0
     u32 searchRooms(const DWCSearchCriteria& criteria);
+    // @addr 0x80627520
+    u32 searchMatch();
     // @addr 0x80626380
     s32 getSearchResultCount() const;
     // @addr 0x80626440
@@ -137,6 +143,12 @@ public:
     DWCMatchState getState() const { return mState; }
     bool isInMatch() const { return mState == DWC_MATCH_PLAYING; }
     bool isError() const { return mState == DWC_MATCH_ERROR; }
+
+    // --- Player list ---
+    // @addr 0x806274E0
+    const DWCPlayerSlot* getPlayerList() const;
+    // @addr 0x80627500
+    s32 getPlayerListCount() const;
 
     // --- Error ---
     u32 getErrorCode() const { return mErrorCode; }

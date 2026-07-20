@@ -294,4 +294,145 @@ u32 KartSuspension::getGroundContactMask() const {
     return mask;
 }
 
+// @addr 0x80490500 (estimated)
+// Compute spring force for a single wheel using Hooke's law: F = -k * x
+// Positive compression = spring compressed (pushes kart up = negative force direction)
+// Returns force magnitude (positive = upward push on kart)
+f32 KartSuspension::calcSpringForce(s32 wheelIdx) const {
+    if (wheelIdx < 0 || (u32)wheelIdx >= WHEEL_COUNT) return 0.0f;
+    return -m_springK * m_wheels[wheelIdx].compression;
+}
+
+// @addr 0x80490540 (estimated)
+// Compute damping force for a single wheel: F = -c * v
+// Uses velocity-dependent damping with kart vertical velocity bonus
+// Returns force magnitude (positive = upward push on kart)
+f32 KartSuspension::calcDampingForce(s32 wheelIdx) const {
+    if (wheelIdx < 0 || (u32)wheelIdx >= WHEEL_COUNT) return 0.0f;
+    f32 cCrit = 2.0f * sqrtf(m_springK);
+    f32 cDamp = m_dampingRatio * cCrit;
+    return -cDamp * m_wheels[wheelIdx].compressionVel;
+}
+
+// @addr 0x80490580 (estimated)
+// Simplified update without explicit dynamics pointer.
+// Computes forces for all wheels and returns total vertical force.
+// Used by external systems that manage their own dynamics integration.
+f32 KartSuspension::update() {
+    EGG::Vector3f totalForce;
+    totalForce.setAll(0);
+
+    for (u32 i = 0; i < WHEEL_COUNT; i++) {
+        WheelSuspState& wheel = m_wheels[i];
+        if (!wheel.grounded) {
+            wheel.appliedForce = 0.0f;
+            m_wheelForce[i] = 0.0f;
+            m_wheelGrounded[i] = false;
+            continue;
+        }
+        f32 springF = calcSpringForce(i);
+        f32 dampF = calcDampingForce(i);
+        f32 total = springF + dampF;
+        if (total > FORCE_CLAMP_MAX) total = FORCE_CLAMP_MAX;
+        if (total < FORCE_CLAMP_MIN) total = FORCE_CLAMP_MIN;
+        wheel.appliedForce = total;
+        m_wheelForce[i] = total;
+        m_wheelGrounded[i] = (wheel.compression > GROUND_DETECT_THRESH);
+        totalForce.y += total;
+    }
+    return totalForce.y;
+}
+
+// @addr 0x80490600 (estimated)
+// Set spring stiffness constant. Valid range: [1000, 200000].
+// Clamped to prevent instability from extreme values.
+void KartSuspension::setStiffness(f32 k) {
+    if (k < 1000.0f) k = 1000.0f;
+    if (k > 200000.0f) k = 200000.0f;
+    m_springK = k;
+}
+
+// @addr 0x80490620 (estimated)
+// Get average compression across all grounded wheels.
+// Returns 0 if no wheels are grounded.
+f32 KartSuspension::getCompression() const {
+    f32 total = 0.0f;
+    u32 count = 0;
+    for (u32 i = 0; i < WHEEL_COUNT; i++) {
+        if (m_wheelGrounded[i]) {
+            total += m_wheels[i].compression;
+            count++;
+        }
+    }
+    if (count == 0) return 0.0f;
+    return total / (f32)count;
+}
+
+// @addr 0x80490640 (estimated)
+// Check if any wheel suspension is at maximum compression.
+// A bottomed-out suspension means the spring has hit its
+// physical stop, which causes a hard impact force.
+bool KartSuspension::isBottomedOut() const {
+    for (u32 i = 0; i < WHEEL_COUNT; i++) {
+        if (m_wheels[i].compression >= MAX_COMPRESSION) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// @addr 0x80490660 (estimated)
+// Apply rough terrain effects to suspension.
+// Rough terrain (off-road, sand, etc.) increases damping
+// and adds random vertical perturbation to simulate bumps.
+// @param roughness  Terrain roughness factor [0.0, 1.0]
+// @param kartSpeed  Current kart speed for speed-proportional bumps
+void KartSuspension::handleRoughTerrain(f32 roughness, f32 kartSpeed) {
+    if (roughness <= 0.0f) return;
+
+    // Clamp roughness to valid range
+    if (roughness > 1.0f) roughness = 1.0f;
+
+    for (u32 i = 0; i < WHEEL_COUNT; i++) {
+        if (!m_wheelGrounded[i]) continue;
+
+        WheelSuspState& wheel = m_wheels[i];
+
+        // Increase damping on rough terrain to prevent oscillation
+        // The extra damping is proportional to roughness
+        f32 extraDamp = roughness * 0.5f;
+        wheel.compressionVel *= (1.0f - extraDamp);
+
+        // Add speed-proportional vertical perturbation
+        // Higher speed = more bump intensity
+        f32 bumpIntensity = roughness * kartSpeed * 0.002f;
+        if (bumpIntensity > 5.0f) bumpIntensity = 5.0f;
+
+        // Apply a small random compression perturbation
+        // In real MKW, this uses a deterministic hash based on
+        // wheel index and frame count for consistency
+        f32 perturbation = bumpIntensity * (((f32)(i * 7 + 3) * 0.37f) - 0.5f);
+        wheel.compression += perturbation;
+
+        // Clamp to physical limits
+        if (wheel.compression > MAX_COMPRESSION) {
+            wheel.compression = MAX_COMPRESSION;
+        }
+        if (wheel.compression < -MIN_EXTENSION) {
+            wheel.compression = -MIN_EXTENSION;
+        }
+    }
+}
+
+// @addr 0x80490700 (estimated)
+// Free function: return default suspension tuning parameters.
+// Used by KartPhysicsEngine during vehicle initialization to set
+// baseline suspension values before per-vehicle stat overrides.
+void KartSuspension_getDefaultParams(f32* outSpringK, f32* outDampingRatio,
+                                      f32* outRestLength) {
+    if (outSpringK) *outSpringK = KartSuspension::DEFAULT_SPRING_K;
+    if (outDampingRatio) *outDampingRatio = KartSuspension::DEFAULT_DAMPING_RATIO;
+    if (outRestLength) *outRestLength = KartSuspension::DEFAULT_REST_LENGTH;
+}
+
 } // namespace Kart

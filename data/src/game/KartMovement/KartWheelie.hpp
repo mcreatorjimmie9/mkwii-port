@@ -94,11 +94,11 @@ public:
     WheelieRuntimeState getState() const { return mState; }
     WheelieState getWheelieState() const { return mState.mState; }
 
-    // Get current speed boost multiplier (typically +1.5% per frame during active wheelie)
-    f32 getSpeedBoost() const { return mState.currentBoost; }
+    // Get current speed bonus multiplier (typically +1.5% per frame during active wheelie)
+    f32 getSpeedBonus() const;
 
     // Get current wheelie angle (for visual tilt)
-    f32 getWheelieAngle() const { return mState.currentAngle; }
+    f32 getWheelieAngle() const;
 
     // Check if kart can be bumped (spin out vulnerability)
     bool canBeBumped() const { return mState.mbCanBeBumped; }
@@ -113,6 +113,15 @@ public:
 
     // Default wheelie config for standard bikes
     static WheelieConfig getDefaultConfig();
+
+    // Get stability metric [0.0, 1.0]
+    f32 getStability() const;
+
+    // Check if in active wheelie state
+    bool isDoingWheelie() const;
+
+    // Get wheelie balance factor for visual tilt [0.0, 1.0]
+    f32 getWheelieBalance() const;
 
 private:
     WheelieRuntimeState mState;

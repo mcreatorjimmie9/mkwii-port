@@ -53,6 +53,15 @@ public:
     // Check if valid
     bool isValid() const { return m_imageData != nullptr; }
 
+    // Decode pixel data to RGBA8888 output buffer
+    bool decode(void* dstBuffer, u32 dstSize) const;
+
+    // Get palette data pointer (paletted formats only, else nullptr)
+    const void* getPalette() const;
+
+    // Decode and return new RGBA8888 buffer (caller frees)
+    void* convertToRGBA32() const;
+
     // Compute expected data size for a format/dimension
     static u32 computeDataSize(TextureFormat fmt, u16 width, u16 height);
 
@@ -64,5 +73,9 @@ private:
     TextureFormat m_format;
     u8 m_mipCount;
 };
+
+// Free function: bind a TIMG texture to a GX texture object
+void ResTIMG_bindToGX(const EGG::ResTIMG* timg, void* gxTexObj,
+                       u32 wrapS, u32 wrapT, u32 minFilter, u32 magFilter);
 
 } // namespace EGG

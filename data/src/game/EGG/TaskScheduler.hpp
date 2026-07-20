@@ -115,6 +115,9 @@ public:
 
     const char* getName() const { return mName; }
 
+    static const u32 DEFAULT_STACK_SIZE = 0x8000; // 32KB default stack
+    static const s32 MAX_THREADS = 8;
+
 private:
     ThreadState mState;
     s32 mPriority;
@@ -127,8 +130,6 @@ private:
     bool mbAutoDestroy;        // Destroy thread object when terminated
 
     static Thread* spCurrentThread;
-    static const u32 DEFAULT_STACK_SIZE = 0x8000; // 32KB default stack
-    static const s32 MAX_THREADS = 8;
     static Thread spThreadTable[MAX_THREADS];
     static s32 sThreadCount;
 };
@@ -168,6 +169,34 @@ public:
     /* TaskScheduler_waitAll @ 0x8016E600 */
     void waitAll();
 
+    // Extended API
+    /* TaskScheduler_addTask @ 0x8016E640 */
+    s32 addTask(ThreadEntryFunc func, void* arg, s32 priority);
+    /* TaskScheduler_removeTask @ 0x8016E6A0 */
+    bool removeTask(s32 taskId);
+    /* TaskScheduler_update_dt @ 0x8016E700 */
+    void update(f32 dt);
+    /* TaskScheduler_pause @ 0x8016E760 */
+    void pause();
+    /* TaskScheduler_resume @ 0x8016E7C0 */
+    void resume();
+    /* TaskScheduler_getTaskCount @ 0x8016E800 */
+    s32 getTaskCount() const;
+    /* TaskScheduler_getActiveTask @ 0x8016E840 */
+    Task* getActiveTask(s32 index);
+    /* TaskScheduler_setPriority @ 0x8016E8A0 */
+    bool setPriority(s32 taskId, s32 newPriority);
+    /* TaskScheduler_isEmpty @ 0x8016E960 */
+    bool isEmpty() const;
+    /* TaskScheduler_clear @ 0x8016E9A0 */
+    void clear();
+    /* TaskScheduler_getTaskPriority @ 0x8016EA00 */
+    s32 getTaskPriority(s32 taskId) const;
+    /* TaskScheduler_hasTask @ 0x8016EA40 */
+    bool hasTask(s32 taskId) const;
+    /* TaskScheduler_processOne @ 0x8016EA80 */
+    bool processOne();
+
     // Singleton access
     static TaskScheduler* getInstance() { return spInstance; }
     static void createInstance();
@@ -182,6 +211,12 @@ private:
     s32 mActiveCount;
     bool mbInitialized;
     static TaskScheduler* spInstance;
+
+    // Internal: sort the task queue by priority
+    void sortQueueByPriority();
 };
 
 } // namespace EGG
+
+// @addr 0x8016EB00
+void TaskScheduler_sortByPriority(EGG::TaskScheduler* scheduler);

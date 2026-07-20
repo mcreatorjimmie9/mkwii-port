@@ -307,4 +307,62 @@ WheelieConfig KartWheelie::getDefaultConfig() {
     return config;
 }
 
+// @addr 0x805B1300 (estimated)
+// Get the current wheelie pitch angle in radians.
+// Returns 0.0 if not in wheelie.
+f32 KartWheelie::getWheelieAngle() const {
+    if (mState.mState == WHEELIE_STATE_NONE) return 0.0f;
+    return mState.currentAngle;
+}
+
+// @addr 0x805B1320 (estimated)
+// Get the current speed bonus multiplier.
+// Returns 1.0 if not in wheelie (no bonus).
+f32 KartWheelie::getSpeedBonus() const {
+    if (mState.mState == WHEELIE_STATE_NONE) return 1.0f;
+    return mState.currentBoost;
+}
+
+// @addr 0x805B1340 (estimated)
+// Get a stability metric [0.0, 1.0] indicating how stable
+// the wheelie is. Lower values indicate higher risk of being bumped.
+f32 KartWheelie::getStability() const {
+    if (mState.mState != WHEELIE_STATE_ACTIVE) return 1.0f;
+
+    f32 stability = 1.0f;
+
+    // Reduce stability based on angle (higher angle = less stable)
+    f32 angleRatio = mState.currentAngle / mConfig.maxWheelieAngle;
+    if (angleRatio > 0.8f) {
+        stability -= (angleRatio - 0.8f) * 2.0f;
+    }
+
+    if (mState.bumpCooldownTimer > 0.0f) {
+        stability -= 0.3f;
+    }
+
+    if (stability < 0.0f) stability = 0.0f;
+    if (stability > 1.0f) stability = 1.0f;
+
+    return stability;
+}
+
+// @addr 0x805B1360 (estimated)
+// Check if the bike is currently performing an active wheelie.
+bool KartWheelie::isDoingWheelie() const {
+    return mState.mState == WHEELIE_STATE_ACTIVE;
+}
+
+// @addr 0x805B1380 (estimated)
+// Get the wheelie balance factor for visual tilt [0.0, 1.0].
+f32 KartWheelie::getWheelieBalance() const {
+    if (mState.mState == WHEELIE_STATE_NONE || !mbIsBike) return 0.0f;
+
+    f32 balance = mState.currentAngle / mConfig.maxWheelieAngle;
+    if (balance < 0.0f) balance = 0.0f;
+    if (balance > 1.0f) balance = 1.0f;
+
+    return balance;
+}
+
 } // namespace Kart

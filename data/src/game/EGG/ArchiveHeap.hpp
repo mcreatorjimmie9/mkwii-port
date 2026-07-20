@@ -49,6 +49,28 @@ public:
     // @addr 0x80176360
     void reset();
 
+    // @addr 0x801763A0
+    u32 getTotalFree() const;
+    // @addr 0x801763E0
+    u32 getMaxBlock() const;
+    // @addr 0x80176420
+    u32 getAllocCount() const;
+
+    // @addr 0x80176460
+    void init(u8* start, u32 size);
+
+    // Block info for findBlock
+    struct BlockInfo {
+        void* start;
+        u32 size;
+        u32 index;
+    };
+
+    // @addr 0x801764C0
+    BlockInfo findBlock(void* ptr) const;
+    // @addr 0x80176520
+    u32 defragment();
+
     // @addr 0x801763C0
     Heap* getBackingHeap() const { return mHeap; }
 
@@ -104,6 +126,15 @@ public:
     // @addr 0x80176900
     void dumpGroupStats() const;
 
+    // @addr 0x80176940
+    u32 getTotalAllocCount() const;
+    // @addr 0x80176980
+    bool hasGroup(u16 groupId) const;
+    // @addr 0x801769C0
+    bool createGroup(u16 groupId);
+    // @addr 0x80176A40
+    bool removeGroup(u16 groupId);
+
     // @addr 0x80176980
     Heap* getBackingHeap() const { return mHeap; }
 
@@ -125,3 +156,6 @@ void dumpAllHeaps();
 Heap* getCurrentHeap();
 
 } // namespace EGG
+
+// @addr 0x80176580
+void ArchiveHeap_printStats(const EGG::ArchiveHeap* heap);

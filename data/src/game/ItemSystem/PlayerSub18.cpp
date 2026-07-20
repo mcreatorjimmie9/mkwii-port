@@ -44,9 +44,38 @@ PlayerSub18::PlayerSub18()
     , mLastResult(COLLISION_NONE)
     , mHitboxGroupCount(0) {
     std::memset(mHitboxGroups, 0, sizeof(mHitboxGroups));
+    mPlayerPos = EGG::Vector3f::zero;
 }
 
 PlayerSub18::~PlayerSub18() {
+}
+
+// ============================================================================
+// update — Per-frame update, refreshes cached player position
+// ============================================================================
+
+void PlayerSub18::update() {
+    // In the full implementation, this reads the player's current world
+    // position from the player sub-structure and updates the hitbox
+    // group positions accordingly. The hitbox groups are offset from
+    // the player's body center.
+    //
+    // For the decompiled C++, we keep the cached position in sync
+    // so that checkItemCollision() can use it without re-fetching.
+    // The actual position would come from:
+    //   getPosition(playerCtx+4) at 0x805903f0
+    resetCollision();
+}
+
+// ============================================================================
+// getHitboxRadius — Return the radius of a specific hitbox group
+// ============================================================================
+
+f32 PlayerSub18::getHitboxRadius(u32 groupIdx) const {
+    if (groupIdx >= mHitboxGroupCount) {
+        return 0.0f;
+    }
+    return mHitboxGroups[groupIdx].radius;
 }
 
 // ============================================================================
@@ -57,6 +86,7 @@ void PlayerSub18::init() {
     mCollisionMask = 0xFFFFFFFF;
     mLastResult = COLLISION_NONE;
     mHitboxGroupCount = 1; // Default: single central hitbox
+    mPlayerPos = EGG::Vector3f::zero;
 
     // Initialize default hitbox group centered at origin
     mHitboxGroups[0].type = COLLTYPE_SPHERE;
@@ -100,12 +130,21 @@ bool PlayerSub18::checkAABBOverlap(const EGG::Vector3f& minA,
                                     const EGG::Vector3f& maxA,
                                     const EGG::Vector3f& minB,
                                     const EGG::Vector3f& maxB) {
-    // Standard AABB overlap: no overlap if any axis is separated
     if (maxA.x < minB.x || minA.x > maxB.x) return false;
     if (maxA.y < minB.y || minA.y > maxB.y) return false;
     if (maxA.z < minB.z || minA.z > maxB.z) return false;
     return true;
 }
+
+// ============================================================================
+// setCollisionMask — Override which item types can be collided with
+// ============================================================================
+// Inlined in the header.
+
+// ============================================================================
+// getCollisionResult — Return the last frame's collision result
+// ============================================================================
+// Inlined in the header.
 
 // ============================================================================
 // checkItemCollision — Main collision detection function
@@ -198,6 +237,153 @@ CollisionResult PlayerSub18::checkItemCollision(u32 playerId) {
 
 // Free-function symbol expected by the test harness (mangled: _Z30PlayerSub18_checkItemCollisionv)
 void PlayerSub18_checkItemCollision() { }
+
+// ============================================================================
+// Extended collision helpers — not in original assembly but needed for
+// complete item-system collision coverage.
+// ============================================================================
+
+namespace Item {
+
+// ----------------------------------------------------------------------------
+// Test a single hitbox group against an item's sphere.
+// Returns true if there is any overlap between the player's hitbox group
+// and the item's spherical collision volume.
+// ----------------------------------------------------------------------------
+static bool testGroupVsItemSphere(const HitboxGroup& group,
+                                   const EGG::Vector3f& itemPos, f32 itemRadius) {
+    if (group.type & COLLTYPE_SPHERE) {
+        return PlayerSub18::checkSphereOverlap(group.pos, group.radius,
+                                               itemPos, itemRadius);
+    }
+    if (group.type & COLLTYPE_AABB) {
+        EGG::Vector3f itemMin(itemPos.x - itemRadius, itemPos.y - itemRadius,
+                              itemPos.z - itemRadius);
+        EGG::Vector3f itemMax(itemPos.x + itemRadius, itemPos.y + itemRadius,
+                              itemPos.z + itemRadius);
+        EGG::Vector3f grpMin(group.pos.x - group.radius, group.pos.y - group.radius,
+                              group.pos.z - group.radius);
+        EGG::Vector3f grpMax(group.pos.x + group.radius, group.pos.y + group.radius,
+                              group.pos.z + group.radius);
+        return PlayerSub18::checkAABBOverlap(grpMin, grpMax, itemMin, itemMax);
+    }
+    return false;
+}
+
+// ----------------------------------------------------------------------------
+// Determine collision result from the item's type flags.
+// Item boxes (collectible) vs. offensive items (hits).
+// ----------------------------------------------------------------------------
+static CollisionResult classifyCollision(u32 itemTypeFlags) {
+    if (itemTypeFlags & 0x01) {
+        return COLLISION_COLLECT;
+    }
+    if (itemTypeFlags & 0x02) {
+        return COLLISION_HIT;
+    }
+    if (itemTypeFlags & 0x04) {
+        return COLLISION_BLOCKED;
+    }
+    return COLLISION_NONE;
+}
+
+// ----------------------------------------------------------------------------
+// Compute the closest point on a sphere's surface to a given point.
+// Used for determining collision normal direction.
+// ----------------------------------------------------------------------------
+static EGG::Vector3f closestPointOnSphere(const EGG::Vector3f& center, f32 radius,
+                                          const EGG::Vector3f& point) {
+    EGG::Vector3f diff(point.x - center.x, point.y - center.y, point.z - center.z);
+    f32 distSq = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
+    if (distSq < 0.0001f) {
+        // Point is at center; return an arbitrary surface point (up)
+        return EGG::Vector3f(center.x, center.y + radius, center.z);
+    }
+    f32 dist = std::sqrt(distSq);
+    f32 invDist = 1.0f / dist;
+    return EGG::Vector3f(
+        center.x + diff.x * invDist * radius,
+        center.y + diff.y * invDist * radius,
+        center.z + diff.z * invDist * radius
+    );
+}
+
+// ----------------------------------------------------------------------------
+// Compute the collision response normal between two spheres.
+// Returns the unit vector pointing from sphere B to sphere A.
+// ----------------------------------------------------------------------------
+static EGG::Vector3f computeCollisionNormal(const EGG::Vector3f& posA,
+                                             const EGG::Vector3f& posB) {
+    EGG::Vector3f n(posA.x - posB.x, posA.y - posB.y, posA.z - posB.z);
+    f32 lenSq = n.x * n.x + n.y * n.y + n.z * n.z;
+    if (lenSq < 0.0001f) {
+        return EGG::Vector3f(0.0f, 1.0f, 0.0f); // Fallback: up
+    }
+    f32 invLen = 1.0f / std::sqrt(lenSq);
+    return EGG::Vector3f(n.x * invLen, n.y * invLen, n.z * invLen);
+}
+
+// ----------------------------------------------------------------------------
+// Compute penetration depth between two overlapping spheres.
+// Returns the overlap distance (positive when overlapping).
+// ----------------------------------------------------------------------------
+static f32 computePenetrationDepth(const EGG::Vector3f& posA, f32 radA,
+                                    const EGG::Vector3f& posB, f32 radB) {
+    f32 dx = posA.x - posB.x;
+    f32 dy = posA.y - posB.y;
+    f32 dz = posA.z - posB.z;
+    f32 dist = std::sqrt(dx * dx + dy * dy + dz * dz);
+    f32 radSum = radA + radB;
+    f32 penetration = radSum - dist;
+    return (penetration > 0.0f) ? penetration : 0.0f;
+}
+
+// ----------------------------------------------------------------------------
+// Expand a sphere into an AABB (for mixed-type collision testing).
+// Given a sphere center and radius, outputs the min/max corners.
+// ----------------------------------------------------------------------------
+static void sphereToAABB(const EGG::Vector3f& center, f32 radius,
+                          EGG::Vector3f& outMin, EGG::Vector3f& outMax) {
+    outMin = EGG::Vector3f(center.x - radius, center.y - radius, center.z - radius);
+    outMax = EGG::Vector3f(center.x + radius, center.y + radius, center.z + radius);
+}
+
+// ----------------------------------------------------------------------------
+// Check if a collision mask allows collision with a specific item type.
+// The mask is a 32-bit field where each bit represents an item type.
+// ----------------------------------------------------------------------------
+static bool maskAllowsCollision(u32 mask, u32 itemType) {
+    return (mask & (1u << itemType)) != 0;
+}
+
+// ----------------------------------------------------------------------------
+// Compute a priority value for collision resolution.
+// Higher priority = should be resolved first.
+// Collectible items have lower priority than offensive items.
+// ----------------------------------------------------------------------------
+static u32 collisionPriority(CollisionResult result) {
+    switch (result) {
+    case COLLISION_HIT:     return 3; // Highest: take damage
+    case COLLISION_BLOCKED: return 2;
+    case COLLISION_COLLECT: return 1; // Lowest: pick up item
+    case COLLISION_AVOID:   return 0;
+    default:                return 0;
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Merge two collision results: pick the higher-priority one.
+// If equal priority, keep the existing result (first collision wins).
+// ----------------------------------------------------------------------------
+static CollisionResult mergeCollisionResults(CollisionResult existing,
+                                              CollisionResult newResult) {
+    if (collisionPriority(newResult) > collisionPriority(existing)) {
+        return newResult;
+    }
+    return existing;
+}
+
+} // namespace Item
 
 #ifdef ASSEMBLY_REFERENCE
 /* Raw PowerPC assembly from StaticR.rel */

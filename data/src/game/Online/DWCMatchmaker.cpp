@@ -322,4 +322,102 @@ void DWCMatchmaker::cancelSearch() {
     if (mState == DWC_MATCH_SEARCHING) { mSearchResultCount = 0; transitionState(DWC_MATCH_CANCELLED); }
 }
 
+// ============================================================================
+// init() — Reset the matchmaker to initial state
+// @addr 0x80625E80
+// ============================================================================
+
+void DWCMatchmaker::init() {
+    mState = DWC_MATCH_IDLE;
+    mPreviousState = DWC_MATCH_IDLE;
+    mConnected = false;
+    mNATNegotiating = false;
+    mErrorCode = 0;
+    mAuthTimer = 0;
+    mCurrentRoomId = 0;
+    mIsHost = 0;
+    mSearchResultCount = 0;
+    mRetryTimer = 0.0f;
+    mConnectTimer = 0.0f;
+    mRetryCount = 0;
+    mMaxRetries = 3;
+    mServerAddr = 0;
+    mServerPort = 0;
+
+    mAuthResult.resultCode = 0;
+    mAuthResult.sessionId = 0;
+    mAuthResult.profileId = 0;
+    mAuthResult.success = 0;
+
+    for (u32 i = 0; i < MAX_SEARCH_RESULTS; i++) {
+        mSearchResults[i].roomId = 0;
+        mSearchResults[i].playerCount = 0;
+        mSearchResults[i].maxPlayers = 0;
+    }
+
+    for (u32 i = 0; i < MAX_PLAYER_SLOTS; i++) {
+        mPlayerSlots[i].playerId = 0;
+        mPlayerSlots[i].slotIndex = static_cast<u8>(i);
+        mPlayerSlots[i].isConnected = 0;
+        mPlayerSlots[i].isReady = 0;
+        mPlayerSlots[i].isHost = 0;
+    }
+}
+
+// ============================================================================
+// searchMatch() — Simplified match search (uses searchRooms internally)
+// @addr 0x80627520
+//
+// Convenience function that creates default criteria and starts a search.
+// ============================================================================
+
+u32 DWCMatchmaker::searchMatch() {
+    DWCSearchCriteria criteria;
+    memset(&criteria, 0, sizeof(criteria));
+    criteria.region = 0;          // Any region
+    criteria.playerCountRangeMin = 0;
+    criteria.playerCountRangeMax = MAX_PLAYER_COUNT;
+    criteria.roomType = 0;         // Any type
+    criteria.gameMode = 0;         // Any mode
+    criteria.requiresPassword = 0; // No password required
+    criteria.sortBy = 0;           // Default sort
+    criteria.maxResults = MAX_SEARCH_RESULTS;
+
+    return searchRooms(criteria);
+}
+
+// ============================================================================
+// getPlayerList() — Get the array of player slots in the current room
+// @addr 0x806274E0
+// ============================================================================
+
+const DWCPlayerSlot* DWCMatchmaker::getPlayerList() const {
+    return mPlayerSlots;
+}
+
+// ============================================================================
+// getPlayerListCount() — Get the number of players in the current room
+// @addr 0x80627500
+// ============================================================================
+
+s32 DWCMatchmaker::getPlayerListCount() const {
+    return getConnectedPlayerCount();
+}
+
+// ============================================================================
+// DWCMatchmaker_getServerStatus() — Free function for server status check
+// @addr 0x80627600
+//
+// Returns a status code indicating the DWC server availability:
+//   0 = server available
+//   1 = server maintenance
+//   2 = server offline
+//   3 = network error
+// ============================================================================
+
+u32 DWCMatchmaker_getServerStatus() {
+    // NWFC servers are no longer operational
+    return 2; // Server offline
+}
+
 } // namespace Online

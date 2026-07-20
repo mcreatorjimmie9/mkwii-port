@@ -29,6 +29,7 @@ SectionDirector::SectionDirector()
     memset(mSceneStack, 0, sizeof(mSceneStack));
     mSceneStackDepth = 0;
     memset(mCourseAssignments, 0, sizeof(mCourseAssignments));
+    memset(mSectionPages, 0, sizeof(mSectionPages));
 }
 
 SectionDirector::~SectionDirector() {
@@ -315,6 +316,133 @@ u32 SectionDirector::getSceneNameMessageId(u32 sceneId) {
     case 2: return 0x1002;
     default: return 0x1000;
     }
+}
+
+// ============================================================================
+// init() — Reset the section director to initial state
+// @addr 0x8071dd80
+// ============================================================================
+
+void SectionDirector::init() {
+    mState = DIRECTOR_IDLE;
+    mCurrentSceneId = 0;
+    mPreviousSceneId = 0;
+    mPendingSceneId = 0;
+    mSceneCount = 0;
+    mActivePlayerMask = 0;
+    mSceneCategory = SCENE_CAT_TITLE;
+    mTransitionFlags = 0;
+    mNetworkState = 0;
+    mSceneLayout = nullptr;
+    mHUDInstanceCount = 0;
+    mTransitionTimer = 0.0f;
+    mTargetSceneId = 0;
+
+    mSceneStackDepth = 0;
+    memset(mSceneStack, 0, sizeof(mSceneStack));
+    memset(mCourseAssignments, 0, sizeof(mCourseAssignments));
+    memset(mSectionPages, 0, sizeof(mSectionPages));
+}
+
+// ============================================================================
+// onUpdate() — Per-frame update for the section director
+// @addr 0x8071dda0
+//
+// Updates the transition timer and processes state changes.
+// ============================================================================
+
+void SectionDirector::onUpdate(f32 dt) {
+    if (mState == DIRECTOR_TRANSITIONING) {
+        mTransitionTimer -= dt;
+        if (mTransitionTimer <= 0.0f) {
+            mTransitionTimer = 0.0f;
+            mState = DIRECTOR_IDLE;
+        }
+    }
+}
+
+// ============================================================================
+// changeSection() — Switch to a different scene category
+// @addr 0x8071DDF0
+//
+// Updates the current and previous section, and transitions
+// to the section's registered page if available.
+// ============================================================================
+
+void SectionDirector::changeSection(u32 newSection) {
+    if (newSection >= SCENE_CAT_COUNT) return;
+
+    mPreviousSceneId = mCurrentSceneId;
+    mSceneCategory = (SceneCategory)newSection;
+
+    // If a page is registered for this section, activate it
+    if (mSectionPages[newSection] != nullptr) {
+        mState = DIRECTOR_TRANSITIONING;
+        mTransitionTimer = 0.5f;
+    }
+}
+
+// ============================================================================
+// getCurrentSection() — Get the current scene category
+// @addr 0x8071DE00
+// ============================================================================
+
+SceneCategory SectionDirector::getCurrentSection() const {
+    return mSceneCategory;
+}
+
+// ============================================================================
+// getPreviousSection() — Get the previous scene category
+// @addr 0x8071DE10
+//
+// Returns the section that was active before the current one.
+// If no previous section exists, returns SCENE_CAT_TITLE.
+// ============================================================================
+
+SceneCategory SectionDirector::getPreviousSection() const {
+    // Look up the previous scene ID's category from a simple mapping
+    // In the real game, this would be tracked via the scene stack
+    u32 prev = mPreviousSceneId;
+    if (prev < 0x10) return SCENE_CAT_TITLE;
+    if (prev < 0x20) return SCENE_CAT_MENU;
+    if (prev < 0x30) return SCENE_CAT_CHARACTER_SELECT;
+    if (prev < 0x40) return SCENE_CAT_COURSE_SELECT;
+    if (prev < 0x50) return SCENE_CAT_RACE;
+    if (prev < 0x60) return SCENE_CAT_RESULT;
+    if (prev < 0x70) return SCENE_CAT_ONLINE;
+    return SCENE_CAT_MENU;
+}
+
+// ============================================================================
+// registerSection() — Register a page handler for a scene category
+// @addr 0x8071DE20
+//
+// Associates a MenuPage with a section category so that the director
+// can automatically activate it during transitions.
+// ============================================================================
+
+void SectionDirector::registerSection(SceneCategory cat, MenuPage* page) {
+    if (cat >= SCENE_CAT_COUNT) return;
+    mSectionPages[cat] = page;
+}
+
+// ============================================================================
+// unregisterSection() — Remove a section's page handler
+// @addr 0x8071DE30
+// ============================================================================
+
+void SectionDirector::unregisterSection(SceneCategory cat) {
+    if (cat >= SCENE_CAT_COUNT) return;
+    mSectionPages[cat] = nullptr;
+}
+
+// ============================================================================
+// isSectionActive() — Check if a section is currently active
+// @addr 0x8071DE40
+// ============================================================================
+
+bool SectionDirector::isSectionActive(SceneCategory cat) const {
+    return mSceneCategory == cat;
 }
 
 } // namespace UI

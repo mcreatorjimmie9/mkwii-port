@@ -78,6 +78,15 @@ public:
     // @addr 0x805b01b0
     virtual u32 getSceneId() const;
 
+    // Lifecycle hooks
+    void onInit();
+    void onEnter();
+    void onExit();
+    void onUpdate(f32 dt);
+    void onDraw();
+    void setActive(bool active);
+    void requestTransition(u32 targetSceneId);
+
     // Sets generic user data pointer (passed during scene creation)
     // @addr 0x805b01c0
     void setUserData(void* data);
@@ -89,7 +98,7 @@ public:
     // State management
     SceneState getState() const { return m_state; }
     void setState(SceneState state) { m_state = state; }
-    bool isActive() const { return m_state == STATE_ACTIVE; }
+    bool isActive() const;
 
     // Transition support
     void beginTransition();
@@ -121,5 +130,7 @@ protected:
     s16 m_fadeDurationA;         // Duration for fade phase A (in frames)
     s16 m_fadeDurationB;         // Duration for fade phase B (in frames)
 };
+
+void SceneBase_printDebugInfo(const SceneBase* scene);
 
 } // namespace Scene

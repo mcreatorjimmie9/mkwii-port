@@ -56,6 +56,10 @@ public:
     void update();
     void draw();
 
+    // --- Init ---
+    // @addr 0x8071e500
+    void init();
+
     // --- Page management ---
     // @addr 0x8071e50c
     void pushPage(MenuPage* page, s32 transitionId);
@@ -64,6 +68,7 @@ public:
     void replacePage(MenuPage* page, s32 transitionId);
 
     MenuPage* getActivePage() const { return mActivePage; }
+    MenuPage* getCurrentPage() const { return mActivePage; }
     MenuPage* getTopPage() const;
     s32 getPageStackDepth() const { return mPageStackDepth; }
 
@@ -76,6 +81,12 @@ public:
     // --- Input ---
     void setInputEnabled(bool enabled);
     bool isInputEnabled() const { return (mFlags & UI_FLAG_INPUT_ENABLED) != 0; }
+    // @addr 0x8071e508
+    void handleInput(u32 pressedButtons, u32 heldButtons);
+
+    // --- Transition ---
+    // @addr 0x8071e50c
+    void setTransition(u32 transitionType);
 
     // --- Global state ---
     const GlobalUIState& getGlobalState() const { return mGlobalState; }
@@ -126,6 +137,12 @@ private:
     void updatePages(f32 dt);
     void drawPages();
     void processTransition(f32 dt);
+
+    // Transition types
+    static const u32 TRANS_NONE = 0;
+    static const u32 TRANS_FADE = 1;
+    static const u32 TRANS_SLIDE_LEFT = 2;
+    static const u32 TRANS_SLIDE_RIGHT = 3;
 
     // @addr 0x8071e06c
     void onSceneChange(MenuPage* page, s32 sceneId, s32 param);

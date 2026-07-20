@@ -297,4 +297,96 @@ void KartInput::setDeadzone(f32 radius) {
     m_deadzone = radius;
 }
 
+// @addr 0x80594400 (estimated)
+// Full initialization of the input system for a player.
+// Resets all state and configures the deadzone.
+void KartInput::init() {
+    memset(this, 0, sizeof(KartInput));
+    m_deadzone = DEFAULT_DEADZONE;
+}
+
+// @addr 0x80594450 (estimated)
+// Per-frame input update. Reads raw input, processes it,
+// and applies driver-assist filtering.
+void KartInput::update() {
+    readRawInput();
+    processInput();
+}
+
+// @addr 0x80594480 (estimated)
+// Get the horizontal stick input with default deadzone.
+// Convenience wrapper for getStickX(m_deadzone).
+f32 KartInput::getStickX() const {
+    return getStickX(m_deadzone);
+}
+
+// @addr 0x805944A0 (estimated)
+// Get the vertical stick input with default deadzone.
+// Convenience wrapper for getStickY(m_deadzone).
+f32 KartInput::getStickY() const {
+    return getStickY(m_deadzone);
+}
+
+// @addr 0x805944C0 (estimated)
+// Check if the brake button is being held.
+// In MKW, braking uses the B button or the L trigger (depending on controls).
+bool KartInput::isBraking() const {
+    return isButtonHeld(PAD_BUTTON_B) || (getTrigger(0) > 0.5f);
+}
+
+// @addr 0x805944E0 (estimated)
+// Check if the accelerate button is being held.
+// In MKW, acceleration uses the A button (automatic in most modes)
+// or the analog A button hold.
+bool KartInput::isAccelerating() const {
+    return isButtonHeld(PAD_BUTTON_A);
+}
+
+// @addr 0x80594500 (estimated)
+// Check if the player is actively drifting.
+// Drifting is initiated by holding the drift button (R trigger or B)
+// while steering left or right at sufficient speed.
+bool KartInput::isDrifting() const {
+    if (!isSteeringLeft() && !isSteeringRight()) return false;
+    return isButtonHeld(PAD_TRIGGER_R) || isButtonHeld(PAD_BUTTON_B);
+}
+
+// @addr 0x80594520 (estimated)
+// Get the L trigger value (brake/drift input).
+f32 KartInput::getTriggerL() {
+    return getTrigger(0);
+}
+
+// @addr 0x80594540 (estimated)
+// Get the R trigger value (drift/item use input).
+f32 KartInput::getTriggerR() {
+    return getTrigger(1);
+}
+
+// @addr 0x80594560 (estimated)
+// Apply deadzone to raw stick values in-place.
+// Uses the per-kart deadzone radius.
+void KartInput::applyDeadzone() {
+    f32 dz = m_deadzone;
+    f32 sx = currentInputState.stickX;
+    f32 sy = currentInputState.stickY;
+
+    // Circular deadzone
+    f32 mag = sqrtf(sx * sx + sy * sy);
+    if (mag < dz) {
+        currentInputState.stickX = 0.0f;
+        currentInputState.stickY = 0.0f;
+    } else if (mag > STICK_MAX) {
+        f32 scale = STICK_MAX / mag;
+        currentInputState.stickX = sx * scale;
+        currentInputState.stickY = sy * scale;
+    }
+}
+
+// @addr 0x80594580 (estimated)
+// Check if the item use button was pressed this frame.
+bool KartInput::isItemUse() const {
+    return isButtonPressed(PAD_BUTTON_X) || isButtonPressed(PAD_TRIGGER_Z);
+}
+
 } // namespace Kart

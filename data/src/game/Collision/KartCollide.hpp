@@ -116,6 +116,20 @@ public:
     void calcWheelCollision(s8 playerIdx, u32 wheelIdx, KartDynamics* kartDynamics, HitboxGroup* hitboxGroup, const EGG::Vector3f& colForce,
                     const EGG::Vector3f& wheelPos, f32 radius);
 
+    bool testFloor(KartCollisionInfo& kartColInfo, const Hitbox& hitbox,
+                   const ::Field::ColInfo& colInfo, u32* colTypeMask);
+    bool testWall(KartCollisionInfo& kartColInfo, const ::Field::ColInfo& colInfo,
+                  u32* colTypeMask);
+    bool testKart(const EGG::Vector3f& otherPos, f32 otherRadius) const;
+    void resolveCollision(KartDynamics* kartDynamics,
+                          const ::Field::ColInfo& colInfo, f32 bounceFactor);
+    u32 getContactInfo(EGG::Vector3f& outContactNormal, f32& outPenetration) const;
+    void setCollisionGroup(u32 groupMask);
+    void enableCollision();
+    void disableCollision();
+
+    // Free function declaration (defined in KartCollide.cpp)
+
     const EGG::Vector3f& getMovement() const { return movement; }
     f32 get1c() const { return wallBounceFactor; }
 
@@ -149,6 +163,9 @@ private:
     u8 _6a[2];                         // 0x6A: padding
     f32 _6c;                           // 0x6C: unknown (zeroed in init)
 };
+
+f32 KartCollide_calcMomentum(f32 massA, f32 massB, f32 relSpeed,
+                              f32 restitution, const EGG::Vector3f& colNormal);
 
 } // namespace Kart
 

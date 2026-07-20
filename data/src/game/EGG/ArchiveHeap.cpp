@@ -95,6 +95,99 @@ void ArchiveHeap::reset() {
     mUsedSize = 0;
 }
 
+// @addr 0x801763A0 — Get total free space in the archive heap
+u32 ArchiveHeap::getTotalFree() const {
+    if (mTotalSize < mUsedSize) return 0;
+    return mTotalSize - mUsedSize;
+}
+
+// @addr 0x801763E0 — Get the maximum contiguous free block size
+u32 ArchiveHeap::getMaxBlock() const {
+    // Linear allocator: all free space is contiguous at the tail
+    if (mCurrentPtr == nullptr || mBufferEnd == nullptr) return 0;
+    uintptr_t current = reinterpret_cast<uintptr_t>(mCurrentPtr);
+    uintptr_t end = reinterpret_cast<uintptr_t>(mBufferEnd);
+    if (end < current) return 0;
+    return static_cast<u32>(end - current);
+}
+
+// @addr 0x80176420 — Get the number of allocations made
+u32 ArchiveHeap::getAllocCount() const {
+    // Archive heap does not track individual allocation count
+    // since it is a linear bump allocator with no free support.
+    // Return 1 if any space has been used, 0 otherwise.
+    return mUsedSize > 0 ? 1 : 0;
+}
+
+// @addr 0x80176460 — Initialize archive heap with raw memory region
+void ArchiveHeap::init(u8* start, u32 size) {
+    mBufferStart = start;
+    mBufferEnd = start + size;
+    mCurrentPtr = start;
+    mTotalSize = size;
+    mUsedSize = 0;
+    mHeap = nullptr; // No backing heap — raw region mode
+}
+
+// @addr 0x801764C0 — Find which block contains the given pointer
+ArchiveHeap::BlockInfo ArchiveHeap::findBlock(void* ptr) const {
+    BlockInfo info;
+    info.start = nullptr;
+    info.size = 0;
+    info.index = 0;
+
+    if (ptr == nullptr || mBufferStart == nullptr) {
+        return info;
+    }
+
+    // In a linear allocator, we can only verify the pointer
+    // lies within the used region.
+    uintptr_t p = reinterpret_cast<uintptr_t>(ptr);
+    uintptr_t base = reinterpret_cast<uintptr_t>(mBufferStart);
+    uintptr_t current = reinterpret_cast<uintptr_t>(mCurrentPtr);
+
+    if (p >= base && p < current) {
+        info.start = mBufferStart;
+        info.size = mUsedSize;
+        info.index = 0;
+    }
+
+    return info;
+}
+
+// @addr 0x80176520 — Defragment is a no-op for linear allocators
+u32 ArchiveHeap::defragment() {
+    // Archive heap uses linear allocation — all free space is already
+    // contiguous at the end. No fragmentation is possible.
+    // Return 0 bytes reclaimed.
+    return 0;
+}
+
+// @addr 0x80176580 — Print archive heap statistics (declared outside namespace)
+// Implementation moved to end of file (outside EGG namespace).
+
+} // namespace EGG
+
+// @addr 0x80176580 — Print archive heap statistics to debug output
+void ArchiveHeap_printStats(const EGG::ArchiveHeap* heap) {
+    if (heap == nullptr) {
+        // OSReport("ArchiveHeap: null\n");
+        return;
+    }
+    u32 total = heap->getTotalFree() + heap->getUsedSize();
+    u32 used = heap->getUsedSize();
+    u32 freeSpace = heap->getTotalFree();
+    u32 maxBlock = heap->getMaxBlock();
+    // OSReport("ArchiveHeap: total=%u used=%u free=%u maxBlock=%u\n",
+    //          total, used, freeSpace, maxBlock);
+    (void)total;
+    (void)used;
+    (void)freeSpace;
+    (void)maxBlock;
+}
+
+namespace EGG {
+
 // ============================================================================
 // GroupHeap
 // ============================================================================
@@ -204,6 +297,54 @@ void GroupHeap::dumpGroupStats() const {
         //          current->groupId, current->totalSize, current->allocCount);
         current = current->next;
     }
+}
+
+// @addr 0x80176940 — Get total allocation count across all groups
+u32 GroupHeap::getTotalAllocCount() const {
+    return mTotalAllocs;
+}
+
+// @addr 0x80176980 — Check if a group exists
+bool GroupHeap::hasGroup(u16 groupId) const {
+    return findGroup(groupId) != nullptr;
+}
+
+// @addr 0x801769C0 — Create a new empty group (returns false if already exists)
+bool GroupHeap::createGroup(u16 groupId) {
+    if (findGroup(groupId) != nullptr) return false;
+    if (mHeap == nullptr) return false;
+
+    // Allocate new record from backing heap
+    GroupRecord* grp = static_cast<GroupRecord*>(/* mHeap->alloc */ nullptr);
+    if (grp == nullptr) return false;
+    grp->groupId = groupId;
+    grp->padding = 0;
+    grp->totalSize = 0;
+    grp->allocCount = 0;
+    grp->next = mGroups;
+    mGroups = grp;
+    return true;
+}
+
+// @addr 0x80176A40 — Remove a group record (does not free the blocks)
+bool GroupHeap::removeGroup(u16 groupId) {
+    GroupRecord* prev = nullptr;
+    GroupRecord* current = mGroups;
+    while (current != nullptr) {
+        if (current->groupId == groupId) {
+            if (prev != nullptr) {
+                prev->next = current->next;
+            } else {
+                mGroups = current->next;
+            }
+            // Free the record itself
+            // In real SDK: mHeap->free(current)
+            return true;
+        }
+        prev = current;
+        current = current->next;
+    }
+    return false;
 }
 
 // ============================================================================

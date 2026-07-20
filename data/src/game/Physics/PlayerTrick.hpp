@@ -54,10 +54,25 @@ public:
     virtual void updateRot();                   // 0x805764fc
 
     PlayerTrick();                               // 0x80575a44
+    void init(PlayerSub10* ps, PlayerPointers* ptrs);
     void updateNext();                             // 0x80575b38
     void tryStart(Vec3* left);                   // 0x80575d7c
     void update();                                 // 0x805763e4
     void end();                                    // 0x805766b8
+
+    // Query helpers
+    TrickType getTrickType() const { return type; }
+    TrickCategory getTrickCategory() const { return category; }
+    u8 getTrickState() const { return nextDirection; }
+
+    // Calculate the trick score boost duration.
+    s16 calcTrickScore() const;
+
+    // Get the animation ID for the current trick type.
+    s32 getAnimId() const;
+
+    // Check if a stick direction is valid for a trick input.
+    static bool isValidDirection(s32 stickX, s32 stickY);
 
     // === Field layout (from player.h) ===
     PlayerPointers* pointers;      // 0x00

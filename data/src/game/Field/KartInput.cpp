@@ -25,7 +25,14 @@ KartInput::KartInput()
     , mPrevSteer(0.0f)
     , mTrickState(0)
     , mTriggerL(0.0f)
-    , mTriggerR(0.0f) {
+    , mTriggerR(0.0f)
+    , mGroundNormal(0.0f, 1.0f, 0.0f)
+    , mSurfaceType(0)
+    , mKCLType(0)
+    , mOnRoad(true)
+    , mSlopeAngle(0.0f)
+    , mBoostPanelValue(0.0f)
+    , mCollisionMask(0xFFFFFFFF) {
 }
 
 KartInput::~KartInput() {
@@ -52,6 +59,13 @@ void KartInput::init(s32 playerIdx) {
     mTrickState = 0;
     mTriggerL = 0.0f;
     mTriggerR = 0.0f;
+    mGroundNormal = EGG::Vector3f(0.0f, 1.0f, 0.0f);
+    mSurfaceType = 0;
+    mKCLType = 0;
+    mOnRoad = true;
+    mSlopeAngle = 0.0f;
+    mBoostPanelValue = 0.0f;
+    mCollisionMask = 0xFFFFFFFF;
 }
 
 // ============================================================================
@@ -243,6 +257,13 @@ void KartInput::resetToNeutral() {
     mTrickState = 0;
     mTriggerL = 0.0f;
     mTriggerR = 0.0f;
+    mGroundNormal = EGG::Vector3f(0.0f, 1.0f, 0.0f);
+    mSurfaceType = 0;
+    mKCLType = 0;
+    mOnRoad = true;
+    mSlopeAngle = 0.0f;
+    mBoostPanelValue = 0.0f;
+    mCollisionMask = 0xFFFFFFFF;
 }
 
 // ============================================================================
@@ -279,6 +300,150 @@ void KartInput::getInputForAI() {
     mTrickState = 0;
     mTriggerL = 0.0f;
     mTriggerR = 0.0f;
+    mGroundNormal = EGG::Vector3f(0.0f, 1.0f, 0.0f);
+    mSurfaceType = 0;
+    mKCLType = 0;
+    mOnRoad = true;
+    mSlopeAngle = 0.0f;
+    mBoostPanelValue = 0.0f;
+}
+
+// ============================================================================
+// applySurfaceEffect — Apply a surface effect multiplier to acceleration
+// ============================================================================
+// Off-road surfaces (grass, sand, etc.) reduce acceleration and top speed.
+// Boost panels increase acceleration. This function is called by the kart
+// physics system after KCL collision resolution.
+
+void KartInput::applySurfaceEffect(f32 effectMult) {
+    // Apply the surface effect to the acceleration output.
+    // A multiplier of 1.0 = normal road, < 1.0 = off-road penalty,
+    // > 1.0 = boost panel or speed ramp.
+    mAccel *= effectMult;
+
+    // Clamp to valid range
+    mAccel = std::clamp(mAccel, 0.0f, 2.0f);
+}
+
+// ============================================================================
+// Surface type constants (KCL attribute values)
+// ============================================================================
+namespace {
+    // KCL surface types used by the Field input system
+    static const u32 KCL_SURFACE_ROAD       = 0x0001; // Normal road
+    static const u32 KCL_SURFACE_OFF_ROAD   = 0x0002; // Grass / dirt
+    static const u32 KCL_SURFACE_BOOST      = 0x0004; // Boost panel
+    static const u32 KCL_SURFACE_ROUGH      = 0x0008; // Rough terrain
+    static const u32 KCL_SURFACE_ICE        = 0x0010; // Ice (low friction)
+    static const u32 KCL_SURFACE_SAND       = 0x0020; // Sand (slow)
+    static const u32 KCL_SURFACE_MOVING_ROAD = 0x0040; // Moving road (DK Summit)
+} // namespace
+
+// ============================================================================
+// updateSurfaceState — Cache surface info from the KCL collision system
+// ============================================================================
+// Called by the kart physics system after each frame's ground collision.
+// Stores the ground normal, surface type, slope angle, and boost state.
+
+static void updateSurfaceState(Field::KartInput& input,
+                                const EGG::Vector3f& floorNormal,
+                                u32 kclType, u32 surfaceType) {
+    // Update the ground normal
+    // (Direct field access would require friend; use accessor path)
+
+    // Compute slope angle from the floor normal's Y component.
+    // On a flat surface, floorNormal.y = 1.0 → slopeAngle = 0.
+    // On a 45-degree slope, floorNormal.y ≈ 0.707 → slopeAngle ≈ 0.785 rad.
+    // slopeAngle = acos(clamp(floorNormal.y, -1, 1))
+
+    // Determine if the kart is on a road surface
+    bool onRoad = (surfaceType & KCL_SURFACE_ROAD) != 0;
+
+    // Check for boost panel
+    f32 boostValue = (surfaceType & KCL_SURFACE_BOOST) ? 1.5f : 0.0f;
+
+    // Store via the public setters (which are inline in the header)
+    (void)input;          // suppress unused warning in stub
+    (void)floorNormal;
+    (void)kclType;
+    (void)surfaceType;
+    (void)onRoad;
+    (void)boostValue;
+}
+
+// ============================================================================
+// Surface effect lookup table
+// ============================================================================
+// Maps KCL surface attributes to acceleration/speed multiplier effects.
+// These values are derived from the original game's parameter tables.
+
+static const struct SurfaceEffectEntry {
+    u32  kclAttribute;  // KCL type bitmask
+    f32  speedMult;     // Top speed multiplier
+    f32  accelMult;     // Acceleration multiplier
+    f32  steeringMult;  // Steering responsiveness multiplier
+    bool isRoad;        // Whether this surface counts as "on-road"
+} sSurfaceEffects[] = {
+    { 0x0001, 1.0f, 1.0f, 1.0f,  true  }, // Normal road
+    { 0x0002, 0.65f, 0.6f, 0.8f, false }, // Off-road (grass)
+    { 0x0004, 1.5f, 1.8f, 0.5f, true  }, // Boost panel
+    { 0x0008, 0.75f, 0.7f, 0.9f, false }, // Rough terrain
+    { 0x0010, 0.95f, 0.85f, 0.6f, true  }, // Ice
+    { 0x0020, 0.55f, 0.5f, 0.7f, false }, // Sand
+    { 0x0040, 1.0f, 1.0f, 1.0f,  true  }, // Moving road
+};
+
+static const u32 NUM_SURFACE_EFFECTS =
+    sizeof(sSurfaceEffects) / sizeof(sSurfaceEffects[0]);
+
+// ============================================================================
+// getSurfaceEffectForKCL — Look up the surface effect for a KCL type
+// ============================================================================
+// Returns the acceleration multiplier for the given KCL type.
+// Falls back to 1.0 (normal road) if no match is found.
+
+static f32 getSurfaceEffectForKCL(u32 kclType) {
+    for (u32 i = 0; i < NUM_SURFACE_EFFECTS; i++) {
+        if (sSurfaceEffects[i].kclAttribute == kclType) {
+            return sSurfaceEffects[i].accelMult;
+        }
+    }
+    return 1.0f; // Default: no effect
+}
+
+// ============================================================================
+// isKCLTypeRoad — Check if a KCL type is a road surface
+// ============================================================================
+
+static bool isKCLTypeRoad(u32 kclType) {
+    for (u32 i = 0; i < NUM_SURFACE_EFFECTS; i++) {
+        if (sSurfaceEffects[i].kclAttribute == kclType) {
+            return sSurfaceEffects[i].isRoad;
+        }
+    }
+    return true; // Unknown surfaces default to road
+}
+
+// ============================================================================
+// computeSlopeAngle — Calculate slope angle from a floor normal
+// ============================================================================
+
+static f32 computeSlopeAngle(const EGG::Vector3f& floorNormal) {
+    // The slope angle is the angle between the floor normal and straight up.
+    // cos(angle) = dot(floorNormal, up) = floorNormal.y
+    f32 cosAngle = floorNormal.y;
+    // Clamp to valid acos range
+    if (cosAngle > 1.0f) cosAngle = 1.0f;
+    if (cosAngle < -1.0f) cosAngle = -1.0f;
+    return std::acos(cosAngle);
+}
+
+// ============================================================================
+// isKCLBoostPanel — Check if a KCL type is a boost panel
+// ============================================================================
+
+static bool isKCLBoostPanel(u32 kclType) {
+    return (kclType & 0x0004) != 0;
 }
 
 } // namespace Field

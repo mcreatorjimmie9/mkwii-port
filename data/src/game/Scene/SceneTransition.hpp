@@ -213,6 +213,40 @@ private:
     /// Fire the completion callback if set.
     void fireCallback();
 
+    // Extended API
+    // @addr 0x80610AC0
+    void startFade(s32 targetScene, f32 duration);
+    // @addr 0x80610B00
+    void startWipe(s32 targetScene, f32 duration);
+    // @addr 0x80610B40
+    void update(f32 dt);
+    // @addr 0x80610BC0
+    void setColor(u8 r, u8 g, u8 b);
+    // @addr 0x80610C00
+    void setDuration(f32 durationSeconds);
+    // @addr 0x80610C40
+    void setHoldDuration(f32 holdSeconds);
+    // @addr 0x80610C80
+    f32 getHoldDuration() const;
+    // @addr 0x80610CC0
+    void startDissolve(f32 duration);
+    // @addr 0x80610D00
+    void startSlide(f32 duration, f32 direction);
+    // @addr 0x80610D40
+    const WipeParams& getWipeParams() const;
+    // @addr 0x80610D80
+    const DissolveParams& getDissolveParams() const;
+    // @addr 0x80610DC0
+    const SlideParams& getSlideParams() const;
+    // @addr 0x80610E00
+    void setFlags(u32 flags);
+    // @addr 0x80610E20
+    u32 getFlags() const;
+    // @addr 0x80610E40
+    f32 getFadeOutDurationSec() const;
+    // @addr 0x80610E60
+    f32 getFadeInDurationSec() const;
+
     // --- Members ---
 
     TransitionPhase    m_phase;           // 0x00 — Current phase
@@ -238,3 +272,6 @@ private:
 };
 
 } // namespace Scene
+
+// @addr 0x80610E80
+u32 SceneTransition_getCurrentScene();

@@ -102,6 +102,13 @@ public:
     // Mount / prepare the save directory
     s32 mount();
 
+    // @addr 0x804F8000
+    s32 init();
+    // @addr 0x804F8020
+    s32 mountSave();
+    // @addr 0x804F8040
+    s32 unmountSave();
+
     // Check if a save file exists
     bool exists();
 
@@ -158,10 +165,28 @@ public:
 
     // --- Integrity ---
     // Verify save file integrity (magic + checksum)
-    SaveError verifyIntegrity(const u8* data, u32 size);
+    SaveError verifyIntegrity(const u8* data, u32 size) const;
 
     // Calculate CRC32 over save data
     static u32 calculateCRC32(const u8* data, u32 size);
+
+    // --- Block operations ---
+    // @addr 0x804F8060
+    s32 readBlock(u32 blockIndex, u8* outBuffer, u32 blockSize);
+    // @addr 0x804F8080
+    s32 writeBlock(u32 blockIndex, const u8* data, u32 blockSize);
+
+    // --- Info ---
+    // @addr 0x804F80A0
+    s32 getFreeBlocks() const;
+    // @addr 0x804F80C0
+    u32 getSaveSize() const;
+
+    // --- Corruption ---
+    // @addr 0x804F80E0
+    bool checkCorruption() const;
+    // @addr 0x804F8100
+    s32 repairSave();
 
     // --- State ---
     bool isMounted() const { return mMounted; }
