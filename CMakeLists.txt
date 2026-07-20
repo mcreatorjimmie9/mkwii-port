@@ -62,6 +62,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/data/src/game/SaveData
     ${CMAKE_SOURCE_DIR}/data/src/game/Field
     ${CMAKE_SOURCE_DIR}/data/src/game/Collision
+    ${CMAKE_SOURCE_DIR}/data/src/game/KartMovement
     ${CMAKE_SOURCE_DIR}/data/src/game/AIRace
     ${CMAKE_SOURCE_DIR}/data/src/game/NW4R
     ${CMAKE_SOURCE_DIR}/data/src/game/EGG

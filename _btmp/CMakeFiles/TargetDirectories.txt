@@ -1,0 +1,4 @@
+/home/z/my-project/mkwii-port-repo/_btmp/CMakeFiles/mkwii-genesis.dir
+/home/z/my-project/mkwii-port-repo/_btmp/CMakeFiles/mkwii-linktest.dir
+/home/z/my-project/mkwii-port-repo/_btmp/CMakeFiles/edit_cache.dir
+/home/z/my-project/mkwii-port-repo/_btmp/CMakeFiles/rebuild_cache.dir

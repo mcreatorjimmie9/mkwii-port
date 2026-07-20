@@ -1,0 +1,1 @@
+/usr/bin/c++ -I/home/z/my-project/mkwii-port-repo/src/modules -Wl,--dependency-file=CMakeFiles/mkwii-linktest.dir/link.d "CMakeFiles/mkwii-linktest.dir/test/main.cpp.o" "CMakeFiles/mkwii-linktest.dir/test/link_stubs.cpp.o" -o mkwii-linktest  libmkwii-genesis.a

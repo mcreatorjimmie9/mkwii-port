@@ -50,6 +50,28 @@ public:
     /// zeroes velocity, and applies respawn invincibility frames.
     void doRespawn();
 
+    /// Compute the speed reduction factor when driving off-road.
+    /// Base penalty is 0.5 (half speed), modified by vehicle type,
+    /// KCL surface type, and active power-ups (star/mega bypass, trick boost reduces).
+    /// @addr 0x80570A54
+    f32 computeOffroadSpeedFactor();
+
+    /// Combine all active speed boosts into a single multiplier.
+    /// Mushroom/MT: +0.5, Star: x2, Bullet Bill: 3.0 (constant override).
+    /// @addr 0x80570B0C
+    f32 computeBoostSpeedMultiplier();
+
+    /// Push the kart out of a collision and reflect its velocity
+    /// component along the collision normal.
+    /// @addr 0x80570BF4
+    void applyCollisionResponse(const EGG::Vector3f& collisionNormal, f32 penetration);
+
+    /// Check if the kart is out of bounds and trigger respawn if needed.
+    /// Detects: Y position below threshold (fell off), and lateral OOB
+    /// (too far from track center).
+    /// @addr 0x80570C4C
+    void checkAndResetOOB();
+
     // ... many more methods (update, acceleration, turning, etc.) ...
 
     PlayerPointers* playerPointers;

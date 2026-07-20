@@ -29,6 +29,10 @@ enum KartFlags {
     KART_FLAG_MEGA = 5,
     KART_FLAG_RESPAWN_INVINCIBLE = 6,
     KART_FLAG_THUNDER = 7,
+    KART_FLAG_TRICK_BOOST = 8,
+    KART_FLAG_MUSHROOM = 9,
+    KART_FLAG_MINI_TURBO = 10,
+    KART_FLAG_OOB = 11,
     KART_FLAG_ALL_WHEELS_COLLISION = 15,
     KART_FLAG_STICKY_ROAD = 16,
     KART_FLAG_TOUCHING_GROUND = 18,
@@ -83,6 +87,7 @@ public:
     virtual ~KartState() {}
     bool on(int f) const { return (mFlags >> f) & 1; }
     void set(int f) { mFlags |= (1u << f); }
+    void reset(int f) { mFlags &= ~(1u << f); }
     void setBoostRampType(s32 t) { (void)t; }
     void setJumpPadType(s32 t) { (void)t; }
     void setHalfpipeInvisibilityTimer(s32 t) { (void)t; }

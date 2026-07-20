@@ -93,6 +93,39 @@ public:
     bool showVR() const { return mShowVR != 0; }
     void setShowVR(bool show) { mShowVR = show ? 1 : 0; }
 
+    // --- Online Settings ---
+    bool isOnlineNotify() const { return mOnlineNotify != 0; }
+    void setOnlineNotify(bool enabled) { mOnlineNotify = enabled ? 1 : 0; }
+
+    // --- Mario Kart Wii specific settings ---
+    enum TractionMode {
+        TRACTION_AUTO = 0,
+        TRACTION_MANUAL = 1,
+    };
+
+    TractionMode getTractionMode() const { return (TractionMode)mTractionMode; }
+    void setTractionMode(TractionMode mode) { mTractionMode = (u8)mode; }
+
+    // --- Display settings ---
+    enum ScreenMode {
+        SCREEN_NORMAL = 0,
+        SCREEN_WIDE   = 1,
+    };
+
+    ScreenMode getScreenMode() const { return (ScreenMode)mScreenMode; }
+    void setScreenMode(ScreenMode mode) { mScreenMode = (u8)mode; }
+
+    // --- Descriptive names ---
+    const char* getDriftModeName() const;
+    const char* getControlSchemeName() const;
+    const char* getLanguageName() const;
+
+    // --- Validate ---
+    bool validate() const;
+
+    // --- Apply ---
+    void apply() const;
+
     // --- Defaults ---
     void setDefaults();
 
@@ -111,7 +144,10 @@ private:
     u8  mLanguage;        // Game language
     u8  mTargetFPS;       // PC: 30 or 60
     u8  mShowVR;          // Show VR in online lobby
-    u8  _pad[0x07];
+    u8  mOnlineNotify;    // Online notification flag
+    u8  mTractionMode;    // Traction control (0: Auto, 1: Manual)
+    u8  mScreenMode;      // Display mode (0: Normal, 1: Wide)
+    u8  _pad2[0x07];      // Padding to 0x14 bytes total
 };
 
 } // namespace Save

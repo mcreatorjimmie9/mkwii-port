@@ -25,6 +25,9 @@ public:
         STATE_DESTROYED = 5,
     };
 
+    // Fade duration constants used by calcFade
+    static const s16 FADE_DURATION_DEFAULT = 30; // ~0.5 seconds at 60fps
+
     SceneBase();
     virtual ~SceneBase();
 
@@ -37,6 +40,51 @@ public:
     virtual void load();
     virtual void unload();
     virtual void reset();
+
+    // Fade control
+    // Advances fade timers, computes alpha from timer, sets complete flags
+    // @addr 0x805b0100
+    virtual void calcFade();
+
+    // Returns true if either fade timer is currently active
+    // @addr 0x805b0140
+    virtual bool isFading() const;
+
+    // Sets the current fade alpha value (0 = fully transparent, 255 = opaque)
+    // @addr 0x805b0160
+    void setFadeColor(u8 alpha);
+
+    // Gets the current fade alpha value
+    // @addr 0x805b0170
+    u8 getFadeAlpha() const;
+
+    // Loading progress
+    // Updates loading status and sub-status fields used by the loading screen
+    // @addr 0x805b0180
+    void setLoadProgress(u32 status, u32 subStatus);
+
+    // Returns loading progress as a float percentage [0.0, 1.0]
+    // Computed from m_loadStatus and m_loadSubStatus
+    // @addr 0x805b0190
+    f32 getLoadProgress() const;
+
+    // Scene info
+    // Sets the scene identifier used by SceneDirector for routing
+    // @addr 0x805b01a0
+    void setSceneId(u32 id);
+
+    // Gets the scene identifier (virtual — override in derived scenes if needed)
+    // Default implementation returns m_sceneId
+    // @addr 0x805b01b0
+    virtual u32 getSceneId() const;
+
+    // Sets generic user data pointer (passed during scene creation)
+    // @addr 0x805b01c0
+    void setUserData(void* data);
+
+    // Gets generic user data pointer
+    // @addr 0x805b01d0
+    void* getUserData() const;
 
     // State management
     SceneState getState() const { return m_state; }
@@ -52,9 +100,6 @@ public:
     u32 getFrameCount() const { return m_frameCount; }
     void incrementFrame() { m_frameCount++; }
 
-    // Scene type ID for the director
-    virtual u32 getSceneId() const = 0;
-
 protected:
     SceneState m_state;          // 0xC4
     bool m_isTransitioning;      // 0xD1
@@ -69,6 +114,12 @@ protected:
     u32 m_frameCount;            // 0x100 area
     u32 m_sceneId;               // Scene identifier
     void* m_userData;            // Generic user data pointer
+
+    // Fade configuration
+    static const u8 FADE_ALPHA_OPAQUE = 0xFF;
+    static const u8 FADE_ALPHA_TRANSPARENT = 0x00;
+    s16 m_fadeDurationA;         // Duration for fade phase A (in frames)
+    s16 m_fadeDurationB;         // Duration for fade phase B (in frames)
 };
 
 } // namespace Scene
