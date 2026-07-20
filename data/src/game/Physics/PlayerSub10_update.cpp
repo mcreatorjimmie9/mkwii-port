@@ -67,42 +67,10 @@ void  sub_startSquishEffect(void* p, s32);               // 0x8056c7d4
 void  sub_getNoInputSquish(void* p, s32);                // 0x80591498
 } // extern "C"
 
-// ============================================================================
-// PlayerSub10() — Constructor
-// 0x80577fc4 (344 bytes)
-// ============================================================================
-// Initializes the base class, zeroes boost and drift fields, sets scale
-// fields, and reads the initial speed from a global parameter table based
-// on the CC class (50/100/150cc).
-// ============================================================================
-PlayerSub10::PlayerSub10() {
-    // Call base class constructor (allocator / vtable setup)
-    // sub_0x0005d930();
+// PlayerSub10::PlayerSub10() moved to PlayerSub10.cpp
 
-    // Zero boost object (0x108 - 0x12B)
-    // Zero scale fields at 0x164-0x184
-    // Zero trick/zipper pointers at 0x258-0x25C
-    // Zero ghostVanishTimer at 0x290
-
-    // Read CC class from global to set speedMultiplier at 0x010
-    // Global[0xb6c] gives vehicle body type; CC class selected by global[0xb70]
-    // Vehicle types 3-7 use CC-based speed multiplier; others default to 0.0
-
-    // If vehicle type check passes:
-    //   speedMultiplier = globalSpeedTable[vehicleType]
-    // else:
-    //   speedMultiplier = 0.0f
-}
-
-// ============================================================================
-// init(isBike, isRemote)
-// 0x805784d4 (1032 bytes)
-// ============================================================================
-// Full initialization of all physics fields. Zeros most state, sets up
-// initial position/direction vectors, KCL factors, drift state, timers,
-// and creates sub-objects (boost, trick, zipper).
-// ============================================================================
-void PlayerSub10::init(bool isBike, bool isRemote) {
+// PlayerSub10::init() moved to PlayerSub10.cpp
+/* void PlayerSub10::init(bool isBike, bool isRemote) {
     // Call sub_0x0005e018 — base init
 
     // Read vehicle parameter from global
@@ -186,7 +154,7 @@ void PlayerSub10::init(bool isBike, bool isRemote) {
     // Store to some field
 
     // Call sub_0x0005e67c (some post-init setup)
-}
+} */
 
 // ============================================================================
 // update()
@@ -300,25 +268,11 @@ void PlayerSub10::updateDir() {
 // Reads stick input, applies turn rate modifiers (drift, offroad, etc.),
 // and computes effectiveTurn. Virtual — bike override adds wheelie logic.
 // ============================================================================
-void PlayerSub10::updateTurn() {
-    // Reset rawTurn = 0.0f and effectiveTurn = 0.0f
-
-    // Check player state flags:
-    //   bit 27 (0x08000000): bullet bill — skip
-    //   bit 12 (0x10000000): something — skip
-    //   bit 28 (0x20000000): wall collision — negate
-    //   bit 20 (0x00100000): standstill — special
-
-    // Read stick X input, store to rawTurn (0x288)
-    // Apply modifiers: offroad, drift state, KCL factors
-    // Clamp effectiveTurn to min/max turn tables
-
-    // If not in wall-collision state:
-    //   Apply effectiveTurn to outsideDriftAngle
-    //   Clamp with turn rate tables (acceleration/deceleration)
-
-    // Update conservedTurn (0x15C) with smoothing
-}
+// PlayerSub10::updateTurn() moved to PlayerSub10.cpp
+/*
+    // updateTurn: moved to PlayerSub10.cpp
+    // 0x8057a8b4 — steer processing
+*/
 
 // ============================================================================
 // updateVehicleSpeed()
@@ -327,17 +281,11 @@ void PlayerSub10::updateTurn() {
 // Computes vehicleSpeed from baseSpeed, boost multiplier, KCL factors,
 // and various state modifiers. Virtual — bike override adds wheelie bonus.
 // ============================================================================
-void PlayerSub10::updateVehicleSpeed() {
-    // If game paused or in special state, return
-
-    // Get KartPhysics speed magnitude
-    // Compute effective speed from baseSpeed * speedMultiplier
-    // Apply boost multiplier from PlayerBoost
-    // Apply KCL speed factor, shock multiplier, etc.
-
-    // Clamp to hardSpeedLimit
-    // Store to vehicleSpeed (0x020)
-}
+// PlayerSub10::updateVehicleSpeed() moved to PlayerSub10.cpp
+/*
+    // updateVehicleSpeed: moved to PlayerSub10.cpp
+    // 0x8057ab68 — speed processing
+*/
 
 // ============================================================================
 // updateAcceleration()

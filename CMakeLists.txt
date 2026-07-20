@@ -77,6 +77,7 @@ set(PHYSICS_SOURCES
     data/src/game/Physics/PlayerPhysics.cpp
     data/src/game/Physics/PlayerBoost.cpp
     data/src/game/Physics/PlayerTrick.cpp
+    data/src/game/Physics/PlayerSub10.cpp
     data/src/game/Physics/PlayerSub10Bike.cpp
     data/src/game/Physics/PlayerSub10_boost.cpp
     data/src/game/Physics/PlayerSub10_update.cpp
@@ -103,6 +104,8 @@ set(KARTMOVEMENT_SOURCES
     data/src/game/KartMovement/KartWheelie.cpp
     data/src/game/KartMovement/KartDrift.cpp
     data/src/game/KartMovement/KartAir.cpp
+    data/src/game/KartMovement/KartSus.cpp
+    data/src/game/KartMovement/KartMovement.cpp
 )
 
 # --- RaceEngine (10 files) ---
@@ -137,6 +140,7 @@ set(AIRACE_SOURCES
     data/src/game/AIRace/AISpeed.cpp
     data/src/game/AIRace/AILookAt.cpp
     data/src/game/AIRace/AIManager.cpp
+    data/src/game/AIRace/AIInfo.cpp
 )
 
 # --- Collision (10 files) ---
@@ -202,6 +206,7 @@ set(RENDERING_SOURCES
     data/src/game/Rendering/Camera.cpp
     data/src/game/Rendering/FogSystem.cpp
     data/src/game/Rendering/ShadowManager.cpp
+    data/src/game/Rendering/RenderUtil.cpp
 )
 
 # --- Scene (14 files) ---
