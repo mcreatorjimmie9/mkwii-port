@@ -128,6 +128,12 @@ set(AIRACE_SOURCES
     data/src/game/AIRace/AIRoad.cpp
     data/src/game/AIRace/AIDrift.cpp
     data/src/game/AIRace/AIItem.cpp
+    data/src/game/AIRace/AIPath.cpp
+    data/src/game/AIRace/AIRank.cpp
+    data/src/game/AIRace/AIProbability.cpp
+    data/src/game/AIRace/AISpeed.cpp
+    data/src/game/AIRace/AILookAt.cpp
+    data/src/game/AIRace/AIManager.cpp
 )
 
 # --- Collision (10 files) ---
@@ -295,12 +301,16 @@ set(NETWORK_SOURCES
     data/src/game/Online/NWC24Manager.cpp
 )
 
-# --- Field (4 files) ---
+# --- Field (10 files, Phase 27) ---
 set(FIELD_SOURCES
     data/src/game/Field/KCollision.cpp
     data/src/game/Field/CourseColManager.cpp
     data/src/game/Field/KartInput.cpp
     data/src/game/Field/InputManager.cpp
+    data/src/game/Field/CourseData.cpp
+    data/src/game/Field/CheckpointSystem.cpp
+    data/src/game/Field/StartGrid.cpp
+    data/src/game/Field/RoutePoint.cpp
 )
 
 # --- NW4R Graphics Wrappers (8 files) ---
