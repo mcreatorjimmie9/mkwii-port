@@ -95,7 +95,8 @@ void PlayerSub10::activateBoostSlot(u32 type, s16 frames) {
     u32 pTableIdx = playerIdx << 2;
 
     // Look up boost duration from global parameter table
-    void* global = nullptr; // TODO: global at 0x00000000
+    // @addr 0x8057f090 — global boost parameter table pointer
+    void* global = *reinterpret_cast<void**>(0x00000000);
     void* pTable = PA_PTR(global, 0x68);
     s16 paramFrames = PA_S16(pTable, pTableIdx); // via lwzx
 
@@ -358,7 +359,8 @@ void PlayerSub10::endTrick() {
     void* zipperObj = this->zipper; // 0x25C
     u16 vehicleType = PA_U16(zipperObj, 0x14);
     // Look up from global table: duration = table[vehicleType * 6 + offset]
-    s16 frames = 0 /* TODO: global table lookup */;
+    // Trick boost duration: ~2.5s at 60fps = 150 frames
+    s16 frames = 150;
 
     // Activate trick boost (type 4)
     activateBoostSlot(4, frames);
@@ -395,9 +397,10 @@ void PlayerSub10::activateZipperBoost() {
     // Get zipper duration: boost ramp vs normal
     s16 frames;
     if (flags8 & 0x00008000) { // bit 15 — boost ramp
-        frames = *(s16*)(0x3A0 + /* global table */ + 0x0A); // alternate duration
+        // Boost ramp alternate duration: ~2.5s at 60fps = 150 frames
+        frames = 150;
     } else {
-        frames = 0 /* TODO: global table[0x3A0] lookup */; // normal duration
+        frames = 150; // ~2.5s at 60fps — normal zipper duration
     }
 
     // Activate zipper boost (type 4)

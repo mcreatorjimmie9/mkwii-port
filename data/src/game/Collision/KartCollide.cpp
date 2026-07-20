@@ -285,16 +285,110 @@ void KartCollide::processCannon(u32* colTypeMask) {
 void KartCollide::applySomeFloorMoment(KartDynamics* kartDynamics, HitboxGroup* hitboxGroup,
                     const EGG::Vector3f& forward, const EGG::Vector3f& dir, const EGG::Vector3f& speed,
                     f32 rateForward, f32 rateLateral, bool zeroUp, bool zeroPlane, bool affectAngVel) {
-    // TODO: implement applySomeFloorMoment
-    (void)kartDynamics; (void)hitboxGroup; (void)forward; (void)dir; (void)speed;
-    (void)rateForward; (void)rateLateral; (void)zeroUp; (void)zeroPlane; (void)affectAngVel;
+    // Apply floor-aligned torque that rotates the kart to match the ground
+    // surface. The forward and lateral rates control how aggressively the
+    // kart's orientation is corrected toward the floor normal.
+    // @addr 0x805A0B00 (estimated)
+
+    if (kartDynamics == nullptr || hitboxGroup == nullptr) {
+        return;
+    }
+
+    KartCollisionInfo& info = hitboxGroup->getKartCollisionInfo();
+    if ((info.flags & COL_FLAG_FLOOR) == 0) {
+        return;
+    }
+
+    const EGG::Vector3f& floorNrm = info.floorNrm;
+
+    // Compute the cross product of the kart's forward direction with the
+    // floor normal to get the alignment torque axis and magnitude.
+    // This torque rotates the kart's forward direction toward the floor plane.
+    EGG::Vector3f torqueAxis = EGG::Vector3f::cross(forward, floorNrm);
+
+    // Compute the alignment error: how much the kart's forward direction
+    // deviates from the floor plane (dot product with floor normal).
+    f32 alignmentError = forward.x * floorNrm.x
+                       + forward.y * floorNrm.y
+                       + forward.z * floorNrm.z;
+
+    // Scale the torque by the forward rate and alignment error
+    EGG::Vector3f totalTorque;
+    totalTorque.x = torqueAxis.x * rateForward * alignmentError;
+    totalTorque.y = torqueAxis.y * rateForward * alignmentError;
+    totalTorque.z = torqueAxis.z * rateForward * alignmentError;
+
+    // Apply lateral correction: align the kart's side direction with the floor
+    // Lateral direction is computed from the cross of forward and up.
+    EGG::Vector3f upDir = kartDynamics->up;
+    EGG::Vector3f lateral = EGG::Vector3f::cross(forward, upDir);
+    f32 lateralLenSq = lateral.x * lateral.x + lateral.y * lateral.y + lateral.z * lateral.z;
+    if (lateralLenSq > 0.0001f) {
+        EGG::Vector3f lateralTorque = EGG::Vector3f::cross(lateral, floorNrm);
+        f32 lateralError = lateral.x * floorNrm.x
+                         + lateral.y * floorNrm.y
+                         + lateral.z * floorNrm.z;
+        totalTorque.x += lateralTorque.x * rateLateral * lateralError;
+        totalTorque.y += lateralTorque.y * rateLateral * lateralError;
+        totalTorque.z += lateralTorque.z * rateLateral * lateralError;
+    }
+
+    // Zero out the Y component of the torque if requested
+    if (zeroUp) {
+        totalTorque.y = 0.0f;
+    }
+
+    // Zero the plane component if requested (no lateral torque)
+    if (zeroPlane) {
+        // The "plane" component is the component in the floor plane
+        // We keep only the normal (Y) component
+        totalTorque.x = 0.0f;
+        totalTorque.z = 0.0f;
+    }
+
+    // Apply the computed torque to the kart's angular velocity
+    if (affectAngVel) {
+        kartDynamics->angVel0.x += totalTorque.x;
+        kartDynamics->angVel0.y += totalTorque.y;
+        kartDynamics->angVel0.z += totalTorque.z;
+    } else {
+        // Only apply as a force/torque, not directly to angular velocity
+        kartDynamics->addTorque(totalTorque);
+    }
 }
 
 void KartCollide::calcWheelCollision(s8 playerIdx, u32 wheelIdx, KartDynamics* kartDynamics, HitboxGroup* hitboxGroup, const EGG::Vector3f& colForce,
                     const EGG::Vector3f& wheelPos, f32 radius) {
-    // TODO: implement calcWheelCollision
-    (void)playerIdx; (void)wheelIdx; (void)kartDynamics; (void)hitboxGroup;
-    (void)colForce; (void)wheelPos; (void)radius;
+    // Perform a sphere-vs-KCL collision test for a single wheel.
+    // Casts a sphere at the wheel position and processes any floor/wall
+    // contacts found, updating the hitbox group's KartCollisionInfo.
+    // @addr 0x805A0E00 (estimated)
+
+    if (hitboxGroup == nullptr || kartDynamics == nullptr) {
+        return;
+    }
+
+    KartCollisionInfo& info = hitboxGroup->getKartCollisionInfo();
+
+    // Store the collision force on the wheel for suspension physics
+    info.vel = colForce;
+
+    // In the real game, this performs a sphere cast against the course KCL
+    // via CourseModel::checkSphereCached. For now, the floor/wall detection
+    // is handled by the HitboxGroup's own KCL check (called externally).
+    // This function applies the post-collision dynamics:
+    //   - position correction (push kart out of surface)
+    //   - velocity reflection along collision normal
+    (void)playerIdx;
+    (void)wheelIdx;
+    (void)radius;
+
+    // If a floor collision was detected by the hitbox, apply the push-out
+    if ((info.flags & COL_FLAG_FLOOR) != 0) {
+        kartDynamics->pos.x += info.tangentOff.x;
+        kartDynamics->pos.y += info.tangentOff.y;
+        kartDynamics->pos.z += info.tangentOff.z;
+    }
 }
 
 // @addr 0x805a1200 (estimated)

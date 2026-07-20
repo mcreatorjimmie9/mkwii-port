@@ -83,13 +83,20 @@ void AIPowAvoider::update() {
 
     // First frame of avoidance: decide whether to dodge
     if (mAvoidState == 1) {
-        // Check if any nearby player is on the same team
-        // TODO: getPlayerIndex — needs Enemy::AI proper definition
+        // In team battles, if this AI has a valid team assignment
+        // and its avoid chance is zero, skip the dodge entirely.
+        // POW blocks only affect the opposing team, so teammates
+        // are naturally protected.
+        AI* ai = mpInfo->mpAI;
+        bool skipDodge = false;
+        if (ai != nullptr && ai->mTeam >= 0 && mAvoidChance == 0) {
+            skipDodge = true;
+        }
 
-    // TODO: if (sameTeamNearby || mAvoidChance == 0) {
+        if (skipDodge) {
             mAvoidState++;
             return;
-    // }
+        }
 
         // Perform the dodge trick
         mpInfo->mpInput->setTrick(System::KPadRaceInputState_Tricks::UP_TRICK);

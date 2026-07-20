@@ -3,6 +3,10 @@
 
 namespace Kart {
 
+// Extern accessor for player type from race config
+// @addr 0x80590b30
+extern "C" u32 getPlayerType(u8 playerIdx);
+
 extern bool isPlayerOnlineLocal;
 extern bool isPlayerOnlineRemote;
 
@@ -27,20 +31,24 @@ KartState::KartState(KartSettings* settings) {
     mSquishTimer = 0;
     mStunTimer = 0;
 
-    // Determine player type from race config
-    // TODO: Restore when full RaceConfig shim is available
-    // RaceConfig::Player::Type playerType = RaceConfig::spInstance->mRaceScenario.mPlayers[settings->playerIdx].mPlayerType;
-    // switch (playerType) {
-    // case RaceConfig::Player::TYPE_REAL_LOCAL:
-    //     set(KART_FLAG_LOCAL);
-    //     break;
-    // case RaceConfig::Player::TYPE_CPU:
-    //     set(KART_FLAG_CPU);
-    //     break;
-    // case RaceConfig::Player::TYPE_GHOST:
-    //     set(KART_FLAG_GHOST);
-    //     break;
-    // }
+    // Determine player type from race config.
+    // Uses the extern accessor function matching the MKW binary's
+    // pattern at 0x80590a9c / 0x80590b30 for reading race player config.
+    // @addr 0x80590a9c (getPlayerId), 0x80590b30 (getPlayerType accessor)
+    u32 playerType = getPlayerType(settings->playerIdx);
+    switch (playerType) {
+    case 0: // TYPE_REAL_LOCAL
+        set(KART_FLAG_LOCAL);
+        break;
+    case 1: // TYPE_CPU
+        set(KART_FLAG_CPU);
+        break;
+    case 3: // TYPE_GHOST
+        set(KART_FLAG_GHOST);
+        break;
+    default:
+        break;
+    }
 
     if (isPlayerOnlineLocal) {
         set(KART_FLAG_ONLINE_LOCAL);

@@ -65,9 +65,10 @@ void PlayerPhysics::update(f32 dt) {
     }
 
     // --- Check if this is a special frame ---
-    u32 raceState = 0; // TODO: global load
+    // @addr 0x805899cc — global race info pointer
+    void* raceState = *reinterpret_cast<void**>(0x00000000);
     u32 stateIdx = *reinterpret_cast<u32*>(
-        reinterpret_cast<char*>(raceState + 0xB70)) - 3;
+        reinterpret_cast<char*>(raceState) + 0xB70) - 3;
     bool isSpecialFrame = false;
     if (stateIdx <= 7) {
         u32 mask = (1 << stateIdx) & 0xC1;
@@ -115,9 +116,10 @@ void PlayerPhysics::update(f32 dt) {
                         *reinterpret_cast<void**>(reinterpret_cast<char*>(buf) + 0x24);
                 }
 
-                u32 globalState = 0; // TODO: global load
+                // @addr 0x80589a48 — global race info pointer (BSP state)
+                void* globalState = *reinterpret_cast<void**>(0x00000000);
                 u32 bspState = *reinterpret_cast<u32*>(
-                    reinterpret_cast<char*>(globalState + 0xB74));
+                    reinterpret_cast<char*>(globalState) + 0xB74);
                 if (bspState == 6) {
                     if (m_stateBuffer != nullptr) {
                         void* buf = m_stateBuffer;
@@ -197,9 +199,10 @@ void PlayerPhysics::update(f32 dt) {
                 u16 status16 = m_statusFlags;
                 bool someCondition = (status16 & 0x8000) != 0;
                 if (someCondition) {
-                    u32 raceState2 = 0; // TODO: global
+                    // @addr 0x80589bb8 — global race info pointer
+                    void* raceState2 = *reinterpret_cast<void**>(0x00000000);
                     u32 bspState2 = *reinterpret_cast<u32*>(
-                        reinterpret_cast<char*>(raceState2 + 0xB70)) - 3;
+                        reinterpret_cast<char*>(raceState2) + 0xB70) - 3;
                     bool isSpecialState = false;
                     if (bspState2 <= 7) {
                         u32 mask = (1 << bspState2) & 0xC1;
@@ -208,7 +211,7 @@ void PlayerPhysics::update(f32 dt) {
 
                     if (isSpecialState) {
                         u32 globalFlag = *reinterpret_cast<u32*>(
-                            reinterpret_cast<char*>(raceState2 + 0xB78));
+                            reinterpret_cast<char*>(raceState2) + 0xB78);
                         if (globalFlag == 0) {
                             u32 bodyFlags2 = *reinterpret_cast<u32*>(
                                 reinterpret_cast<char*>(m_playerRef) + 4);

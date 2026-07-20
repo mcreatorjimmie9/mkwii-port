@@ -197,6 +197,11 @@ public:
     // Updates fade/pitch ramp state. Called once per frame.
     void update();
 
+    // --- Category Volume ---
+    // @addr 0x80512D8C
+    // Applies a category-level volume multiplier to this handle.
+    void setCategoryVolume(f32 catVolume);
+
     // --- Internal ---
     void attach(SoundStartable* sound);
 

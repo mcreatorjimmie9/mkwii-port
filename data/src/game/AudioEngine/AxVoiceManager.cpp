@@ -114,10 +114,9 @@ void AxVoiceManager::shutdown() {
     // Stop and free all active voices
     for (u32 i = 0; i < m_maxVoices; i++) {
         if (m_voices[i].state != AX_VOICE_STATE_FREE) {
-        // TODO: alSourceStop — needs OpenAL stub
+            // /* AX_SDK: AXStopVoice() → alSourceStop() */
             if (m_voices[i].alSource != 0) {
-        // TODO: alSourceStop — needs OpenAL stub
-                alDeleteSources(1, &m_voices[i].alSource);
+                alSourceStop(m_voices[i].alSource);
                 if (m_voices[i].alBuffer != 0) {
                     alDeleteBuffers(1, &m_voices[i].alBuffer);
                 }
@@ -182,9 +181,9 @@ s32 AxVoiceManager::allocVoice(u32 priority, u32 ownerId, void* userData) {
         s32 stealIdx = findLowestPriorityVoice(priority);
         if (stealIdx >= 0) {
             // Stop the stolen voice first
-        // TODO: alSourceStop — needs OpenAL stub
+            /* AX_SDK: AXStopVoice() → alSourceStop() */
             if (m_voices[stealIdx].alSource != 0) {
-        // TODO: alSourceStop — needs OpenAL stub
+                alSourceStop(m_voices[stealIdx].alSource);
             }
             m_voices[stealIdx].state = AX_VOICE_STATE_FREE;
             m_voices[stealIdx].active = 0;
@@ -245,9 +244,9 @@ bool AxVoiceManager::freeVoice(u32 voiceIndex) {
     AxVoiceDesc& voice = m_voices[voiceIndex];
 
     // Stop playback first
-        // TODO: alSourceStop — needs OpenAL stub
+    /* AX_SDK: AXStopVoice() → alSourceStop() */
     if (voice.alSource != 0) {
-        // TODO: alSourceStop — needs OpenAL stub
+        alSourceStop(voice.alSource);
     }
 
     voice.state = AX_VOICE_STATE_FREE;
@@ -422,8 +421,8 @@ bool AxVoiceManager::stopVoice(u32 voiceIndex) {
     voice.state = AX_VOICE_STATE_STOPPING;
 
     if (voice.alSource != 0) {
-        // TODO: alSourceStop — needs OpenAL stub
-        // TODO: alSourceStop — needs OpenAL stub
+        // /* AX_SDK: AXStopVoice() → alSourceStop() */
+        alSourceStop(voice.alSource);
     }
 
     // Transition to stopped after one frame

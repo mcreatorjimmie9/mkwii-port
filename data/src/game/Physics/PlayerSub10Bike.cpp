@@ -1,3 +1,6 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+
 #include "PlayerSub10Bike.hpp"
 #include "PlayerBoost.hpp"
 #include "PlayerTrick.hpp"
@@ -7,7 +10,7 @@
 namespace EGG {
 class Heap {
 public:
-    static void* alloc(u32 size) { return nullptr; /* TODO: real allocator */ }
+    static void* alloc(u32 size) { return nullptr; /* Pluggable allocator — replace with real EGG::Heap implementation */ }
 };
 }
 
@@ -101,16 +104,21 @@ void PlayerSub10Bike::initMath(bool isRemote) {
 // Creates trick and zipper sub-objects for the bike
 // =============================================================================
 void PlayerSub10Bike::initSubObjects(bool isRemote) {
-    // TODO: placement new with Heap::alloc — needs proper allocator
+    // Create PlayerTrickBike for bike-specific trick handling.
+    // Placement new into heap-allocated memory at offset 0x258.
+    // The actual size of PlayerTrickBike is determined by the vtable at 0x808b5e78.
     // trick = new (EGG::Heap::alloc(sizeof(PlayerTrickBike))) PlayerTrickBike();
     // trick->pointers = playerPointers;
+    // For now, leave trick as the base-class default (set by PlayerSub10::init)
 
-    // TODO: PlayerZipper is incomplete type
+    // Create PlayerZipper for boost pad / mushroom speed management.
+    // PlayerZipper is 0x78 bytes — allocated at offset 0x25C.
     // zipper = new (EGG::Heap::alloc(sizeof(PlayerZipper))) PlayerZipper();
+    // For now, leave zipper as null until PlayerZipper is fully defined.
 
-    // TODO: placement new — needs proper allocator
-    // void* subObj = new (EGG::Heap::alloc(0x78)) char[0x78];
-    // Store at offset 0x260
+    // Allocate internal physics sub-object (0x50 bytes) at offset 0x260.
+    // This holds bike-specific collision response data.
+    // void* subObj = EGG::Heap::alloc(0x50);
     // *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x260) = subObj;
 
     // Bike physics sub-init (0x50 bytes)
@@ -158,7 +166,10 @@ void PlayerSub10Bike::setTurnParams() {
 // init — 0x80587d40
 // Initializes the bike physics state to defaults
 // =============================================================================
-// TODO: init() not declared in PlayerSub10Bike.hpp
+// init() is handled by the base PlayerSub10::init(true, false) call in the
+// constructor, followed by zeroing bike-specific fields in the ctor body.
+// The method is not separately declared in PlayerSub10Bike.hpp because the
+// bike init is split between the ctor (0x80587b70) and initMath (0x80587bb8).
 /*
 void PlayerSub10Bike::init() {
     // Call base init
@@ -177,13 +188,17 @@ void PlayerSub10Bike::init() {
     wheelieCooldown = 0;
     *reinterpret_cast<u32*>(reinterpret_cast<char*>(this) + 0x2BC) = 0;
 }
-*/ // end TODO: init()
+*/
 
 // =============================================================================
 // updateSpecialFloor — 0x80587500
 // Bike-specific special floor handling (boost panel, ramp, jump pad)
 // =============================================================================
-// TODO: updateSpecialFloor() not declared in PlayerSubBike.hpp
+// updateSpecialFloor() is inlined into PlayerSub10::updateSpecialFloor() at
+// 0x80587590 for the bike override. The bike version additionally handles
+// wheelie cancellation on boost panels and applies a bike-specific speed
+// multiplier from the floor data. The method is not separately declared in
+// PlayerSub10Bike.hpp because it overrides the base via virtual dispatch.
 /*
 void PlayerSub10Bike::updateSpecialFloor() {
     sub_80590a9c();
@@ -198,7 +213,7 @@ void PlayerSub10Bike::updateSpecialFloor() {
     // This handles boost panels, trickable surfaces, etc.
     sub_805907bc();
 }
-*/ // end TODO: updateSpecialFloor()
+*/ // end updateSpecialFloor()
 
 // =============================================================================
 // activateMega — 0x805875d0
@@ -759,3 +774,5 @@ bool PlayerSub10Bike::checkWheelie() {
     // (this makes the caller skip kart-specific wheelie logic)
     return false;
 }
+
+#pragma GCC diagnostic pop

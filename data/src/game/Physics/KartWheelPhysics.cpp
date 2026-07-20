@@ -6,7 +6,7 @@
 namespace EGG {
 class Heap {
 public:
-    static void* alloc(u32 size) { return nullptr; /* TODO: real allocator */ }
+    static void* alloc(u32 size) { return ::operator new(size); }
 };
 }
 
@@ -118,7 +118,7 @@ void KartWheelPhysics::calcCollision(const EGG::Vector3f& bottom,
     sub_805b42c0();
 
     // Get speed scalar for collision response
-    f32 speedVal;
+    f32 speedVal = 0.0f;
     sub_80592e24();
     f32 speedSq = speedVal * speedVal;
 
@@ -347,7 +347,7 @@ void KartSusPhysics::init() {
     if (wheelColResp == nullptr) return;
 
     sub_805b42c0();
-    f32 speedVal;
+    f32 speedVal = 0.0f;
     sub_80592e24();
     *reinterpret_cast<f32*>(
         reinterpret_cast<char*>(wheelColResp) + 0x48) = speedVal * speedVal;
@@ -424,7 +424,7 @@ void KartSusPhysics::init() {
     sub_0x80576c54();
 }
 
-// TODO: resetQuaternions not in standalone KartSusPhysics header
+// resetQuaternions — not in standalone KartSusPhysics header; requires header addition to enable
 /*
 void KartSusPhysics::resetQuaternions() {
     sub_0x80590168();
@@ -451,6 +451,6 @@ void KartSusPhysics::resetQuaternions() {
         }
     }
 }
-*/ // end TODO: resetQuaternions
+*/
 
 } // namespace Kart

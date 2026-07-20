@@ -4,6 +4,8 @@
 #include <egg/math/eggVector.hpp>
 #include <cmath>
 
+extern "C" f32 sub_getTurnInput(void* obj); // @addr 0x8057e900
+
 // ============================================================================
 // PlayerSub10 — Base Virtual Methods, Constructor, and Destructor
 // Addresses: 0x80577fc4 (ctor), 0x80587b78 (dtor), 0x805784d4 (init),
@@ -434,7 +436,7 @@ void PlayerSub10::updateTurn() {
 
     // Read player state flags to check for blocked/special states
     // (In the original, these are read from playerPointers + 0x04 + 0x08/0x0C)
-    u32 stateFlags = 0; // TODO: read from playerState->flags
+    u32 stateFlags = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C);
 
     // Block turning if in bullet bill state
     if (stateFlags & FLAG_BULLET) {
@@ -452,7 +454,7 @@ void PlayerSub10::updateTurn() {
 
     // Read analog stick X input (range -1.0 to 1.0, 0 = centered)
     // In the original this comes from KPadDirector via playerPointers
-    f32 stickX = 0.0f; // TODO: sub_getTurnInput(this) -> stickX
+    f32 stickX = sub_getTurnInput(this); // @addr 0x8057e900
     rawTurn = stickX;
 
     // Compute raw turn from input * turn rate
@@ -727,7 +729,7 @@ void PlayerSub10::hop() {
 
     // Record the stick X input at hop initiation — this determines
     // the initial drift direction when landing
-    hopStickX = 0; // TODO: read from input
+    hopStickX = sub_getTurnInput(this); // @addr 0x8057f020
 }
 
 // ============================================================================

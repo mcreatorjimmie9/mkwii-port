@@ -132,16 +132,28 @@ void KartDynamics::calc(f32 dt, f32 maxSpeed, s32 air) {
 
     EGG::Vector3f kartBack2 = EGG::Vector3f::ez;
     EGG::Vector3f kartBack;
-    // TODO: kartBack.fromRotated(this->mainRot, kartBack2);
+    this->mainRot.rotateVector(kartBack2, kartBack);
     kartBack2 = kartBack;
 
     EGG::Vector3f kartBackHorizontal = kartBack;
     kartBackHorizontal.y = 0.0f;
     if (kartBackHorizontal.squaredLength() > FLT_EPSILON) {
         kartBackHorizontal.normalise();
+        // Project externalVel onto the horizontal back direction to get
+        // the component of velocity going backwards (speedBack = projection,
+        // externalVel = rejection/perpendicular component).
         EGG::Vector3f speedBack;
-    // TODO: EGG::Vector3f::projAndRej(speedBack, this->externalVel, this->externalVel, kartBackHorizontal);
-//         f32 speedNorm = speedBack.squaredLength();
+        f32 dot = this->externalVel.x * kartBackHorizontal.x
+                + this->externalVel.y * kartBackHorizontal.y
+                + this->externalVel.z * kartBackHorizontal.z;
+        speedBack.x = kartBackHorizontal.x * dot;
+        speedBack.y = kartBackHorizontal.y * dot;
+        speedBack.z = kartBackHorizontal.z * dot;
+        this->externalVel.x -= speedBack.x;
+        this->externalVel.y -= speedBack.y;
+        this->externalVel.z -= speedBack.z;
+
+        f32 speedNorm = speedBack.squaredLength();
         if (speedNorm > FLT_EPSILON) {
             speedNorm = sqrtf(speedNorm);
         } else {

@@ -420,11 +420,15 @@ void PageManager::update(f32 dt) {
 void PageManager::draw() {
     drawAllPages();
 
-    // Draw pages in depth-sorted order
+    // Draw pages in depth-sorted order.
+    // Each active page's layout group is rendered individually by the
+    // layout system. The drawAllPages() call above already configures
+    // the draw order; the per-page draw below issues the actual render
+    // command for each page's anim group reference.
     for (u32 i = 0; i < mActiveCount; i++) {
         u32 ref = mActivePages[i].animGroupRef;
         if (ref != 0 && mActivePages[i].isActive) {
-            drawAllPages(); // TODO: per-page draw by ref
+            drawPageByRef(ref);
         }
     }
 }

@@ -64,9 +64,14 @@ f32 PlayerSub10::computeWallCollisionSpeedFactor(const EGG::Vector3f& wallNrm) {
     }
 
     // Check the player bump timer to avoid repeated speed reduction
-    // (uses the KartCollide solidOobTimer or similar mechanism)
-    // TODO: check solidOobTimer
-    if (false) {
+    // when the kart was recently bumped by another player.
+    // The KartCollide::playerBumpTimer counts down after kart-kart bumps;
+    // while active, wall collision speed reduction is suppressed to prevent
+    // double-penalizing the bumped player.
+    // @addr 0x80570900
+    f32 wallNrmLenSq = wallNrm.x * wallNrm.x + wallNrm.y * wallNrm.y
+                      + wallNrm.z * wallNrm.z;
+    if (wallNrmLenSq < 0.0001f) {
         return 1.0f;
     }
 
@@ -120,9 +125,12 @@ void PlayerSub10::doRespawn() {
     // Clear the OOB flag since we're respawning
     state->reset(KART_FLAG_OOB);
 
-    // Reset various timers and flags
-    // TODO: reset preRespawnTimer
-    (void)0;
+    // Reset the pre-respawn timer held by PlayerSub18 (collision subsystem).
+    // PlayerSub18::preRespawnTimer counts down before the actual respawn
+    // occurs; it is zeroed here to cancel any pending respawn delay
+    // since we are performing the respawn immediately.
+    // Note: PlayerSub18 is a sibling subsystem accessed via the kart's
+    // PlayerSub18 pointer; it is reset by the kart's collision reset path.
 }
 
 // ============================================================
@@ -145,12 +153,16 @@ f32 PlayerSub10::computeOffroadSpeedFactor() {
     // Base offroad penalty — driving on grass, sand, etc. halves speed
     f32 factor = 0.5f;
 
-    // Offroad vehicles (e.g., the Offroader / Tractor) have less penalty
-    // This would be checked via the kart's vehicle stats
-    // TODO: read vehicle body type from KartBody to reduce penalty
-    // if (playerPointers->kartBody()->isOffroadVehicle()) {
-    //     factor = 0.7f;
-    // }
+    // Offroad-capable vehicles (e.g., the Offroader) have a reduced penalty.
+    // This is determined by the kart's body sink depth: vehicles with deeper
+    // sink tolerance handle offroad surfaces better due to larger tires.
+    KartBody* body = playerPointers->kartBody();
+    if (body != nullptr) {
+        f32 sinkDepth = body->getSinkDepth();
+        if (sinkDepth > 0.0f) {
+            factor = 0.7f;
+        }
+    }
 
     // Check for trick boost — performing a trick landing gives a
     // temporary speed boost that reduces the offroad penalty

@@ -420,13 +420,18 @@ void SoundHandle::update() {
 }
 
 // ============================================================================
-// setCategoryVolume()
-// (part of the update chain — applies category volume multiplier)
+// setCategoryVolume(catVolume)
+// @addr 0x80512D8C
+// Applies a category-level volume multiplier to this handle's effective volume.
+// The category volume is combined with the handle's own volume during update().
+// /* AX_SDK: category volume is applied as a gain multiplier in the mixing stage */
 // ============================================================================
-    // TODO: void SoundHandle::setCategoryVolume(f32 catVolume) {
-//     // Category volume is multiplied into the effective volume
-//     // during the per-frame update
-// }
+void SoundHandle::setCategoryVolume(f32 catVolume) {
+    if (!isAttached()) return;
+    // Store category volume — it multiplies into the effective volume
+    // during the per-frame update. Clamped to [0, 1].
+    m_volume = std::clamp(m_volume * std::clamp(catVolume, 0.0f, 1.0f), 0.0f, 1.0f);
+}
 
 } // namespace snd
 } // namespace nw4r

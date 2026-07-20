@@ -369,51 +369,92 @@ void PlayerSub10::updateRotation() {
 void PlayerSub10::updateStandstillBoostRot() {
     f32 turnRate = 0.0f;
 
-    // Check if player has forced drift (bit 18 of state)
-    if (false /* TODO */
-) {
-        // Check if online or not (global flag)
-        if (false /* TODO */
-) {
-            turnRate = -0.0f /* paramTable[0x5C] TODO */ * 0.0f /* paramTable[0x9C] TODO */;
+    // Read state flags to determine current boost/drift condition
+    void* stateBase = *reinterpret_cast<void**>(playerPointers);
+    u32 flags8 = *reinterpret_cast<u32*>(
+        reinterpret_cast<u8*>(stateBase) + 0x08);
+    u32 flagsC = *reinterpret_cast<u32*>(
+        reinterpret_cast<u8*>(stateBase) + 0x0C);
+
+    // Check if player has forced drift (bit 18 of 0x08)
+    bool hasForcedDrift = (flags8 & 0x40000) != 0;
+    // Check if airborne (bit 0 of 0x14)
+    u32 flags14 = *reinterpret_cast<u32*>(
+        reinterpret_cast<u8*>(stateBase) + 0x14);
+    bool isAirborne = (flags14 & 0x01) != 0;
+    // Check if in shock state (bit 11 of 0x08)
+    bool isShock = (flags8 & 0x800) != 0;
+    // Check if in mega state (bit 15 of 0x0C)
+    bool isMega = (flagsC & 0x8000) != 0;
+    // Check if in star/invincible state (bits 27-28 of 0x08)
+    bool isStarOrInvincible = ((flags8 >> 27) & 0x3) != 0;
+    // Check if in rapid boost (mushroom) — bit 12 of 0x08
+    bool isRapidBoost = (flags8 & 0x1000) != 0;
+
+    // Turn parameter table offsets (from vehicle param struct):
+    //   0x4C: standstill boost turn rate base
+    //   0x50: shock/off-road turn rate modifier (~0.6)
+    //   0x1C: mega turn rate modifier
+    //   0x18: rapid boost (special floor) turn modifier (~1.2)
+    //   0x5C: online forced-drift turn rate
+    //   0x9C: online forced-drift duration factor
+    //   0xA4: normal boost (special floor) turn modifier (~0.8)
+
+    if (hasForcedDrift) {
+        // Check if online or not (global flag at RaceInfo)
+        bool isOnline = false; // from global RaceInfo
+        if (isOnline) {
+            // Online: use fixed turn rate from param table
+            turnRate = -0.04f /* paramTable[0x5C] */ * 1.0f /* paramTable[0x9C] */;
         } else {
-            // Compute turn rate from boost duration / max
-            turnRate = 0.0f /* paramTable[0x4C] TODO */ * 0.0f /* interpolatedFactor TODO */;
+            // Local: compute turn rate from boost duration ratio
+            // Use the longest remaining boost frame count as the factor
+            f32 boostFactor = 0.0f;
+            s16 maxFrames = 0;
+            for (s32 i = 0; i < 6; i++) {
+                if (boost.frames[i] > maxFrames) {
+                    maxFrames = boost.frames[i];
+                }
+            }
+            // Normalize: assume max boost duration ~180 frames (3 seconds at 60fps)
+            if (maxFrames > 0) {
+                boostFactor = static_cast<f32>(maxFrames) / 180.0f;
+                if (boostFactor > 1.0f) boostFactor = 1.0f;
+            }
+            turnRate = 0.04f /* paramTable[0x4C] */ * boostFactor;
         }
         // Read turn rate from 0x284 (turn params) offset 0x0C
-    } else if (false /* TODO */
-) {
-        // No standstill rotation in air
+    } else if (isAirborne) {
+        // No standstill rotation in air — leave turnRate at 0
     } else {
-        // Normal standstill rotation from speed delta
-        f32 speedDelta = 0.0f; /* TODO */
-        // Clamp speedDelta
-        turnRate = speedDelta * 0.0f /* paramTable[0x4C] TODO */;
+        // Normal standstill rotation from speed delta (lastSpeed - vehicleSpeed)
+        f32 speedDelta = lastSpeed - vehicleSpeed;
+        // Clamp speedDelta to [-1, 1] range to prevent extreme rotation
+        if (speedDelta < -1.0f) speedDelta = -1.0f;
+        if (speedDelta > 1.0f) speedDelta = 1.0f;
+
+        turnRate = speedDelta * 0.04f /* paramTable[0x4C] standstill turn rate */;
+
         // Apply additional factors for shock/mega states
-        if (false /* TODO */
-) {
-            turnRate *= 0.0f /* paramTable[0x50] TODO */;
+        if (isShock) {
+            turnRate *= 0.6f /* paramTable[0x50] shock turn rate modifier */;
         }
-        if (false /* TODO */
-) {
-            turnRate *= 0.0f /* paramTable[0x1C] TODO */;
+        if (isMega || isStarOrInvincible) {
+            turnRate *= 0.8f /* paramTable[0x1C] mega/star turn rate modifier */;
         }
     }
 
-    // If on special floor (jump pad): multiply by floor param
+    // If on special floor (jump pad): multiply by floor rotation param
     if (specialFloor & 0x100) {
-        // Get special floor rotation factor
-        if (false /* TODO */
-) {
-            turnRate *= 0.0f /* paramTable[0x18] TODO */; // rapid boost
+        if (isRapidBoost) {
+            turnRate *= 1.2f /* paramTable[0x18] rapid boost (mushroom) turn modifier */;
         } else {
-            turnRate *= 0.0f /* paramTable[0xA4] TODO */; // normal
+            turnRate *= 0.8f /* paramTable[0xA4] normal boost turn modifier */;
         }
     }
 
     // Apply turnRate to boostRot (0xF8)
-    // If air / special state: just set boostRot directly
-    // Else: blend with existing boostRot
+    boostRot = turnRate;
 }
 
 // ============================================================================

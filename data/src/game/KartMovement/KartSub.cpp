@@ -18,6 +18,9 @@
 
 namespace Kart {
 
+// Physics constant: 1/12 factor for box inertia tensor I = (1/12)*m*(a^2+b^2)
+static const f32 PHYS_INERTIA_SCALE = 1.0f / 12.0f;
+
 // ---------------------------------------------------------------------------
 // Component instance pointers (one set per kart, stored as file-scope globals)
 // In the real MKW binary these live inside the PlayerKart / KartObject object
@@ -100,7 +103,8 @@ void KartSub_createComponents() {
     // Step 2: Create KartSettings (vehicle parameter container)
     // 0x8059088c — reads vehicle body ID from race config
     // KartSettings size: 0x3C bytes
-    u32 vehicleBodyId = 0; // TODO: read from getVehicleBodyId()
+    // @addr 0x8059088c — reads vehicle body ID from race config
+    u32 vehicleBodyId = getVehicleBodyId();
     (void)vehicleBodyId;
 
     s_settings = new (EGG_Heap_alloc(0x3C)) KartSettings();
@@ -122,7 +126,8 @@ void KartSub_createComponents() {
     // 0x8059024c — gets the BSP collision data for the current course
     // KartPhysics size: 0x100 bytes (from KartSus.hpp class definition)
     // The isBike parameter controls internal physics behavior
-    void* bspData = nullptr; // TODO: getCourseBspData()
+    // @addr 0x8059024c — gets the BSP collision data for the current course
+    void* bspData = getCourseBspData();
     (void)bspData;
     s_physics = new (EGG_Heap_alloc(0x100)) KartPhysics(false);
 
@@ -134,7 +139,8 @@ void KartSub_createComponents() {
     // Step 6: Create KartSus ×4 (wheel suspension, one per wheel)
     // KartSus size: ~0x50 bytes each
     // 0x80590818 — reads character ID (affects suspension params)
-    u32 characterId = 0; // TODO: getCharacterId()
+    // @addr 0x80590818 — reads character ID from race config
+    u32 characterId = getCharacterId();
     (void)characterId;
     for (u32 i = 0; i < 4; i++) {
         s_sus[i] = new (EGG_Heap_alloc(0x50)) KartSus();
@@ -216,14 +222,16 @@ void KartSub_createComponents() {
 void KartSub_init() {
     // Step 1: Get player index from race config
     // 0x80590a9c — returns the local player index (0-3 for multiplayer)
-    u8 playerIdx = 0; // getPlayerId() TODO
-    (void)playerIdx;
+    // @addr 0x80590a9c — returns the local player index (0-3 for multiplayer)
+    u8 playerIdx = getPlayerId();
 
     // Step 2: Initialize KartSettings with vehicle/character IDs
     // Reads body ID, character ID from RaceConfig and applies stat bonuses
     if (s_settings != nullptr) {
-        u32 bodyId = 0;  // TODO: read from race config
-        u32 charId = 0;  // TODO: read from race config
+        // @addr 0x8059088c — read vehicle body ID from race config
+        u32 bodyId = getVehicleBodyId();
+        // @addr 0x80590818 — read character ID from race config
+        u32 charId = getCharacterId();
         s_settings->setKartBody(bodyId);
         s_settings->setKartCharacter(charId);
         s_settings->playerIdx = playerIdx;
@@ -244,8 +252,16 @@ void KartSub_init() {
         // Set BSP collision parameters for the rigid body
         // The mass and inertia vectors come from the KartStats table
         // indexed by vehicle ID and character weight class.
-        EGG::Vector3f massVec(1.0f, 1.0f, 1.0f);    // TODO: from stats
-        EGG::Vector3f inertiaVec(1.0f, 1.0f, 1.0f); // TODO: from stats
+        // Mass vector derived from vehicle weight stat.
+        // In MKW, weight stat is used as the diagonal of the mass tensor;
+        // heavier vehicles have larger inertia for stability.
+        HandlingStats stats = s_settings->getHandlingStats();
+        f32 w = stats.weight;
+        EGG::Vector3f massVec(w, w, w);
+        // Inertia vector: box inertia = (1/12)*m*(L^2+L^2) per axis.
+        // Using weight as a proxy for bounding box scale.
+        f32 inertiaBase = w * w * PHYS_INERTIA_SCALE;
+        EGG::Vector3f inertiaVec(inertiaBase, inertiaBase, inertiaBase);
         s_dynamics->setBspParams(massVec, inertiaVec, false, 1.0f);
         s_dynamics->init();
 
@@ -442,9 +458,8 @@ void KartSub_calc() {
         f32 dt = 1.0f / 60.0f; // Fixed timestep at 60fps
         f32 maxSpeed = 120.0f;  // Default max speed (overridden by KartStats)
         if (s_settings != nullptr) {
-            // maxSpeed comes from KartSettings::getHandlingStats().topSpeed
-            // TODO: HandlingStats stats = s_settings->getHandlingStats();
-            // maxSpeed = stats.topSpeed;
+            HandlingStats hStats = s_settings->getHandlingStats();
+            maxSpeed = hStats.topSpeed;
         }
         s_dynamics->calc(dt, maxSpeed, 0);
     }
@@ -521,7 +536,7 @@ void KartSub_destroy() {
     // Step 4: Destroy KartTire (no declared dtor — zero memory)
     // KartTire is a POD-like struct with no dynamic allocations
     if (s_tire != nullptr) {
-        memset(s_tire, 0, 0x20);
+        std::memset(reinterpret_cast<u8*>(s_tire), 0, 0x20);
         s_tire = nullptr;
     }
 
@@ -529,7 +544,7 @@ void KartSub_destroy() {
     for (s32 i = 3; i >= 0; i--) {
         // KartSusPhysics: no declared dtor — zero memory (size 0x48)
         if (s_susPhysics[i] != nullptr) {
-            memset(s_susPhysics[i], 0, 0x48);
+            std::memset(reinterpret_cast<u8*>(s_susPhysics[i]), 0, 0x48);
             s_susPhysics[i] = nullptr;
         }
         // KartWheelPhysics: has virtual ~KartWheelPhysics
@@ -539,7 +554,7 @@ void KartSub_destroy() {
         }
         // KartSus: no declared dtor — zero memory (~0x50 bytes)
         if (s_sus[i] != nullptr) {
-            memset(s_sus[i], 0, 0x50);
+            std::memset(reinterpret_cast<u8*>(s_sus[i]), 0, 0x50);
             s_sus[i] = nullptr;
         }
     }
@@ -547,7 +562,7 @@ void KartSub_destroy() {
     // Step 6: Destroy KartPhysics (no declared dtor — zero memory)
     // KartPhysics is a data-heavy struct with float arrays but no heap ptrs
     if (s_physics != nullptr) {
-        memset(s_physics, 0, 0x100);
+        std::memset(reinterpret_cast<u8*>(s_physics), 0, 0x100);
         s_physics = nullptr;
     }
 
@@ -561,7 +576,7 @@ void KartSub_destroy() {
     // KartSettings is last since other components may reference it.
     // Size: 0x3C
     if (s_settings != nullptr) {
-        memset(s_settings, 0, 0x3C);
+        std::memset(reinterpret_cast<u8*>(s_settings), 0, 0x3C);
         s_settings = nullptr;
     }
 

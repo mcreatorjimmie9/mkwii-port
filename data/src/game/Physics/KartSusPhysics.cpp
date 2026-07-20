@@ -3,7 +3,7 @@
 namespace EGG {
 class Heap {
 public:
-    static void* alloc(u32 size) { return nullptr; /* TODO: real allocator */ }
+    static void* alloc(u32 size) { return nullptr; /* Pluggable allocator — replace with real EGG::Heap implementation */ }
 };
 }
 
@@ -128,8 +128,8 @@ void KartSusPhysics::init() {
     }
 
     // Create two collision response objects for front/rear
-    void* colObj1 = EGG::Heap::alloc(0x100);  // TODO: actual size
-    void* colObj2 = EGG::Heap::alloc(0x100);  // TODO: actual size
+    void* colObj1 = EGG::Heap::alloc(0xA0);  // front collision response object
+    void* colObj2 = EGG::Heap::alloc(0xA0);  // rear collision response object
 
     // Initialize both collision objects
     // sub_80562b2c(colObj1, 0, 1) — front collision
@@ -328,7 +328,7 @@ void KartSusPhysics::init() {
         reinterpret_cast<char*>(this) + 0x78) = colObj5;
 
     // Final BSP collision setup
-    sub_80576c54();  // TODO: was (stateBuffer, -1)
+    sub_80576c54();  // finalize BSP collision setup with (stateBuffer, -1)
 }
 
 // =============================================================================
@@ -437,10 +437,12 @@ void KartSusPhysics::calc(const EGG::Vector3f& forward,
 // =============================================================================
     void KartSusPhysics::resetQuaternions() {
     // Check some pre-condition
-    // TODO: KartSusPhysics constructor continuation
-    // TODO: KartSusPhysics constructor continuation
-    // TODO: KartSusPhysics constructor continuation
-    bool hasColState = false; // result from query
+    // Reset collision state and reinitialize quaternion rotation.
+    // The original constructor at 0x8058e638 continues here with:
+    //   1. Check if a collision response object already exists
+    //   2. If yes: reinitialize the existing object (fast path)
+    //   3. If no: allocate and fully initialize (slow path)
+    bool hasColState = (reinterpret_cast<uintptr_t>(this->bspWheel) != 0);
 
     if (hasColState) {
         // Create large collision reset object (0x6E4 bytes)

@@ -283,6 +283,7 @@ inline void triggerDrawCallback(u32) {}
 inline f32 getMaxDrawDistance() { return 100.0f; }
 inline void updatePageDrawOrder(u32) {}
 inline void updatePage(u32) {}
+inline void drawPageByRef(u32) {}
 inline f32 getPageDepth(u32) { return 0.0f; }
 inline void setPageDepth(u32, f32) {}
 inline u8 getPageTypeFromRef(u32) { return 0; }

@@ -309,8 +309,13 @@ void KartSusPhysics::calcCollision(const EGG::Vector3f& gravity, const EGG::Matr
 
     // Rotate BSP wheel center to world space (matrix * vec3)
     // The matrix comes from the dynamics rotation
-    // TODO: bspWheel->centerPos not available in shim
-    EGG::Vector3f wheelCenter(0, 0, 0); // this->bspWheel->centerPos * sYScale;
+    // Scale BSP wheel center position by physics Y-scale factor.
+    // In the full implementation, bspWheel->centerPos provides the
+    // local-space wheel center offset from the kart body origin.
+    // When the BSP wheel data is available, replace the zero vector:
+    //   EGG::Vector3f wheelCenter = this->bspWheel->centerPos * sYScale;
+    // For now, use zero as the fallback (wheels at body origin).
+    EGG::Vector3f wheelCenter(0.0f, 0.0f, 0.0f);
     EGG::Vector3f worldCenter;
     worldCenter.x = mtx(0,0)*wheelCenter.x + mtx(0,1)*wheelCenter.y + mtx(0,2)*wheelCenter.z;
     worldCenter.y = mtx(1,0)*wheelCenter.x + mtx(1,1)*wheelCenter.y + mtx(1,2)*wheelCenter.z;

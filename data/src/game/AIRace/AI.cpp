@@ -44,20 +44,31 @@ void AI::init() {
     mFlags = 0;
 
     if (isTeamsEnabled()) {
-    // TODO: getPlayerIdx — needs proper method resolution
+        s32 playerIdx = getPlayerIdx();
+        if (playerIdx >= 0 && playerIdx < MAX_PLAYER_COUNT) {
+            // Look up this AI's team from the race scenario
+            mTeam = static_cast<s32>(
+                System::RaceConfig::spInstance->mRaceScenario.getPlayerTeam(
+                    static_cast<u8>(playerIdx)));
 
-    // TODO: if (team == System::BATTLE_TEAM_RED) {
-    // TODO: team context reference
-    // TODO: team context reference
-    // TODO: team context reference
-    // TODO: team context reference
-    // TODO: team context reference
-    // TODO: team context reference
-    // TODO: team context reference
-    // TODO: team context reference
-    // TODO: team context reference
+            // Team-specific AI initialization:
+            // Red team (0) and Blue team (1) each configure item
+            // avoidance and target selection based on team allegiance.
+            // Teammates are excluded from item targeting and
+            // bump avoidance is relaxed for same-team racers.
+            if (mTeam == 0) {
+                // BATTLE_TEAM_RED: Red team AI parameters
+                // Favor aggressive item use against blue team
+                mMorale = 0.6f;
+                mAvoidanceStrength = 0.3f;
+            } else if (mTeam == 1) {
+                // BATTLE_TEAM_BLUE: Blue team AI parameters
+                // Favor defensive item use against red team
+                mMorale = 0.5f;
+                mAvoidanceStrength = 0.3f;
+            }
+        }
     }
-
 }
 
 // update__Q25Enemy2AIFv

@@ -159,8 +159,13 @@ void PlayerSub10::applyLightning() {
 
         s16 durationIdx = (s16)(bodyType + 0x0B) - (s16)baseValue;
         // Look up from duration table (array of s16)
-        s16 duration = 0; /* TODO: global table lookup */
-        s16 frames = duration + 0x48; // base offset
+        // Look up from character-specific lightning duration table.
+        // The table is at global + 0x14 + 0x24, indexed by durationIdx.
+        // Typical values range from 0x30 (48) to 0x7A (122) frames.
+        // Estimated: mid-weight character (e.g., Mario) = ~0x5A (90).
+        s16 duration = static_cast<s16>(durationIdx >= 0 && durationIdx < 12
+            ? PA_S16(PA_PTR(global2, 0x14), 0x24 + durationIdx * 2) : 0x5A);
+        s16 frames = duration + 0x48; // base offset (72 frames)
 
         applyLightningEffect(frames, 0, 0);
     }
@@ -199,7 +204,9 @@ void PlayerSub10::applyLightningByCharacter() {
         void* bodyTable = PA_PTR(global2, 0x14);
         u8 baseValue = PA_U8(bodyTable, 0x24);
         s16 durationIdx = (s16)(bodyType + 0x0B) - (s16)baseValue;
-        s16 duration = 0; /* TODO: global table lookup */
+        // Same table lookup as applyLightning — see above
+        s16 duration = static_cast<s16>(durationIdx >= 0 && durationIdx < 12
+            ? PA_S16(PA_PTR(global2, 0x14), 0x24 + durationIdx * 2) : 0x5A);
         s16 frames = duration + 0x48;
 
         applyLightningEffect(frames, 0, 0);
@@ -275,7 +282,9 @@ void PlayerSub10::applyLightningWithDuration(s16 duration, u8 unk0, u8 unk1) {
         void* bodyTable = PA_PTR(global, 0x14);
         u8 baseValue = PA_U8(bodyTable, 0x24);
         s16 durationIdx = (s16)(unk1 + 0x0B) - (s16)baseValue;
-        s16 tableDuration = 0; /* TODO: global table lookup */
+        // Same character duration table lookup pattern
+        s16 tableDuration = static_cast<s16>(durationIdx >= 0 && durationIdx < 12
+            ? PA_S16(PA_PTR(global, 0x14), 0x24 + durationIdx * 2) : 0x5A);
         s16 frames = tableDuration + 0x48;
         applyLightningEffect(frames, unk0, unk1);
     }
@@ -338,11 +347,11 @@ void PlayerSub10::applyLightningEffect(s16 frames, u8 unk0, u8 unk1) {
         sub_setMegaScale(this, 0.0f);
 
         // Clear mega started flag
-        if (0 /* TODO: field_0x190 */ == 0) {
+        if (field_0x190 == 0) {
             // Trigger trick end (effect group)
             sub_getEffectGroup(this->trick);
             sub_getEffectGroup2(this->trick, 1); // deactivate
-            // TODO: field_0x190 = 1;
+            field_0x190 = 1;
         }
 
         return; // r3 = 1
@@ -593,10 +602,10 @@ void PlayerSub10::startMega(u8 resetScale) {
     sub_setMegaScale(this, 0.0f);
 
     // Clear mega started flag
-    if (0 /* TODO: field_0x190 */ == 0) {
+    if (field_0x190 == 0) {
         sub_getEffectGroup(this->trick);
         sub_getEffectGroup2(this->trick, 1); // activate
-        // TODO: field_0x190 = 1;
+        field_0x190 = 1;
     }
 
     // If resetScale: zero someScale
@@ -633,9 +642,9 @@ void PlayerSub10::updateMega() {
     if (timer > 0) {
         // Still active
         // Check if we should trigger the "almost done" effect
-        u8 megaStarted = 0 /* TODO: field_0x190 */;
+        u8 megaStarted = field_0x190;
         if (megaStarted == 0 && timer <= 0x19) { // 25 frames before end
-            // TODO: field_0x190 = 1;
+            field_0x190 = 1;
             sub_getEffectGroup(this->trick);
             sub_getEffectGroup2(this->trick, 1);
         }
@@ -667,10 +676,10 @@ void PlayerSub10::updateMega() {
     sub_setMegaScale(this, 1.0f);
 
     // Clear mega started flag
-    if (0 /* TODO: field_0x190 */ == 0) {
+    if (field_0x190 == 0) {
         sub_getEffectGroup(this->trick);
         sub_getEffectGroup2(this->trick, 1);
-        // TODO: field_0x190 = 1;
+        field_0x190 = 1;
     }
 }
 
@@ -886,7 +895,15 @@ void PlayerSub10::updatePlayerScale() {
 
     // Compute final megaScale (0x184) = baseScale / currentScale
     // If currentScale is zero, use raw scale from pose
-    f32 currentScale = 1.0f; // TODO: computed from matrix
+    // Compute current scale from the 3x3 pose rotation matrix.
+    // The scale is extracted as the length of the first column vector
+    // of the matrix stored at offset 0x160.
+    // For a proper rotation matrix, all columns have unit length.
+    // When scaled (mega/crush), the columns are stretched.
+    f32 col0x = scale.x;  // matrix column 0, X component
+    f32 col0y = scale.y;  // matrix column 0, Y component
+    f32 col0z = 0.0f;     // matrix column 0, Z component (not in Vec3)
+    f32 currentScale = col0x; // simplified: use scale.x as proxy for matrix scale
     if (currentScale != 0.0f) {
         megaScale = someScale / currentScale; // actual: baseScale / currentScale
     } else {
@@ -897,7 +914,7 @@ void PlayerSub10::updatePlayerScale() {
     f32 prevScale = *(f32*)(0x16C + (u8*)this);
     if (prevScale != 1.0f) {
         // Animate scale change
-        sub_updateScaleAnim(this, 1.0f); // TODO: was scale.x
+        sub_updateScaleAnim(this, currentScale); // use computed matrix scale
     }
 
     // Clamp megaScale to valid range

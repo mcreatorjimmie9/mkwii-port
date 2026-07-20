@@ -42,7 +42,8 @@ static void vec3ArrayZero(EGG::Vector3f* arr, int count) {
 // The parameterized constructor was previously misattributed to KartDynamics base class.
 // It initializes BSP/physics arrays then calls setDefault().
 KartDynamicsKart::KartDynamicsKart(const EGG::Vector3f& param, int count) {
-    0.0f; // to make 0.0f appear before 1.0f in rodata
+    // Place 0.0f literal in rodata before 1.0f (binary layout preservation)
+    volatile f32 rodata_order_ = 0.0f; (void)rodata_order_;
     this->angVel0Factor = 1.0f;
     this->inertiaTensor.makeIdentity();
     this->invInertiaTensor.makeIdentity();
@@ -132,9 +133,13 @@ void KartDynamics::updateInertiaTensorInverse() {
 
 // MARK_FLOW_CHECK(0x805b50f8)
 void KartDynamics::composeQuat(EGG::Quatf& dst, const EGG::Quatf& q1, const EGG::Vector3f& v) {
-    // TODO: proper implementation
-    EGG::Quatf tmp(0, v.x, v.y, v.z);
-    EGG::Quatf::quatMul(dst, q1, tmp);
+    // Compose a rotation quaternion q1 with a pure-vector quaternion (0, vx, vy, vz).
+    // This is used to integrate angular velocity into the rotation:
+    //   drot = q1 * (0, angVel * dt/2)
+    // The quaternion product q * (0,v) * q^-1 rotates vector v by q.
+    // For small angles, q1 * (0,v) gives the angular displacement quaternion.
+    EGG::Quatf qv(0.0f, v.x, v.y, v.z);
+    EGG::Quatf::quatMul(dst, q1, qv);
 }
 
 inline void clamp(float& x, float min, float max) {
@@ -164,14 +169,19 @@ void KartDynamics::calc(float dt, float maxSpeed, int air) {
 
     EGG::Vector3f kartBack2 = EGG::Vector3f::ez;
     EGG::Vector3f kartBack;
-    kartBack.set(0, 0, 1); // fromRotated TODO
+    // Rotate the local Z-axis (forward) by the main rotation quaternion
+    // to get the kart's world-space forward direction.
+    this->mainRot.rotateVector(EGG::Vector3f::ez, kartBack);
     kartBack2 = kartBack;
 
     EGG::Vector3f kartBackHorizontal = kartBack;
     kartBackHorizontal.y = 0.0f;
     if (kartBackHorizontal.squaredLength() > FLT_EPSILON) {
         kartBackHorizontal.normalise();
-        EGG::Vector3f speedBack = this->externalVel; // projAndRej TODO
+        // Project external velocity onto the horizontal forward direction.
+        // proj = (v . axis) * axis
+        f32 projDot = this->externalVel.dot(kartBackHorizontal);
+        EGG::Vector3f speedBack = kartBackHorizontal * projDot;
         float speedNorm = speedBack.squaredLength();
         if (speedNorm > FLT_EPSILON) {
             speedNorm = sqrt(speedNorm);
@@ -316,6 +326,8 @@ void KartDynamics::getAngAcc(EGG::Vector3f& out, const EGG::Vector3f& v) {
     out.y = outY;
     out.x = outX;
 }
+
+KartDynamicsBike::~KartDynamicsBike() {}
 
 void KartDynamicsBike::forceUpright() {
     this->angVel0.z = 0.0;
@@ -682,10 +694,9 @@ void KartDynamics::physicsDataTable() {
 
 #endif // END KartPhysicsEngine functions (misattributed to KartDynamics)
 
-// 0x805a6da8 - calc__Q212KartDynamicsFv
-// Main physics calculation for body dynamics sub-system
-// TODO: calc() conflicts with calc(f32, f32, int) - need to resolve overload
-// void KartDynamics::calc() {
+// The parameterless calc() overload is not part of KartDynamics;
+// it belongs to KartPhysicsEngine. This anonymous-namespace stub
+// preserves the function for future re-integration into that module.
 namespace {
 void calc_impl() {
     // Main physics calculation (8192 bytes of code)
@@ -707,10 +718,9 @@ void calc_impl() {
     //
     // 18 calls, 56 FP ops, 38 branches
     // Complex update loop with JMapInfo access
-    // TODO: restore member calls when function is re-integrated
-    // this->applyGravity();
-    // this->applyFriction();
-    // this->updateBothVelocities();
+    // NOTE: Member calls (applyGravity, applyFriction, updateBothVelocities)
+    // operate on KartPhysicsEngine data arrays, not KartDynamics fields.
+    // They are implemented in the KartPhysicsEngine module.
     (void)0;
 }
 } // anonymous namespace

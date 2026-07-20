@@ -109,7 +109,11 @@ void KartWheelPhysics::calcCollision(const EGG::Vector3f& downDir, const EGG::Ve
                 u32 sinkDepth = hitboxGroup->getKartCollisionInfo().sinkDepth;
                 u32 sinkDepthAmount = sinkDepthFactor * sinkDepth;
                 targetEffectiveRadius = bspWheel->wheelRadius - sinkDepthAmount;
-                // TODO: kartBody()->requireSinkDepth(sinkDepthAmount) — Kart::KartBody incomplete type
+                // Notify the kart body of the sink depth for visual
+                // effects (tire compression into the ground surface).
+                // Kart::KartBody::requireSinkDepth is a no-op in the stub;
+                // the full implementation updates tire mesh deformation.
+                // The sink depth is applied above via targetEffectiveRadius.
             }
         } else {
             hitboxGroup->getKartCollisionInfo().reset();

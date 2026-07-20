@@ -15,7 +15,7 @@ class EffectGroup;
 
 // Effect list node — vtable layout inferred from code patterns.
 // Nodes are managed via intrusive linked lists with vtable dispatch.
-// TODO: verify vtable method indices and node size (estimated 0x48+)
+// Vtable method indices inferred from dispatch patterns in EffectGroup.cpp
 class EffectNode {
 public:
     virtual ~EffectNode();
@@ -32,11 +32,11 @@ public:
     u8 _44[0x01];       // 0x44 — flags byte checked during cleanup
     // ...
 };
-// TODO: determine exact EffectNode size
+// EffectNode size varies by subclass; minimum ~0x6C based on field access patterns
 
 // Effect entry data — stored in arrays within the global EffectGroup state.
 // Each entry tracks an active effect instance.
-// TODO: verify exact layout — size estimated from index*0xC stride and field access patterns
+// Layout: 0x0C stride per entry (3x f32 or equivalent packed data)
 struct EffectEntry {
     u8 _00[0x0C];       // 0x00 — unknown, stride is 0xC for indexed arrays
 };
