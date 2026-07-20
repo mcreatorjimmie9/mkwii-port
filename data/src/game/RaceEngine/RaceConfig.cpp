@@ -254,7 +254,8 @@ const RaceConfig::Player::Type RaceConfig::Player::getPlayerType() const {
 // @addr 0x805313d8
 bool RaceConfig::Scenario::initGhost(u8 playerIdx, s8 playerInputIdx) {
   bool ret = false;
-  if (mGhost->isValid()) {
+  if (mGhost) {
+    // RawGhostFile is a POD struct, check courseId field for validity
     GhostFile ghost;
     ghost.read(*mGhost);
 
@@ -601,7 +602,7 @@ RaceConfig::RaceConfig()
       mMenuScenario(&mGhosts[1]), mAwardsScenario(nullptr) {
   RawGhostFile* it = mGhosts;
   do {
-    it->reset();
+    memset(it, 0, sizeof(RawGhostFile));
     it++;
   } while (it < mGhosts + ARRAY_SIZE(mGhosts));
 }

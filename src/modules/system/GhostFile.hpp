@@ -3,13 +3,7 @@
 
 namespace System {
 
-class RawGhostFile {
-public:
-    void reset() { /* TODO */ }
-    bool isValid() const { return false; }
-
-    u8 data[0x2800];
-};
+struct RawGhostFile;
 
 class GhostFile {
 public:

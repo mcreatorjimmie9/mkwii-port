@@ -10,8 +10,16 @@ namespace System {
 #define __CHARACTER_ID_DEFINED__
 enum CharacterId { CHARACTER_MARIO = 0, CHARACTER_LUIGI = 1, CHARACTER_PEACH = 2 };
 #endif
+#ifndef __VEHICLE_ID_DEFINED__
+#define __VEHICLE_ID_DEFINED__
 enum VehicleId { VEHICLE_STANDARD_KART = 0 };
+#endif
+#ifndef __BATTLE_TEAM_DEFINED__
+#define __BATTLE_TEAM_DEFINED__
 enum BattleTeam { BATTLE_TEAM_RED = 0, BATTLE_TEAM_BLUE = 1, BATTLE_TEAM_NONE = 2 };
+#endif
+#ifndef __COURSE_ID_DEFINED__
+#define __COURSE_ID_DEFINED__
 enum CourseId {
   // Nitro tracks
   MARIO_CIRCUIT = 0x0,
@@ -66,8 +74,12 @@ enum CourseId {
   DRAW_DEMO = 0x39,
   SUNSET_LUIGI_CIRCUIT = 0x3A
 };
+#endif // __COURSE_ID_DEFINED__
+#ifndef __UNK8_DEFINED__
+#define __UNK8_DEFINED__
 enum unk8 { UNK8_DEFAULT = 0 };
-typedef u32 unk32;
+#endif
+// unk32 typedef in rk_common.h
 
 // Competition objective constants
 enum {
@@ -170,7 +182,7 @@ typedef System::CourseId CourseId;
 typedef System::VehicleId VehicleId;
 typedef System::CharacterId CharacterId;
 typedef System::BattleTeam BattleTeam;
-static const u8 MAX_PLAYER_COUNT = 12;
+// MAX_PLAYER_COUNT already defined as macro in rk_common.h
 
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))

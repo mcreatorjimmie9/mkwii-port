@@ -26,12 +26,25 @@ namespace System {
 #ifndef __CHARACTER_ID_DEFINED__
 #define __CHARACTER_ID_DEFINED__
 enum CharacterId { CHARACTER_MARIO = 0, CHARACTER_LUIGI = 1, CHARACTER_PEACH = 2 };
+#endif
+#ifndef __VEHICLE_ID_DEFINED__
+#define __VEHICLE_ID_DEFINED__
 enum VehicleId { VEHICLE_STANDARD_KART = 0 };
+#endif
 // BattleTeam defined in system/RaceConfig.hpp
+#ifndef __COURSE_ID_DEFINED__
+#define __COURSE_ID_DEFINED__
 enum CourseId { COURSE_MARIO_CIRCUIT = 0 };
+#endif
 
+#ifndef __UNK8_DEFINED__
+#define __UNK8_DEFINED__
 typedef u8 unk8;
+#endif
+#ifndef __UNK32_DEFINED__
+#define __UNK32_DEFINED__
 typedef u32 unk32;
+#endif
 
 class GhostFile;
 class Mii;
@@ -42,6 +55,8 @@ class KPadPlayer;
 class RaceMode;
 class ElineControlManager;
 
+#ifndef __RAW_GHOST_FILE_DEFINED__
+#define __RAW_GHOST_FILE_DEFINED__
 struct RawGhostFile {
     u8 _00[0x100];
 };

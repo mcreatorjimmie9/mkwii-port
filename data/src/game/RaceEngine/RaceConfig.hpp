@@ -64,9 +64,11 @@ public:
 
     CharacterId getCharacter();
     Mii& getMii();
+    const Mii& getMii() const { return mMii; }
     const Type getPlayerType() const;
 
     BattleTeam getTeam();
+    const BattleTeam getTeam() const { return mTeam; }
     u8 getUnkPos();
     VehicleId getVehicle();
 
@@ -229,7 +231,7 @@ public:
     inline const Player::Type getPlayerType(u8 idx) const { return mPlayers[idx].mPlayerType; }
     inline BattleTeam getPlayerTeam(u8 idx) { return mPlayers[idx].mTeam; }
 
-    inline bool isOnline(Settings::GameMode mode) {
+    inline bool isOnline(Settings::GameMode mode) const {
       bool ret = false;
       switch ((Settings::GameMode)(u32)mode) {
       case Settings::GAMEMODE_PRIVATE_VS:
@@ -237,6 +239,7 @@ public:
       case Settings::GAMEMODE_PUBLIC_BATTLE:
       case Settings::GAMEMODE_PRIVATE_BATTLE:
         ret = true;
+        default: break;
       }
       return ret;
     }

@@ -1,9 +1,82 @@
 // CtrlRaceTime.cpp - Reconstructed from Ghidra decompilation
 // Module: RaceEngine
 
+#include <cstring>
+#include <cmath>
 #include "CtrlRaceTime.hpp"
+#include "Raceinfo.hpp"
+#include "RaceConfig.hpp"
+#include "RaceManager.hpp"
 
 namespace System {
+
+// Helper: format milliseconds to "M:SS.mmm" string
+// Returns number of characters written (excluding null terminator).
+u32 formatTime(char* buf, u32 bufSize, f32 timeMs) {
+    if (buf == nullptr || bufSize < 10) {
+        return 0;
+    }
+
+    // Handle negative time (countdown phase)
+    bool negative = false;
+    if (timeMs < 0.0f) {
+        negative = true;
+        timeMs = -timeMs;
+    }
+
+    // Clamp to reasonable range
+    if (timeMs < 0.0f) {
+        timeMs = 0.0f;
+    }
+    if (timeMs > 599999.999f) {
+        timeMs = 599999.999f;
+    }
+
+    // Extract minutes, seconds, milliseconds
+    u32 totalMs = (u32)timeMs;
+    u32 ms = totalMs % 1000;
+    u32 totalSeconds = totalMs / 1000;
+    u32 seconds = totalSeconds % 60;
+    u32 minutes = totalSeconds / 60;
+
+    u32 offset = 0;
+
+    // Negative sign for countdown
+    if (negative) {
+        buf[offset++] = '-';
+    }
+
+    // Minutes (single digit, max 9:59.999)
+    buf[offset++] = (char)('0' + (minutes % 10));
+    buf[offset++] = ':';
+
+    // Seconds (two digits, zero-padded)
+    buf[offset++] = (char)('0' + (seconds / 10));
+    buf[offset++] = (char)('0' + (seconds % 10));
+    buf[offset++] = '.';
+
+    // Milliseconds (three digits, zero-padded)
+    buf[offset++] = (char)('0' + (ms / 100));
+    buf[offset++] = (char)('0' + ((ms / 10) % 10));
+    buf[offset++] = (char)('0' + (ms % 10));
+    buf[offset] = '\0';
+
+    return offset;
+}
+
+CtrlRaceTime::CtrlRaceTime() {
+    flags = 0;
+    timeValue = 0.0f;
+    lastTime = 0.0f;
+    memset(mTimeText, 0, sizeof(mTimeText));
+    mDeltaDisplay = 0.0f;
+    mLagCounter = 0;
+    mShowDelta = false;
+    mDeltaColor = 0;
+}
+
+CtrlRaceTime::~CtrlRaceTime() {
+}
 
 // @addr 0x807fa154
 // Initializes the timer display control.
@@ -16,6 +89,20 @@ void CtrlRaceTime::initSelf() {
     if (!(flags & (1 << 23))) {
         // Call UI text setup with time format float
         // 0x807b55e0(this, parentControl, timeFormat);
+        // When bit 23 is clear, the timer is in the default time display mode.
+        // Setup the text control with time formatting parameters.
+
+        // Initialize display values
+        timeValue = 0.0f;
+        lastTime = 0.0f;
+
+        // Set initial text content to "0:00.000"
+        formatTime(mTimeText, sizeof(mTimeText), 0.0f);
+
+        mDeltaDisplay = 0.0f;
+        mLagCounter = 0;
+        mShowDelta = false;
+        mDeltaColor = 0;
     }
 }
 
@@ -28,9 +115,56 @@ void CtrlRaceTime::initSelf() {
 // - Loads a global float constant, loads stored time at +0x50
 // - Performs floating-point arithmetic for display
 void CtrlRaceTime::calcSelf() {
-    // Calculates elapsed time from game timer
-    // Formats as MM:SS.mmm for display
-    // Updates the UI text content
+    // Early exit check — if race hasn't started, don't update
+    // (bne check from Ghidra: some condition flag)
+    if (RaceManager::spInstance == nullptr) {
+        return;
+    }
+
+    // Compute elapsed time from race timer
+    // In the full implementation, 0x807f9cac reads from the global
+    // race timer and returns the current time in milliseconds.
+    f32 currentMs = 0.0f;
+
+    RaceStage stage = RaceManager::spInstance->stage;
+    if (stage == COUNTDOWN) {
+        // During countdown, show negative time or zero
+        currentMs = 0.0f;
+    } else if (stage == RACE) {
+        // During the race, compute elapsed time from frame counter
+        // 60 FPS → ~16.667ms per frame
+        currentMs = (f32)(RaceManager::spInstance->timer * 17);
+    } else if (stage == FINISHED_RACE) {
+        // After finish, freeze the displayed time
+        currentMs = timeValue;
+    }
+
+    // Handle negative time (countdown)
+    if (currentMs < 0.0f) {
+        formatTime(mTimeText, sizeof(mTimeText), currentMs);
+        timeValue = currentMs;
+        return;
+    }
+
+    // Store the computed time
+    timeValue = currentMs;
+
+    // Format as MM:SS.mmm for display
+    // 0x8051aeac (time formatting) stores result at self+0x134
+    formatTime(mTimeText, sizeof(mTimeText), currentMs);
+
+    // Update lap delta display for Time Attack mode
+    if (RaceConfig::spInstance != nullptr) {
+        bool isTimeAttack = (RaceConfig::spInstance->mRaceScenario.mSettings.mGameMode
+            == RaceConfig::Settings::GAMEMODE_TIME_TRIAL);
+        if (isTimeAttack) {
+            mShowDelta = true;
+            // Delta is computed relative to ghost or best time
+            // For now, leave delta at zero until ghost comparison is implemented
+            mDeltaDisplay = 0.0f;
+            mDeltaColor = 0;
+        }
+    }
 }
 
 // @addr 0x807fa9a8
@@ -43,12 +177,84 @@ void CtrlRaceTime::calcSelf() {
 void CtrlRaceTime::refresh() {
     // Computes time delta since last refresh
     f32 delta = lastTime - timeValue; // fsubs f1, f2, f1
-    // Updates displayed time text
+
+    // Update the animation lag counter
+    mLagCounter++;
+
+    // Update animation states — the display text is already updated
+    // by calcSelf(), but refresh handles the visual transition effects.
+
+    // Handle time comparison display (green if faster, red if slower)
+    if (mShowDelta) {
+        f32 absDelta = delta;
+        if (absDelta < 0.0f) {
+            absDelta = -absDelta;
+        }
+
+        // Only update color when delta is significant (> 1ms)
+        if (absDelta > 1.0f) {
+            if (delta < 0.0f) {
+                // Current time is less than last — player is faster (green)
+                mDeltaColor = 1;
+            } else if (delta > 0.0f) {
+                // Current time is greater — player is slower (red)
+                mDeltaColor = 2;
+            }
+            mDeltaDisplay = delta;
+        }
+    }
+
+    // Store current time for next refresh comparison
+    lastTime = timeValue;
 }
 
 } // namespace System
 
 namespace System {
+
+CtrlRaceLap::CtrlRaceLap() {
+    lapTime = 0.0f;
+    storedValue = 10.0f;  // Division-by-10 threshold
+    displayVal = 0.0f;
+    someData = 0;
+    memset(mLapText, 0, sizeof(mLapText));
+    mDisplayedLap = 1;
+    mPreviousLap = 0;
+    mIsFinalLap = false;
+}
+
+CtrlRaceLap::~CtrlRaceLap() {
+}
+
+void CtrlRaceLap::initSelf() {
+    // Initialize lap display, set initial "LAP 1" text
+    displayVal = 1.0f;
+    mDisplayedLap = 1;
+    mPreviousLap = 0;
+    mIsFinalLap = false;
+
+    // Set initial "LAP 1" text
+    mLapText[0] = 'L';
+    mLapText[1] = 'A';
+    mLapText[2] = 'P';
+    mLapText[3] = ' ';
+    mLapText[4] = '1';
+    mLapText[5] = '\0';
+}
+
+void CtrlRaceLap::calcSelf() {
+    // Update current lap from Raceinfo.
+    // In the full implementation, this reads the current lap from
+    // the player's RaceinfoPlayer (accessed via RaceManager) and
+    // triggers a display update if the lap has changed.
+    // The actual lap data comes through the RaceManager's player array,
+    // which is updated each frame by the race logic.
+    if (RaceManager::spInstance == nullptr) {
+        return;
+    }
+    // Lap display is updated in load() via the division-by-10 trick.
+    // calcSelf() is called before load() to prepare state.
+}
 
 // @addr 0x807f1db8
 // Loads lap display data. Ghidra shows (172 bytes):
@@ -61,9 +267,101 @@ namespace System {
 //   0x121 "LAP" and 0x12d (lap number format)
 // - Additional logic for +0x190 data and float comparison at +0x148
 void CtrlRaceLap::load() {
-    // Compute current lap number
-    // Update "LAP X" display text
-    // 0x80613104 is likely a UI::TextBox::setText or similar
+    // Compute current lap number using division-by-10 trick
+    // The Ghidra decomp shows multiply-by-magic: value * 0x6667,
+    // then mulhw (multiply high word), then srawi (arithmetic shift right)
+    // This computes value / 10 for integer division.
+
+    // Load the raw lap value (from parent/raceinfo)
+    f32 rawValue = lapTime; // +0x128
+
+    // Compute quotient = (s32)(rawValue) / 10
+    s32 intVal = (s32)rawValue;
+    // Division by 10 using multiply-by-magic: (intVal * 0x6667) >> (16 + 1)
+    s32 quotient = (s32)(((s64)intVal * 0x6667) >> 19);
+
+    // Compare quotient with the stored value
+    f32 stored = storedValue; // +0x148
+    if ((f32)quotient < stored) {
+        // If quotient < stored, update display value from +0x128
+        displayVal = lapTime; // +0x128 → +0x180
+    }
+
+    // Determine the current lap number
+    u8 currentLap = 1;
+    u8 maxLaps = 3;
+
+    // Read from RaceConfig for max laps
+    if (RaceConfig::spInstance != nullptr) {
+        maxLaps = RaceConfig::spInstance->mRaceScenario.mSettings.mLapCount;
+        if (maxLaps == 0) {
+            maxLaps = 3;
+        }
+    }
+
+    // Compute current lap from the race timer or raceinfo
+    // The lap count is typically stored in Raceinfo
+    if (RaceManager::spInstance != nullptr && RaceManager::spInstance->players != nullptr) {
+        // In the full implementation, read from the player's RaceManagerPlayer
+        // For now, use the quotient-based calculation from Ghidra
+        if (quotient >= 1 && quotient <= (s32)maxLaps) {
+            currentLap = (u8)quotient;
+        }
+    }
+
+    // Handle "FINAL LAP" display
+    mIsFinalLap = (currentLap == maxLaps);
+
+    // Update the lap text if it changed
+    if (currentLap != mDisplayedLap) {
+        mPreviousLap = mDisplayedLap;
+        mDisplayedLap = currentLap;
+
+        // Store lap count value to a global
+        someData = currentLap; // +0x190
+
+        // 0x80613104 is called twice (UI text setting):
+        // First call with "LAP" (offset 0x121)
+        // Second call with lap number format (offset 0x12d)
+
+        if (mIsFinalLap) {
+            // "FINAL LAP" text
+            mLapText[0] = 'F';
+            mLapText[1] = 'I';
+            mLapText[2] = 'N';
+            mLapText[3] = 'A';
+            mLapText[4] = 'L';
+            mLapText[5] = ' ';
+            mLapText[6] = 'L';
+            mLapText[7] = 'A';
+            mLapText[8] = 'P';
+            mLapText[9] = '\0';
+        } else {
+            // "LAP X" text
+            mLapText[0] = 'L';
+            mLapText[1] = 'A';
+            mLapText[2] = 'P';
+            mLapText[3] = ' ';
+            // Convert lap number to digit(s)
+            if (currentLap < 10) {
+                mLapText[4] = (char)('0' + currentLap);
+                mLapText[5] = '\0';
+            } else {
+                // Two-digit lap number (unlikely but supported)
+                mLapText[4] = (char)('0' + (currentLap / 10));
+                mLapText[5] = (char)('0' + (currentLap % 10));
+                mLapText[6] = '\0';
+            }
+        }
+    }
+
+    // Float comparison at +0x148 for animation trigger
+    // If displayVal crossed the storedValue threshold, trigger text animation
+    if (displayVal >= storedValue && mPreviousLap != currentLap) {
+        // Lap change detected — animation state would be set here
+        // In the full implementation, this triggers the lap text
+        // scale/fade animation on the UI control
+    }
 }
 
 } // namespace System

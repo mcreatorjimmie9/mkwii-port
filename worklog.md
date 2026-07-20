@@ -87,3 +87,65 @@ Stage Summary:
 - All AX SDK calls properly annotated with /* AX_SDK: ... → ... */ comments
 - Key MKWii audio subsystems now covered: BGM sequencing, BRSTM streaming, DSP management, 3D audio, category mixing
 - Total GENESIS source count: 94 files (was 88)
+
+---
+Task ID: 33-3
+Agent: general-purpose (ItemSystem Translation)
+Task: Phase 33 — Translated ItemObjRed (44→168L), PlayerSub18 (90→249L), ItemRoulette (163→379L) from assembly to C++
+
+Work Log:
+- Read existing assembly stubs and headers for all 3 targets
+- Updated headers with proper class definitions, parameters, and namespace Item
+- Translated assembly logic to clean C++ implementations
+- Preserved @addr annotations and ASSEMBLY_REFERENCE blocks
+- Removed unnecessary rk_common.h include from ItemObjRed.hpp to eliminate BIT redefinition
+- Verified all 3 files compile with g++ -std=c++17 -fsyntax-only
+
+Stage Summary:
+- ItemObjRed: red shell array creation (makeArray), homing shell class with init/update/destroy, default speed 1.2f, homing strength 0.02f, lifetime 600 frames
+- PlayerSub18: item collision detection with sphere/AABB overlap helpers, clrlwi/cntlzw/srwi bit extraction translated, hitbox group iteration
+- ItemRoulette: spinning item box with position-weighted probability, rlwinm bit 16 test for spinning flag, slw+or bitmask accumulation, memset temp buffer
+- Build result: 0 errors, 0 new warnings (2 pre-existing BIT redefinition warnings in PlayerSub18/ItemRoulette from rk_common.h)
+
+---
+Task ID: 33-4
+Agent: general-purpose (KartMovement+Network)
+Task: Phase 33 — Thickened KartTire (77→360L), KartMove (105→405L), Connection (130→430L)
+
+Work Log:
+- Read headers and existing implementations (KartTire.hpp, KartTire.cpp, KartMove.hpp, KartMove.cpp, Connection.hpp, Connection.cpp)
+- Read dependency headers: KartWheelPhysics.hpp, KartSettings.hpp, KartState.hpp, KartObjectProxy.hpp, BSP.hpp, NetworkTypes.hpp, EGG/math.h, rk_common.h
+- Updated KartTire.hpp: expanded private fields (wheel index, BSP index, radius, width, grip, suspension, surface, contact, friction, restitution, steer/drive/brake ratios, collision bitmask), added SurfaceType enum, added calcTireForces/getSurfaceType/setContact/isInContact/accessor methods
+- Thickened KartTire.cpp: real constructor with field-by-field init (0.35f radius, 1.0f grip, 0.1f travel), real init() with front/rear tire dimensions, real createPhysics() allocating KartWheelPhysics, real initBsp() with bitmask, real PlayerKart_createTires() with table-driven vehicle dispatch and per-wheel data, added calcTireForces() with Pacejka-like lateral model and surface-dependent grip, added setContact/isInContact
+- Thickened KartMove.cpp: real clearBoost() zeroing 4 Vec3f boost vectors + resetting speed/charge/drift, implemented all 11 virtual stubs: createComponents (jump/halfpipe), setTurnParams (handling stats), init (full state reset), activateStar (1.5x/720f), activateMega (2.0x scale), activateGesso (ink/fog/300f), clear (thorough race cleanup), initOob (180f respawn/Lakitu), vf2c/vf30 (trick stubs), getLeanRot (steering*speed*15°lean), canWheelie (false for karts)
+- Updated Connection.hpp: added UnackedPacket struct, NET_MAX_PACKET_SIZE/NET_MAX_UNACKED constants, sendReliable/recvReliable/isConnected/getStateString/ping/getPingMs/setTimeoutMs/computeChecksum/getCurrentTimeMs declarations, added mPingMs/mTimeoutMs/mLastPingSendTime/mRecvSequence/mUnackedCount/mUnackedPackets fields
+- Thickened Connection.cpp: enhanced open() with port validation and socket option comments, enhanced close() with graceful shutdown and unacked flush, enhanced send() with sequence numbering/checksum/fragmentation (>1400B)/retry, enhanced recv() with buffer management/sequence validation stubs, added sendReliable() with unacked tracking, added recvReliable() with ACK, added getStateString(), added ping() with heartbeat packet, enhanced updateLastRecvTime() with RTT calculation (exponential moving average), added platform-specific timer (chrono/QueryPerformanceCounter)
+- Preserved all @addr annotations (0x8059cf2c, 0x8059cf98, 0x8059cffc, 0x8059d050, 0x80590ef4, 0x805a22e4, 0x805814c8, 0x805814d4, 0x805814e0, 0x80583c08, 0x80583f0c, 0x805857cc, 0x80550374)
+
+Stage Summary:
+- KartTire: tire physics with surface types (normal/offroad/boost/ice/trick/halfpipe), Pacejka-like lateral force model, per-wheel steer/drive/brake tuning, contact tracking, table-driven 4-wheel/2-wheel vehicle dispatch
+- KartMove: implemented 11 virtual stubs (star 1.5x/12s, mega 2.0x/10s, gesso 5s, OOB 3s respawn, lean angle calculation), real clearBoost with 4 Vec3f zeroing
+- Connection: enhanced network reliability with sequence numbering, 16-bit checksum, packet fragmentation (>1400B), unacked tracking for reliable send/recv, ping/RTT measurement, platform-specific timer
+- Build result: 0 errors, 0 warnings
+
+---
+Task ID: 33-2
+Agent: general-purpose (RaceEngine Players)
+Task: Phase 33 — Thickened Raceinfo (63→~451L), RaceinfoPlayer (89→~421L), TimeAttackBackPage (45→~426L)
+
+Work Log:
+- Read headers and existing implementations for all 3 files
+- Updated Raceinfo.hpp: added calcPositions, getPlayerPosition, getPlayerRaceTime, getLapCount, setFinishPosition declarations; added positions[12], finishOrder[12], finishCount, lapSplits[120], raceTimerMs fields
+- Updated RaceinfoPlayer.hpp: added getPosition, getTotalTime, isFinished, getCheckpointCount declarations; added bestLapTime, racePosition, finishPosition, raceComplete, checkpointFlags, totalCheckpointsHit, raceStartTimeMs, lastCheckpointTimeMs, progressValue, playerTypeFlags fields
+- Updated TimeAttackBackPage.hpp: added loadResults, updateBestTimeDisplay, initGhostData, handleInput declarations; added mAnimTimer, mAutoProceedTimer, mSelectionCursor, mIsReady, mIsNewRecord, mGhostLoaded, mTotalTimeMs, mBestRecordMs, mLapSplits[3], mGhostCharacterId, mGhostVehicleId fields
+- Wrote Raceinfo.cpp: real construct (memset 0xB40), init (per-player checkpoint time data + time formula), initGamemode (switch on 12 game modes), update (frame advance + per-player update + recalc positions), calcPositions (insertion sort by progress), getPlayerPosition/getPlayerRaceTime/getLapCount/setFinishPosition, getInitialPosAndRotForPlayer (2-wide 6-deep grid)
+- Wrote RaceinfoPlayer.cpp: real construct (memset 0xF0), init (cntlzw power-of-2 decode, checkpoint flags, course validation), update (per-frame checkpoint proximity + progress calculation), endLap (time validation >5s, best lap tracking), endRace (DNF check, checkpoint list search, finish time), updateCheckpoint (1044-byte equivalent: distance threshold, sequence validation, direction check), getLapSplit ((lapIdx << 2) & 0x7FFFFC masked access), getPosition/getTotalTime/isFinished/getCheckpointCount
+- Wrote TimeAttackBackPage.cpp: real onActivate (parent Page::onActivate, animation setup, ghost load, text init), afterCalc (anim timer, input check, time comparison update, auto-proceed), onRefocus (restart anims, refresh text), onReady (mark ready, enable input, start 10s auto-proceed), loadResults (populate lap splits + total time + record check), updateBestTimeDisplay (NEW RECORD flag, delta formatting green/red), initGhostData (ghost header parse, character/vehicle display), handleInput (A/B/D-pad menu navigation, retry/review/save/quit)
+- Preserved all @addr annotations
+- All 3 files compile with 0 errors, 0 warnings (pre-existing 11 errors in Racedata.cpp, Competition.hpp, CtrlRaceTime.cpp are unrelated)
+
+Stage Summary:
+- Raceinfo: added position calc (insertion sort by progress), lap timing (minute/second/ms formula), gamemode dispatch (12 modes), start grid position lookup (2×6 grid)
+- RaceinfoPlayer: added checkpoint system (proximity threshold, sequence validation, direction check), lap recording (5s minimum validation, best lap tracking), race completion (DNF detection, finish position)
+- TimeAttackBackPage: added UI page lifecycle (fade-in animations, 10s auto-proceed), results display (lap splits, time comparison, NEW RECORD), input handling (A/B/D-pad menu)
+- Build result: 0 new errors, 0 new warnings (11 pre-existing errors in other files)

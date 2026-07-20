@@ -49,6 +49,21 @@ enum NatResult {
     NAT_TIMEOUT      = 4,
 };
 
+// Maximum payload before fragmentation is needed
+static const u32 NET_MAX_PACKET_SIZE = 1400;
+// Maximum number of unacknowledged reliable packets tracked
+static const u32 NET_MAX_UNACKED = 32;
+
+// Unacknowledged reliable packet entry
+struct UnackedPacket {
+    u32 sequence;
+    u8  data[NET_MAX_PACKET_SIZE];
+    u32 size;
+    u32 sendTime;      // timestamp when sent (ms)
+    u8  retryCount;
+    u8  _pad[3];
+};
+
 // ============================================================================
 // Connection — Single Network Connection
 // ============================================================================
@@ -84,10 +99,20 @@ public:
     s32 send(const void* data, u32 size);
     s32 recv(void* buffer, u32 maxSize, u32* outReceived);
 
+    // --- Reliable Data Transfer ---
+    // Send with ACK requirement, track unacknowledged packets
+    s32 sendReliable(const void* data, u32 size);
+    // Receive reliable data, send ACK back
+    s32 recvReliable(void* buffer, u32 maxSize);
+
     // --- State Queries ---
     ConnectionState getState() const { return (ConnectionState)mState; }
+    // Return connection state as human-readable string
+    const char* getStateString() const;
     bool isOpen() const { return mState >= CONN_STATE_CONNECTED; }
     bool isActive() const { return mState == CONN_STATE_CONNECTED; }
+    // Check if connection is in active (connected) state
+    bool isConnected() const { return mState == CONN_STATE_CONNECTED; }
 
     u32 getRemoteAddr() const { return mRemoteAddr; }
     u16 getRemotePort() const { return mRemotePort; }
@@ -103,6 +128,17 @@ public:
     // --- Heartbeat / Keepalive ---
     void updateLastRecvTime();
     u32 getRecvAgeMs() const; // ms since last received data
+
+    // --- Ping / RTT ---
+    // Send ping packet, measure RTT
+    s32 ping();
+    // Return last measured round-trip time in ms
+    u32 getPingMs() const { return mPingMs; }
+
+    // --- Timeout ---
+    // Set connection timeout in ms
+    void setTimeoutMs(u32 timeout) { mTimeoutMs = timeout; }
+    u32 getTimeoutMs() const { return mTimeoutMs; }
 
     // --- Connection metadata ---
     // State value < 0x42 means "connected" in decompiled code
@@ -136,6 +172,12 @@ private:
     Connection(const Connection&);
     Connection& operator=(const Connection&);
 
+    // Compute simple checksum for packet integrity
+    u16 computeChecksum(const void* data, u32 size) const;
+
+    // Get current time in ms (platform-specific)
+    static u32 getCurrentTimeMs();
+
     // === Connection State (matches decompiled player entry layout) ===
     // Layout: 0x30-byte entry with fields at specific offsets
     u32  mGroupId;         // 0x04: room/group ID
@@ -164,7 +206,15 @@ private:
     u32  mLastRecvTime;    // timestamp of last received packet (ms)
     NatResult mNatResult;
     void* mSocketHandle;   // platform socket descriptor
-    u8   _pad[0x08];
+
+    // === Reliability & Ping State ===
+    u32  mPingMs;          // last measured RTT in ms
+    u32  mTimeoutMs;       // connection timeout in ms
+    u32  mLastPingSendTime;// timestamp of last ping sent
+    u32  mRecvSequence;    // next expected recv sequence
+    u32  mUnackedCount;    // number of tracked unacked packets
+    UnackedPacket mUnackedPackets[NET_MAX_UNACKED]; // reliable send tracking
+    u8   _pad2[0x04];
 };
 
 } // namespace Net
