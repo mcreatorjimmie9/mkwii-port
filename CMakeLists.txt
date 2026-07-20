@@ -114,6 +114,8 @@ set(RACEENGINE_SOURCES
     data/src/game/RaceEngine/TimeAttackGamemode.cpp
     data/src/game/RaceEngine/TimeAttackSplitsPage.cpp
     data/src/game/RaceEngine/TimeAttackBackPage.cpp
+    data/src/game/RaceEngine/RaceSequence.cpp
+    data/src/game/RaceEngine/RaceDirector.cpp
 )
 
 # --- AIRace (8 files) ---
@@ -322,6 +324,8 @@ set(SAVEDATA_SOURCES
     data/src/game/SaveData/SaveData.cpp
     data/src/game/SaveData/SaveManager.cpp
     data/src/game/SaveData/Settings.cpp
+    data/src/game/SaveData/GhostManager.cpp
+    data/src/game/SaveData/RankingSystem.cpp
 )
 
 # --- EGG Framework Utilities (6 files, Phase 20) ---
