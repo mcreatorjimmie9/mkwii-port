@@ -165,6 +165,18 @@ public:
     u32 getSequence() const { return mHeader.sequence; }
     u32 getAckBits() const { return mHeader.ackBits; }
 
+    // --- Additional queries ---
+    bool needsReliable() const;
+    u32 getSeq() const;
+    u8 getSender() const;
+    void setSender(u8 playerId);
+    const u8* getPayloadData() const;
+    u8* getMutablePayload();
+    Packet clone() const;
+    u8 getSendChannel() const;
+    void setSendChannel(u8 channel);
+    u16 getEffectiveSize() const;
+
     // --- Payload Access ---
     // Returns pointer to payload data (after header)
     u8* getPayload() { return mPayload; }

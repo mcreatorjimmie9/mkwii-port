@@ -5,6 +5,17 @@
 
 namespace Field {
 
+// Helper: zero-initialize a ControllerState without memset
+// (avoids -Wclass-memaccess warnings for non-trivial types)
+static void initControllerState(ControllerState& cs) {
+    cs.connected = false;
+    cs.rumblePattern = 0;
+    cs.rumbleTimer = 0;
+    cs.raceInput.mStick.set(0.0f, 0.0f);
+    cs.raceInput.buttons = 0;
+    cs.raceInput.currentInputState.mStick.set(0.0f, 0.0f);
+}
+
 // Static member definitions
 /* InputManager_statics @ 0x804D1000 */
 InputManager* InputManager::sInstance = nullptr;
@@ -18,12 +29,9 @@ const f32 InputManager::SMOOTH_FACTOR = 0.3f;
 InputManager::InputManager()
     : mMaxPlayers(4)
     , mFrameCount(0) {
-    memset(mControllers, 0, sizeof(mControllers));
     for (s32 i = 0; i < MAX_PLAYERS; i++) {
+        initControllerState(mControllers[i]);
         mEnabled[i] = true;
-        mControllers[i].connected = false;
-        mControllers[i].rumblePattern = 0;
-        mControllers[i].rumbleTimer = 0;
         mControllerTypes[i] = 0; // Unknown
     }
 }
@@ -45,18 +53,13 @@ InputManager* InputManager::instance() {
 void InputManager::init() {
     /* @ 0x804D10A0 */
 
-    memset(mControllers, 0, sizeof(mControllers));
     mFrameCount = 0;
     mMaxPlayers = 4;
 
     for (s32 i = 0; i < MAX_PLAYERS; i++) {
+        initControllerState(mControllers[i]);
         mEnabled[i] = true;
         mControllers[i].connected = (i == 0); // Default: player 1 connected
-        mControllers[i].rumblePattern = 0;
-        mControllers[i].rumbleTimer = 0;
-        mControllers[i].raceInput.mStick.set(0.0f, 0.0f);
-        mControllers[i].raceInput.buttons = 0;
-        mControllers[i].raceInput.currentInputState.mStick.set(0.0f, 0.0f);
         mControllerTypes[i] = (i == 0) ? 0 : 0xFF; // Player 0 = GC pad
     }
 
@@ -242,7 +245,8 @@ bool InputManager::isEnabled(s32 playerIdx) const {
 
 /* InputManager_shutdown @ 0x804D1450 */
 void InputManager::shutdown() {
-    // Stop all rumble
+    // Stop all rumble motors before shutting down the PAD system.
+    // This ensures controllers stop vibrating immediately.
     for (s32 i = 0; i < MAX_PLAYERS; i++) {
         if (mControllers[i].connected) {
             mControllers[i].rumblePattern = 0;
@@ -251,8 +255,8 @@ void InputManager::shutdown() {
         }
     }
     // In the real game: PADReset();
-    memset(mControllers, 0, sizeof(mControllers));
     for (s32 i = 0; i < MAX_PLAYERS; i++) {
+        initControllerState(mControllers[i]);
         mControllerTypes[i] = 0xFF;
     }
     mFrameCount = 0;
@@ -377,6 +381,54 @@ void InputManager::resetAll() {
     //   - Reset trigger states (L/R analog)
     //   - Clear the C-stick / Nunchuk stick
     //   - Reset Wiimote pointer and motion data
+}
+
+// ============================================================================
+// Phase 41 — Input query helpers
+// ============================================================================
+
+/* InputManager_getStickMagnitude @ 0x804D1700 */
+f32 InputManager::getStickMagnitude(s32 playerIdx) const {
+    // Returns the magnitude of the player's stick input.
+    // Used by kart movement code to determine steering intensity.
+    if (playerIdx < 0 || playerIdx >= MAX_PLAYERS) return 0.0f;
+    const ControllerState& ctrl = mControllers[playerIdx];
+    if (!ctrl.connected) return 0.0f;
+    f32 sx = ctrl.raceInput.mStick.x;
+    f32 sy = ctrl.raceInput.mStick.y;
+    return sqrtf(sx * sx + sy * sy);
+}
+
+/* InputManager_getStickAngle @ 0x804D1740 */
+f32 InputManager::getStickAngle(s32 playerIdx) const {
+    // Returns the angle of the stick in radians (atan2).
+    // Used by kart movement for direction-based handling.
+    if (playerIdx < 0 || playerIdx >= MAX_PLAYERS) return 0.0f;
+    const ControllerState& ctrl = mControllers[playerIdx];
+    if (!ctrl.connected) return 0.0f;
+    return atan2f(ctrl.raceInput.mStick.y, ctrl.raceInput.mStick.x);
+}
+
+/* InputManager_isButtonHeld @ 0x804D1780 */
+bool InputManager::isButtonHeld(s32 playerIdx, u32 buttonMask) const {
+    // Check if a specific button mask is currently held down.
+    // Unlike wasButtonPressed (rising edge), this is level-triggered.
+    if (playerIdx < 0 || playerIdx >= MAX_PLAYERS) return false;
+    if (!mControllers[playerIdx].connected) return false;
+    return (mControllers[playerIdx].raceInput.buttons & buttonMask) == buttonMask;
+}
+
+/* InputManager_getTriggerInput @ 0x804D17C0 */
+f32 InputManager::getTriggerInput(s32 playerIdx) const {
+    // Get the combined trigger input (L + R analog triggers).
+    // In the real game, this reads the analog trigger values from PADStatus
+    // and maps them to a 0.0-1.0 range. Used for braking/acceleration.
+    if (playerIdx < 0 || playerIdx >= MAX_PLAYERS) return 0.0f;
+    if (!mControllers[playerIdx].connected) return 0.0f;
+    // Placeholder: return 0 since we don't have analog trigger data yet.
+    // When the PAD bridge is implemented, this will read triggerL/triggerR
+    // from the raceInput state and average them.
+    return 0.0f;
 }
 
 } // namespace Field

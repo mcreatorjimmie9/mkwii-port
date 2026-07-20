@@ -77,6 +77,14 @@ public:
     const MapObjEntry* getObject(u32 index) const;
     MapObjEntry* findByType(u16 typeId);
     MapObjEntry* findByPosition(const Vec3& pos, f32 radius);
+    MapObjEntry* findById(u32 id) const;
+    u32 findByTypeAll(u16 typeId, MapObjEntry** outResults, u32 maxResults) const;
+    u32 getVisibleCount() const;
+    void getBoundingBox(Vec3& outMin, Vec3& outMax) const;
+    void setVariant(u32 index, u8 variant);
+    void recalcBoundingRadius(u32 index);
+    void swapObjects(u32 a, u32 b);
+    u32 getMemoryUsage() const;
 
     // Animation
     void setAnimation(u32 index, u16 frame, u16 maxFrame, f32 speed);

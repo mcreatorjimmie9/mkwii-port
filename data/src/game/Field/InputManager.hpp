@@ -101,6 +101,22 @@ public:
     /* InputManager_applySmoothing @ 0x804D1640 */
     static void applySmoothing(f32& value, f32 prev, f32 factor);
 
+    // Get stick magnitude (0.0-1.0+)
+    /* InputManager_getStickMagnitude @ 0x804D1700 */
+    f32 getStickMagnitude(s32 playerIdx) const;
+
+    // Get stick angle in radians (atan2)
+    /* InputManager_getStickAngle @ 0x804D1740 */
+    f32 getStickAngle(s32 playerIdx) const;
+
+    // Check if a button mask is currently held (level-triggered)
+    /* InputManager_isButtonHeld @ 0x804D1780 */
+    bool isButtonHeld(s32 playerIdx, u32 buttonMask) const;
+
+    // Get combined analog trigger input (0.0-1.0)
+    /* InputManager_getTriggerInput @ 0x804D17C0 */
+    f32 getTriggerInput(s32 playerIdx) const;
+
 private:
     // Process raw PADStatus into KPadRaceInputState
     void processPADStatus(s32 channel, const u8* padStatus);

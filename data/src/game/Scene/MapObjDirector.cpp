@@ -368,4 +368,119 @@ void MapObjDirector::drawObject(const MapObjEntry& entry) const {
 
 /* MapObjDirector_getObjectCount @ 0x806b0280 */
 
+// =============================================================================
+// findById — Find object by slot index, with type filter
+// @addr 0x806b02a0
+// =============================================================================
+
+/* MapObjDirector_findById @ 0x806b02a0 */
+MapObjEntry* MapObjDirector::findById(u32 id) const {
+    if (id >= m_maxObjects) return nullptr;
+    if (!m_objects[id].loaded) return nullptr;
+    return &m_objects[id];
+}
+
+// =============================================================================
+// findByTypeAll — Return all objects matching a type, up to maxResults
+// @addr 0x806b02c0
+// =============================================================================
+
+/* MapObjDirector_findByTypeAll @ 0x806b02c0 */
+u32 MapObjDirector::findByTypeAll(u16 typeId, MapObjEntry** outResults, u32 maxResults) const {
+    u32 count = 0;
+    for (u32 i = 0; i < m_maxObjects && count < maxResults; i++) {
+        if (!m_objects[i].loaded) continue;
+        if (m_objects[i].typeId == typeId) {
+            outResults[count++] = &m_objects[i];
+        }
+    }
+    return count;
+}
+
+// =============================================================================
+// getVisibleCount — Count currently visible (frustum-culled) objects
+// =============================================================================
+
+u32 MapObjDirector::getVisibleCount() const {
+    u32 count = 0;
+    for (u32 i = 0; i < m_maxObjects; i++) {
+        if (m_objects[i].loaded && m_objects[i].visible) count++;
+    }
+    return count;
+}
+
+// =============================================================================
+// getBoundingBox — Compute bounding box of all loaded objects
+// =============================================================================
+
+void MapObjDirector::getBoundingBox(Vec3& outMin, Vec3& outMax) const {
+    outMin.x = outMin.y = outMin.z = 1e30f;
+    outMax.x = outMax.y = outMax.z = -1e30f;
+
+    for (u32 i = 0; i < m_maxObjects; i++) {
+        if (!m_objects[i].loaded) continue;
+        const Vec3& p = m_objects[i].position;
+        f32 r = m_objects[i].boundingRadius;
+        if (p.x - r < outMin.x) outMin.x = p.x - r;
+        if (p.y - r < outMin.y) outMin.y = p.y - r;
+        if (p.z - r < outMin.z) outMin.z = p.z - r;
+        if (p.x + r > outMax.x) outMax.x = p.x + r;
+        if (p.y + r > outMax.y) outMax.y = p.y + r;
+        if (p.z + r > outMax.z) outMax.z = p.z + r;
+    }
+}
+
+// =============================================================================
+// setVariant — Change the variant (color/LOD) of an object
+// =============================================================================
+
+void MapObjDirector::setVariant(u32 index, u8 variant) {
+    if (index >= m_maxObjects || !m_objects[index].loaded) return;
+    m_objects[index].variantId = variant;
+}
+
+// =============================================================================
+// recalcBoundingRadius — Recompute bounding radius from scale
+// =============================================================================
+
+void MapObjDirector::recalcBoundingRadius(u32 index) {
+    if (index >= m_maxObjects || !m_objects[index].loaded) return;
+    const Vec3& s = m_objects[index].scale;
+    f32 maxScale = s.x > s.y ? s.x : s.y;
+    if (s.z > maxScale) maxScale = s.z;
+    m_objects[index].boundingRadius = 100.0f * maxScale;
+}
+
+// =============================================================================
+// swapObjects — Swap two object slots (useful for sorting)
+// =============================================================================
+
+void MapObjDirector::swapObjects(u32 a, u32 b) {
+    if (a >= m_maxObjects || b >= m_maxObjects) return;
+    MapObjEntry tmp = m_objects[a];
+    m_objects[a] = m_objects[b];
+    m_objects[b] = tmp;
+}
+
+// =============================================================================
+// getMemoryUsage — Return approximate memory used by all loaded objects
+// =============================================================================
+
+u32 MapObjDirector::getMemoryUsage() const {
+    return m_maxObjects * sizeof(MapObjEntry);
+}
+
+// =============================================================================
+// Free function: MapObjDirector_getDefaultDirector
+// =============================================================================
+
+MapObjDirector* MapObjDirector_getDefaultDirector() {
+    static MapObjDirector sDirector;
+    if (!sDirector.areResourcesLoaded()) {
+        sDirector.init(4096);
+        sDirector.loadResources();
+    }
+    return &sDirector;
+}
+
 } // namespace Scene

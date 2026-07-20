@@ -388,4 +388,81 @@ const char* Packet_getTypeName(u8 type) {
     return PacketHeaderUtil::getTypeName(type);
 }
 
+// =============================================================================
+// Additional Packet methods
+// =============================================================================
+
+// @addr 0x8055bc40 — Check if this packet needs reliable delivery
+bool Packet::needsReliable() const {
+    return mbReliable;
+}
+
+// @addr 0x8055bc60 — Get the sequence number
+u32 Packet::getSeq() const {
+    return mHeader.sequence;
+}
+
+// @addr 0x8055bc80 — Get the sender player index
+u8 Packet::getSender() const {
+    return mHeader.senderId;
+}
+
+// @addr 0x8055bca0 — Set the sender player index
+void Packet::setSender(u8 playerId) {
+    mHeader.senderId = playerId;
+}
+
+// @addr 0x8055bcc0 — Get payload data pointer
+const u8* Packet::getPayloadData() const {
+    return mPayload;
+}
+
+// @addr 0x8055bce0 — Get mutable payload pointer for writing
+u8* Packet::getMutablePayload() {
+    return mPayload;
+}
+
+// @addr 0x8055bd00 — Clone this packet
+Packet Packet::clone() const {
+    Packet copy;
+    copy.mHeader = mHeader;
+    copy.mbReliable = mbReliable;
+    copy.mChannel = mChannel;
+    u16 payloadSize = mHeader.payloadSize;
+    if (payloadSize > 0 && payloadSize <= MAX_PAYLOAD_SIZE) {
+        memcpy(copy.mPayload, mPayload, payloadSize);
+    } else {
+        memcpy(copy.mPayload, mPayload, 0); // just copy nothing
+    }
+    return copy;
+}
+
+// @addr 0x8055bd20 — Get the channel this packet will be sent on
+u8 Packet::getSendChannel() const {
+    return mChannel;
+}
+
+// @addr 0x8055bd40 — Set the send channel
+void Packet::setSendChannel(u8 channel) {
+    mChannel = channel;
+}
+
+// @addr 0x8055bd60 — Get the effective size (header + payload)
+u16 Packet::getEffectiveSize() const {
+    return (u16)(sizeof(PacketHeader) + mHeader.payloadSize);
+}
+
+// @addr 0x8055bd80 — Free function: Packet_createUnreliable
+Packet* Packet_createUnreliable(PacketType type, const u8* payload, u32 size) {
+    Packet* pkt = new Packet();
+    // Set type via the mutable header accessor
+    pkt->getHeader().type = (u8)type;
+    pkt->setReliable(false);
+    if (payload != nullptr && size > 0 && size <= Packet::MAX_PAYLOAD_SIZE) {
+        memcpy(pkt->getMutablePayload(), payload, size);
+        pkt->getHeader().payloadSize = (u16)size;
+    }
+    return pkt;
+}
+
 } // namespace RKNet

@@ -97,6 +97,14 @@ public:
     bool isVSyncEnabled() const;
     f32 getTargetFrameRate() const;
     f32 getFrameBudget() const;
+    u32 getElapsedMs() const;
+    u32 getDeltaUs() const;
+    bool isInitialized() const;
+    f32 getPeakFrameTime() const;
+    void resetPeakFrameTime();
+    f32 getAverageFrameTime() const;
+    bool isWithinTolerance(f32 tolerance) const;
+    const char* getPerformanceString() const;
 
 private:
     s32 mStartTick;        // 0x00 — tick at frame start
