@@ -63,6 +63,8 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/data/src/game/Field
     ${CMAKE_SOURCE_DIR}/data/src/game/Collision
     ${CMAKE_SOURCE_DIR}/data/src/game/AIRace
+    ${CMAKE_SOURCE_DIR}/data/src/game/NW4R
+    ${CMAKE_SOURCE_DIR}/data/src/game/EGG
 )
 
 # =============================================================================
@@ -204,6 +206,12 @@ set(SCENE_SOURCES
     data/src/game/Scene/SceneRace.cpp
     data/src/game/Scene/ParticleEffect.cpp
     data/src/game/Scene/Skybox.cpp
+    data/src/game/Scene/SceneCreator.cpp
+    data/src/game/Scene/SceneMgr.cpp
+    data/src/game/Scene/SceneTransition.cpp
+    data/src/game/Scene/HomeButton.cpp
+    data/src/game/Scene/SceneBase2D.cpp
+    data/src/game/Scene/SceneBase3D.cpp
 )
 
 # --- UI (11 files) ---
@@ -286,6 +294,18 @@ set(FIELD_SOURCES
     data/src/game/Field/InputManager.cpp
 )
 
+# --- NW4R Graphics Wrappers (8 files) ---
+set(NW4R_SOURCES
+    data/src/game/NW4R/AnmObjTexPat.cpp
+    data/src/game/NW4R/AnmObjTexSrt.cpp
+    data/src/game/NW4R/AnmObjMatClr.cpp
+    data/src/game/NW4R/AnmObjChr.cpp
+    data/src/game/NW4R/AnmScn.cpp
+    data/src/game/NW4R/G3dObj.cpp
+    data/src/game/NW4R/G3dResFile.cpp
+    data/src/game/NW4R/ResTex.cpp
+)
+
 # --- SaveData (8 files) ---
 set(SAVEDATA_SOURCES
     data/src/game/SaveData/GhostFile.cpp
@@ -295,6 +315,18 @@ set(SAVEDATA_SOURCES
     data/src/game/SaveData/SaveData.cpp
     data/src/game/SaveData/SaveManager.cpp
     data/src/game/SaveData/Settings.cpp
+)
+
+# --- EGG Framework Utilities (6 files, Phase 20) ---
+# Address range: 0x8016C000-0x80178000 (DOL)
+# Covers Display, FrmHeap, Graphics, Utility, FrameTimer, ArchiveHeap
+set(EGG_SOURCES
+    data/src/game/EGG/Display.cpp
+    data/src/game/EGG/FrmHeap.cpp
+    data/src/game/EGG/Graphics.cpp
+    data/src/game/EGG/Utility.cpp
+    data/src/game/EGG/FrameTimer.cpp
+    data/src/game/EGG/ArchiveHeap.cpp
 )
 
 # =============================================================================
@@ -317,6 +349,8 @@ add_library(mkwii-genesis STATIC
     ${NETWORK_SOURCES}
     ${SAVEDATA_SOURCES}
     ${FIELD_SOURCES}
+    ${NW4R_SOURCES}
+    ${EGG_SOURCES}
 )
 
 # =============================================================================
@@ -338,7 +372,9 @@ list(LENGTH RENDERING_SOURCES _render_cnt)
 list(LENGTH SCENE_SOURCES _scene_cnt)
 list(LENGTH UI_SOURCES _ui_cnt)
 list(LENGTH FIELD_SOURCES _field_cnt)
-math(EXPR _total "${_phys_cnt}+${_kart_cnt}+${_race_cnt}+${_ai_cnt}+${_coll_cnt}+${_item_cnt}+${_audio_cnt}+${_render_cnt}+${_scene_cnt}+${_ui_cnt}+${_field_cnt}")
+list(LENGTH NW4R_SOURCES _nw4r_cnt)
+list(LENGTH EGG_SOURCES _egg_cnt)
+math(EXPR _total "${_phys_cnt}+${_kart_cnt}+${_race_cnt}+${_ai_cnt}+${_coll_cnt}+${_item_cnt}+${_audio_cnt}+${_render_cnt}+${_scene_cnt}+${_ui_cnt}+${_field_cnt}+${_nw4r_cnt}+${_egg_cnt}")
 message(STATUS "Physics:       ${_phys_cnt} files")
 message(STATUS "KartMovement:  ${_kart_cnt} files")
 message(STATUS "RaceEngine:   ${_race_cnt} files")
@@ -350,6 +386,8 @@ message(STATUS "Rendering:    ${_render_cnt} files")
 message(STATUS "Scene:        ${_scene_cnt} files")
 message(STATUS "UI:           ${_ui_cnt} files")
 message(STATUS "Field:        ${_field_cnt} files")
+message(STATUS "NW4R:         ${_nw4r_cnt} files")
+message(STATUS "EGG Util:     ${_egg_cnt} files")
 message(STATUS "TOTAL:        ${_total} GENESIS source files")
 
 # =============================================================================
@@ -385,4 +423,5 @@ target_include_directories(mkwii-linktest PRIVATE
     ${CMAKE_SOURCE_DIR}/data/src/game/Field
     ${CMAKE_SOURCE_DIR}/data/src/game/Collision
     ${CMAKE_SOURCE_DIR}/data/src/game/AIRace
+    ${CMAKE_SOURCE_DIR}/data/src/game/EGG
 )
