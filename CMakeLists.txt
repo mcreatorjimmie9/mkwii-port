@@ -214,7 +214,7 @@ set(SCENE_SOURCES
     data/src/game/Scene/SceneBase3D.cpp
 )
 
-# --- UI (11 files) ---
+# --- UI (15 files) ---
 set(UI_SOURCES
     data/src/game/UI/UIManager.cpp
     data/src/game/UI/UIControl.cpp
@@ -227,6 +227,10 @@ set(UI_SOURCES
     data/src/game/UI/MessageBox.cpp
     data/src/game/UI/TextInput.cpp
     data/src/game/UI/PageManager.cpp
+    data/src/game/UI/PageController.cpp
+    data/src/game/UI/PageAnimCtrl.cpp
+    data/src/game/UI/UIControlSystem.cpp
+    data/src/game/UI/UIControlHelper.cpp
 )
 
 # --- Runtime (18 categorized files — function declarations) ---
