@@ -288,6 +288,9 @@ set(NETWORK_SOURCES
     data/src/game/Network/RKNetConnectionManager.cpp
     data/src/game/Network/RacingNet.cpp
     data/src/game/Network/Session.cpp
+    data/src/game/Online/DWCMatchmaker.cpp
+    data/src/game/Online/GameSpyAuth.cpp
+    data/src/game/Online/NWC24Manager.cpp
 )
 
 # --- Field (4 files) ---
