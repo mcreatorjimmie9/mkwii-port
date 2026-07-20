@@ -351,3 +351,38 @@ message(STATUS "Scene:        ${_scene_cnt} files")
 message(STATUS "UI:           ${_ui_cnt} files")
 message(STATUS "Field:        ${_field_cnt} files")
 message(STATUS "TOTAL:        ${_total} GENESIS source files")
+
+# =============================================================================
+# Phase 18: Linkage Test executable
+# =============================================================================
+add_executable(mkwii-linktest
+    test/main.cpp
+    test/link_stubs.cpp
+)
+target_link_libraries(mkwii-linktest
+    mkwii-genesis
+)
+# The link test needs the same include paths as the library
+target_include_directories(mkwii-linktest PRIVATE
+    ${CMAKE_SOURCE_DIR}/src/modules
+    ${CMAKE_SOURCE_DIR}/src/modules/egg/core
+    ${CMAKE_SOURCE_DIR}/src/modules/egg/math
+    ${CMAKE_SOURCE_DIR}/src/modules/game/kart
+    ${CMAKE_SOURCE_DIR}/src/modules/game/field
+    ${CMAKE_SOURCE_DIR}/src/modules/game/system
+    ${CMAKE_SOURCE_DIR}/src/modules/game/util
+    ${CMAKE_SOURCE_DIR}/src/modules/system
+    ${CMAKE_SOURCE_DIR}/src/modules/util
+    ${CMAKE_SOURCE_DIR}/src/modules/host_system
+    ${CMAKE_SOURCE_DIR}/src/modules/shims
+    ${CMAKE_SOURCE_DIR}/src/modules/shims/ax_audio
+    ${CMAKE_SOURCE_DIR}/src/modules/rvl
+    ${CMAKE_SOURCE_DIR}/data/src/game
+    ${CMAKE_SOURCE_DIR}/data/src/game/UI
+    ${CMAKE_SOURCE_DIR}/data/src/game/Scene
+    ${CMAKE_SOURCE_DIR}/data/src/game/Network
+    ${CMAKE_SOURCE_DIR}/data/src/game/SaveData
+    ${CMAKE_SOURCE_DIR}/data/src/game/Field
+    ${CMAKE_SOURCE_DIR}/data/src/game/Collision
+    ${CMAKE_SOURCE_DIR}/data/src/game/AIRace
+)
