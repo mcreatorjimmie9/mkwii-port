@@ -227,3 +227,40 @@ u16 ResShape_GetMaterialIndex(const ResShape* shape);
 
 // @addr 0x80604460 — Get shape vertex count
 u16 ResShape_GetVertexCount(const ResShape* shape);
+
+// ============================================================================
+// Extended ResTex Functions — Texture load/unload/bind and helpers
+// ============================================================================
+
+// Initialize a ResTexData struct to safe defaults
+void ResTex_InitDefaults(ResTex* tex);
+
+// Parse a standalone TEX0/REFT block and populate the ResTexData
+// Returns TRUE on success, FALSE if the header is invalid or data is too small
+BOOL ResTex_Load(ResTex* tex, const void* data, u32 size);
+
+// Reset a ResTexData to default/unloaded state
+void ResTex_Unload(ResTex* tex);
+
+// Bind the texture to a GX texture unit for rendering
+// On PC this is a no-op; on Wii it calls GXLoadTexObj
+void ResTex_Bind(const ResTex* tex, u8 texUnit);
+
+// Get the number of mipmaps in this texture
+u8 ResTex_GetMipmapCount(const ResTex* tex);
+
+// Check whether this texture uses a palette (CI4, CI8, or CI14X2 format)
+BOOL ResTex_HasPalette(const ResTex* tex);
+
+// Get the palette format (GX_TLUT_RGB565 or GX_TLUT_RGB5A3)
+u8 ResTex_GetPaletteFormat(const ResTex* tex);
+
+// Compute the total memory used by this texture (all mip levels + palette)
+u32 ResTex_GetTotalSize(const ResTex* tex);
+
+// Convert a GX texture format enum to bytes per pixel (at base mip level)
+u32 ResTex_FormatToBytesPerPixel(u8 gxFormat);
+
+// Decode palette entries from raw TLUT data into an RGBA u8 array
+// count = number of palette entries, format = GX_TLUT_*
+void ResTex_DecodePaletteData(const u8* src, u8* dst, u32 count, u32 format);

@@ -3,6 +3,10 @@
 #include <egg/math/eggVector.hpp>
 #include <rk_common.h>
 
+namespace System {
+struct MapdataEnemyPathAccessor;
+}
+
 namespace Enemy {
 
 struct AIPathManager;
@@ -80,10 +84,21 @@ struct AIPathHandler {
 
     virtual ~AIPathHandler();
     virtual void init(const InitArg&);
+    void calc(const EGG::Vector3f& pos, const EGG::Vector3f& fwd);
+    void setPath(const System::MapdataEnemyPathAccessor* accessor);
     void addOffsetRateAndRecalcTargetTrans(f32);
     bool isSwitchingPath();
     void recalcTargetTrans(const EGG::Vector3f&);
     void setStartDashType(s32);
+    EGG::Vector3f getCurrentPoint() const;
+    EGG::Vector3f getPreviousPoint() const;
+    EGG::Vector3f getDirection() const;
+    f32 getUpcomingAngle() const;
+    void advanceToNextWaypoint();
+    s32 findNearestPoint(const EGG::Vector3f& pos) const;
+    bool isNearNextWaypoint(const EGG::Vector3f& pos) const;
+    f32 getProgress() const;
+    bool isFinished() const;
 
     bool mbIsSwitchingPath;
     PointParam* mpPrevPointParam;
@@ -102,6 +117,12 @@ struct AIPathHandler {
     f32 field_0x34;
     f32 field_0x38;
     f32 field_0x3C;
+    const System::MapdataEnemyPathAccessor* mpPathAccessor;
+    s32 mWaypointIndex;
+    s32 mPathPointCount;
+    f32 mProgress;
+    bool mbFinished;
+    f32 mArrivalDistSq;
 };
 
 struct AIPathManager {

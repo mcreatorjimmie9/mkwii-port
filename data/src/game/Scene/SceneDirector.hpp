@@ -6,6 +6,7 @@
 // orchestrates transitions between scenes (e.g. Menu → Race → Results).
 
 #include "rk_common.h"
+#include "SceneCreator.hpp"  // SceneId, SceneArgs for factory-based transitions
 
 namespace Scene {
 
@@ -35,12 +36,28 @@ public:
 
     // Scene management
     void changeScene(SceneBase* nextScene, TransitionType type);
+    void changeScene(SceneId sceneId, const SceneArgs* args = nullptr,
+                     TransitionType type = TRANS_FADE_OUT);
     void update();
     void draw();
+
+    // Scene stack operations (for overlays / pause menus)
+    void pushScene(SceneId sceneId, const SceneArgs* args = nullptr);
+    void popScene();
 
     // Scene access
     SceneBase* getCurrentScene() const { return m_currentScene; }
     SceneBase* getNextScene() const { return m_nextScene; }
+
+    // Scene lookup
+    SceneBase* getSceneByID(SceneId sceneId) const;
+
+    // Fade management
+    void updateFade();
+    bool isTransitioning() const { return m_isFadingOut != 0 || m_isFadingIn != 0; }
+
+    // Scene teardown
+    void destroyCurrentScene();
 
     // State queries
     bool isChanging() const { return m_nextScene != nullptr; }
@@ -66,6 +83,17 @@ private:
     u8 m_isFadingOut;
     u8 m_isFadingIn;
     u32 m_reserved[8];           // Padding for alignment
+
+    // Scene stack for push/pop (overlays, pause menus)
+    static const u32 MAX_SCENE_STACK = 4;
+    SceneBase* m_sceneStack[MAX_SCENE_STACK];
+    u32 m_stackTop;
+
+    // Fade overlay state
+    u8 m_fadeAlpha;               // Current overlay alpha (0-255)
+    u8 m_fadeColorR;              // Fade color R
+    u8 m_fadeColorG;              // Fade color G
+    u8 m_fadeColorB;              // Fade color B
 
     static SceneDirector* s_instance;
 };

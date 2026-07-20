@@ -5,6 +5,8 @@
 
 #include "rk_common.h"
 
+namespace EGG { class J2DPane; }
+
 namespace UI {
 
 // Forward declarations
@@ -50,6 +52,24 @@ public:
     void setVisible(bool visible);
     void setEnabled(bool enabled);
 
+    // --- Extended pane interface ---
+    void init(EGG::J2DPane* pane);
+    EGG::J2DPane* getPane() const { return mPanePtr; }
+    void setPosition(f32 x, f32 y);
+    void getPosition(f32* outX, f32* outY) const;
+    void setSize(f32 w, f32 h);
+    void getSize(f32* outW, f32* outH) const;
+    void setRotation(f32 degrees);
+    void setAlpha(u8 alpha);
+    u8 getAlpha() const { return mCachedAlpha; }
+    void setColor(u8 r, u8 g, u8 b, u8 a);
+
+    // --- Animation ---
+    void animatePosition(f32 targetX, f32 targetY, f32 speed);
+    void animateAlpha(u8 targetAlpha, f32 speed);
+    void animateScale(f32 targetScale, f32 speed);
+    void updateAnimations();
+
     // @addr 0x8050b634
     static u32 getCourseMessageId(u16 courseId);
 
@@ -71,6 +91,29 @@ protected:
     u32 mOverlayActive;        // overlay flag
     u8 mInitFlag;              // initialization flag
     u8 mOverlayFlag;           // overlay visibility
+
+    // --- Cached transform state ---
+    EGG::J2DPane* mPanePtr;    // 0x24: raw J2DPane pointer (may be null)
+    f32 mCachedPosX;           // cached position X
+    f32 mCachedPosY;           // cached position Y
+    f32 mCachedWidth;          // cached width
+    f32 mCachedHeight;         // cached height
+    f32 mCachedRotation;       // cached rotation in degrees
+    u8 mCachedAlpha;           // cached alpha (0-255)
+    u8 mColorR, mColorG, mColorB, mColorA; // cached color multiplier
+
+    // --- Animation state ---
+    bool mAnimPosActive;       // position animation active
+    f32 mAnimPosTargetX;
+    f32 mAnimPosTargetY;
+    f32 mAnimPosSpeed;
+    bool mAnimAlphaActive;     // alpha animation active
+    u8 mAnimAlphaTarget;
+    f32 mAnimAlphaSpeed;
+    bool mAnimScaleActive;     // scale animation active
+    f32 mAnimScaleTarget;
+    f32 mAnimScaleCurrent;
+    f32 mAnimScaleSpeed;
 };
 
 } // namespace UI

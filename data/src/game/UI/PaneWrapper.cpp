@@ -4,6 +4,10 @@
 #include "PaneWrapper.hpp"
 #include "LayoutLoader.hpp"
 #include "ui_stubs.h"
+#include <Scene/J2DPane.hpp>
+#include <cstring>
+#include <cmath>
+#include <algorithm>
 
 namespace UI {
 
@@ -15,7 +19,34 @@ PaneWrapper::PaneWrapper()
     , mFlags(PANE_FLAG_VISIBLE)
     , _1D(0)
     , _1E(0)
-    , _1F(0) {
+    , _1F(0)
+    , mTransitionState(0)
+    , mState(0)
+    , mOverlayActive(0)
+    , mInitFlag(0)
+    , mOverlayFlag(0)
+    , mPanePtr(nullptr)
+    , mCachedPosX(0.0f)
+    , mCachedPosY(0.0f)
+    , mCachedWidth(0.0f)
+    , mCachedHeight(0.0f)
+    , mCachedRotation(0.0f)
+    , mCachedAlpha(0xFF)
+    , mColorR(0xFF)
+    , mColorG(0xFF)
+    , mColorB(0xFF)
+    , mColorA(0xFF)
+    , mAnimPosActive(false)
+    , mAnimPosTargetX(0.0f)
+    , mAnimPosTargetY(0.0f)
+    , mAnimPosSpeed(0.0f)
+    , mAnimAlphaActive(false)
+    , mAnimAlphaTarget(0xFF)
+    , mAnimAlphaSpeed(0.0f)
+    , mAnimScaleActive(false)
+    , mAnimScaleTarget(1.0f)
+    , mAnimScaleCurrent(1.0f)
+    , mAnimScaleSpeed(0.0f) {
     memset(mPaneData, 0, sizeof(mPaneData));
 }
 
@@ -170,6 +201,187 @@ void PaneWrapper::setEnabled(bool enabled) {
         mFlags = (PaneFlag)(mFlags | PANE_FLAG_ENABLED);
     } else {
         mFlags = (PaneFlag)(mFlags & ~PANE_FLAG_ENABLED);
+    }
+}
+
+// ============================================================================
+// Extended Pane Interface
+// ============================================================================
+
+void PaneWrapper::init(EGG::J2DPane* pane) {
+    mPanePtr = pane;
+    mAnimPosActive = false;
+    mAnimAlphaActive = false;
+    mAnimScaleActive = false;
+
+    if (pane) {
+        // Cache initial transform values from the J2DPane
+        mCachedPosX = pane->getX();
+        mCachedPosY = pane->getY();
+        mCachedWidth = pane->getWidth();
+        mCachedHeight = pane->getHeight();
+        mCachedRotation = pane->getRotation();
+        mCachedAlpha = pane->getAlpha();
+        mColorR = pane->getColorR();
+        mColorG = pane->getColorG();
+        mColorB = pane->getColorB();
+        mColorA = pane->getColorA();
+        mAnimScaleCurrent = pane->getScaleX(); // assume uniform scale
+    } else {
+        mCachedPosX = 0.0f;
+        mCachedPosY = 0.0f;
+        mCachedWidth = 0.0f;
+        mCachedHeight = 0.0f;
+        mCachedRotation = 0.0f;
+        mCachedAlpha = 0xFF;
+        mColorR = 0xFF;
+        mColorG = 0xFF;
+        mColorB = 0xFF;
+        mColorA = 0xFF;
+        mAnimScaleCurrent = 1.0f;
+    }
+}
+
+void PaneWrapper::setPosition(f32 x, f32 y) {
+    mCachedPosX = x;
+    mCachedPosY = y;
+    mAnimPosActive = false; // cancel any running position animation
+    if (mPanePtr) {
+        mPanePtr->setBounds(x, y, mCachedWidth, mCachedHeight);
+    }
+}
+
+void PaneWrapper::getPosition(f32* outX, f32* outY) const {
+    if (outX) *outX = mCachedPosX;
+    if (outY) *outY = mCachedPosY;
+}
+
+void PaneWrapper::setSize(f32 w, f32 h) {
+    mCachedWidth = w;
+    mCachedHeight = h;
+    if (mPanePtr) {
+        mPanePtr->setBounds(mCachedPosX, mCachedPosY, w, h);
+    }
+}
+
+void PaneWrapper::getSize(f32* outW, f32* outH) const {
+    if (outW) *outW = mCachedWidth;
+    if (outH) *outH = mCachedHeight;
+}
+
+void PaneWrapper::setRotation(f32 degrees) {
+    mCachedRotation = degrees;
+    if (mPanePtr) {
+        mPanePtr->setRotation(degrees);
+    }
+}
+
+void PaneWrapper::setAlpha(u8 alpha) {
+    mCachedAlpha = alpha;
+    mAnimAlphaActive = false; // cancel any running alpha animation
+    if (mPanePtr) {
+        mPanePtr->setAlpha(alpha);
+    }
+}
+
+void PaneWrapper::setColor(u8 r, u8 g, u8 b, u8 a) {
+    mColorR = r;
+    mColorG = g;
+    mColorB = b;
+    mColorA = a;
+    if (mPanePtr) {
+        mPanePtr->setColor(r, g, b, a);
+    }
+}
+
+// ============================================================================
+// Animation
+// ============================================================================
+
+void PaneWrapper::animatePosition(f32 targetX, f32 targetY, f32 speed) {
+    mAnimPosTargetX = targetX;
+    mAnimPosTargetY = targetY;
+    mAnimPosSpeed = speed;
+    mAnimPosActive = true;
+}
+
+void PaneWrapper::animateAlpha(u8 targetAlpha, f32 speed) {
+    mAnimAlphaTarget = targetAlpha;
+    mAnimAlphaSpeed = speed;
+    mAnimAlphaActive = true;
+}
+
+void PaneWrapper::animateScale(f32 targetScale, f32 speed) {
+    mAnimScaleTarget = targetScale;
+    mAnimScaleSpeed = speed;
+    mAnimScaleActive = true;
+}
+
+void PaneWrapper::updateAnimations() {
+    // --- Position animation ---
+    if (mAnimPosActive) {
+        f32 dx = mAnimPosTargetX - mCachedPosX;
+        f32 dy = mAnimPosTargetY - mCachedPosY;
+        f32 dist = std::sqrt(dx * dx + dy * dy);
+
+        if (dist < 0.5f) {
+            // Close enough — snap to target
+            mCachedPosX = mAnimPosTargetX;
+            mCachedPosY = mAnimPosTargetY;
+            mAnimPosActive = false;
+        } else {
+            // Move toward target at given speed (units per frame)
+            f32 step = std::min(mAnimPosSpeed, dist);
+            f32 invDist = step / dist;
+            mCachedPosX += dx * invDist;
+            mCachedPosY += dy * invDist;
+        }
+
+        if (mPanePtr) {
+            mPanePtr->setBounds(mCachedPosX, mCachedPosY, mCachedWidth, mCachedHeight);
+        }
+    }
+
+    // --- Alpha animation ---
+    if (mAnimAlphaActive) {
+        f32 diff = static_cast<f32>(mAnimAlphaTarget) - static_cast<f32>(mCachedAlpha);
+
+        if (std::abs(diff) < 1.0f) {
+            mCachedAlpha = mAnimAlphaTarget;
+            mAnimAlphaActive = false;
+        } else {
+            f32 step = std::min(mAnimAlphaSpeed, std::abs(diff));
+            if (diff > 0.0f) {
+                mCachedAlpha = static_cast<u8>(mCachedAlpha + step);
+            } else {
+                mCachedAlpha = static_cast<u8>(mCachedAlpha - step);
+            }
+        }
+
+        if (mPanePtr) {
+            mPanePtr->setAlpha(mCachedAlpha);
+        }
+    }
+
+    // --- Scale animation ---
+    if (mAnimScaleActive) {
+        f32 diff = mAnimScaleTarget - mAnimScaleCurrent;
+
+        if (std::abs(diff) < 0.001f) {
+            mAnimScaleCurrent = mAnimScaleTarget;
+            mAnimScaleActive = false;
+        } else {
+            f32 step = std::min(mAnimScaleSpeed, std::abs(diff));
+            if (diff > 0.0f) {
+                mAnimScaleCurrent += step;
+            } else {
+                mAnimScaleCurrent -= step;
+            }
+        }
+
+        if (mPanePtr) {
+            mPanePtr->setScale(mAnimScaleCurrent, mAnimScaleCurrent);
+        }
     }
 }
 

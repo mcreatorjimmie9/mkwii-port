@@ -48,6 +48,27 @@ struct KartCollisionInfo {
 
     KartCollisionInfo* initStatus();
     void reset();
+
+    /// Compute wall collision response: decompose velocity into normal/tangential,
+    /// apply bounce/restitution. Writes result back to vel.
+    /// @param restitution  Bounce coefficient (0.0 = no bounce, 1.0 = perfect bounce)
+    void computeWallCollision(f32 restitution);
+
+    /// Compute floor collision: store floor normal, compute slope angle from
+    /// the normal's Y component, apply friction to tangential velocity.
+    /// @param floorNormal  The floor surface normal
+    /// @param friction  Friction coefficient (0.0 = ice, 1.0 = max grip)
+    void computeFloorCollision(const EGG::Vector3f& floorNormal, f32 friction);
+
+    /// Check floorKclType to determine if on a drivable surface.
+    /// @return true if the kart is on a road/drivable KCL type
+    bool isOnRoad() const;
+
+    /// Return speed reduction factor based on surface type and collision severity.
+    /// Lower values = more speed lost. Ranges from 0.0 to 1.0.
+    /// @param severity  Collision severity (0.0 = light, 1.0 = heavy)
+    /// @return Speed retention factor (1.0 = no reduction)
+    f32 getSpeedReduction(f32 severity) const;
 };
 // static_assert(sizeof(KartCollisionInfo) == 0x84);
 

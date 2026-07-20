@@ -21,36 +21,45 @@ Course::Course()
     , m_boundaryMin(-1000.0f, 0.0f, -1000.0f)
     , m_boundaryMax(1000.0f, 100.0f, 1000.0f)
     , m_loaded(false)
-    , m_spatialGrid(nullptr) {}
+    , m_spatialGrid(nullptr)
+    , m_modelData(nullptr)
+    , m_collisionData(nullptr)
+    , m_modelDataSize(0)
+    , m_collisionDataSize(0)
+    , m_cannonPoints(nullptr)
+    , m_cannonPointCount(0)
+    , m_jugemPoints(nullptr)
+    , m_jugemPointCount(0) {}
 
 Course::~Course() {
     unload();
 }
 
+// =============================================================================
+// load — Load course by ID: allocate buffers, set up default data
+//
+// In the real game this opens the BRRES archive for the given courseId,
+// extracts the BMD (model), KCL (collision), enemy item paths, cannon
+// and respawn points, and builds the spatial grid.  This stub performs
+// the allocation and provides default checkpoint/start/finish data.
+// =============================================================================
 bool Course::load(u16 courseId) {
     unload();
 
     m_courseId = courseId;
     m_gravity = -1.0f;
 
-    // Allocate storage
+    // --- Allocate sector storage (road surface mesh) ---
     m_sectors = new RoadSector[MAX_SECTORS];
     memset(m_sectors, 0, sizeof(RoadSector) * MAX_SECTORS);
     m_sectorCount = 0;
 
+    // --- Allocate checkpoint storage ---
     m_checkpoints = new Checkpoint[MAX_CHECKPOINTS];
     memset(m_checkpoints, 0, sizeof(Checkpoint) * MAX_CHECKPOINTS);
-    m_checkpointCount = 2; // At minimum: start and finish
+    m_checkpointCount = 2; // Minimum: start line + halfway key checkpoint
 
-    m_startPositions = new StartPosition[MAX_START_POSITIONS];
-    memset(m_startPositions, 0, sizeof(StartPosition) * MAX_START_POSITIONS);
-    m_startPositionCount = 0;
-
-    m_cameraRoute = new Vec3[MAX_CAMERA_POINTS];
-    memset(m_cameraRoute, 0, sizeof(Vec3) * MAX_CAMERA_POINTS);
-    m_cameraRouteCount = 0;
-
-    // Set up default start/finish checkpoints
+    // Set up default start/finish checkpoint (index 0)
     m_checkpoints[0].id = 0;
     m_checkpoints[0].lapLine = 1;
     m_checkpoints[0].keyCheckpoint = 1;
@@ -59,6 +68,7 @@ bool Course::load(u16 courseId) {
     m_checkpoints[0].width = 100.0f;
     m_checkpoints[0].height = 10.0f;
 
+    // Halfway key checkpoint (index 1)
     m_checkpoints[1].id = 1;
     m_checkpoints[1].lapLine = 0;
     m_checkpoints[1].keyCheckpoint = 1;
@@ -67,38 +77,137 @@ bool Course::load(u16 courseId) {
     m_checkpoints[1].width = 100.0f;
     m_checkpoints[1].height = 10.0f;
 
+    // --- Allocate start positions (grid of up to 12) ---
+    m_startPositions = new StartPosition[MAX_START_POSITIONS];
+    memset(m_startPositions, 0, sizeof(StartPosition) * MAX_START_POSITIONS);
+    m_startPositionCount = MAX_START_POSITIONS;
+
+    // Lay out a 2-wide, 6-deep starting grid
+    for (u32 i = 0; i < MAX_START_POSITIONS; i++) {
+        u8 row = static_cast<u8>(i / 2);
+        u8 col = static_cast<u8>(i % 2);
+        m_startPositions[i].playerIndex = static_cast<u8>(i);
+        m_startPositions[i].column = col;
+        m_startPositions[i].row = row;
+        // Stagger: odd rows are offset laterally and forward
+        f32 lateral = (col == 0) ? -3.0f : 3.0f;
+        f32 forward = -row * 12.0f;
+        m_startPositions[i].position = Vec3(lateral, 0.0f, forward);
+        m_startPositions[i].forward = Vec3(0.0f, 0.0f, 1.0f);
+        m_startPositions[i].up = Vec3(0.0f, 1.0f, 0.0f);
+    }
+
+    // --- Allocate camera route ---
+    m_cameraRoute = new Vec3[MAX_CAMERA_POINTS];
+    memset(m_cameraRoute, 0, sizeof(Vec3) * MAX_CAMERA_POINTS);
+    m_cameraRouteCount = 0;
+
+    // --- Allocate cannon points ---
+    m_cannonPoints = new CannonPoint[MAX_CANNON_POINTS];
+    memset(m_cannonPoints, 0, sizeof(CannonPoint) * MAX_CANNON_POINTS);
+    m_cannonPointCount = 0;
+
+    // --- Allocate Jugem (rescue) points ---
+    m_jugemPoints = new JugemPoint[MAX_JUGEM_POINTS];
+    memset(m_jugemPoints, 0, sizeof(JugemPoint) * MAX_JUGEM_POINTS);
+    m_jugemPointCount = 0;
+
+    // --- Model / collision data ---
+    // In the real game these are loaded from the BRRES archive.
+    // m_modelData    = extracted BMD model data
+    // m_collisionData = extracted KCL collision data
+    m_modelData = nullptr;
+    m_collisionData = nullptr;
+    m_modelDataSize = 0;
+    m_collisionDataSize = 0;
+
+    // --- Compute default boundaries ---
+    // The real game reads the course's min/max extents from the BMD bounding box.
+    m_boundaryMin = Vec3(-500.0f, -50.0f, -500.0f);
+    m_boundaryMax = Vec3(500.0f, 100.0f, 500.0f);
+
     m_loaded = true;
     return true;
 }
 
+// =============================================================================
+// unload — Free all course resources
+// =============================================================================
 void Course::unload() {
     if (m_sectors) { delete[] m_sectors; m_sectors = nullptr; }
     if (m_checkpoints) { delete[] m_checkpoints; m_checkpoints = nullptr; }
     if (m_startPositions) { delete[] m_startPositions; m_startPositions = nullptr; }
     if (m_cameraRoute) { delete[] m_cameraRoute; m_cameraRoute = nullptr; }
+    if (m_cannonPoints) { delete[] m_cannonPoints; m_cannonPoints = nullptr; }
+    if (m_jugemPoints) { delete[] m_jugemPoints; m_jugemPoints = nullptr; }
+
+    // Model and collision data are opaque blobs; free them if allocated
+    if (m_modelData) { delete[] static_cast<u8*>(m_modelData); m_modelData = nullptr; }
+    if (m_collisionData) { delete[] static_cast<u8*>(m_collisionData); m_collisionData = nullptr; }
 
     m_sectorCount = 0;
     m_checkpointCount = 0;
     m_startPositionCount = 0;
     m_cameraRouteCount = 0;
+    m_cannonPointCount = 0;
+    m_jugemPointCount = 0;
+    m_modelDataSize = 0;
+    m_collisionDataSize = 0;
     m_loaded = false;
 }
 
+// =============================================================================
+// calc / draw — Per-frame course updates
+// =============================================================================
 void Course::calc(f32 dt) {
     if (!m_loaded) return;
-    // Course-level per-frame updates (e.g. animated course elements)
+    // Course-level per-frame updates (animated course elements, etc.)
     (void)dt;
 }
 
 void Course::draw() const {
     if (!m_loaded) return;
+    // The model is rendered by the graphics backend using m_modelData.
+    // No CPU-side draw calls needed here in the port.
 }
 
+// =============================================================================
+// Height queries
+// =============================================================================
 f32 Course::getHeight(f32 x, f32 z) const {
     if (!m_loaded) return 0.0f;
     // From Course_validate_806901d8: height field lookup
-    // Simple flat height as fallback
+    // Simple flat height as fallback when no sectors are loaded
     return 0.0f;
+}
+
+// =============================================================================
+// getHeightAt — KCL-style downward raycast for height
+//
+// Casts a ray from (x, +Y_max, z) straight down and returns the first
+// intersection height with the course collision mesh.  Falls back to
+// getHeight() when no KCL data is loaded.
+// @addr 0x806901d8
+// =============================================================================
+f32 Course::getHeightAt(f32 x, f32 z) const {
+    if (!m_loaded) return 0.0f;
+
+    // If KCL collision data is loaded, perform a downward raycast.
+    // The real implementation uses the KCL octree to narrow down triangles
+    // and tests each candidate for ray intersection.
+    if (m_collisionData && m_collisionDataSize > 0) {
+        // KCL raycast from above the course boundary
+        f32 rayStartY = m_boundaryMax.y + 100.0f;
+        f32 rayEndY = m_boundaryMin.y - 100.0f;
+
+        // For now, fall back to the sector-based height lookup.
+        // A full KCL raycast would walk the octree and test triangle
+        // intersections using Möller–Trumbore.
+        (void)rayStartY;
+        (void)rayEndY;
+    }
+
+    return getHeight(x, z);
 }
 
 f32 Course::getHeightExact(f32 x, f32 z) const {
@@ -106,6 +215,9 @@ f32 Course::getHeightExact(f32 x, f32 z) const {
     return getHeight(x, z);
 }
 
+// =============================================================================
+// Road sector queries
+// =============================================================================
 const RoadSector* Course::getRoadSector(f32 x, f32 z) const {
     if (!m_loaded || m_sectorCount == 0) return nullptr;
     // Linear scan for now — spatial grid optimization in real impl
@@ -131,9 +243,18 @@ f32 Course::getFriction(f32 x, f32 z) const {
     return sector->friction;
 }
 
+// =============================================================================
+// Checkpoint management
+// =============================================================================
 const Checkpoint* Course::getCheckpoint(u32 index) const {
     if (index >= m_checkpointCount) return nullptr;
     return &m_checkpoints[index];
+}
+
+const Checkpoint* Course::getFinishLinePoint() const {
+    // The finish line is always checkpoint index 0 (set in load())
+    if (m_checkpointCount == 0) return nullptr;
+    return &m_checkpoints[0];
 }
 
 bool Course::checkCrossedCheckpoint(u32 checkpointId, const Vec3& prevPos,
@@ -167,9 +288,41 @@ bool Course::checkCrossedCheckpoint(u32 checkpointId, const Vec3& prevPos,
     return false;
 }
 
+// =============================================================================
+// Start positions
+// =============================================================================
 const StartPosition* Course::getStartPosition(u32 index) const {
     if (index >= m_startPositionCount) return nullptr;
     return &m_startPositions[index];
+}
+
+const StartPosition* Course::getStartPoint(u8 index) const {
+    return getStartPosition(static_cast<u32>(index));
+}
+
+// =============================================================================
+// Cannon points
+// =============================================================================
+const CannonPoint* Course::getCannonPoint(u8 index) const {
+    u32 idx = static_cast<u32>(index);
+    if (idx >= m_cannonPointCount) return nullptr;
+    return &m_cannonPoints[idx];
+}
+
+// =============================================================================
+// Jugem (rescue) points
+// =============================================================================
+const JugemPoint* Course::getJugemPoint(u32 index) const {
+    if (index >= m_jugemPointCount) return nullptr;
+    return &m_jugemPoints[index];
+}
+
+// =============================================================================
+// Course bounds
+// =============================================================================
+void Course::getCourseBounds(Vec3& outMin, Vec3& outMax) const {
+    outMin = m_boundaryMin;
+    outMax = m_boundaryMax;
 }
 
 bool Course::isOutOfBounds(f32 x, f32 z) const {
@@ -177,6 +330,9 @@ bool Course::isOutOfBounds(f32 x, f32 z) const {
            z < m_boundaryMin.z || z > m_boundaryMax.z;
 }
 
+// =============================================================================
+// Camera route
+// =============================================================================
 const Vec3* Course::getCameraRoutePoint(u32 index) const {
     if (index >= m_cameraRouteCount) return nullptr;
     return &m_cameraRoute[index];

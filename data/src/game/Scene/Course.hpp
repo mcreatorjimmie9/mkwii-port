@@ -39,6 +39,28 @@ struct Checkpoint {
 };
 
 // =============================================================================
+// CannonPoint — Cannon entry and exit positions
+// =============================================================================
+struct CannonPoint {
+    Vec3 entryPos;       // Position where kart enters the cannon
+    Vec3 exitPos;        // Position where kart exits the cannon
+    Vec3 exitDir;        // Exit direction vector
+    u8  index;           // Cannon index
+    u8  active;          // Whether this cannon is enabled
+    u8  padding[2];
+};
+
+// =============================================================================
+// JugemPoint — Off-road rescue (Lakitu pickup) position
+// =============================================================================
+struct JugemPoint {
+    Vec3 position;       // Rescue drop point position
+    Vec3 forward;        // Forward direction when placed back
+    u16 areaId;          // Area this point belongs to
+    u16 padding;
+};
+
+// =============================================================================
 // StartPosition — Kart starting grid position
 // =============================================================================
 struct StartPosition {
@@ -114,6 +136,32 @@ public:
     u32 getCameraRouteCount() const { return m_cameraRouteCount; }
     const Vec3* getCameraRoutePoint(u32 index) const;
 
+    // Model / collision access (for rendering and physics)
+    void* getModel() const { return m_modelData; }
+    void* getCollision() const { return m_collisionData; }
+
+    // Start point by u8 index (convenience wrapper for getStartPosition)
+    const StartPosition* getStartPoint(u8 index) const;
+
+    // Cannon points
+    u32 getCannonPointCount() const { return m_cannonPointCount; }
+    const CannonPoint* getCannonPoint(u8 index) const;
+
+    // Jugem (rescue) points
+    u32 getJugemPointCount() const { return m_jugemPointCount; }
+    const JugemPoint* getJugemPoints() const { return m_jugemPoints; }
+    const JugemPoint* getJugemPoint(u32 index) const;
+
+    // Finish line access
+    const Checkpoint* getFinishLinePoint() const;
+
+    // Course bounding box
+    void getCourseBounds(Vec3& outMin, Vec3& outMax) const;
+
+    // Height query via KCL-style downward raycast
+    // @addr 0x806901d8
+    f32 getHeightAt(f32 x, f32 z) const;
+
 private:
     static const u32 MAX_SECTORS = 4096;
     static const u32 MAX_CHECKPOINTS = 64;
@@ -139,6 +187,22 @@ private:
 
     // Spatial grid for fast sector lookup
     void* m_spatialGrid;
+
+    // Model / collision data (opaque handles to BMD / KCL)
+    void* m_modelData;
+    void* m_collisionData;
+    u32 m_modelDataSize;
+    u32 m_collisionDataSize;
+
+    // Cannon points
+    static const u32 MAX_CANNON_POINTS = 16;
+    CannonPoint* m_cannonPoints;
+    u32 m_cannonPointCount;
+
+    // Jugem (rescue) points
+    static const u32 MAX_JUGEM_POINTS = 64;
+    JugemPoint* m_jugemPoints;
+    u32 m_jugemPointCount;
 };
 
 } // namespace Scene

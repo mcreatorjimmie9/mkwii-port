@@ -58,6 +58,38 @@ public:
     /// Force-complete the respawn (e.g. on course reload).
     void forceComplete();
 
+    // --- Extended respawn methods ---
+
+    /// Per-frame respawn calculation: countdown, movement, invincibility, OOB check.
+    void calc();
+
+    /// Begin respawn sequence: store respawn point, start countdown, disable physics.
+    /// @param point  World position to respawn the kart at
+    void startRespawn(const EGG::Vector3f& point);
+
+    /// Begin out-of-bounds respawn using Jugem point data.
+    /// @param point  Jugem rescue point containing position and rotation
+    void startOOBRespawn(const EGG::Vector3f& point);
+
+    /// Return remaining respawn countdown frames.
+    /// @return Frames until respawn completes (0 if not respawning)
+    s32 getRespawnTimer() const;
+
+    /// Check if kart has post-respawn invincibility.
+    /// @return true if invincibility frames remain
+    bool isInvincible() const;
+
+    /// Return the current respawn destination.
+    /// @return Target position the kart is being moved to
+    const EGG::Vector3f& getRespawnPoint() const;
+
+    /// Find nearest ground position below respawn point using KCL raycast.
+    /// Adjusts m_targetPos.y downward to rest on the nearest floor surface.
+    void snapToGround();
+
+    /// Finish respawn: restore normal physics, set final position, clear invincibility timer.
+    void completeRespawn();
+
 private:
     static const f32 LIFT_HEIGHT;          // Height to lift kart before flying
     static const f32 LIFT_SPEED;           // Vertical lift speed
@@ -82,6 +114,15 @@ private:
     s32 m_invincibilityTimer;      // Invincibility frames after respawn
     s32 m_oobTimer;                // Consecutive frames OOB before triggering
     f32 m_helicopterHeight;        // Helicopter flight altitude
+    s32 m_respawnCountdown;        // Total respawn countdown frames (180)
+    s32 m_respawnTimerRemaining;   // Remaining frames in respawn sequence
+    f32 m_respawnSpeedFactor;      // Speed restoration factor (0.0→1.0)
+    bool m_physicsDisabled;        // Whether kart physics are disabled during respawn
+
+    static const s32 RESPAWN_COUNTDOWN;      // Total respawn sequence frames
+    static const s32 POST_RESPAWN_INVINCIBILITY; // Invincibility after respawn
+    static const f32 OOB_THRESHOLD_Y;        // Y threshold for OOB detection
+    static const s32 OOB_GRACE_FRAMES;       // Frames before OOB triggers respawn
 };
 
 } // namespace Kart

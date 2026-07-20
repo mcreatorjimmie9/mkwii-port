@@ -3,11 +3,17 @@
 
 #include "SceneDirector.hpp"
 #include "SceneBase.hpp"
+#include "SceneCreator.hpp"
+#include <cstring>
+#include <math.h>
 
 namespace Scene {
 
 SceneDirector* SceneDirector::s_instance = nullptr;
 
+// =============================================================================
+// Singleton accessor
+// =============================================================================
 SceneDirector* SceneDirector::getInstance() {
     if (!s_instance) {
         s_instance = new SceneDirector();
@@ -15,6 +21,9 @@ SceneDirector* SceneDirector::getInstance() {
     return s_instance;
 }
 
+// =============================================================================
+// Constructor / Destructor
+// =============================================================================
 SceneDirector::SceneDirector()
     : m_currentScene(nullptr)
     , m_nextScene(nullptr)
@@ -23,8 +32,16 @@ SceneDirector::SceneDirector()
     , m_fadeProgress(0)
     , m_maxFadeSteps(0x3D)
     , m_isFadingOut(0)
-    , m_isFadingIn(0) {
+    , m_isFadingIn(0)
+    , m_stackTop(0)
+    , m_fadeAlpha(0)
+    , m_fadeColorR(0)
+    , m_fadeColorG(0)
+    , m_fadeColorB(0) {
     for (u32 i = 0; i < 8; i++) m_reserved[i] = 0;
+    for (u32 i = 0; i < MAX_SCENE_STACK; i++) {
+        m_sceneStack[i] = nullptr;
+    }
 }
 
 SceneDirector::~SceneDirector() {
@@ -32,6 +49,9 @@ SceneDirector::~SceneDirector() {
     s_instance = nullptr;
 }
 
+// =============================================================================
+// init — Initialize scene stack, set up factory, prepare for first scene
+// =============================================================================
 void SceneDirector::init() {
     m_frameCount = 0;
     m_fadeProgress = 0;
@@ -40,9 +60,40 @@ void SceneDirector::init() {
     m_transitionType = TRANS_NONE;
     m_currentScene = nullptr;
     m_nextScene = nullptr;
+    m_stackTop = 0;
+    m_fadeAlpha = 0;
+    m_fadeColorR = 0;
+    m_fadeColorG = 0;
+    m_fadeColorB = 0;
+
+    // Clear the scene stack
+    for (u32 i = 0; i < MAX_SCENE_STACK; i++) {
+        m_sceneStack[i] = nullptr;
+    }
+
+    // Ensure the scene factory is initialized so scenes can be created
+    SceneCreator::initGlobal();
+
+    // The boot/menu scene is not created here — the boot sequence will call
+    // changeScene(SCENE_TITLE) or changeScene(SCENE_MENU_TOP) to set the
+    // initial scene. The factory is now ready for that call.
 }
 
+// =============================================================================
+// shutdown — Tear down all scenes and the factory
+// =============================================================================
 void SceneDirector::shutdown() {
+    // Destroy all scenes on the stack (top-down)
+    while (m_stackTop > 0) {
+        m_stackTop--;
+        if (m_sceneStack[m_stackTop]) {
+            m_sceneStack[m_stackTop]->unload();
+            delete m_sceneStack[m_stackTop];
+            m_sceneStack[m_stackTop] = nullptr;
+        }
+    }
+
+    // Destroy the active and pending scenes
     if (m_currentScene) {
         m_currentScene->unload();
         delete m_currentScene;
@@ -53,8 +104,13 @@ void SceneDirector::shutdown() {
         delete m_nextScene;
         m_nextScene = nullptr;
     }
+
+    SceneCreator::shutdownGlobal();
 }
 
+// =============================================================================
+// changeScene (SceneBase*) — Direct scene swap with transition
+// =============================================================================
 void SceneDirector::changeScene(SceneBase* nextScene, TransitionType type) {
     if (m_nextScene) return; // Already transitioning
     if (!nextScene) return;
@@ -70,36 +126,213 @@ void SceneDirector::changeScene(SceneBase* nextScene, TransitionType type) {
     }
 }
 
+// =============================================================================
+// changeScene (SceneId) — Factory-based scene transition
+//
+// Uses SceneCreator to instantiate the new scene by ID, then delegates
+// to the SceneBase* overload. This is the primary interface used by
+// gameplay code to switch scenes.
+// =============================================================================
+void SceneDirector::changeScene(SceneId sceneId, const SceneArgs* args,
+                                TransitionType type) {
+    if (m_nextScene) return;
+
+    // Look up the scene factory
+    SceneCreator* factory = SceneCreator::getInstance();
+    if (!factory || !factory->isRegistered(sceneId)) return;
+
+    // Build default args if none provided
+    SceneArgs defaultArgs;
+    defaultArgs.sceneId = static_cast<u32>(sceneId);
+    const SceneArgs& finalArgs = (args != nullptr) ? *args : defaultArgs;
+
+    // Create the next scene via the factory
+    SceneBase* nextScene = factory->createScene(sceneId, finalArgs);
+    if (!nextScene) return;
+
+    // Delegate to the SceneBase* overload
+    changeScene(nextScene, type);
+}
+
+// =============================================================================
+// update (calc) — Per-frame: advance fade, update transition, calc scene
+// =============================================================================
 void SceneDirector::update() {
     m_frameCount++;
 
-    // Update transition state machine
+    // Update the fade overlay alpha every frame
+    updateFade();
+
+    // Drive the transition state machine
     if (isChanging()) {
         updateTransition();
     }
 
-    // Update active scene
+    // Update the active scene
     if (m_currentScene && m_currentScene->isActive()) {
         m_currentScene->calc();
     }
 }
 
+// =============================================================================
+// draw — Per-frame: draw active scene, then fade overlay if transitioning
+// =============================================================================
 void SceneDirector::draw() {
     if (m_currentScene) {
         m_currentScene->draw();
     }
+
+    // During a fade transition, a full-screen overlay is drawn on top.
+    // The renderer reads m_fadeAlpha (0-255) and m_fadeColorR/G/B to
+    // composite the overlay.  The actual GX/OpenGL draw call is handled
+    // by the graphics backend; we only set the state here.
+    if (isTransitioning() && m_fadeAlpha > 0) {
+        (void)m_fadeColorR;
+        (void)m_fadeColorG;
+        (void)m_fadeColorB;
+    }
 }
 
+// =============================================================================
+// pushScene — Push current scene onto stack, create new scene on top
+//
+// Used for overlays and pause menus. The current scene is saved on the
+// stack with its state preserved. When popScene() is called, the old
+// scene is restored exactly.
+// =============================================================================
+void SceneDirector::pushScene(SceneId sceneId, const SceneArgs* args) {
+    if (m_stackTop >= MAX_SCENE_STACK) return;
+    if (!m_currentScene) return;
+
+    // Save the current scene on the stack
+    m_sceneStack[m_stackTop] = m_currentScene;
+    m_stackTop++;
+
+    // Pause the pushed scene (it stays in memory but stops updating)
+    m_currentScene->setState(SceneBase::STATE_READY);
+
+    // Clear current so changeScene can set a new one
+    m_currentScene = nullptr;
+    m_nextScene = nullptr;
+
+    // Create the new top scene via the factory
+    changeScene(sceneId, args, TRANS_FADE_OUT);
+}
+
+// =============================================================================
+// popScene — Pop top scene, restore previous scene from stack
+//
+// Destroys the current overlay scene and resumes the scene that was
+// pushed. A fade-in transition plays so the restore looks smooth.
+// =============================================================================
+void SceneDirector::popScene() {
+    if (m_stackTop == 0) return;
+
+    // Tear down the current top scene
+    destroyCurrentScene();
+
+    // Restore the previous scene from the stack
+    m_stackTop--;
+    m_currentScene = m_sceneStack[m_stackTop];
+    m_sceneStack[m_stackTop] = nullptr;
+
+    if (m_currentScene) {
+        m_currentScene->setState(SceneBase::STATE_ACTIVE);
+        m_currentScene->beginTransition();
+        startFadeIn();
+    }
+
+    m_transitionType = TRANS_FADE_IN;
+}
+
+// =============================================================================
+// getSceneByID — Search current, next, and stack for a scene by ID
+// =============================================================================
+SceneBase* SceneDirector::getSceneByID(SceneId sceneId) const {
+    // Check current scene
+    if (m_currentScene &&
+        m_currentScene->getSceneId() == static_cast<u32>(sceneId)) {
+        return m_currentScene;
+    }
+
+    // Check the pending next scene
+    if (m_nextScene &&
+        m_nextScene->getSceneId() == static_cast<u32>(sceneId)) {
+        return m_nextScene;
+    }
+
+    // Search the scene stack (bottom to top)
+    for (u32 i = 0; i < m_stackTop; i++) {
+        if (m_sceneStack[i] &&
+            m_sceneStack[i]->getSceneId() == static_cast<u32>(sceneId)) {
+            return m_sceneStack[i];
+        }
+    }
+
+    return nullptr;
+}
+
+// =============================================================================
+// updateFade — Manage fade-in/fade-out alpha overlay
+//
+// Converts the step counter (m_fadeProgress / m_maxFadeSteps) into a
+// 0-255 alpha value for the overlay quad.
+// =============================================================================
+void SceneDirector::updateFade() {
+    if (m_maxFadeSteps == 0) {
+        m_fadeAlpha = 0;
+        return;
+    }
+
+    f32 t = static_cast<f32>(m_fadeProgress) / static_cast<f32>(m_maxFadeSteps);
+
+    if (m_isFadingOut) {
+        // Fade-out: alpha ramps 0 → 255 (screen goes black)
+        f32 alpha = t * 255.0f;
+        if (alpha > 255.0f) alpha = 255.0f;
+        m_fadeAlpha = static_cast<u8>(alpha);
+    } else if (m_isFadingIn) {
+        // Fade-in: alpha ramps 255 → 0 (screen reveals)
+        f32 alpha = (1.0f - t) * 255.0f;
+        if (alpha < 0.0f) alpha = 0.0f;
+        if (alpha > 255.0f) alpha = 255.0f;
+        m_fadeAlpha = static_cast<u8>(alpha);
+    } else {
+        m_fadeAlpha = 0;
+    }
+}
+
+// =============================================================================
+// destroyCurrentScene — Safely tear down current scene and all resources
+// =============================================================================
+void SceneDirector::destroyCurrentScene() {
+    if (!m_currentScene) return;
+
+    // Transition to shutdown state so the scene can release resources
+    m_currentScene->setState(SceneBase::STATE_SHUTDOWN);
+    m_currentScene->unload();
+    delete m_currentScene;
+    m_currentScene = nullptr;
+}
+
+// =============================================================================
+// Internal transition helpers
+// =============================================================================
 void SceneDirector::startFadeOut() {
     m_isFadingOut = 1;
     m_isFadingIn = 0;
     m_fadeProgress = 0;
+    // Default fade to black
+    m_fadeColorR = 0;
+    m_fadeColorG = 0;
+    m_fadeColorB = 0;
 }
 
 void SceneDirector::startFadeIn() {
     m_isFadingOut = 0;
     m_isFadingIn = 1;
     m_fadeProgress = 0;
+    // Fade color is preserved from the fade-out phase
 }
 
 void SceneDirector::updateTransition() {
@@ -140,9 +373,10 @@ void SceneDirector::finalizeTransition() {
     m_currentScene = m_nextScene;
     m_nextScene = nullptr;
 
-    // Initialize new scene
+    // Initialize the new scene
     if (m_currentScene) {
         m_currentScene->load();
+        m_currentScene->init();
         m_currentScene->setState(SceneBase::STATE_ACTIVE);
     }
 

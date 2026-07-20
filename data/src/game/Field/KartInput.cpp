@@ -23,7 +23,9 @@ KartInput::KartInput()
     , mDeadzone(0.15f)      // Default deadzone ~15% of stick range
     , mSmoothing(0.35f)     // Default smoothing factor
     , mPrevSteer(0.0f)
-    , mTrickState(0) {
+    , mTrickState(0)
+    , mTriggerL(0.0f)
+    , mTriggerR(0.0f) {
 }
 
 KartInput::~KartInput() {
@@ -48,6 +50,8 @@ void KartInput::init(s32 playerIdx) {
     mLastButtons = 0;
     mPrevSteer = 0.0f;
     mTrickState = 0;
+    mTriggerL = 0.0f;
+    mTriggerR = 0.0f;
 }
 
 // ============================================================================
@@ -161,6 +165,120 @@ f32 KartInput::smoothSteer(f32 target) {
 
     mPrevSteer = result;
     return result;
+}
+
+// ============================================================================
+// readInput — filtered read with explicit trigger handling
+// ============================================================================
+
+void KartInput::readInput(const System::KPadRaceInputState& raw) {
+    // Save previous button state for edge detection
+    mLastButtons = mButtons;
+
+    // Read raw stick
+    mRawStickX = raw.mStick.x;
+    mRawStickY = raw.mStick.y;
+
+    // Apply deadzone to stick
+    f32 dzX, dzY;
+    applyDeadzone(mRawStickX, mRawStickY, mDeadzone, &dzX, &dzY);
+
+    // Store deadzoned values back (so getStickX/Y return filtered values)
+    mRawStickX = dzX;
+    mRawStickY = dzY;
+
+    // Process buttons → drive commands
+    processButtons(raw);
+
+    // Steering after deadzone and smoothing
+    f32 targetSteer = dzX;
+    mSteer = smoothSteer(targetSteer);
+
+    // Acceleration from Y axis (inverted)
+    mAccel = std::clamp(-dzY, 0.0f, 1.0f);
+
+    // Note: In the real game, trigger values come from KPad's analog
+    // trigger data. The KPadRaceInputState stub doesn't include separate
+    // trigger fields, so we derive them from button state as a fallback.
+    // L trigger from PAD_BUTTON_L, R trigger from PAD_BUTTON_R
+    mTriggerL = (mButtons & PAD_BUTTON_L) ? 1.0f : 0.0f;
+    mTriggerR = (mButtons & PAD_BUTTON_R) ? 1.0f : 0.0f;
+}
+
+// ============================================================================
+// Edge Detection
+// ============================================================================
+
+void KartInput::updateEdgeDetection() {
+    // Save current buttons as "last frame" for next frame's edge detection.
+    // This should be called at the end of each frame if update() is not used
+    // (e.g., when readInput is used directly by AI or replay systems).
+    mLastButtons = mButtons;
+}
+
+// ============================================================================
+// Trigger Normalization
+// ============================================================================
+
+f32 KartInput::normalizeTrigger(u8 rawTrigger) {
+    // Wii triggers report 0-255; normalize to 0.0-1.0
+    return static_cast<f32>(rawTrigger) / 255.0f;
+}
+
+// ============================================================================
+// Reset to Neutral
+// ============================================================================
+
+void KartInput::resetToNeutral() {
+    mSteer = 0.0f;
+    mAccel = 0.0f;
+    mBrake = 0.0f;
+    mDrifting = false;
+    mItemUse = false;
+    mRawStickX = 0.0f;
+    mRawStickY = 0.0f;
+    mButtons = 0;
+    mLastButtons = 0;
+    mPrevSteer = 0.0f;
+    mTrickState = 0;
+    mTriggerL = 0.0f;
+    mTriggerR = 0.0f;
+}
+
+// ============================================================================
+// AI Input Generation
+// ============================================================================
+
+void KartInput::getInputForAI() {
+    // Generate synthetic input from the AI decision system.
+    // In the real game, AI-controlled players have their input injected
+    // through the KPadAI system which fills a KPadRaceInputState.
+    //
+    // Here we produce a default "drive forward" input as a safe fallback.
+    // The AI system (AIRace module) would override these values through
+    // its own readInput path.
+    //
+    // Default AI behavior:
+    //   - Full acceleration
+    //   - No steering (will be overridden by AI steering)
+    //   - No buttons pressed
+    //   - No triggers
+    //   - No tricks
+
+    mLastButtons = mButtons;
+
+    mRawStickX = 0.0f;
+    mRawStickY = 0.0f;
+    mButtons = 0;
+    mSteer = 0.0f;
+    mPrevSteer = 0.0f;
+    mAccel = 1.0f;  // AI always accelerates
+    mBrake = 0.0f;
+    mDrifting = false;
+    mItemUse = false;
+    mTrickState = 0;
+    mTriggerL = 0.0f;
+    mTriggerR = 0.0f;
 }
 
 } // namespace Field

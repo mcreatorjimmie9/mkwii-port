@@ -185,6 +185,14 @@ public:
     /// Dump registered scene types (debug).
     void dumpRegistrations() const;
 
+    /// Get human-readable name string for a scene ID.
+    const char* getSceneName(SceneId id) const;
+
+    /// Preload assets needed for a scene before creating it.
+    /// Uses background loading where available.
+    /// @addr 0x8060A600
+    void preloadResources(SceneId id, const SceneArgs& args);
+
 private:
     struct Entry {
         CreateFunc  createFunc;

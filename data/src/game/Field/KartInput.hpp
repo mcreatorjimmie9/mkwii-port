@@ -29,6 +29,9 @@ public:
     /* KartInput_update @ 0x804C1100 */
     void update(const System::KPadRaceInputState& rawInput);
 
+    // Read raw controller input with filtering (alternative to update)
+    void readInput(const System::KPadRaceInputState& raw);
+
     // ---- Output accessors ----
 
     // Steering: [-1.0, 1.0], negative = left, positive = right
@@ -59,6 +62,13 @@ public:
     /* KartInput_getStickY @ 0x804C1460 */
     f32 getStickY() const { return mRawStickY; }
 
+    // Current button bitmask
+    u32 getButtons() const { return mButtons; }
+
+    // Trigger pressure [0.0, 1.0]
+    f32 getTriggerL() const { return mTriggerL; }
+    f32 getTriggerR() const { return mTriggerR; }
+
     // ---- Configuration ----
 
     // Set analog stick deadzone radius [0.0, 1.0]
@@ -78,6 +88,18 @@ public:
         return (mButtons & buttonMask) != 0 && (mLastButtons & buttonMask) == 0;
     }
 
+    // u16-button variants for narrower masks
+    bool isButtonPressed(u16 buttonMask) const { return (mButtons & buttonMask) != 0; }
+    bool wasButtonJustPressed(u16 buttonMask) const {
+        return (mButtons & buttonMask) != 0 && (mLastButtons & buttonMask) == 0;
+    }
+    bool wasButtonJustReleased(u16 buttonMask) const {
+        return (mButtons & buttonMask) == 0 && (mLastButtons & buttonMask) != 0;
+    }
+
+    // Explicitly save current button state as "previous" for next frame
+    void updateEdgeDetection();
+
     // Trick input state
     s32 getTrickState() const { return mTrickState; } // 0=none, 1=up, 2=down, 3=left, 4=right
 
@@ -91,6 +113,15 @@ private:
 
     // Smooth steering value toward target
     f32 smoothSteer(f32 target);
+
+    // Normalize a raw u8 trigger value to [0.0, 1.0]
+    static f32 normalizeTrigger(u8 rawTrigger);
+
+    // Reset all inputs to neutral state
+    void resetToNeutral();
+
+    // Generate synthetic input from AI decision system
+    void getInputForAI();
 
     s32 mPlayerIdx;          // 0x04: player index [0-3]
 
@@ -114,6 +145,10 @@ private:
     // Internal state
     f32 mPrevSteer;          // 0x30: previous frame steering (for smoothing)
     s32 mTrickState;         // 0x34: trick input state
+
+    // Trigger pressure [0.0, 1.0]
+    f32 mTriggerL;           // 0x38: left trigger analog pressure
+    f32 mTriggerR;           // 0x3C: right trigger analog pressure
 };
 
 } // namespace Field

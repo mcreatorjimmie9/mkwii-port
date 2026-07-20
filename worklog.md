@@ -207,3 +207,70 @@ Stage Summary:
 - AIEngine.cpp: 94→333L
 - AISpeed.cpp: 95→238L
 - AIManager.cpp: 97→406L
+
+## Phase 35 Agent 1: Collision Deepening (3 files)
+
+### Files Modified
+- `data/src/game/Collision/KartBoost.hpp` — Added ItemBoostFlag enum, 13 new member variables, 14 new method declarations, 11 static tuning constants
+- `data/src/game/Collision/KartBoost.cpp` — 158→449L. Added item boost system: calc(), activateMushroom(), activateStar(), activateMega(), activateZipper(), activateMT(u16), activateSMT(u16), activateTrickBoost(u16), clearBoost(), getSpeedMultiplier(), getItemBoostFlags(), isActive(), updateTimers(). Enhanced init() to reset all new state. Integrated calc() into existing update().
+- `data/src/game/Collision/KartRespawn.hpp` — Added 7 new method declarations, 5 new member variables, 4 static constants
+- `data/src/game/Collision/KartRespawn.cpp` — 188→362L. Added calc(), startRespawn(), startOOBRespawn(), getRespawnTimer(), isInvincible(), getRespawnPoint(), snapToGround(), completeRespawn(). Enhanced init() and forceComplete() for new state. Integrated calc() into existing update().
+- `data/src/game/Collision/KartHitbox.hpp` — Added 4 new KartCollisionInfo method declarations
+- `data/src/game/Collision/KartHitbox.cpp` — 199→405L. Enhanced Hitbox::update() (bounding radius scale), setLastPos() (comments), create() (enabled flag). Enhanced initHitboxes() (max radius init), setHitboxes() (radius recompute), computeCollisionLimits() (null-check, scale). Rewrote initStatus() to inline all fields. Added computeWallCollision(), computeFloorCollision(), isOnRoad(), getSpeedReduction().
+
+### Build: 0 errors in modified files
+- Pre-existing errors in AIPath.hpp (unrelated)
+
+## Phase 35 Agent 4: NW4R/UI/EGG/Field Deepening (3 files)
+
+### Summary
+Thickened 3 source files with domain-specific implementations:
+1. **ResTex.cpp** (176→404L): Added 10 new free functions for texture resource management — init/load/unload/bind, mipmap/palette queries, total size calculation, format-to-bpp helper, and palette data decoder (RGB565/RGB5A3).
+2. **PaneWrapper.cpp** (176→387L): Added extended J2DPane wrapper interface — init from pane pointer, position/size/rotation/alpha/color setters, and 3 animation types (position, alpha, scale) with per-frame interpolation via updateAnimations().
+3. **KartInput.cpp** (165→283L): Added readInput with trigger handling, u16-button edge detection (wasJustPressed/wasJustReleased), updateEdgeDetection, normalizeTrigger, resetToNeutral, and getInputForAI for synthetic AI input generation. New fields: mTriggerL, mTriggerR.
+
+### Files Modified
+- `data/src/game/NW4R/ResTex.hpp` — added 10 function declarations
+- `data/src/game/NW4R/ResTex.cpp` — added TEX0Header struct, 10 function implementations
+- `data/src/game/UI/PaneWrapper.hpp` — added forward decl for J2DPane, 11 new methods, 22 new member fields
+- `data/src/game/UI/PaneWrapper.cpp` — added includes, expanded constructor, 11 method implementations
+- `data/src/game/Field/KartInput.hpp` — added readInput, getButtons, getTriggerL/R, u16-button variants, wasJustReleased, updateEdgeDetection; new private methods normalizeTrigger/resetToNeutral/getInputForAI; new fields mTriggerL/mTriggerR
+- `data/src/game/Field/KartInput.cpp` — updated ctor/init with trigger fields, 5 new method implementations
+
+### Build: 0 errors in modified files
+- Pre-existing errors in AIInfo.cpp (mButtons vs buttons naming), AIPath.cpp (cross() signature) — unrelated to this change
+
+## Phase 35 Agent 2: Scene Deepening (3 files)
+
+### Files Modified
+- `data/src/game/Scene/SceneDirector.hpp` — Added `#include "SceneCreator.hpp"`, new `changeScene(SceneId, SceneArgs*, TransitionType)` overload, `pushScene()`/`popScene()` stack ops, `getSceneByID()`, `updateFade()`, `isTransitioning()` inline, `destroyCurrentScene()`, scene stack array + fade overlay members
+- `data/src/game/Scene/SceneDirector.cpp` — 152→286L. Expanded `init()` with factory init + stack clear, `shutdown()` with stack teardown. Added `changeScene(SceneId, ...)` factory integration, `pushScene()`/`popScene()` with state save/restore, `getSceneByID()` searching current/next/stack, `updateFade()` computing alpha from step counter, `destroyCurrentScene()` with state→SHUTDOWN. Enhanced `update()` to call updateFade(), enhanced `draw()` with fade overlay comment.
+- `data/src/game/Scene/Course.hpp` — Added `CannonPoint` and `JugemPoint` structs, `getModel()`/`getCollision()` accessors, `getStartPoint(u8)`, `getCannonPoint(u8)`, `getJugemPoints()`/`getJugemPoint(u32)`, `getFinishLinePoint()`, `getCourseBounds()`, `getHeightAt()` declarations, model/collision/cannon/jugem member variables
+- `data/src/game/Scene/Course.cpp` — 184→240L. Expanded `load()` with cannon/jugem allocation, 12-slot start grid layout (2×6 stagger), model/collision handle init, boundary defaults. Expanded `unload()` with cannon/jugem/model/collision cleanup. Added `getStartPoint(u8)`, `getCannonPoint(u8)`, `getJugemPoint(u32)`, `getFinishLinePoint()`, `getCourseBounds()`, `getHeightAt()` with KCL raycast stub.
+- `data/src/game/Scene/SceneCreator.hpp` — Added `getSceneName(SceneId)` and `preloadResources(SceneId, const SceneArgs&)` declarations
+- `data/src/game/Scene/SceneCreator.cpp` — 185→320L. Added `StubScene` minimal concrete class for unimplemented scenes, 18 factory functions (createTitleScene, createMenuTopScene, createMenuGrandPrixScene, createMenuVSScene, createMenuBattleScene, createMenuGhostScene, createMenuChannelScene, createCaryardScene, createCourseSelectScene, createRaceScene [real RaceScene], createRaceResultScene, createReplayScene, createAwardScene, createStaffScene, createMovieScene, createOnlineScene, createTournamentScene, createMissionScene), `getSceneName()` with name table, `preloadResources()` stub, expanded `initGlobal()` with all 18 scene type registrations.
+
+### Build: 0 errors in modified files
+- Pre-existing error in AIPath.cpp (unrelated TVector3 template mismatch)
+
+## Phase 35 Agent 3: AIRace Deepening (3 files)
+
+### Summary
+Thickened 3 AIRace source files with AI input smoothing, path following logic, and rubber-banding ranking system:
+1. **AIInfo.cpp** (115→290L): Added stick smoothing system (exponential interpolation 0.3f, convergence snap at 0.01f), per-frame calc() with edge detection, 6 input setter functions (steer/accel/brake/drift/item/hop), getSteerSmoothed()/getActions() accessors, setFromPathFollower() with auto-brake on tight turns, setFromItemSystem() with edge-triggered item use. Enhanced init() to reset all new fields (mStickXTarget, mStickXSmoothed, mStickY/YTarget, mPrevActions, mSmoothFrames).
+2. **AIPath.cpp** (148→373L): Added per-frame calc() with waypoint arrival detection, steering correction via cross product (Y component = left/right), turn sharpness→speed factor mapping. Added setPath() from MapdataEnemyPathAccessor, getCurrentPoint()/getPreviousPoint()/getDirection() (normalized), getUpcomingAngle() via acos(dot), advanceToNextWaypoint(), findNearestPoint() with ±2 waypoint range scan, isNearNextWaypoint() with configurable arrival radius squared, getProgress() (0.0→1.0), isFinished(). Enhanced init() with new field resets.
+3. **AIRank.cpp** (175→444L): Added per-frame calc() orchestrating position sort + rubber-banding. Added updatePositions() with insertion sort (12 players), getPosition()/getTargetRank()/getSpeedAdvantage() per-player, isStateSpeedAdvantage(), setTargetPositions() with human player rank redistribution, applyRubberBanding() with 3%/position speed delta (±15% cap, 0.05f smoothing), getAverageSpeed() rolling 60-frame ring buffer, updateAverageSpeed(), endRace() clearing all advantages. Added AIRankManager methods: setTargetPositions(), applyRubberBanding(), updatePositions(), endRace() delegating to all registered AIRank instances. Enhanced init() to zero all arrays.
+
+### Files Modified
+- `data/src/game/AIRace/AIInfo.hpp` — Added 6 new member fields (mPrevActions, mStickXTarget, mStickXSmoothed, mStickY, mStickYTarget, mSmoothFrames), 10 free function declarations
+- `data/src/game/AIRace/AIInfo.cpp` — 115→290L
+- `data/src/game/AIRace/AIPath.hpp` — Added forward decl for System::MapdataEnemyPathAccessor, 10 new member method declarations on AIPathHandler, 6 new member fields (mpPathAccessor, mWaypointIndex, mPathPointCount, mProgress, mbFinished, mArrivalDistSq)
+- `data/src/game/AIRace/AIPath.cpp` — 148→373L
+- `data/src/game/AIRace/AIRank.hpp` — Added 11 new member methods on AIRank, 10 new arrays/fields (mPlayerPositions, mTargetRanks, mSpeedAdvantages, mDistanceCompleted, mAvgSpeedBuffer[12][60], mAvgSpeedIdx, mbRaceEnded, mbSpeedAdvantageActive, mPlayerCount). Added 4 AIRankManager methods + 4 new fields (mpRanks[12], mPlayerCount, mbActive, mbRaceEnded)
+- `data/src/game/AIRace/AIRank.cpp` — 175→444L
+
+### Build: 0 errors in modified files
+- Pre-existing errors in KartHitbox.cpp (static dot() vs member dot() call mismatch) — unrelated to this change
+- Fixed AIInfo.cpp to use `buttons` field (not `mButtons`) matching actual KPadRaceInputState layout
+- Fixed AIPath.cpp to use `EGG::TVector3<f32>::cross(a,b)` static form (TVector3 has no member cross)
+- All @addr annotations preserved; 64-bit safe; EGG::Vector3f.length() not used

@@ -7,12 +7,168 @@
 
 #include "SceneCreator.hpp"
 #include "SceneBase.hpp"
+#include "SceneRace.hpp"
 #include <cstring>
 
 namespace Scene {
 
+// =============================================================================
+// Anonymous namespace — Stub scene and factory functions
+//
+// Concrete scene classes that don't exist yet are represented by StubScene.
+// It satisfies the SceneBase pure-virtual interface so the factory can
+// return valid instances.  Replace with real scene classes as they are
+// implemented.
+// =============================================================================
+namespace {
+
+// Minimal stub scene for unimplemented scene types.
+// Provides no-op implementations of the required interface.
+class StubScene : public SceneBase {
+public:
+    explicit StubScene(u32 id) {
+        m_sceneId = id;
+        m_state = STATE_ACTIVE;
+    }
+    virtual ~StubScene() {}
+
+    virtual void init() override {}
+    virtual void calc() override {}
+    virtual void draw() override {}
+    virtual u32 getSceneId() const override { return m_sceneId; }
+};
+
+// --- Factory functions for each scene type ---
+
+SceneBase* createTitleScene(const SceneArgs& args) {
+    (void)args;
+    return new StubScene(SCENE_TITLE);
+}
+
+SceneBase* createMenuTopScene(const SceneArgs& args) {
+    (void)args;
+    return new StubScene(SCENE_MENU_TOP);
+}
+
+SceneBase* createMenuGrandPrixScene(const SceneArgs& args) {
+    (void)args;
+    return new StubScene(SCENE_MENU_GRANDPRIX);
+}
+
+SceneBase* createMenuVSScene(const SceneArgs& args) {
+    (void)args;
+    return new StubScene(SCENE_MENU_VS);
+}
+
+SceneBase* createMenuBattleScene(const SceneArgs& args) {
+    (void)args;
+    return new StubScene(SCENE_MENU_BATTLE);
+}
+
+SceneBase* createMenuGhostScene(const SceneArgs& args) {
+    (void)args;
+    return new StubScene(SCENE_MENU_GHOST);
+}
+
+SceneBase* createMenuChannelScene(const SceneArgs& args) {
+    (void)args;
+    return new StubScene(SCENE_MENU_CHANNEL);
+}
+
+SceneBase* createCaryardScene(const SceneArgs& args) {
+    (void)args;
+    // SceneCaryard does not inherit from SceneBase, so we use a stub
+    // until the proper integration is done.
+    return new StubScene(SCENE_CARYARD);
+}
+
+SceneBase* createCourseSelectScene(const SceneArgs& args) {
+    (void)args;
+    return new StubScene(SCENE_COURSE_SELECT);
+}
+
+// RaceScene has a real concrete class — use it directly
+SceneBase* createRaceScene(const SceneArgs& args) {
+    RaceScene* race = new RaceScene();
+    (void)args; // courseId etc. are passed via loadCourse() later
+    return race;
+}
+
+SceneBase* createRaceResultScene(const SceneArgs& args) {
+    (void)args;
+    return new StubScene(SCENE_RACE_RESULT);
+}
+
+SceneBase* createReplayScene(const SceneArgs& args) {
+    (void)args;
+    return new StubScene(SCENE_REPLAY);
+}
+
+SceneBase* createAwardScene(const SceneArgs& args) {
+    (void)args;
+    return new StubScene(SCENE_AWARD);
+}
+
+SceneBase* createStaffScene(const SceneArgs& args) {
+    (void)args;
+    return new StubScene(SCENE_STAFF);
+}
+
+SceneBase* createMovieScene(const SceneArgs& args) {
+    (void)args;
+    return new StubScene(SCENE_MOVIE);
+}
+
+SceneBase* createOnlineScene(const SceneArgs& args) {
+    (void)args;
+    return new StubScene(SCENE_ONLINE);
+}
+
+SceneBase* createTournamentScene(const SceneArgs& args) {
+    (void)args;
+    return new StubScene(SCENE_TOURNAMENT);
+}
+
+SceneBase* createMissionScene(const SceneArgs& args) {
+    (void)args;
+    return new StubScene(SCENE_MISSION);
+}
+
+// Custom destroy function for scenes that need extra cleanup.
+// Currently all scenes use the default delete path.
+void destroySceneDefault(SceneBase* scene) {
+    delete scene;
+}
+
+// Human-readable scene name table
+static const char* s_sceneNames[] = {
+    "Title",           // SCENE_TITLE
+    "MenuTop",         // SCENE_MENU_TOP
+    "MenuGrandPrix",   // SCENE_MENU_GRANDPRIX
+    "MenuVS",          // SCENE_MENU_VS
+    "MenuBattle",      // SCENE_MENU_BATTLE
+    "MenuGhost",       // SCENE_MENU_GHOST
+    "MenuChannel",     // SCENE_MENU_CHANNEL
+    "Caryard",         // SCENE_CARYARD
+    "CourseSelect",    // SCENE_COURSE_SELECT
+    "Race",            // SCENE_RACE
+    "RaceResult",      // SCENE_RACE_RESULT
+    "Replay",          // SCENE_REPLAY
+    "Award",           // SCENE_AWARD
+    "Staff",           // SCENE_STAFF
+    "Movie",           // SCENE_MOVIE
+    "Online",          // SCENE_ONLINE
+    "Tournament",      // SCENE_TOURNAMENT
+    "Mission",         // SCENE_MISSION
+};
+
+} // anonymous namespace
+
 SceneCreator* SceneCreator::s_instance = nullptr;
 
+// =============================================================================
+// Constructor / Destructor
+// =============================================================================
 // @addr 0x8060A194
 SceneCreator::SceneCreator()
     : m_registeredCount(0) {
@@ -35,7 +191,10 @@ SceneCreator::~SceneCreator() {
     m_registeredCount = 0;
 }
 
+// =============================================================================
+// createScene — Factory method: instantiate a scene by ID
 // @addr 0x8060A194
+// =============================================================================
 SceneBase* SceneCreator::createScene(SceneId id, const SceneArgs& args) {
     // Validate scene ID range
     if (id < 0 || static_cast<u32>(id) >= MAX_SCENES) {
@@ -52,7 +211,10 @@ SceneBase* SceneCreator::createScene(SceneId id, const SceneArgs& args) {
     return scene;
 }
 
+// =============================================================================
+// destroyScene — Safely destroy a scene instance
 // @addr 0x8060A280
+// =============================================================================
 void SceneCreator::destroyScene(SceneBase* scene) {
     if (!scene) return;
 
@@ -72,6 +234,9 @@ void SceneCreator::destroyScene(SceneBase* scene) {
     delete scene;
 }
 
+// =============================================================================
+// registerCreator / unregisterCreator
+// =============================================================================
 // @addr 0x8060A320
 void SceneCreator::registerCreator(SceneId id, CreateFunc create, DestroyFunc destroy) {
     if (id < 0 || static_cast<u32>(id) >= MAX_SCENES) return;
@@ -104,6 +269,9 @@ void SceneCreator::unregisterCreator(SceneId id) {
     }
 }
 
+// =============================================================================
+// Query methods
+// =============================================================================
 // @addr 0x8060A440
 bool SceneCreator::isRegistered(SceneId id) const {
     if (id < 0 || static_cast<u32>(id) >= MAX_SCENES) return false;
@@ -127,6 +295,38 @@ DestroyFunc SceneCreator::getDestroyFunc(SceneId id) const {
     return m_entries[static_cast<u32>(id)].destroyFunc;
 }
 
+// =============================================================================
+// getSceneName — Return human-readable name for a scene ID
+// =============================================================================
+const char* SceneCreator::getSceneName(SceneId id) const {
+    if (id < 0 || id >= SCENE_COUNT) return "Unknown";
+    return s_sceneNames[static_cast<u32>(id)];
+}
+
+// =============================================================================
+// preloadResources — Preload assets for a scene before creating it
+//
+// In the real game this triggers async DVD reads via the NAND/DVD thread
+// so that textures, models, and layouts are in RAM by the time the scene
+// is created.  The port stub marks the args as needing preload.
+// @addr 0x8060A600
+// =============================================================================
+void SceneCreator::preloadResources(SceneId id, const SceneArgs& args) {
+    if (!isRegistered(id)) return;
+
+    // In the real game:
+    // 1. Query the scene's resource manifest (list of archive paths)
+    // 2. Submit async load requests to the DVD thread
+    // 3. The loading screen scene shows progress until all resources ready
+    //
+    // For the port, we do nothing here — resources load synchronously
+    // or are pre-cached by the asset system.
+    (void)args;
+}
+
+// =============================================================================
+// Singleton and global init/shutdown
+// =============================================================================
 SceneCreator* SceneCreator::getInstance() {
     if (!s_instance) {
         s_instance = new SceneCreator();
@@ -139,11 +339,55 @@ void SceneCreator::initGlobal() {
     if (!s_instance) {
         s_instance = new SceneCreator();
     }
-    // In the real game, all scene types register here:
-    // registerCreator(SCENE_TITLE, createTitleScene);
-    // registerCreator(SCENE_MENU_TOP, createMenuScene);
-    // registerCreator(SCENE_RACE, createRaceScene);
-    // etc.
+
+    // Register all scene types with their factory functions.
+    // Each scene type gets a CreateFunc and an optional DestroyFunc.
+    // The real game registers these during static initialization or
+    // early in main() before the title screen is shown.
+
+    // Boot / title screen
+    s_instance->registerCreator(SCENE_TITLE, createTitleScene, destroySceneDefault);
+
+    // Menu system
+    s_instance->registerCreator(SCENE_MENU_TOP, createMenuTopScene, destroySceneDefault);
+    s_instance->registerCreator(SCENE_MENU_GRANDPRIX, createMenuGrandPrixScene, destroySceneDefault);
+    s_instance->registerCreator(SCENE_MENU_VS, createMenuVSScene, destroySceneDefault);
+    s_instance->registerCreator(SCENE_MENU_BATTLE, createMenuBattleScene, destroySceneDefault);
+    s_instance->registerCreator(SCENE_MENU_GHOST, createMenuGhostScene, destroySceneDefault);
+    s_instance->registerCreator(SCENE_MENU_CHANNEL, createMenuChannelScene, destroySceneDefault);
+
+    // Character / kart selection
+    s_instance->registerCreator(SCENE_CARYARD, createCaryardScene, destroySceneDefault);
+
+    // Course selection wheel
+    s_instance->registerCreator(SCENE_COURSE_SELECT, createCourseSelectScene, destroySceneDefault);
+
+    // Race gameplay — uses the real RaceScene class
+    s_instance->registerCreator(SCENE_RACE, createRaceScene, destroySceneDefault);
+
+    // Post-race results
+    s_instance->registerCreator(SCENE_RACE_RESULT, createRaceResultScene, destroySceneDefault);
+
+    // Replay theater
+    s_instance->registerCreator(SCENE_REPLAY, createReplayScene, destroySceneDefault);
+
+    // Trophy / award ceremony
+    s_instance->registerCreator(SCENE_AWARD, createAwardScene, destroySceneDefault);
+
+    // Staff credits roll
+    s_instance->registerCreator(SCENE_STAFF, createStaffScene, destroySceneDefault);
+
+    // Cutscene playback
+    s_instance->registerCreator(SCENE_MOVIE, createMovieScene, destroySceneDefault);
+
+    // Online lobby / matchmaking
+    s_instance->registerCreator(SCENE_ONLINE, createOnlineScene, destroySceneDefault);
+
+    // Tournament mode
+    s_instance->registerCreator(SCENE_TOURNAMENT, createTournamentScene, destroySceneDefault);
+
+    // Mission mode
+    s_instance->registerCreator(SCENE_MISSION, createMissionScene, destroySceneDefault);
 }
 
 // @addr 0x8060A560
@@ -177,8 +421,9 @@ bool SceneCreator::validateRegistrations() const {
 void SceneCreator::dumpRegistrations() const {
     for (u32 i = 0; i < MAX_SCENES; i++) {
         if (m_entries[i].registered) {
-            // Debug: log registered scene
-            (void)m_entries[i].id;
+            const char* name = getSceneName(static_cast<SceneId>(i));
+            (void)name;
+            // Debug output: registered scene name
         }
     }
 }
