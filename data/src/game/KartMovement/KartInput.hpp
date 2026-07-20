@@ -44,10 +44,47 @@ public:
     // @addr 0x80594300
     void resetToNeutral();
 
+    // Process raw input with driver-assist filtering and smoothing.
+    // Called after readRawInput() to produce final kart-facing input values.
+    void processInput();
+
+    // Set raw button state directly (for external injection, e.g. replay).
+    void setRawButtonState(u32 buttons);
+
+    // Set raw analog stick state directly (for external injection).
+    // Values should be in [-1.0, 1.0] range.
+    void setRawStickState(f32 stickX, f32 stickY);
+
+    // Check if steering is currently directed to the left.
+    // Returns true if stick X is beyond the negative deadzone threshold.
+    bool isSteeringLeft() const;
+
+    // Check if steering is currently directed to the right.
+    // Returns true if stick X is beyond the positive deadzone threshold.
+    bool isSteeringRight() const;
+
+    // Get the absolute magnitude of the steering input.
+    // Returns value in [0.0, 1.0].
+    f32 getSteeringMagnitude() const;
+
+    // Check if any input is currently active (buttons or stick).
+    // Useful for idle detection and controller disconnect.
+    bool hasAnyInput() const;
+
+    // Get a const reference to the current input state.
+    const System::KPadRaceInputState& getInputState() const;
+
+    // Set the per-kart analog deadzone radius.
+    void setDeadzone(f32 radius);
+
+    // Get the per-kart analog deadzone radius.
+    f32 getDeadzone() const { return m_deadzone; }
+
     u8 field_0x04[36];
     System::KPadRaceInputState currentInputState;
     System::KPadRaceInputState lastInputState;
-    u8 field_0x58[128];
+    u8 field_0x58[124];
+    f32 m_deadzone;  // Per-kart analog stick deadzone radius
 };
 
 } // namespace Kart

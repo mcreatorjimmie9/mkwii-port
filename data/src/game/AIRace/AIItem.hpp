@@ -77,6 +77,23 @@ public:
     /// @return Protection priority value (0.0 = maximum need, 1.0 = no need)
     f32 getProtectionPriority();
 
+    /// Set the protection priority externally (called by AI engine/rank system).
+    /// @param priority  New protection value (0.0 = max need, 1.0 = no need)
+    void setProtectionPriority(f32 priority);
+
+    /// Check if the AI is currently holding an item.
+    /// @return true if holding a non-ITEM_NONE item
+    bool isHoldingItem() const;
+
+    /// Get the type of the currently held item as an ItemType enum.
+    /// @return The held item type (ITEM_NONE if not holding anything)
+    u32 getHeldItemType() const;
+
+    /// Check if the AI should use a held protective item (green shell, banana).
+    /// Considers incoming threat direction and whether the item should be held behind.
+    /// @return true if a protective item should be deployed now
+    bool shouldUseProtection();
+
     // State queries
     u32 getHeldItem() const { return m_heldItem; }
     u32 getLastUsedItem() const { return m_lastUsedItem; }
@@ -97,6 +114,12 @@ private:
     f32 m_useCooldown;          // Cooldown after using an item
     f32 m_protectionPriority;   // Cached protection need value
     bool m_wantsToUse;         // AI has decided to use the item
+    u32 m_currentRank;          // AI's current race position (1-12)
+    f32 m_distToNext;           // Distance to the player directly ahead
+    f32 m_distToPrev;           // Distance to the player directly behind
+    bool m_incomingThreat;      // True if a threat (shell/bomb) is approaching
+    u32 m_incomingThreatType;   // Type of the incoming threat item
+    u32 m_itemCount;            // Total items the AI has used this race
 };
 
 } // namespace Enemy

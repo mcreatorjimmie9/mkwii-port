@@ -12,7 +12,7 @@
 // Categorization: GENESIS Phase 5 (SaveData Module)
 // ============================================================================
 
-#include "rk_common.h"
+#include "GhostFile.hpp"
 
 // ============================================================================
 // Record Metadata
@@ -21,10 +21,10 @@
 #pragma pack(push, 1)
 
 struct RecordMeta {
-    u8  characterId;     // Character used for the record
-    u8  vehicleId;       // Vehicle (kart/bike) used
-    u8  controllerType;  // 0: Wii Wheel, 1: Nunchuk, 2: Classic, 3: GC
-    u8  driftIsAuto;     // 0: Manual, 1: Auto drift
+    u8  characterId;
+    u8  vehicleId;
+    u8  controllerType;
+    u8  driftIsAuto;
 
     // Date the record was set
     u16 year;
@@ -51,45 +51,65 @@ public:
     RecordData();
 
     // --- Best Times ---
-    // Get best total race time (3 laps, or 2 for some courses)
     const System::Time& getBestTime() const { return mBestTime; }
-
-    // Get best single lap time
     const System::Time& getBestLap() const { return mBestLap; }
 
-    // Check if a time is a new record
     bool isNewRecord(const System::Time& raceTime) const;
     bool isNewLapRecord(const System::Time& lapTime) const;
 
-    // Set new records
     void setRecord(const System::Time& raceTime, const RecordMeta& meta);
     void setLapRecord(const System::Time& lapTime, const RecordMeta& meta);
 
-    // Set time directly (from deserialization)
     void setBestTime(const System::Time& t) { mBestTime = t; }
     void setBestLap(const System::Time& t) { mBestLap = t; }
+
+    // --- Record existence ---
+    bool hasRecord() const {
+        return mBestTime.minutes != 0 || mBestTime.seconds != 0 || mBestTime.millis != 0;
+    }
+    bool hasLapRecord() const {
+        return mBestLap.minutes != 0 || mBestLap.seconds != 0 || mBestLap.millis != 0;
+    }
+
+    // --- Clear ---
+    void clearRecord();
+    void clearLapRecord();
 
     // --- Metadata ---
     const RecordMeta& getMeta() const { return mMeta; }
     RecordMeta& getMeta() { return mMeta; }
 
-    // --- Utility ---
-    bool hasRecord() const {
-        // A record exists if the time is non-zero
-        return mBestTime.minutes != 0 || mBestTime.seconds != 0 || mBestTime.millis != 0;
-    }
+    // --- Comparison ---
+    // Returns <0 if this time is faster, 0 if equal, >0 if slower
+    s32 compareRecord(const RecordData& other) const;
+    s32 compareLapRecord(const RecordData& other) const;
+    bool operator==(const RecordData& other) const;
+    bool operator!=(const RecordData& other) const { return !(*this == other); }
 
+    // --- Utility ---
     void reset();
 
     // --- Serialization ---
+    // Byte layout:
+    //   [0]    record type (0x00 = none, 0x01 = race, 0x02 = both)
+    //   [1-3]  best race time (minutes s16 BE, seconds u8, millis u8)
+    //   [4-6]  best lap time (minutes s16 BE, seconds u8, millis u8)
+    //   [7-8]  date: year (u16 BE)
+    //   [9]    month, [10] day, [11] hour, [12] minute, [13] second
+    //   [14]   characterId, [15] vehicleId, [16] controllerType, [17] driftIsAuto
+    //   [18]   isStaffGhost
+    //   [19]   padding to 20 bytes
     u32 serialize(u8* buffer, u32 bufferSize) const;
     u32 deserialize(const u8* buffer, u32 bufferSize);
 
-    // Size in the save file
-    static const u32 SAVE_SIZE = sizeof(System::Time) * 2 + sizeof(RecordMeta);
+    static const u32 SAVE_SIZE = 20;
+
+    // --- Formatting ---
+    // Format a Time as "MM:SS.mmm" into buf (min bufSize = 10)
+    static void formatTime(const System::Time& t, char* buf, u32 bufSize);
 
 private:
-    System::Time mBestTime;    // Best 3-lap race time
-    System::Time mBestLap;     // Best single lap time
-    RecordMeta   mMeta;        // Record metadata
+    System::Time mBestTime;
+    System::Time mBestLap;
+    RecordMeta   mMeta;
 };

@@ -21,6 +21,9 @@
 #include "rk_common.h"
 #include "GhostFile.hpp"
 
+// Forward-declare Mii (from system/Mii.hpp, not yet ported)
+namespace System { class Mii; }
+
 // ============================================================================
 // Save File Layout Constants
 // ============================================================================
@@ -29,17 +32,23 @@ static const u32 SAVE_MAGIC         = 0x524D4345; // "RMCE"
 static const u32 SAVE_VERSION       = 3;
 static const u32 MAX_LICENSES       = 3;
 static const u32 MAX_GHOSTS_PER_LICENSE = 36;
-static const u32 MAX_RECORDS        = 32; // per course
+static const u32 MAX_RECORDS        = 32;
 static const u32 SAVE_FILE_SIZE     = 0x2C000; // ~180 KB (Wii NAND block)
+static const u32 SAVE_HEADER_SIZE   = 0x40;
+static const u32 SAVE_OPTIONS_SIZE  = 0x10;
+static const u32 SAVE_UNLOCKED_SIZE = 0x10;
+static const u32 NAND_BLOCK_SIZE    = 0x200;  // 512 bytes per NAND block
+static const u32 NAND_BLOCK_COUNT   = SAVE_FILE_SIZE / NAND_BLOCK_SIZE;
+static const u32 NAND_MAX_BLOCKS    = 0x200;  // 128 KB max NAND space for saves
 
 // ============================================================================
 // Unlocked Content Bitfields
 // ============================================================================
 
 struct UnlockedData {
-    u32 characters;    // bitfield: which characters are unlocked
-    u32 vehicles;      // bitfield: which vehicles are unlocked
-    u32 courses;       // bitfield: which cups/courses are unlocked
+    u32 characters;
+    u32 vehicles;
+    u32 courses;
     u32 _pad;
 };
 
@@ -69,15 +78,15 @@ struct SaveHeader {
 // ============================================================================
 
 struct SaveOptions {
-    u8  driftMode;        // 0: Manual, 1: Auto
-    u8  soundVolume;      // 0-100
-    u8  musicVolume;      // 0-100
-    u8  sfxVolume;        // 0-100
-    u8  rumble;           // 0: Off, 1: On
-    u8  controlScheme;    // 0: Wii Wheel, 1: Nunchuk, 2: Classic, 3: GC
-    u8  stereoType;       // 0: Mono, 1: Stereo, 2: Surround
-    u8  targetFPS;        // 0: 30, 1: 60 (PC-only)
-    u8  language;         // 0: English, 1: Japanese, etc.
+    u8  driftMode;
+    u8  soundVolume;
+    u8  musicVolume;
+    u8  sfxVolume;
+    u8  rumble;
+    u8  controlScheme;
+    u8  stereoType;
+    u8  targetFPS;
+    u8  language;
     u8  _pad[0x07];
 };
 
@@ -97,21 +106,14 @@ public:
     SaveData();
     ~SaveData();
 
+    // --- Initialization ---
+    s32 init();
+
     // --- File Operations ---
-    // Load save from disk (or NAND on Wii)
-    // Returns 0 on success, error code on failure
     s32 load();
-
-    // Write save to disk
     s32 save();
-
-    // Check if a save file exists
     bool exists();
-
-    // Create a new default save file
     s32 createDefault();
-
-    // Delete the save file
     s32 erase();
 
     // --- License Access ---
@@ -120,9 +122,11 @@ public:
     s32 setActiveLicense(u32 index);
     s32 createLicense(const char* name, System::Mii* mii);
     s32 deleteLicense(u32 index);
+    s32 addLicense(const char* name, System::Mii* mii);
+    s32 removeLicense(u32 index);
+    License* findLicenseByMii(const char* miiName);
 
     // --- Ghost Data Access ---
-    // Ghosts are stored per-license
     System::GhostFile* getGhost(u32 licenseIdx, u32 ghostIdx);
     s32 saveGhost(u32 licenseIdx, const System::RawGhostFile& raw);
     s32 deleteGhost(u32 licenseIdx, u32 ghostIdx);
@@ -140,20 +144,27 @@ public:
     // --- Save Info ---
     u32 getTotalPlayTime() const { return mHeader.totalPlayTime; }
     u32 getTotalRaceCount() const { return mHeader.totalRaceCount; }
+    u32 getTotalWinCount() const { return mHeader.totalWinCount; }
     void addRaceResult(bool won, u32 secondsPlayed);
+
+    // --- Size / Capacity ---
+    const char* formatSaveSize(char* buf, u32 bufSize) const;
+    u32 getFreeBlocks() const;
+    u32 getUsedBlocks() const;
 
     // --- Validation ---
     bool isValid() const;
     bool verifyChecksum();
     u32  calculateChecksum();
+    bool validateSave() const;
 
 private:
     SaveHeader    mHeader;
     SaveOptions   mOptions;
     UnlockedData  mUnlocked;
     License*      mLicenses[MAX_LICENSES];
-    bool          mDirty; // true if save needs writing
-    u8*           mRawData; // raw save file buffer
+    bool          mDirty;
+    u8*           mRawData;
 };
 
 } // namespace Save

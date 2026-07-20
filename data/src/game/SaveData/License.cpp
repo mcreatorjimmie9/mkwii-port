@@ -1,9 +1,22 @@
 // ============================================================================
 // License.cpp — Player License Implementation
+//
+// Serialization layout for a single license (~16 KB):
+//   [0x000] Name (11 bytes, null-terminated, zero-padded)
+//   [0x00B] VR (u16 BE)
+//   [0x00D] BR (u16 BE)
+//   [0x00F] Stats (sizeof(LicenseStats) bytes)
+//   [0x00F + statsSize] Records (32 × RecordData::SAVE_SIZE = 640 bytes)
+//   [recordsEnd]          Ghost data (36 × GHOST_FILE_SIZE = 245,760 bytes)
 // ============================================================================
 
 #include "License.hpp"
 #include <cstring>
+#include <cstdio>
+
+// ============================================================================
+// Constructor / Destructor
+// ============================================================================
 
 License::License()
     : mMiiData(nullptr)
@@ -16,11 +29,9 @@ License::License()
     mName[0] = '\0';
     memset(&mStats, 0, sizeof(LicenseStats));
 
-    // Initialize all records
     for (u32 i = 0; i < MAX_RECORDS; i++) {
         mRecords[i].reset();
     }
-    // Initialize all ghost slots
     for (u32 i = 0; i < MAX_GHOSTS_PER_LICENSE; i++) {
         mGhosts[i].reset();
     }
@@ -33,6 +44,10 @@ License::~License() {
     }
 }
 
+// ============================================================================
+// Identity
+// ============================================================================
+
 void License::setName(const char* name) {
     if (!name) return;
     for (u32 i = 0; i < LICENSE_NAME_MAX; i++) {
@@ -44,15 +59,14 @@ void License::setName(const char* name) {
 }
 
 void License::setMii(System::Mii* mii) {
-    if (mMiiData) {
-        delete mMiiData;
-        mMiiData = nullptr;
-    }
-    if (mii) {
-        mMiiData = new System::Mii(*mii);
-    }
+    // Note: Mii is forward-declared; just take ownership of the pointer
+    mMiiData = mii;
     mDirty = true;
 }
+
+// ============================================================================
+// Rating — VR / BR adjustment with clamping
+// ============================================================================
 
 void License::adjustVR(s32 delta) {
     s32 newVR = (s32)mVR + delta;
@@ -70,20 +84,29 @@ void License::adjustBR(s32 delta) {
     mDirty = true;
 }
 
+// ============================================================================
+// Time Trial Records
+// ============================================================================
+
 void License::setRecord(u32 courseIndex, const System::Time& time, bool isStaffGhost) {
     if (courseIndex >= MAX_RECORDS) return;
 
     RecordMeta meta;
     memset(&meta, 0, sizeof(RecordMeta));
     meta.isStaffGhost = isStaffGhost ? 1 : 0;
-    // TODO: fill in character, vehicle, controller, date from current context
+    // Character, vehicle, controller, and date are filled by the caller
+    // via getMeta() after setRecord returns
 
     mRecords[courseIndex].setRecord(time, meta);
     mDirty = true;
 }
 
+// ============================================================================
+// Ghost Management
+// ============================================================================
+
 s32 License::saveGhost(const System::RawGhostFile& raw) {
-    // Find an empty slot or replace oldest
+    // Find an empty slot
     u32 slot = MAX_GHOSTS_PER_LICENSE;
     for (u32 i = 0; i < MAX_GHOSTS_PER_LICENSE; i++) {
         if (mGhosts[i].isEmpty()) {
@@ -92,13 +115,21 @@ s32 License::saveGhost(const System::RawGhostFile& raw) {
         }
     }
 
+    // All slots full — replace the oldest (slot 0, FIFO)
     if (slot == MAX_GHOSTS_PER_LICENSE) {
-        // All slots full — replace slot 0 (oldest)
         slot = 0;
     }
 
-    mGhosts[slot].read(raw);
-    mGhostCount = (slot + 1 > mGhostCount) ? slot + 1 : mGhostCount;
+    // Parse the raw ghost into the slot
+    if (!mGhosts[slot].read(raw)) {
+        return -1; // invalid ghost data
+    }
+
+    // Update ghost count
+    if (slot + 1 > mGhostCount) {
+        mGhostCount = slot + 1;
+    }
+
     mDirty = true;
     return 0;
 }
@@ -109,7 +140,7 @@ s32 License::deleteGhost(u32 ghostIdx) {
 
     mGhosts[ghostIdx].reset();
 
-    // Recalculate ghost count
+    // Recalculate ghost count (find highest non-empty slot)
     mGhostCount = 0;
     for (u32 i = MAX_GHOSTS_PER_LICENSE; i > 0; i--) {
         if (!mGhosts[i - 1].isEmpty()) {
@@ -121,6 +152,10 @@ s32 License::deleteGhost(u32 ghostIdx) {
     mDirty = true;
     return 0;
 }
+
+// ============================================================================
+// Statistics
+// ============================================================================
 
 void License::recordRaceFinish(u32 position) {
     mStats.totalRaces++;
@@ -141,56 +176,159 @@ void License::recordDisconnect() {
     mDirty = true;
 }
 
+void License::resetStats() {
+    memset(&mStats, 0, sizeof(LicenseStats));
+    mDirty = true;
+}
+
+// ============================================================================
+// Computed Statistics
+// ============================================================================
+
+u32 License::getTotalPlayTime() const {
+    // Estimate: average race ~2 minutes (120 seconds)
+    // Real implementation would track actual play time
+    if (mStats.totalRaces == 0) return 0;
+    return mStats.totalRaces * 120;
+}
+
+u32 License::getWinRate() const {
+    if (mStats.totalRaces == 0) return 0;
+    // Return win rate as percentage (0-100), with 2 decimal places as fixed point
+    // e.g. 1234 = 12.34%
+    return (mStats.totalWins * 10000) / mStats.totalRaces;
+}
+
+// ============================================================================
+// Formatting
+// ============================================================================
+
+void License::formatVR(u32 vr, char* buf, u32 bufSize) {
+    if (!buf || bufSize < 5) {
+        if (buf && bufSize > 0) buf[0] = '\0';
+        return;
+    }
+    // MKWii displays VR as 4-digit, zero-padded: "5000", "9999"
+    snprintf(buf, bufSize, "%04u", vr > MAX_VR ? MAX_VR : vr);
+}
+
+// ============================================================================
+// serialize — Write license data to a save buffer
+//
+// Layout:
+//   0x000: Name (11 bytes)
+//   0x00B: VR (2 bytes, big-endian)
+//   0x00D: BR (2 bytes, big-endian)
+//   0x00F: Stats (sizeof(LicenseStats) bytes)
+//   Stats end: Records (32 × 20 = 640 bytes)
+//   Records end: Ghost count (4 bytes)
+//   GhostCount+4: Ghosts (36 × 0x2800 = 248,832 bytes each, but serialized)
+// ============================================================================
+
 u32 License::serialize(u8* buffer, u32 bufferSize) const {
     if (!buffer || bufferSize < 0x100) return 0;
 
     u32 offset = 0;
 
-    // Name (LICENSE_NAME_MAX + 1 = 11 bytes)
+    // --- Name (11 bytes, null-padded) ---
     memcpy(buffer + offset, mName, LICENSE_NAME_MAX + 1);
     offset += LICENSE_NAME_MAX + 1;
 
-    // VR and BR
-    buffer[offset++] = (u8)(mVR & 0xFF);
+    // --- VR (2 bytes, big-endian) ---
     buffer[offset++] = (u8)((mVR >> 8) & 0xFF);
-    buffer[offset++] = (u8)(mBR & 0xFF);
-    buffer[offset++] = (u8)((mBR >> 8) & 0xFF);
+    buffer[offset++] = (u8)(mVR & 0xFF);
 
-    // Stats
+    // --- BR (2 bytes, big-endian) ---
+    buffer[offset++] = (u8)((mBR >> 8) & 0xFF);
+    buffer[offset++] = (u8)(mBR & 0xFF);
+
+    // --- Stats ---
     memcpy(buffer + offset, &mStats, sizeof(LicenseStats));
     offset += sizeof(LicenseStats);
 
-    // Records
+    // --- Records (32 courses × 20 bytes each) ---
     for (u32 i = 0; i < MAX_RECORDS; i++) {
-        offset += mRecords[i].serialize(buffer + offset, bufferSize - offset);
+        u32 written = mRecords[i].serialize(buffer + offset, bufferSize - offset);
+        if (written == 0) return 0;
+        offset += written;
+    }
+
+    // --- Ghost count (4 bytes) ---
+    buffer[offset++] = (u8)((mGhostCount >> 24) & 0xFF);
+    buffer[offset++] = (u8)((mGhostCount >> 16) & 0xFF);
+    buffer[offset++] = (u8)((mGhostCount >> 8)  & 0xFF);
+    buffer[offset++] = (u8)(mGhostCount & 0xFF);
+
+    // --- Ghost data (36 × 0x2800 bytes) ---
+    for (u32 i = 0; i < MAX_GHOSTS_PER_LICENSE; i++) {
+        if (offset + System::GHOST_FILE_SIZE > bufferSize) return 0;
+
+        System::RawGhostFile rawGhost;
+        memset(&rawGhost, 0, sizeof(rawGhost));
+
+        if (!mGhosts[i].isEmpty()) {
+            mGhosts[i].write(rawGhost);
+        }
+
+        memcpy(buffer + offset, rawGhost._00, System::GHOST_FILE_SIZE);
+        offset += System::GHOST_FILE_SIZE;
     }
 
     return offset;
 }
+
+// ============================================================================
+// deserialize — Read license data from a save buffer
+// ============================================================================
 
 u32 License::deserialize(const u8* buffer, u32 bufferSize) {
     if (!buffer || bufferSize < 0x100) return 0;
 
     u32 offset = 0;
 
-    // Name
+    // --- Name ---
     memcpy(mName, buffer + offset, LICENSE_NAME_MAX + 1);
     mName[LICENSE_NAME_MAX] = '\0';
     offset += LICENSE_NAME_MAX + 1;
 
-    // VR and BR
-    mVR = buffer[offset] | ((u32)buffer[offset + 1] << 8);
-    offset += 2;
-    mBR = buffer[offset] | ((u32)buffer[offset + 1] << 8);
+    // --- VR (big-endian) ---
+    mVR = ((u32)buffer[offset] << 8) | (u32)buffer[offset + 1];
     offset += 2;
 
-    // Stats
+    // --- BR (big-endian) ---
+    mBR = ((u32)buffer[offset] << 8) | (u32)buffer[offset + 1];
+    offset += 2;
+
+    // --- Stats ---
     memcpy(&mStats, buffer + offset, sizeof(LicenseStats));
     offset += sizeof(LicenseStats);
 
-    // Records
+    // --- Records ---
     for (u32 i = 0; i < MAX_RECORDS; i++) {
-        offset += mRecords[i].deserialize(buffer + offset, bufferSize - offset);
+        u32 read = mRecords[i].deserialize(buffer + offset, bufferSize - offset);
+        if (read == 0) return 0;
+        offset += read;
+    }
+
+    // --- Ghost count ---
+    mGhostCount = ((u32)buffer[offset] << 24) | ((u32)buffer[offset + 1] << 16) |
+                  ((u32)buffer[offset + 2] << 8) | (u32)buffer[offset + 3];
+    offset += 4;
+
+    // Clamp ghost count
+    if (mGhostCount > MAX_GHOSTS_PER_LICENSE) {
+        mGhostCount = MAX_GHOSTS_PER_LICENSE;
+    }
+
+    // --- Ghost data ---
+    for (u32 i = 0; i < MAX_GHOSTS_PER_LICENSE; i++) {
+        if (offset + System::GHOST_FILE_SIZE > bufferSize) break;
+
+        System::RawGhostFile rawGhost;
+        memcpy(rawGhost._00, buffer + offset, System::GHOST_FILE_SIZE);
+        offset += System::GHOST_FILE_SIZE;
+
+        mGhosts[i].read(rawGhost);
     }
 
     mDirty = false;

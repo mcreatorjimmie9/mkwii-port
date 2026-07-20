@@ -58,6 +58,33 @@ public:
     /// Get the suspension force being applied to a wheel this frame.
     f32 getWheelForce(s32 idx) const { return m_wheelForce[idx]; }
 
+    /// Compute the damping coefficient for a given wheel.
+    /// @param wheelIdx  Wheel index (0-3)
+    /// @return Damping coefficient (force per unit velocity)
+    f32 computeWheelDamping(s32 wheelIdx) const;
+
+    /// Get the full state of a wheel (compression, velocity, grounded, force).
+    /// @param idx       Wheel index (0-3)
+    /// @param outComp   Output compression
+    /// @param outVel    Output compression velocity
+    /// @param outForce  Output applied force
+    /// @param outGround Output grounded flag
+    void getWheelState(s32 idx, f32* outComp, f32* outVel, f32* outForce, bool* outGround) const;
+
+    /// Reset a single wheel's suspension state to default.
+    /// @param idx  Wheel index (0-3)
+    void resetWheel(s32 idx);
+
+    /// Set all spring parameters at once for vehicle-specific tuning.
+    /// @param k     Spring constant
+    /// @param zeta  Damping ratio
+    /// @param len   Rest length
+    void setSpringParams(f32 k, f32 zeta, f32 len);
+
+    /// Get a bitmask of grounded wheels. Bit i is set if wheel i is grounded.
+    /// @return Bitmask (e.g. 0x5 = RL+FL, 0xF = all four)
+    u32 getGroundContactMask() const;
+
     /// Suspension parameters (can be tuned per vehicle)
     void setSpringConstant(f32 k) { m_springK = k; }
     void setDampingRatio(f32 zeta) { m_dampingRatio = zeta; }

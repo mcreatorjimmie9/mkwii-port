@@ -16,6 +16,8 @@
 
 #include "rk_common.h"
 
+// System::Time and System::RawGhostFile are defined in rk_common.h
+
 // ============================================================================
 // Ghost Header — First 0x100 bytes of ghost data
 // ============================================================================
@@ -23,43 +25,34 @@
 #pragma pack(push, 1)
 
 struct GhostHeader {
-    u8  courseId;        // Course the ghost was recorded on
-    u8  characterId;     // Character used
-    u8  vehicleId;       // Vehicle used
-    u8  controllerId;    // 0: Wii Wheel, 1: Nunchuk, 2: Classic, 3: GC
-    u8  driftIsAuto;     // 0: Manual, 1: Auto
+    u8  courseId;
+    u8  characterId;
+    u8  vehicleId;
+    u8  controllerId;
+    u8  driftIsAuto;
     u8  _pad0[0x03];
 
-    // Race time
     s16 finishMinutes;
     u8  finishSeconds;
     u8  finishMillis;
 
-    // Lap times (3 laps)
     struct {
         s16 minutes;
         u8  seconds;
         u8  millis;
     } lapTimes[3];
 
-    // Mii name
     char miiName[0x10];
 
-    // Validation
-    u32 checksum;        // CRC of the input data section
-    u32 inputSize;       // Total bytes of input data
-    u32 lapFrameCounts[3]; // Frame count per lap
-
-    // Lap marker offsets into input stream
+    u32 checksum;
+    u32 inputSize;
+    u32 lapFrameCounts[3];
     u32 lapOffsets[3];
 
-    u8  _pad1[0x70];     // Padding to 0x100
+    u8  _pad1[0x70];
 };
 
 #pragma pack(pop)
-
-// Static assert on raw size
-// static_assert(sizeof(GhostHeader) == 0x100, "GhostHeader must be 0x100 bytes");
 
 // ============================================================================
 // GhostFile — Parsed Ghost Replay
@@ -67,19 +60,25 @@ struct GhostHeader {
 
 namespace System {
 
+static const u8 GHOST_MAX_COURSE_ID = 31;
+static const u8 GHOST_MAX_CHARACTER_ID = 24;
+static const u8 GHOST_MAX_VEHICLE_ID = 35;
+static const u8 GHOST_MAX_CONTROLLER_ID = 3;
+
+static const u32 GHOST_FILE_SIZE = 0x2800;
+static const u32 GHOST_HEADER_SIZE = 0x100;
+static const u32 GHOST_INPUT_MAX = 0x2700;
+
+static const u32 GHOST_CRC32_POLY = 0xEDB88320u;
+
 class GhostFile {
 public:
     GhostFile();
     ~GhostFile();
 
-    // --- Read / Write ---
-    // Parse a raw ghost data buffer
     bool read(const RawGhostFile& raw);
-
-    // Serialize back to raw format
     bool write(RawGhostFile& raw) const;
 
-    // --- Header Access ---
     const GhostHeader& getHeader() const { return mHeader; }
     GhostHeader& getHeader() { return mHeader; }
 
@@ -89,7 +88,6 @@ public:
     u8  getControllerId() const { return mHeader.controllerId; }
     bool isDriftAuto() const { return mHeader.driftIsAuto != 0; }
 
-    // --- Time Access ---
     System::Time getFinishTime() const {
         System::Time t;
         t.minutes = mHeader.finishMinutes;
@@ -110,29 +108,38 @@ public:
         return t;
     }
 
-    // --- Input Stream ---
     const u8* getInputData() const { return mInputData; }
     u32 getInputSize() const { return mHeader.inputSize; }
 
-    // Get input at a specific frame
     u16 getInputAtFrame(u32 frame) const;
-
-    // Get total frame count
+    bool setFrameInput(u32 frame, u16 input);
     u32 getTotalFrames() const;
 
-    // --- Validation ---
     bool isValid() const;
     bool verifyChecksum() const;
     u32 calculateChecksum() const;
 
-    // --- Utility ---
     bool isEmpty() const { return mHeader.inputSize == 0; }
-
     void reset();
+
+    const char* getHeaderInfo(char* buf, u32 bufSize) const;
+
+    void setCourseId(u8 courseId) { mHeader.courseId = courseId; }
+    void setCharacterId(u8 charId) { mHeader.characterId = charId; }
+    void setVehicleId(u8 vehicleId) { mHeader.vehicleId = vehicleId; }
+    void setControllerId(u8 ctrlId) { mHeader.controllerId = ctrlId; }
+    void setDriftAuto(bool autoDrift) { mHeader.driftIsAuto = autoDrift ? 1 : 0; }
+    void setFinishTime(const System::Time& t);
+    void setLapTime(u32 lapIndex, const System::Time& t);
+    void setMiiName(const char* name);
+    void setInputSize(u32 size);
+    void setLapFrameCount(u32 lap, u32 count);
+    void setLapOffset(u32 lap, u32 offset);
+    void updateChecksum();
 
 private:
     GhostHeader mHeader;
-    u8          mInputData[0x2700]; // Input data section (0x2800 - 0x100)
+    u8          mInputData[0x2700];
 };
 
 } // namespace System

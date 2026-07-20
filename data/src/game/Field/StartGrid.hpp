@@ -82,6 +82,28 @@ public:
     /* StartGrid_reverseOrder @ 0x804C3900 */
     void reverseOrder();
 
+    // Get row and column counts for the current layout
+    s32 getRowCount() const { return mConfig.maxRows; }
+    s32 getColumnCount() const { return mConfig.columns; }
+
+    // Get pole position (slot 0 world position)
+    const EGG::Vector3f& getStartPosition() const;
+
+    // Map player index → grid slot (which slot this player starts in)
+    s32 getPositionForPlayer(s32 playerIdx) const;
+
+    // Inverse: map grid slot → player index (who starts in this slot)
+    s32 getPlayerForPosition(s32 slotIdx) const;
+
+    // Generate randomized VS race grid order
+    void getRandomizedOrder(s32* outOrder, s32 count) const;
+
+    // Mirror the grid for mirror mode (flip lateral axis)
+    void adjustForReverse();
+
+    // Reset all assignments to default (player i → slot i)
+    void resetToDefault();
+
 private:
     static const s32 MAX_GRID_SLOTS = MAX_PLAYER_COUNT; // 12 slots
     static const f32 DEFAULT_ROW_SPACING;

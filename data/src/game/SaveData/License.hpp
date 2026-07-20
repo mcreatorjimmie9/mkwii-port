@@ -19,14 +19,19 @@
 #include "rk_common.h"
 #include "RecordData.hpp"
 #include "GhostFile.hpp"
-#include "system/Mii.hpp"
+
+// ============================================================================
+// Forward-declare Mii (from system/Mii.hpp, not yet ported)
+// ============================================================================
+
+namespace System {
+class Mii;
+}
 
 // ============================================================================
 // License Constants
 // ============================================================================
 
-// Forward-declare constants (defined in SaveData.hpp)
-// These are duplicated here for standalone compilation.
 #ifndef MAX_RECORDS
 #define MAX_RECORDS 32
 #endif
@@ -47,28 +52,28 @@ static const u32 DEFAULT_BR         = 5000;
 #pragma pack(push, 1)
 
 struct LicenseStats {
-    u32 totalRaces;        // Total number of races completed
-    u32 totalWins;         // Total races won (1st place)
-    u32 total2nd;          // Total 2nd place finishes
-    u32 total3rd;          // Total 3rd place finishes
-    u32 totalDisconnects;  // Races lost to disconnect
-    u32 totalOnlineRaces;  // Online races played
-    u32 totalGPWins;       // Grand Prix wins (1st overall)
-    u32 totalGPPlayed;     // Grand Prix played
-    u32 totalTTPlayed;     // Time trials completed
-    u32 totalBTTPlayed;    // Battle time trials completed
-    u32 totalItemsUsed;    // Items used (all types)
-    u32 totalMushrooms;    // Mushrooms used
-    u32 totalBananas;      // Bananas used
-    u32 totalShells;       // Shells used
-    u32 totalStars;        // Stars used
-    u32 totalBombs;        // Bob-ombs used
-    u32 totalMegaMushrooms;// Mega Mushrooms used
-    u32 totalBulletBills;  // Bullet Bills used
-    u32 totalThunderClouds;// Thunder Clouds absorbed
-    u32 totalBoosts;       // Total boost time (frames)
-    u32 totalTricks;       // Successful tricks performed
-    u32 totalCoinCount;    // Coins collected (cumulative)
+    u32 totalRaces;
+    u32 totalWins;
+    u32 total2nd;
+    u32 total3rd;
+    u32 totalDisconnects;
+    u32 totalOnlineRaces;
+    u32 totalGPWins;
+    u32 totalGPPlayed;
+    u32 totalTTPlayed;
+    u32 totalBTTPlayed;
+    u32 totalItemsUsed;
+    u32 totalMushrooms;
+    u32 totalBananas;
+    u32 totalShells;
+    u32 totalStars;
+    u32 totalBombs;
+    u32 totalMegaMushrooms;
+    u32 totalBulletBills;
+    u32 totalThunderClouds;
+    u32 totalBoosts;
+    u32 totalTricks;
+    u32 totalCoinCount;
     u32 _pad[0x04];
 };
 
@@ -114,6 +119,11 @@ public:
         return &mGhosts[ghostIndex];
     }
 
+    bool hasGhost(u32 ghostIndex) const {
+        if (ghostIndex >= MAX_GHOSTS_PER_LICENSE) return false;
+        return !mGhosts[ghostIndex].isEmpty();
+    }
+
     s32 saveGhost(const System::RawGhostFile& raw);
     s32 deleteGhost(u32 ghostIdx);
 
@@ -121,31 +131,39 @@ public:
 
     // --- Statistics ---
     LicenseStats* getStats() { return &mStats; }
+    const LicenseStats* getStats() const { return &mStats; }
 
     void recordRaceFinish(u32 position);
     void recordGrandPrix(u32 overallPosition);
     void recordDisconnect();
+    void resetStats();
+
+    // --- Computed stats ---
+    u32 getTotalPlayTime() const;
+    u32 getWinRate() const;
+
+    // --- Formatting ---
+    // Format VR as 4-digit zero-padded string: "5000" → "5000"
+    static void formatVR(u32 vr, char* buf, u32 bufSize);
 
     // --- Serialization ---
-    // Serialize/deserialize for save file I/O
     u32 serialize(u8* buffer, u32 bufferSize) const;
     u32 deserialize(const u8* buffer, u32 bufferSize);
 
     // --- State ---
     bool isDirty() const { return mDirty; }
+    void markClean() { mDirty = false; }
 
 private:
-    // === License Data (from Wii save layout) ===
-    char        mName[LICENSE_NAME_MAX + 1]; // Player display name
-    System::Mii* mMiiData;                    // Associated Mii (heap-allocated)
-    u32         mVR;                           // Versus Rating (5000-9999)
-    u32         mBR;                           // Battle Rating (5000-9999)
+    char            mName[LICENSE_NAME_MAX + 1];
+    System::Mii*    mMiiData;
+    u32             mVR;
+    u32             mBR;
 
-    RecordData  mRecords[MAX_RECORDS];         // Per-course time trial records
-    System::GhostFile mGhosts[MAX_GHOSTS_PER_LICENSE]; // Saved ghost replays
-    u32         mGhostCount;
+    RecordData      mRecords[MAX_RECORDS];
+    System::GhostFile mGhosts[MAX_GHOSTS_PER_LICENSE];
+    u32             mGhostCount;
 
-    LicenseStats mStats;                       // Cumulative statistics
-
-    bool        mDirty;                        // Needs save
+    LicenseStats    mStats;
+    bool            mDirty;
 };

@@ -67,6 +67,29 @@ public:
     /// Set whether the kart is in moving water.
     void setInMovingWater(bool in, s32 variant) { m_inMovingWater = in; m_waterVariant = variant; }
 
+    /// Set the water variant independently with validation.
+    /// @param variant  Water KCL variant (0-3)
+    void setWaterVariant(s32 variant);
+
+    /// Get the KCL type of the current floor surface.
+    /// @return KCL attribute type, or 0 if no floor.
+    u32 getFloorKclType() const { return m_floorKclType; }
+
+    /// Set the KCL type of the current floor (from collision system).
+    void setFloorKclType(u32 kclType) { m_floorKclType = kclType; }
+
+    /// Check if the kart is currently in water (any variant).
+    bool isInWater() const { return m_inMovingWater || m_waterVariant > 0; }
+
+    /// Check if the kart is on a road surface (KCL type indicates road).
+    bool isOnRoad() const;
+
+    /// Get the current drowning timer (counts up while submerged).
+    f32 getDrowningTimer() const { return m_drowningTimer; }
+
+    /// Reset the drowning timer (e.g. when kart exits water).
+    void resetDrowningTimer() { m_drowningTimer = 0.0f; }
+
     /// Get the current slope factor.
     f32 getSlopeFactor() const { return m_slopeFactor; }
 
@@ -82,6 +105,7 @@ private:
     EGG::Vector3f m_floorNormal;       // Current floor surface normal
     bool m_hasFloorNormal;             // Whether floor normal is valid
     f32 m_slopeFactor;                 // Current slope steepness [0,1]
+    u32 m_floorKclType;                // KCL attribute type of current floor
 
     EGG::Vector3f m_movingRoadVel;     // Moving road surface velocity
     bool m_onMovingRoad;               // Currently on a moving road
@@ -89,6 +113,7 @@ private:
     EGG::Vector3f m_movingWaterVel;    // Moving water current velocity
     bool m_inMovingWater;              // Currently in moving water
     s32 m_waterVariant;                // Water KCL variant (affects behavior)
+    f32 m_drowningTimer;               // Time spent underwater (drowning check)
 };
 
 } // namespace Kart

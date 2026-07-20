@@ -14,8 +14,13 @@ struct AITrickHandler {
     void avoidPow();
     bool allowTricking();
     bool shouldTrick();
+    void setTrickCooldown(f32 cooldown);
+    bool allowWheelie() const;
 
     AIInfo* mpInfo;
+    f32 mTrickCooldown;    // Minimum time between trick attempts
+    f32 mLastTrickTime;    // Timestamp of last performed trick
+    f32 mAirTime;          // Time spent in the air (for timing logic)
 };
 
 struct AITrickHandlerBike: public AITrickHandler {
@@ -26,8 +31,11 @@ struct AITrickHandlerBike: public AITrickHandler {
     void disableWheelie();
     void calcWheelie();
     virtual void update();
+    bool allowWheelie() const;
 
     bool mbPerformWheelie;
+    bool mbWheelieDisabled; // Tracks if wheelie was explicitly disabled
+    s32 mWheelieEndFrame;   // Frame counter for when wheelie should end
 };
 
 } // namespace Enemy

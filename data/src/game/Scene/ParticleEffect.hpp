@@ -16,14 +16,14 @@ namespace Scene {
 struct Particle {
     f32 x, y, z;           // World position
     f32 vx, vy, vz;        // Velocity
-    f32 ax, ay, az;        // Acceleration
+    f32 ax, ay, az;        // Acceleration (gravity variation by type)
     f32 life;               // Remaining life (seconds)
     f32 maxLife;            // Initial life
     f32 size;               // Current size
     f32 sizeEnd;            // Size at end of life
     u8 r, g, b, a;         // Current color
     u8 rEnd, gEnd, bEnd, aEnd; // Color at end of life
-    u16 flags;              // Behavior flags
+    u16 flags;              // Behavior flags (bit 0 = no gravity, etc.)
 };
 
 // =============================================================================
@@ -35,7 +35,7 @@ enum ParticleEffectType {
     PEFFECT_DRIFT_SPARKS  = 2,   // Sparks during drift (MT charge)
     PEFFECT_STAR_TRAIL    = 3,   // Star power sparkle trail
     PEFFECT_EXPLOSION     = 4,   // Item explosion (shell hit, bomb)
-    PEFFECT_SMOKE         = 5,   // Tire smoke
+    PEFFECT_SMOKE         = 5,   // Tire smoke (offroad driving)
     PEFFECT_MUSHROOM_SMOKE = 6,  // Mushroom exhaust
     PEFFECT_BULLET_SMOKE  = 7,   // Bullet Bill exhaust trail
     PEFFECT_BANANA_SLIP   = 8,   // Banana peel slip effect
@@ -66,7 +66,7 @@ public:
     /// @param effectType  Type of effect to spawn
     void spawn(f32 x, f32 y, f32 z, u32 effectType);
 
-    /// Update all active particles.
+    /// Update all active particles with frame-budget limiting.
     /// @param dt  Frame delta time in seconds
     void update(f32 dt);
 
@@ -76,24 +76,47 @@ public:
     // --- Specialized spawn functions ---
 
     /// Spawn boost flame particles at kart exhaust position.
-    /// @param x, y, z  Exhaust position in world space
     void spawnBoostFlames(f32 x, f32 y, f32 z);
 
     /// Spawn drift spark particles at kart wheel position.
-    /// @param x, y, z  Wheel contact position in world space
     /// @param mtLevel  Mini-turbo charge level (0-3)
     void spawnDriftSparks(f32 x, f32 y, f32 z, u32 mtLevel);
 
     /// Spawn star power sparkle trail.
-    /// @param x, y, z  Kart center position in world space
     void spawnStarTrail(f32 x, f32 y, f32 z);
 
     /// Spawn an item explosion effect.
-    /// @param x, y, z  Explosion center in world space
     void spawnExplosion(f32 x, f32 y, f32 z);
+
+    /// Spawn tire smoke particles for offroad driving.
+    /// @param x, y, z  Wheel contact position
+    /// @param intensity  0.0-1.0, how hard the kart is offroad
+    void spawnSmoke(f32 x, f32 y, f32 z, f32 intensity);
+
+    /// Spawn mega star power particles (rainbow burst).
+    void spawnMegaStar(f32 x, f32 y, f32 z);
+
+    /// Spawn water splash particles on water entry.
+    /// @param speed  Kart speed at water surface for splash height
+    void spawnWaterSplash(f32 x, f32 y, f32 z, f32 speed);
+
+    /// Spawn bullet bill smoke trail.
+    /// @param x, y, z  Bullet bill tail position
+    void spawnBulletBillTrail(f32 x, f32 y, f32 z);
+
+    // --- Control ---
 
     /// Get total active particle count.
     u32 getActiveCount() const { return m_activeCount; }
+
+    /// Set maximum active particle limit for performance.
+    void setParticleLimit(u32 limit);
+
+    /// Kill all active particles immediately.
+    void killAll();
+
+    /// Set global alpha multiplier for fade effects.
+    void setGlobalAlpha(f32 alpha);
 
 private:
     void spawnParticle(f32 x, f32 y, f32 z,
@@ -104,6 +127,8 @@ private:
 
     Particle m_particles[MAX_PARTICLES];
     u32 m_activeCount;
+    u32 m_particleLimit;   // Soft cap on active particles
+    f32 m_globalAlpha;     // Alpha multiplier for fade effects
     bool m_initialized;
 };
 

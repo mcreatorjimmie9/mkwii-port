@@ -22,6 +22,7 @@ struct PaneAnim {
     f32 rotation;
     f32 alpha;
     f32 timer;
+    f32 duration;      // Total animation duration in seconds
     bool active;
 };
 
@@ -64,10 +65,10 @@ public:
     f32 getGlobalX() const;
     f32 getGlobalY() const;
 
-    // --- Alpha / visibility ---
-    void setAlpha(u8 alpha) { m_alpha = alpha; }
+    // --- Alpha / visibility (with cascade) ---
+    void setAlpha(u8 alpha);
     u8 getAlpha() const { return m_alpha; }
-    void setVisible(bool visible) { m_visible = visible; }
+    void setVisible(bool visible);
     bool isVisible() const { return m_visible; }
 
     // --- Color tint ---
@@ -83,8 +84,9 @@ public:
     void setRotation(f32 degrees) { m_rotation = degrees; }
     f32 getRotation() const { return m_rotation; }
 
-    // --- Scale ---
+    // --- Scale (per-axis and uniform) ---
     void setScale(f32 sx, f32 sy) { m_scaleX = sx; m_scaleY = sy; }
+    void setScale(f32 s) { m_scaleX = s; m_scaleY = s; }
     f32 getScaleX() const { return m_scaleX; }
     f32 getScaleY() const { return m_scaleY; }
 
@@ -98,9 +100,18 @@ public:
     u16 getTag() const { return m_tag; }
     virtual J2DPane* findPane(u16 tag);
 
-    // --- Name ---
+    // --- Name-based lookup ---
     void setName(const char* name);
     const char* getName() const { return m_name; }
+    J2DPane* getPaneByName(const char* name);
+
+    // --- User data (tag-based, for attaching game data) ---
+    void setUserPaneData(void* data) { m_userData = data; }
+    void* getUserPaneData() const { return m_userData; }
+
+    // --- Z-ordering for draw order ---
+    void setZOrder(s32 order) { m_zOrder = order; }
+    s32 getZOrder() const { return m_zOrder; }
 
 protected:
     static const u32 MAX_CHILDREN = 64;
@@ -128,6 +139,12 @@ protected:
     // Identification
     u16 m_tag;
     char m_name[32];
+
+    // User data pointer (attached by game code, not owned)
+    void* m_userData;
+
+    // Z-order for draw sorting (lower = drawn first)
+    s32 m_zOrder;
 };
 
 // =============================================================================
@@ -139,6 +156,7 @@ public:
     ~J2DTextBox() override;
 
     void calc() override;
+    void calcSelf() override;
     void drawSelf() const override;
 
     // Text content
@@ -173,6 +191,40 @@ private:
     u8 m_textR, m_textG, m_textB;
     Alignment m_alignment;
     f32 m_maxWidth;
+
+    // Computed during calcSelf for drawSelf
+    f32 m_drawX;      // X offset after alignment
+    s32 m_charCount;  // Number of visible characters (after wrapping)
+};
+
+// =============================================================================
+// J2DPicture — Image rendering pane (texture quad)
+// =============================================================================
+class J2DPicture : public J2DPane {
+public:
+    J2DPicture();
+    ~J2DPicture() override;
+
+    void calcSelf() override;
+    void drawSelf() const override;
+
+    // Texture resource (loaded from BRLYT or BRRES)
+    void setTextureRes(void* texRes) { m_texResPtr = texRes; }
+    void* getTextureRes() const { return m_texResPtr; }
+
+    // UV coordinates for the texture quad
+    void setTexCoords(f32 u0, f32 v0, f32 u1, f32 v1) {
+        m_u0 = u0; m_v0 = v0; m_u1 = u1; m_v1 = v1;
+    }
+
+    // TEG (texture envelope) material ID for GX material binding
+    void setMaterialID(u16 id) { m_materialID = id; }
+    u16 getMaterialID() const { return m_materialID; }
+
+private:
+    void* m_texResPtr;  // Pointer to ResTIMG or similar texture resource
+    f32 m_u0, m_v0, m_u1, m_v1;  // Texture coordinate rectangle
+    u16 m_materialID;    // Material index for multi-material panes
 };
 
 } // namespace EGG

@@ -70,6 +70,11 @@ struct Time {
     s8 millis;
     Time() : minutes(0), seconds(0), millis(0) {}
     void set2(u16 m, u8 s, u8 ms, bool b) { minutes = m; seconds = s; millis = ms; (void)b; }
+    s32 toMilliseconds() const { return (minutes * 60 + seconds) * 1000 + millis * 10; }
+    bool operator<(const Time& o) const { return toMilliseconds() < o.toMilliseconds(); }
+    bool operator==(const Time& o) const { return toMilliseconds() == o.toMilliseconds(); }
+    bool operator!=(const Time& o) const { return !(*this == o); }
+    bool isZero() const { return minutes == 0 && seconds == 0 && millis == 0; }
 };
 #endif
 

@@ -38,11 +38,9 @@ public:
     void init();
 
     /// Load skybox textures and model for a given course.
-    /// @param skyboxId  Skybox resource ID (mapped per course)
     void load(u32 skyboxId);
 
     /// Render the sky dome.
-    /// Called first in the draw pass (before all geometry).
     void draw();
 
     /// Update sky colors and effects based on time of day.
@@ -50,11 +48,10 @@ public:
     void update(f32 timeOfDay);
 
     /// Set the current weather type.
-    /// @param weatherType  Weather condition
     void setWeather(u32 weatherType);
 
     /// Get the current weather type.
-    WeatherType getWeather() const { return m_weatherType; }
+    WeatherType getWeatherType() const { return m_weatherType; }
 
     /// Get the current sky color (top of dome).
     void getSkyColorTop(u8* r, u8* g, u8* b) const {
@@ -71,14 +68,34 @@ public:
         *r = m_fogColor[0]; *g = m_fogColor[1]; *b = m_fogColor[2];
     }
 
+    /// Get ambient light color derived from sky color.
+    void getAmbientLightColor(u8* r, u8* g, u8* b) const;
+
     /// Get fog start/end distances.
     f32 getFogStart() const { return m_fogStart; }
     f32 getFogEnd() const { return m_fogEnd; }
     f32 getFogDensity() const { return m_fogDensity; }
 
+    /// Set fog parameters.
+    void setFogParams(f32 start, f32 end, f32 density);
+
+    /// Load the 6 cube map face textures.
+    /// @param faceTextures  Array of 6 texture resource pointers (PX,NX,PY,NY,PZ,NZ)
+    void loadSkyTextures(void* faceTextures[6]);
+
+    /// Get the current weather type (explicit accessor).
+    u32 getWeather() const { return (u32)m_weatherType; }
+
+    /// Set sky override for cutscene control (nullptr = disable).
+    void setSkyOverride(const u8 topColor[3], const u8 horizonColor[3], const u8 bottomColor[3]);
+
+    /// Get sky override active flag.
+    bool isSkyOverrideActive() const { return m_skyOverride; }
+
 private:
     void updateSkyColors(f32 timeOfDay);
     void updateWeatherEffects(f32 dt);
+    void drawSkyDome(); // GX rendering setup helper
 
     // Sky colors (top, horizon, bottom)
     u8 m_skyColorTop[3];      // Zenith color
@@ -95,12 +112,19 @@ private:
     WeatherType m_weatherType;
     f32 m_rainIntensity;      // 0.0-1.0
     f32 m_weatherTimer;
+    f32 m_rainSpawnAccum;     // Accumulator for rain particle spawn rate
 
     // Resource
     u32 m_skyboxId;           // Currently loaded skybox ID
     bool m_loaded;            // Whether skybox resources are loaded
     void* m_skyModelRes;      // Sky dome model resource
     void* m_skyTextures[6];   // Cube map face textures
+
+    // Cutscene override
+    bool m_skyOverride;
+    u8 m_overrideTop[3];
+    u8 m_overrideHorizon[3];
+    u8 m_overrideBottom[3];
 };
 
 } // namespace Scene

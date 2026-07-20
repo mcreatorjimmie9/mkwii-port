@@ -1,4 +1,5 @@
 #include <cstring>
+#include <cmath>
 #include "KartInput.hpp"
 
 namespace Kart {
@@ -23,10 +24,26 @@ enum KPadButtonMask {
     PAD_DPAD_LEFT     = 0x0200,
     PAD_DPAD_RIGHT    = 0x1000,
 };
+
+// Default deadzone radius for the analog stick
+const f32 DEFAULT_DEADZONE    = 0.15f;
+// Maximum stick deflection (input should be pre-normalized to [-1, 1])
+const f32 STICK_MAX           = 1.0f;
+// Minimum input magnitude to register as "active" for hasAnyInput()
+const f32 ANY_INPUT_THRESH    = 0.08f;
+// Driver-assist steering correction factor (reduces oversteer at speed)
+const f32 DRIVER_ASSIST_FACTOR = 0.15f;
+// Stick smoothing factor for analog input (0 = none, 1 = full)
+const f32 STICK_SMOOTHING     = 0.4f;
+// Buttons that are considered "active input" for idle detection
+const u32 IDLE_BUTTON_MASK    = PAD_BUTTON_A | PAD_BUTTON_B | PAD_BUTTON_X |
+                                PAD_BUTTON_Y | PAD_TRIGGER_L | PAD_TRIGGER_R |
+                                PAD_TRIGGER_Z | PAD_BUTTON_START;
 } // anonymous namespace
 
 KartInput::KartInput() {
     memset(this, 0, sizeof(KartInput));
+    m_deadzone = DEFAULT_DEADZONE;
 }
 
 KartInput::~KartInput() {}
@@ -40,9 +57,44 @@ KartInput::~KartInput() {}
 void KartInput::readRawInput() {
     // Copy current input to last input (for edge detection)
     lastInputState = currentInputState;
+
     // In the real game, the KPad system writes directly into
     // currentInputState via the KPADRead callback. Here we
     // leave currentInputState unchanged (external system fills it).
+
+    // Apply KPAD-style post-processing to the raw values:
+    // 1. Clamp stick values to valid range in case the external
+    //    system produces out-of-bounds values (can happen with
+    //    third-party controllers or during connection transitions)
+    if (currentInputState.stickX > STICK_MAX) currentInputState.stickX = STICK_MAX;
+    if (currentInputState.stickX < -STICK_MAX) currentInputState.stickX = -STICK_MAX;
+    if (currentInputState.stickY > STICK_MAX) currentInputState.stickY = STICK_MAX;
+    if (currentInputState.stickY < -STICK_MAX) currentInputState.stickY = -STICK_MAX;
+
+    // 2. Apply circular deadzone to the stick input.
+    //    MKW uses a circular deadzone: if the stick magnitude is within
+    //    the deadzone radius, both X and Y are zeroed. This prevents
+    //    diagonal deadzone edge artifacts.
+    f32 sx = currentInputState.stickX;
+    f32 sy = currentInputState.stickY;
+    f32 mag = sqrtf(sx * sx + sy * sy);
+    if (mag < m_deadzone) {
+        currentInputState.stickX = 0.0f;
+        currentInputState.stickY = 0.0f;
+    } else if (mag > STICK_MAX) {
+        // Rescale to unit circle if magnitude exceeds 1.0
+        // (can happen with non-circular hardware ranges)
+        f32 scale = STICK_MAX / mag;
+        currentInputState.stickX = sx * scale;
+        currentInputState.stickY = sy * scale;
+    }
+    // else: within valid range, no adjustment needed
+
+    // 3. Ensure trigger values are clamped to [0, 1]
+    if (currentInputState.triggerL < 0.0f) currentInputState.triggerL = 0.0f;
+    if (currentInputState.triggerL > 1.0f) currentInputState.triggerL = 1.0f;
+    if (currentInputState.triggerR < 0.0f) currentInputState.triggerR = 0.0f;
+    if (currentInputState.triggerR > 1.0f) currentInputState.triggerR = 1.0f;
 }
 
 // Check if a button was just pressed this frame (rising edge)
@@ -71,10 +123,10 @@ bool KartInput::isButtonHeld(u32 button) const {
 f32 KartInput::getStickX(f32 deadzone) const {
     f32 x = currentInputState.stickX;
     if (x > deadzone) {
-        return (x - deadzone) / (1.0f - deadzone);
+        return (x - deadzone) / (STICK_MAX - deadzone);
     }
     if (x < -deadzone) {
-        return (x + deadzone) / (1.0f - deadzone);
+        return (x + deadzone) / (STICK_MAX - deadzone);
     }
     return 0.0f;
 }
@@ -86,10 +138,10 @@ f32 KartInput::getStickX(f32 deadzone) const {
 f32 KartInput::getStickY(f32 deadzone) const {
     f32 y = currentInputState.stickY;
     if (y > deadzone) {
-        return (y - deadzone) / (1.0f - deadzone);
+        return (y - deadzone) / (STICK_MAX - deadzone);
     }
     if (y < -deadzone) {
-        return (y + deadzone) / (1.0f - deadzone);
+        return (y + deadzone) / (STICK_MAX - deadzone);
     }
     return 0.0f;
 }
@@ -134,6 +186,115 @@ void KartInput::resetToNeutral() {
     currentInputState.stickX = 0.0f;
     currentInputState.stickY = 0.0f;
     currentInputState.buttons = 0;
+}
+
+// Process raw input with driver-assist filtering and smoothing.
+// Applies stick smoothing to reduce jitter, and optionally applies
+// driver-assist corrections for casual players. Called after
+// readRawInput() each frame.
+void KartInput::processInput() {
+    // Apply analog stick smoothing to reduce input jitter.
+    // This blends the current raw stick position with the previous
+    // frame's value for a smoother steering response.
+    f32 smoothX = lastInputState.stickX * (1.0f - STICK_SMOOTHING) +
+                  currentInputState.stickX * STICK_SMOOTHING;
+    f32 smoothY = lastInputState.stickY * (1.0f - STICK_SMOOTHING) +
+                  currentInputState.stickY * STICK_SMOOTHING;
+
+    // Apply deadzone to smoothed values
+    f32 dz = m_deadzone;
+    if (smoothX > -dz && smoothX < dz) smoothX = 0.0f;
+    if (smoothY > -dz && smoothY < dz) smoothY = 0.0f;
+
+    // Clamp to valid range
+    if (smoothX > STICK_MAX) smoothX = STICK_MAX;
+    if (smoothX < -STICK_MAX) smoothX = -STICK_MAX;
+    if (smoothY > STICK_MAX) smoothY = STICK_MAX;
+    if (smoothY < -STICK_MAX) smoothY = -STICK_MAX;
+
+    // Write processed values back
+    currentInputState.stickX = smoothX;
+    currentInputState.stickY = smoothY;
+
+    // Driver-assist: reduce maximum steering at high deflection to
+    // help prevent overcorrection. This is a subtle effect that
+    // scales linearly with stick magnitude.
+    f32 steerMag = (smoothX > 0.0f) ? smoothX : -smoothX;
+    if (steerMag > 0.7f) {
+        f32 assistReduction = (steerMag - 0.7f) / 0.3f; // 0 at 0.7, 1 at 1.0
+        f32 correction = assistReduction * DRIVER_ASSIST_FACTOR;
+        if (smoothX > 0.0f) {
+            currentInputState.stickX = smoothX - correction;
+        } else if (smoothX < 0.0f) {
+            currentInputState.stickX = smoothX + correction;
+        }
+    }
+}
+
+// Set raw button state directly (for external injection, e.g. replay)
+void KartInput::setRawButtonState(u32 buttons) {
+    lastInputState.buttons = currentInputState.buttons;
+    currentInputState.buttons = buttons;
+}
+
+// Set raw analog stick state directly (for external injection)
+void KartInput::setRawStickState(f32 stickX, f32 stickY) {
+    lastInputState.stickX = currentInputState.stickX;
+    lastInputState.stickY = currentInputState.stickY;
+    // Clamp to valid range
+    if (stickX > STICK_MAX) stickX = STICK_MAX;
+    if (stickX < -STICK_MAX) stickX = -STICK_MAX;
+    if (stickY > STICK_MAX) stickY = STICK_MAX;
+    if (stickY < -STICK_MAX) stickY = -STICK_MAX;
+    currentInputState.stickX = stickX;
+    currentInputState.stickY = stickY;
+}
+
+// Check if steering is currently directed to the left
+bool KartInput::isSteeringLeft() const {
+    return currentInputState.stickX < -m_deadzone;
+}
+
+// Check if steering is currently directed to the right
+bool KartInput::isSteeringRight() const {
+    return currentInputState.stickX > m_deadzone;
+}
+
+// Get the absolute magnitude of the steering input
+f32 KartInput::getSteeringMagnitude() const {
+    f32 x = currentInputState.stickX;
+    f32 mag = (x > 0.0f) ? x : -x;
+    // Apply deadzone: if within deadzone, return 0
+    if (mag <= m_deadzone) return 0.0f;
+    // Rescale to [0, 1] accounting for deadzone
+    return (mag - m_deadzone) / (STICK_MAX - m_deadzone);
+}
+
+// Check if any input is currently active (buttons or stick)
+bool KartInput::hasAnyInput() const {
+    // Check buttons
+    if (currentInputState.buttons & IDLE_BUTTON_MASK) return true;
+    // Check D-pad
+    u32 dpad = PAD_DPAD_UP | PAD_DPAD_DOWN | PAD_DPAD_LEFT | PAD_DPAD_RIGHT;
+    if (currentInputState.buttons & dpad) return true;
+    // Check stick
+    f32 sx = (currentInputState.stickX > 0.0f) ? currentInputState.stickX : -currentInputState.stickX;
+    f32 sy = (currentInputState.stickY > 0.0f) ? currentInputState.stickY : -currentInputState.stickY;
+    if (sx > ANY_INPUT_THRESH || sy > ANY_INPUT_THRESH) return true;
+    return false;
+}
+
+// Get a const reference to the current input state
+const System::KPadRaceInputState& KartInput::getInputState() const {
+    return currentInputState;
+}
+
+// Set the per-kart analog deadzone radius
+void KartInput::setDeadzone(f32 radius) {
+    // Clamp to valid range [0.0, 0.5]
+    if (radius < 0.0f) radius = 0.0f;
+    if (radius > 0.5f) radius = 0.5f;
+    m_deadzone = radius;
 }
 
 } // namespace Kart
