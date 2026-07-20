@@ -6,6 +6,7 @@
 #include <system/RaceConfig.hpp>
 #include <system/RaceManager.hpp>
 #include <EGG/math.h>
+#include <cmath>
 
 #define GENESIS_KART_STATE_DEFINED
 
@@ -86,6 +87,27 @@ public:
     void startWipe(int wipeState);
     void resetCollisionFlags();
 
+    // Per-frame state update and timer management
+    void update();
+    void updateTimers();
+
+    // Drift state management (0=none, 1=outside, 2=inside)
+    void setDriftState(u8 state);
+    u8 getDriftState() const;
+    bool isDrifting() const;
+
+    // Effect activation/deactivation
+    void setStar(bool active, u32 duration = 720);
+    void setMega(bool active, u32 duration = 600);
+    void setInk(bool active, u32 duration = 300);
+    void setSquish(bool active, u32 duration = 120);
+
+    // State queries
+    bool isInvincible() const;
+    bool isStunned() const;
+    u32 getActiveEffectMask() const;
+    void resetAllEffects();
+
     bool on(size_t n) const { return mFlags.on(n); }
     void set(size_t n) { mFlags.set(n); }
     void reset(size_t n) { mFlags.reset(n); }
@@ -96,6 +118,19 @@ public:
     void setJumpPadType(s32 type) { mJumpPadType = type; }
     void setHalfpipeInvisibilityTimer(s32 timer) { mHalfpipeInvisibilityTimer = timer; }
     void setStartBoostIdx(s32 idx) { mStartBoostIdx = idx; }
+
+    // Effect bit flags (stored in mFlags bitfield)
+    static const u32 EFFECT_BIT_STAR   = 100;
+    static const u32 EFFECT_BIT_MEGA   = 101;
+    static const u32 EFFECT_BIT_INK    = 102;
+    static const u32 EFFECT_BIT_SQUISH = 103;
+    static const u32 EFFECT_BIT_STUN   = 104;
+
+    // Default effect durations (in frames at 60fps)
+    static const u32 STAR_DURATION_DEFAULT   = 720;  // 12 seconds
+    static const u32 MEGA_DURATION_DEFAULT   = 600;  // 10 seconds
+    static const u32 INK_DURATION_DEFAULT    = 300;  // 5 seconds
+    static const u32 SQUISH_DURATION_DEFAULT = 120;  // 2 seconds
 
 private:
     RKBitField<160> mFlags;
@@ -128,6 +163,16 @@ private:
     u16 _a6;
     EGG::Vector3f m_a8;
     u8 _b4[0xc0 - 0xb4];
+
+    // Extended state: drift
+    u8 mDriftState;          // 0=none, 1=outside, 2=inside
+
+    // Extended state: effect timers (in frames)
+    u32 mStarTimer;
+    u32 mMegaTimer;
+    u32 mInkTimer;
+    u32 mSquishTimer;
+    u32 mStunTimer;
 };
 // static_assert(sizeof(KartState) == 0xc0);
 

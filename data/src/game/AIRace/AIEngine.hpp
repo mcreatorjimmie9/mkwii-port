@@ -21,8 +21,13 @@ struct AIEngine: public Util::StateSequencer<AIEngine> {
     virtual void init();
     virtual void update(const System::MapdataEnemyPathAccessor*);
     virtual void onOutOfBounds(const System::MapdataJugemPoint&);
+    void calc();
     void endRace();
     void forceRecalculation(bool);
+    f32 getTotalSteer() const;
+    f32 getTotalSpeedMod() const;
+    bool isDrifting() const;
+    s32 getCurrentSection() const;
 
     Util::State<AIEngine> mStateReady;
     Util::State<AIEngine> mStateRunCPU;

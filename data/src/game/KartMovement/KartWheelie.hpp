@@ -69,11 +69,32 @@ public:
     /* KartWheelie_forceCancel @ 0x805B1200 */
     void forceCancel();
 
+    // Begin wheelie: set state to rising, start angle animation
+    void startWheelie();
+
+    // End wheelie: set state to falling, restore normal angle
+    void endWheelie();
+
+    // Smoothly animate wheelie angle (rising/maintaining/falling)
+    void updateAngle();
+
+    // Check if wheelie is in progress (any non-NONE state)
+    bool isActive() const;
+
+    // Check conditions: vehicle is bike, speed > threshold, not drifting, not in air, not stunned
+    bool canStartWheelie(f32 currentSpeed, f32 steerInput) const;
+
+    // Set wheelie parameters from vehicle stats
+    void setWheelieParams(f32 angleMax, u32 riseFrames, f32 speedThreshold);
+
+    // Force-cancel wheelie (alias for forceCancel, from being hit, off-road, etc.)
+    void cancelWheelie();
+
     // Get current wheelie state
     WheelieRuntimeState getState() const { return mState; }
     WheelieState getWheelieState() const { return mState.mState; }
 
-    // Get current speed boost multiplier
+    // Get current speed boost multiplier (typically +1.5% per frame during active wheelie)
     f32 getSpeedBoost() const { return mState.currentBoost; }
 
     // Get current wheelie angle (for visual tilt)

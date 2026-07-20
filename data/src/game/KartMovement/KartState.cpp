@@ -19,6 +19,14 @@ KartState::KartState(KartSettings* settings) {
     mUp.setAll(0);
     mProxy = nullptr;
 
+    // Initialize extended state
+    mDriftState = 0;
+    mStarTimer = 0;
+    mMegaTimer = 0;
+    mInkTimer = 0;
+    mSquishTimer = 0;
+    mStunTimer = 0;
+
     // Determine player type from race config
     // TODO: Restore when full RaceConfig shim is available
     // RaceConfig::Player::Type playerType = RaceConfig::spInstance->mRaceScenario.mPlayers[settings->playerIdx].mPlayerType;
@@ -51,8 +59,38 @@ KartState::~KartState() {}
 // Size: 56 bytes
 // Calls: 0x80590cfc
 void KartState::init() {
+    // Full initialization: reset all state to normal driving
+    // Clear all effect flags and timers
+    mFlags.reset();
+    mDriftState = 0;
+    mStarTimer = 0;
+    mMegaTimer = 0;
+    mInkTimer = 0;
+    mSquishTimer = 0;
+    mStunTimer = 0;
+
+    // Reset core state fields
+    mAirtime = 0;
+    _24 = 0.0f;
+    mCannonPointId = 0;
+    mBoostRampType = 0;
+    mJumpPadType = 0;
+    _7c = 0.0f;
+    mHalfpipeInvisibilityTimer = 0;
+    mStartBoostCharge = 0.0f;
+    mStartBoostIdx = 0;
+    mStick.set(0.0f, 0.0f);
+    mWipeState = 0;
+    mWipeFrame = 0;
+    mUp.setAll(0);
+    _40.setAll(0);
+    _4c.setAll(0);
+    m_a8.setAll(0);
+    mHwgTimer = 0;
+    m_70 = 0;
+
     // Calls global function 0x80590cfc (likely KartState-specific init)
-    // This may reset the bitfield or set up initial race state flags
+    // This may set up initial race state flags
 }
 
 // 0x80596a7c - reset__Q24Kart9KartStateFv
@@ -89,6 +127,14 @@ void KartState::reset() {
     _40.setAll(0);
     _4c.setAll(0);
     m_a8.setAll(0);
+
+    // Reset extended state
+    mDriftState = 0;
+    mStarTimer = 0;
+    mMegaTimer = 0;
+    mInkTimer = 0;
+    mSquishTimer = 0;
+    mStunTimer = 0;
 }
 
 // 0x80596b1c - resetOob__Q24Kart9KartStateFv
@@ -98,6 +144,7 @@ void KartState::resetOob() {
     // Resets out-of-bounds specific state
     // Calls global function 0x805907bc (likely clears OOB-related flags)
     // From disasm (16 bytes): just a single function call + return
+    reset(KART_FLAG_OOB);
 }
 
 void KartState::startWipe(int wipeState) {
@@ -108,6 +155,219 @@ void KartState::startWipe(int wipeState) {
 void KartState::resetCollisionFlags() {
     // Reset collision-related bits in the bitfield
     // Keep player type flags, clear physics state flags
+    // Clear ground/wall collision flags but preserve identity flags
+    reset(KART_FLAG_ALL_WHEELS_COLLISION);
+    reset(KART_FLAG_TOUCHING_GROUND);
+    reset(KART_FLAG_STICKY_ROAD);
+    reset(KART_FLAG_AT_SUSP_LIMIT);
+    reset(KART_FLAG_STH_WALL_COL);
+    reset(KART_FLAG_DRIFTING_ON_GROUND);
+}
+
+// Per-frame update: manage state transitions and tick timers
+void KartState::update() {
+    // Decrement all effect timers and auto-expire
+    updateTimers();
+
+    // Manage wipe state progression
+    if (mWipeState != 0) {
+        mWipeFrame++;
+    }
+
+    // Manage halfpipe invisibility countdown
+    if (mHalfpipeInvisibilityTimer > 0) {
+        mHalfpipeInvisibilityTimer--;
+    }
+
+    // Manage HWG timer (heavy weight growl / shockwave timer)
+    if (mHwgTimer > 0) {
+        mHwgTimer--;
+    }
+
+    // Auto-clear drift state if not on ground
+    if (mDriftState != 0 && !on(KART_FLAG_DRIFTING_ON_GROUND)) {
+        mDriftState = 0;
+    }
+
+    // Manage air start state
+    if (on(KART_FLAG_AIR_START)) {
+        mAirtime++;
+    }
+}
+
+// Decrement all effect timers, auto-expire when timer reaches 0
+void KartState::updateTimers() {
+    // Star power countdown
+    if (mStarTimer > 0) {
+        mStarTimer--;
+        if (mStarTimer == 0) {
+            reset(EFFECT_BIT_STAR);
+            reset(KART_FLAG_STAR);
+        }
+    }
+
+    // Mega mushroom countdown
+    if (mMegaTimer > 0) {
+        mMegaTimer--;
+        if (mMegaTimer == 0) {
+            reset(EFFECT_BIT_MEGA);
+            reset(KART_FLAG_MEGA);
+        }
+    }
+
+    // Ink effect countdown
+    if (mInkTimer > 0) {
+        mInkTimer--;
+        if (mInkTimer == 0) {
+            reset(EFFECT_BIT_INK);
+        }
+    }
+
+    // Squish countdown
+    if (mSquishTimer > 0) {
+        mSquishTimer--;
+        if (mSquishTimer == 0) {
+            reset(EFFECT_BIT_SQUISH);
+        }
+    }
+
+    // Stun countdown
+    if (mStunTimer > 0) {
+        mStunTimer--;
+        if (mStunTimer == 0) {
+            reset(EFFECT_BIT_STUN);
+        }
+    }
+}
+
+// Set drift type: 0=none, 1=outside, 2=inside
+void KartState::setDriftState(u8 state) {
+    // Clamp to valid range
+    if (state > 2) {
+        state = 0;
+    }
+    mDriftState = state;
+
+    // Update the drifting-on-ground flag accordingly
+    if (state != 0) {
+        set(KART_FLAG_DRIFTING_ON_GROUND);
+    } else {
+        reset(KART_FLAG_DRIFTING_ON_GROUND);
+    }
+}
+
+// Return current drift state (0=none, 1=outside, 2=inside)
+u8 KartState::getDriftState() const {
+    return mDriftState;
+}
+
+// Check if currently in any drift state
+bool KartState::isDrifting() const {
+    return mDriftState != 0;
+}
+
+// Activate or deactivate star power
+void KartState::setStar(bool active, u32 duration) {
+    if (active) {
+        set(KART_FLAG_STAR);
+        set(EFFECT_BIT_STAR);
+        mStarTimer = (duration > 0) ? duration : STAR_DURATION_DEFAULT;
+    } else {
+        reset(KART_FLAG_STAR);
+        reset(EFFECT_BIT_STAR);
+        mStarTimer = 0;
+    }
+}
+
+// Activate or deactivate mega mushroom
+void KartState::setMega(bool active, u32 duration) {
+    if (active) {
+        set(KART_FLAG_MEGA);
+        set(EFFECT_BIT_MEGA);
+        mMegaTimer = (duration > 0) ? duration : MEGA_DURATION_DEFAULT;
+    } else {
+        reset(KART_FLAG_MEGA);
+        reset(EFFECT_BIT_MEGA);
+        mMegaTimer = 0;
+    }
+}
+
+// Activate or deactivate ink effect
+void KartState::setInk(bool active, u32 duration) {
+    if (active) {
+        set(EFFECT_BIT_INK);
+        mInkTimer = (duration > 0) ? duration : INK_DURATION_DEFAULT;
+    } else {
+        reset(EFFECT_BIT_INK);
+        mInkTimer = 0;
+    }
+}
+
+// Activate or deactivate squish (from being squished by larger player)
+void KartState::setSquish(bool active, u32 duration) {
+    if (active) {
+        set(EFFECT_BIT_SQUISH);
+        mSquishTimer = (duration > 0) ? duration : SQUISH_DURATION_DEFAULT;
+    } else {
+        reset(EFFECT_BIT_SQUISH);
+        mSquishTimer = 0;
+    }
+}
+
+// Check if star or mega is active (invincibility)
+bool KartState::isInvincible() const {
+    return on(KART_FLAG_STAR) || on(KART_FLAG_MEGA) ||
+           on(EFFECT_BIT_STAR) || on(EFFECT_BIT_MEGA) ||
+           on(KART_FLAG_RESPAWN_INVINCIBLE);
+}
+
+// Check if currently stunned (hit by item or squish)
+bool KartState::isStunned() const {
+    return on(EFFECT_BIT_STUN) || on(EFFECT_BIT_SQUISH) ||
+           mWipeState != 0;
+}
+
+// Return bitmask of all active effects
+u32 KartState::getActiveEffectMask() const {
+    u32 mask = 0;
+    if (on(EFFECT_BIT_STAR))   mask |= (1u << 0);
+    if (on(EFFECT_BIT_MEGA))   mask |= (1u << 1);
+    if (on(EFFECT_BIT_INK))    mask |= (1u << 2);
+    if (on(EFFECT_BIT_SQUISH)) mask |= (1u << 3);
+    if (on(EFFECT_BIT_STUN))   mask |= (1u << 4);
+    if (on(KART_FLAG_BULLET) || on(KART_FLAG_IN_BULLET) || on(KART_FLAG_IN_A_BULLET))
+        mask |= (1u << 5);
+    if (on(KART_FLAG_THUNDER)) mask |= (1u << 6);
+    return mask;
+}
+
+// Clear all temporary effects and their timers
+void KartState::resetAllEffects() {
+    // Clear all effect bits
+    reset(EFFECT_BIT_STAR);
+    reset(EFFECT_BIT_MEGA);
+    reset(EFFECT_BIT_INK);
+    reset(EFFECT_BIT_SQUISH);
+    reset(EFFECT_BIT_STUN);
+
+    // Clear classic flag-based effects
+    reset(KART_FLAG_STAR);
+    reset(KART_FLAG_MEGA);
+    reset(KART_FLAG_THUNDER);
+    reset(KART_FLAG_BULLET);
+    reset(KART_FLAG_IN_BULLET);
+    reset(KART_FLAG_IN_A_BULLET);
+    reset(KART_FLAG_RESPAWN_INVINCIBLE);
+    reset(KART_FLAG_MUSHROOM);
+    reset(KART_FLAG_MINI_TURBO);
+    reset(KART_FLAG_TRICK_BOOST);
+
+    // Zero all effect timers
+    mStarTimer = 0;
+    mMegaTimer = 0;
+    mInkTimer = 0;
+    mSquishTimer = 0;
+    mStunTimer = 0;
 }
 
 } // namespace Kart

@@ -1,4 +1,5 @@
 #include <cstring>
+#include <cmath>
 #include "KartBody.hpp"
 #include "KartPhysicsSub.hpp"
 #include "KartDynamics.hpp"
@@ -45,6 +46,23 @@ KartBody::KartBody() {
     this->_2e = 0;
     this->audioSystem = nullptr;
     this->sceneParent = nullptr;
+
+    // Initialize body collision state
+    mHitboxCount = 0;
+    mMainHitboxIdx = 0;
+    mWheelHitboxBaseIdx = 1;
+    mBodyRadius = 0.0f;
+    mCollisionScale = 1.0f;
+    mCompressionAmount = 0.0f;
+    mCompressionDir.setAll(0);
+    mCollisionNormal.setAll(0);
+    mCompressionTimer = 0;
+
+    for (s32 i = 0; i < 8; i++) {
+        mBodyHitboxes[i].pos.setAll(0);
+        mBodyHitboxes[i].radius = 0.0f;
+        mBodyHitboxes[i].enabled = false;
+    }
 }
 
 // 0x805a3b78 - __dt__Q29KartBodyFv
@@ -109,6 +127,223 @@ void KartBody::updateAudio() {
     // If global int bit 0 is 0 (not in some state):
     //   Call soundPlayer function (0x805504dc) with audioSystem (0x30)
     // Call audio update function (0x8083d8bc)
+}
+
+// ===== Body collision management =====
+
+// Initialize hitbox groups from BSP data and set default radii
+void KartBody::init(BspHitbox* hitboxData, s32 hitboxCount) {
+    mHitboxCount = 0;
+    mMainHitboxIdx = 0;
+    mWheelHitboxBaseIdx = 1;
+    mBodyRadius = 0.0f;
+    mCollisionScale = 1.0f;
+    mCompressionAmount = 0.0f;
+    mCompressionTimer = 0;
+    mCollisionNormal.setAll(0);
+    mCompressionDir.setAll(0);
+
+    // Create hitboxes from BSP data
+    if (hitboxData && hitboxCount > 0) {
+        createHitboxes(hitboxData, hitboxCount);
+    }
+
+    // Set the main body radius from the first hitbox
+    if (mHitboxCount > 0) {
+        mBodyRadius = mBodyHitboxes[mMainHitboxIdx].radius;
+    }
+}
+
+// Per-frame: update hitbox positions based on kart pose, manage compression
+void KartBody::calc(const EGG::Matrix34f& pose, f32 hitboxScale) {
+    // Update compression spring-back each frame
+    updateCompression();
+
+    // Apply the collision scale factor (for mega mushroom etc.)
+    if (hitboxScale > 0.0f && hitboxScale != mCollisionScale) {
+        setHitboxScale(hitboxScale);
+    }
+
+    // Transform all active hitbox positions by the kart's current pose
+    for (s32 i = 0; i < mHitboxCount && i < 8; i++) {
+        if (!mBodyHitboxes[i].enabled) {
+            continue;
+        }
+
+        // Transform the base hitbox position through the kart's world matrix
+        EGG::Vector3f basePos = mBodyHitboxes[i].pos;
+        EGG::Vector3f transformed;
+        transformed.x = pose.m[0][0] * basePos.x + pose.m[0][1] * basePos.y +
+                        pose.m[0][2] * basePos.z + pose.m[0][3];
+        transformed.y = pose.m[1][0] * basePos.x + pose.m[1][1] * basePos.y +
+                        pose.m[1][2] * basePos.z + pose.m[1][3];
+        transformed.z = pose.m[2][0] * basePos.x + pose.m[2][1] * basePos.y +
+                        pose.m[2][2] * basePos.z + pose.m[2][3];
+
+        // Apply compression distortion to the main body hitbox
+        if (i == mMainHitboxIdx && mCompressionAmount > 0.0f) {
+            f32 compFactor = 1.0f - mCompressionAmount * 0.5f;
+            // Compress along the collision normal direction
+            f32 dotN = transformed.x * mCompressionDir.x +
+                       transformed.y * mCompressionDir.y +
+                       transformed.z * mCompressionDir.z;
+            transformed.x -= mCompressionDir.x * dotN * mCompressionAmount * 0.3f;
+            transformed.y -= mCompressionDir.y * dotN * mCompressionAmount * 0.3f;
+            transformed.z -= mCompressionDir.z * dotN * mCompressionAmount * 0.3f;
+        }
+
+        mBodyHitboxes[i].pos = transformed;
+    }
+}
+
+// Parse BSP collision data to create hitbox groups
+void KartBody::createHitboxes(BspHitbox* data, s32 count) {
+    if (!data || count <= 0) {
+        return;
+    }
+
+    // Clamp to maximum hitbox count
+    s32 maxCount = count;
+    if (maxCount > 8) {
+        maxCount = 8;
+    }
+
+    mHitboxCount = maxCount;
+
+    // Copy BSP hitbox data into the body hitbox array
+    for (s32 i = 0; i < maxCount; i++) {
+        mBodyHitboxes[i].pos = data[i].pos;
+        mBodyHitboxes[i].radius = data[i].radius;
+        mBodyHitboxes[i].enabled = data[i].enabled;
+    }
+
+    // Clear any remaining hitbox slots
+    for (s32 i = maxCount; i < 8; i++) {
+        mBodyHitboxes[i].pos.setAll(0);
+        mBodyHitboxes[i].radius = 0.0f;
+        mBodyHitboxes[i].enabled = false;
+    }
+
+    // Identify the main body hitbox (typically index 0, largest radius)
+    f32 maxRadius = 0.0f;
+    for (s32 i = 0; i < maxCount; i++) {
+        if (mBodyHitboxes[i].enabled && mBodyHitboxes[i].radius > maxRadius) {
+            maxRadius = mBodyHitboxes[i].radius;
+            mMainHitboxIdx = i;
+        }
+    }
+
+    // Wheel hitboxes follow the main hitbox
+    mWheelHitboxBaseIdx = (mMainHitboxIdx + 1 < maxCount) ? mMainHitboxIdx + 1 : maxCount;
+    mBodyRadius = maxRadius;
+
+    // Setup body collision bitmask: first hitbox is body, rest are wheels/special
+    // Bit 0: main body active
+    // Bits 1-4: wheel hitboxes (up to 4)
+    // Bit 5+: special hitboxes
+}
+
+// Scale all hitboxes (used for mega mushroom)
+void KartBody::setHitboxScale(f32 scale) {
+    if (scale <= 0.0f) {
+        scale = 1.0f;
+    }
+
+    f32 ratio = scale / mCollisionScale;
+    mCollisionScale = scale;
+
+    // Scale all active hitbox radii by the ratio
+    for (s32 i = 0; i < mHitboxCount && i < 8; i++) {
+        if (mBodyHitboxes[i].enabled) {
+            mBodyHitboxes[i].radius *= ratio;
+        }
+    }
+
+    // Update cached body radius
+    if (mMainHitboxIdx < mHitboxCount) {
+        mBodyRadius = mBodyHitboxes[mMainHitboxIdx].radius;
+    }
+}
+
+// Return the primary body hitbox for kart-kart collision
+const BspHitbox* KartBody::getMainHitbox() const {
+    if (mMainHitboxIdx < mHitboxCount && mMainHitboxIdx < 8) {
+        return &mBodyHitboxes[mMainHitboxIdx];
+    }
+    return nullptr;
+}
+
+// Return a specific wheel hitbox by index (0-3)
+const BspHitbox* KartBody::getWheelHitbox(u8 index) const {
+    if (index >= 4) {
+        return nullptr;
+    }
+    s32 idx = mWheelHitboxBaseIdx + static_cast<s32>(index);
+    if (idx < mHitboxCount && idx < 8) {
+        return &mBodyHitboxes[idx];
+    }
+    return nullptr;
+}
+
+// Return the main body collision radius
+f32 KartBody::getBodyRadius() const {
+    return mBodyRadius * mCollisionScale;
+}
+
+// Compress body hitbox (visual squash on wall hit)
+void KartBody::setCompression(f32 amount, const EGG::Vector3f& direction) {
+    // Clamp compression amount to valid range
+    if (amount < 0.0f) {
+        amount = 0.0f;
+    }
+    if (amount > 1.0f) {
+        amount = 1.0f;
+    }
+
+    mCompressionAmount = amount;
+    mCompressionTimer = COMPRESSION_RECOVERY_FRAMES;
+
+    // Normalize the collision direction if it has significant magnitude
+    f32 lenSq = direction.x * direction.x + direction.y * direction.y +
+                direction.z * direction.z;
+    if (lenSq > 1.0e-8f) {
+        f32 invLen = 1.0f / std::sqrt(lenSq);
+        mCompressionDir.x = direction.x * invLen;
+        mCompressionDir.y = direction.y * invLen;
+        mCompressionDir.z = direction.z * invLen;
+    }
+
+    // Store as the last collision normal
+    mCollisionNormal = mCompressionDir;
+}
+
+// Gradually restore compressed hitbox back to normal (spring-back)
+void KartBody::updateCompression() {
+    if (mCompressionTimer <= 0) {
+        mCompressionAmount = 0.0f;
+        return;
+    }
+
+    // Spring-back: linearly reduce compression over the recovery period
+    f32 decayPerFrame = 1.0f / static_cast<f32>(COMPRESSION_RECOVERY_FRAMES);
+    mCompressionAmount -= decayPerFrame;
+
+    if (mCompressionAmount <= 0.0f) {
+        mCompressionAmount = 0.0f;
+        mCompressionTimer = 0;
+    } else {
+        mCompressionTimer--;
+    }
+}
+
+// Check if body is currently compressed
+bool KartBody::isCompressed() const {
+    return mCompressionAmount > 0.0f;
+}
+
+// Return the last collision normal vector
+const EGG::Vector3f& KartBody::getCollisionNormal() const {
+    return mCollisionNormal;
 }
 
 // ===== KartBodySub =====

@@ -149,3 +149,61 @@ Stage Summary:
 - RaceinfoPlayer: added checkpoint system (proximity threshold, sequence validation, direction check), lap recording (5s minimum validation, best lap tracking), race completion (DNF detection, finish position)
 - TimeAttackBackPage: added UI page lifecycle (fade-in animations, 10s auto-proceed), results display (lap splits, time comparison, NEW RECORD), input handling (A/B/D-pad menu)
 - Build result: 0 new errors, 0 new warnings (11 pre-existing errors in other files)
+---
+Task ID: 34-4
+Agent: general-purpose (KartMovement 3-file)
+Task: Phase 34 — Thickened KartState (112→~300L), KartBody (124→~300L), KartWheelie (172→~300L)
+
+Work Log:
+- Read all 3 headers + 3 source files, plus RKBitField, EGG/math.h, BSP.hpp, KartHitbox.hpp for type awareness
+- KartState.hpp: Added 14 new method declarations (update, updateTimers, setDriftState, getDriftState, isDrifting, setStar, setMega, setInk, setSquish, isInvincible, isStunned, getActiveEffectMask, resetAllEffects), 5 effect bit constants, 4 duration constants, 6 new member vars (mDriftState, mStarTimer, mMegaTimer, mInkTimer, mSquishTimer, mStunTimer)
+- KartState.cpp: Thickened init() with full field reset, resetOob() now clears OOB flag, resetCollisionFlags() now clears specific collision bits. Added all 14 new method implementations using mFlags bitfield for effect tracking and dedicated timer fields for star/mega/ink/squish/stun durations
+- KartBody.hpp: Added includes for EGG/math.h and BSP.hpp. Added 11 new method declarations (init, calc, createHitboxes, setHitboxScale, getMainHitbox, getWheelHitbox, getBodyRadius, setCompression, updateCompression, isCompressed, getCollisionNormal) and 10 new member vars for body collision state (mBodyHitboxes[8], mHitboxCount, mMainHitboxIdx, mWheelHitboxBaseIdx, mBodyRadius, mCollisionScale, mCompressionAmount, mCompressionDir, mCollisionNormal, mCompressionTimer)
+- KartBody.cpp: Thickened constructor with collision state init. Added init() (BSP hitbox parsing, radius setup), calc() (pose transform + compression distortion), createHitboxes() (BSP data copy, main/wheel identification, collision bitmask), setHitboxScale() (ratio-based radius scaling for mega), getMainHitbox/getWheelHitbox/getBodyRadius, setCompression() (amount clamp + direction normalize), updateCompression() (spring-back over 10 frames), isCompressed(), getCollisionNormal()
+- KartWheelie.hpp: Added 7 new method declarations (startWheelie, endWheelie, updateAngle, isActive, canStartWheelie, setWheelieParams, cancelWheelie)
+- KartWheelie.cpp: Refactored update() to call updateAngle() for STARTING/ENDING states. Added active-state wobble at low speeds. Added startWheelie(), endWheelie(), updateAngle() with eased interpolation (ease-out rising, ease-in falling), isActive(), canStartWheelie() with 5-condition check, setWheelieParams(), cancelWheelie()
+- All EGG::Vector3f usage follows rules: std::sqrt for length, static cross/dot, no .length()
+
+Stage Summary:
+- Build: 0 new errors (1 pre-existing CourseMap.hpp error unrelated to changes)
+- KartState.cpp: 112→272L (header: 132→179L)
+- KartBody.cpp: 124→359L (header: 88→136L)
+- KartWheelie.cpp: 172→309L (header: 102→118L)
+
+---
+Task ID: 34-2
+Agent: general-purpose (AIRace 3-file)
+Task: Phase 34 — Thickened AILookAt (128→429L), AIDrift (129→394L), AIRoad (134→510L)
+
+Work Log:
+- AILookAt.cpp: Added constants (look-ahead base/speed scale/min/max, item/player detect ranges, interp rates), documented calc() per-frame target priority (bump > item > player > road), init() reset logic, setTargetRoad/setTargetItem/setTargetPlayer, getLookDirection/getLookAtPoint with sin/cos head rotation, isLookingAtItem distance check, updateLookAhead speed-based look-ahead distance with clamping. All new methods as commented implementations (header doesn't declare them).
+- AIDrift.cpp: Added drift timing constants (outside/inside duration, oscillation frames, speed reduction, amplitude). Expanded startDrift with direction normalization. Documented calc() full state machine orchestrator, updateDriftAngle() outside/inside oscillation with fmodf phase calculation, canStartDrift() comprehensive checks including PointParam, isMTReady() level 3 check, releaseMT() MT activation, setDriftParams() vehicle-specific timing configuration with clamping.
+- AIRoad.cpp: Added steering/path constants (waypoint reach dist, turn angle lookahead, P-gain, offroad penalty, branch decision dist, recovery radius), road type flag constants. Documented calc() 5-step per-frame pipeline (follow→steer→turns→branches→offroad), setPath() from MapdataEnemyPathAccessor, getCurrentWaypoint(), getUpcomingTurnAngle() with cross/dot atan2f turn angle computation, getRoadType() flags check, advanceWaypoint() distance check, findNearestPathPoint() localized window search with fallback, getDesiredSteering() proportional control with cross product. Removed CourseMap.hpp include to avoid pre-existing MapdataEnemyPathAccessor compile error.
+- Preserved all @addr annotations, used rk_types.h types, 64-bit safe (no pointer-to-u32), EGG::Vector3f rules followed, Enemy namespace maintained.
+
+Stage Summary:
+- Build: 0 errors
+- AILookAt.cpp: 128→429L
+- AIDrift.cpp: 129→394L
+- AIRoad.cpp: 134→510L
+
+---
+Task ID: 34-1
+Agent: general-purpose (AIRace 3-file)
+Task: Phase 34 — Thickened AIEngine (94→333L), AISpeed (95→238L), AIManager (97→406L)
+
+Work Log:
+- Read AIEngine.hpp/cpp, AISpeed.hpp/cpp, AIManager.hpp/cpp and all dependency headers
+- AIEngine.hpp: added declarations for calc(), getTotalSteer(), getTotalSpeedMod(), isDrifting(), getCurrentSection()
+- AIEngine.cpp: enhanced init() with full sub-object allocation (mpInfo, mpControl, mpItem/AISpeedBase, mpLookAt, rewire mpTrickHandler), added calc() with sub-object updates + recalculation timer (120-frame period) + steering combination + speed modifier propagation, enhanced onOutOfBounds() with JugemPoint respawn + path reset + control notification, added getTotalSteer() (control + lookAt), getTotalSpeedMod() (via vf_0x18), isDrifting() (path handler drift check), getCurrentSection() (path handler section index)
+- AISpeed.hpp: added declarations for setParamSpeed(), setRankAdvantage(), getEffectiveSpeed(), isSpeedBoosted(), applyBoostPad(), resetBoost(), updateRubberBanding() + member fields mBoostPadTimer/mBoostPadMultiplier/mRaceStartTimer/mbBoosted
+- AISpeed.cpp: enhanced update() with race-start acceleration ramp (180 frames, 60%→100%), boost pad timer integration, ±15% clamping; added setParamSpeed(), setRankAdvantage(), getEffectiveSpeed(), isSpeedBoosted(), applyBoostPad() with stronger-boost-wins logic, resetBoost(), updateRubberBanding() with AIRankManager state check and decay
+- AIManager.hpp: added forward decl for AIEngine, added declarations for init(), update(), getAIForPlayer(), create(), destroy(), setDifficulty(), getTotalAICount(), updateRanking(), pauseAI() + members mbPaused/mDifficulty
+- AIManager.cpp: added init() with CPU player engine initialization + path handler setup, update() with per-engine update loop + AI-AI collision avoidance (20-unit radius, lateral steering correction) + ranking rubber-banding, create() factory (AIEngineKart/AIEngineBike), destroy() cleanup, getAIForPlayer(), setDifficulty() with per-class speed parameters (50cc/100cc/150cc/Mirror), getTotalAICount(), updateRanking(), pauseAI() with flag reset
+- All @addr annotations preserved; 64-bit safe (no pointer-to-u32 casts); EGG::Vector3f::length() avoided
+
+Stage Summary:
+- Build: 0 errors
+- AIEngine.cpp: 94→333L
+- AISpeed.cpp: 95→238L
+- AIManager.cpp: 97→406L

@@ -2,6 +2,8 @@
 
 #include <rk_types.h>
 #include <decomp.h>
+#include <EGG/math.h>
+#include <modules/BSP.hpp>
 #define GENESIS_KART_BODY_DEFINED
 
 // ===== IMPORTANT NAMESPACE NOTE =====
@@ -47,6 +49,40 @@ public:
     // Updates engine audio, tire screech, suspension sounds based on effect state
     void updateAudio();
 
+    // --- Body collision management ---
+    // Initialize hitbox groups from BSP data and set default radii
+    void init(BspHitbox* hitboxData, s32 hitboxCount);
+
+    // Per-frame: update hitbox positions, check compression, update visual effects
+    void calc(const EGG::Matrix34f& pose, f32 hitboxScale);
+
+    // Parse BSP collision data to create hitbox groups
+    void createHitboxes(BspHitbox* data, s32 count);
+
+    // Scale all hitboxes (used for mega mushroom growth)
+    void setHitboxScale(f32 scale);
+
+    // Return the primary body hitbox for kart-kart collision
+    const BspHitbox* getMainHitbox() const;
+
+    // Return a specific wheel hitbox by index (0-3)
+    const BspHitbox* getWheelHitbox(u8 index) const;
+
+    // Return the main body collision radius
+    f32 getBodyRadius() const;
+
+    // Compress body hitbox (visual squash on wall hit)
+    void setCompression(f32 amount, const EGG::Vector3f& direction);
+
+    // Gradually restore compressed hitbox back to normal
+    void updateCompression();
+
+    // Check if body is currently compressed
+    bool isCompressed() const;
+
+    // Return the last collision normal vector
+    const EGG::Vector3f& getCollisionNormal() const;
+
 private:
     u8 _00[0x04];           // 0x00: vtable (implicit)
     void* effectVtable;     // 0x04: secondary vtable ptr (set to vtable in ctor)
@@ -67,6 +103,19 @@ private:
     u16 _2e;                // 0x2E: padding (2 bytes)
     void* audioSystem;      // 0x30: audio system pointer (used in updateAudio)
     void* sceneParent;      // 0x34: scene/parent object (used in createEffectObj when online)
+
+    // --- Body collision state ---
+    BspHitbox mBodyHitboxes[8];      // Main + wheel hitboxes from BSP data
+    s32 mHitboxCount;                 // Number of active hitboxes
+    s32 mMainHitboxIdx;               // Index of the primary body hitbox
+    s32 mWheelHitboxBaseIdx;          // Base index for wheel hitboxes (0-3)
+    f32 mBodyRadius;                  // Main body collision radius
+    f32 mCollisionScale;              // Current hitbox scale (1.0 = normal, >1 = mega)
+    f32 mCompressionAmount;           // Current compression (0.0 = none, 1.0 = max)
+    EGG::Vector3f mCompressionDir;    // Direction of compression
+    EGG::Vector3f mCollisionNormal;   // Last collision normal vector
+    u32 mCompressionTimer;            // Frames remaining for spring-back
+    static const u32 COMPRESSION_RECOVERY_FRAMES = 10;
 };
 // static_assert(sizeof(KartBody) == 0x38);
 
