@@ -61,6 +61,26 @@ public:
     // getKartCollisionInfo__Q24Kart16KartWheelPhysicsCFv  0x8059c3b0
     const KartCollisionInfo& getKartCollisionInfo() const;
 
+    // Extended wheel physics methods
+    // calcSuspensionForce__Q24Kart16KartWheelPhysicsFf
+    f32 calcSuspensionForce(f32 gravity) const;
+    // calcTractionCurve__Q24Kart16KartWheelPhysicsFff
+    f32 calcTractionCurve(f32 slipRatio, f32 normalForce) const;
+    // getWheelAngle__Q24Kart16KartWheelPhysicsCFv
+    f32 getWheelAngle() const;
+    // setSteerAngle__Q24Kart16KartWheelPhysicsFf
+    void setSteerAngle(f32 angle);
+    // updateRotation__Q24Kart16KartWheelPhysicsFfff
+    void updateRotation(f32 forwardSpeed, f32 wheelRadius, f32 dt);
+    // isContact__Q24Kart16KartWheelPhysicsCFv
+    bool isContact() const;
+    // getContactNormal__Q24Kart16KartWheelPhysicsCFv
+    const EGG::Vector3f& getContactNormal() const;
+    // applySurfaceEffect__Q24Kart16KartWheelPhysicsFff
+    void applySurfaceEffect(f32 friction, f32 speedBoost, f32 offRoadPenalty);
+    // getWheelSpeed__Q24Kart16KartWheelPhysicsCFv
+    f32 getWheelSpeed() const;
+
     f32 getSusTravel() const { return susTravel; }
     void setWheelPos(const EGG::Vector3f& wheelPos) { this->wheelPos = wheelPos; }
 
@@ -79,6 +99,9 @@ public:
     f32 targetEffectiveRadius;
     f32 isAtSuspLimit;
     EGG::Vector3f suspTop;
+    f32 mSteerAngle;            // Current steering angle (radians)
+    f32 mWheelRotation;         // Cumulative wheel rotation (radians)
+    f32 mSurfaceFriction;       // Current surface friction coefficient
 };
 // static_assert(sizeof(KartWheelPhysics) == 0x84);
 

@@ -72,7 +72,47 @@ public:
     /// @addr 0x80570C4C
     void checkAndResetOOB();
 
-    // ... many more methods (update, acceleration, turning, etc.) ...
+    /// Initialize speed and direction state
+    /// @addr 0x80570820
+    void init();
+
+    /// Per-frame update for speed and direction tracking
+    /// @addr 0x80570D00
+    void update();
+
+    /// Process collision results
+    /// @addr 0x80570E00
+    void calcCollision();
+
+    /// Get the current collision/ground normal
+    /// @addr 0x80570E40
+    EGG::Vector3f getCollisionNormal() const;
+
+    /// Get the penetration depth from the last collision
+    /// @addr 0x80570E80
+    f32 getPenetrationDepth() const;
+
+    /// Set the collision group for this player
+    /// @addr 0x80570EC0
+    void setCollisionGroup(u32 group);
+
+    /// Enable collision detection
+    /// @addr 0x80570F00
+    void enable();
+
+    /// Disable collision detection
+    /// @addr 0x80570F20
+    void disable();
+
+    /// Test sphere collision against a point
+    /// @addr 0x80570F40
+    bool testSphere(const EGG::Vector3f& center, f32 radius) const;
+
+    /// Test capsule collision
+    /// @addr 0x80570F80
+    bool testCapsule(const EGG::Vector3f& pointA,
+                     const EGG::Vector3f& pointB,
+                     f32 radius) const;
 
     PlayerPointers* playerPointers;
     u8 _04[0x0C - 0x04];
@@ -93,5 +133,9 @@ public:
     EGG::Vector3f vel1Dir;
     // ... more fields up to 0x294 ...
 };
+
+// Free function: Check if a player is on the ground
+// @addr 0x80570FC0
+bool PlayerSub10_checkGround(const PlayerSub10* player);
 
 } // namespace Kart

@@ -100,6 +100,15 @@ struct G3dResFileData {
     u32 flags;                  // 0x48: flags
     u32 _4C;                    // 0x4C: flags/state
     u8  _50[0x10];              // 0x50: reserved
+
+    // --- Class methods ---
+    bool load(const void* data, u32 size);
+    bool parseHeader();
+    u16 getSectionCount() const;
+    const void* getSectionData(u16 index) const;
+    const void* getScnData() const;
+    const void* getBmdData() const;
+    bool validate() const;
 };
 
 // ============================================================================
@@ -150,3 +159,6 @@ BOOL G3dResFile_Validate(const void* data, u32 size);
 
 // @addr 0x80603C00 — Get a specific animation block by type
 const void* G3dResFile_GetBlock(G3dResFileData* obj, u32 blockType);
+
+// @addr 0x80603DA0 — Get model count from MDL3 block
+u16 G3dResFile_getModelCount(const G3dResFileData* obj);

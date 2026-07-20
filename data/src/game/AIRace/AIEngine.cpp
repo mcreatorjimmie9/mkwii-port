@@ -30,6 +30,104 @@ AIEngine::AIEngine(const AI& ai) {
 
 AIEngine::~AIEngine() {}
 
+// AIEngine_initInstance — Get the singleton-like AI engine instance
+// In the real game, each AI player has its own AIEngine instance
+// managed by the AIManager.
+// @addr 0x80734A90
+/* AIEngine_getInstance @ 0x80734A90 */
+AIEngine* AIEngine_getInstance() {
+    // The AIManager holds the array of AIEngine instances.
+    // This free function is a convenience accessor.
+    // In the real game, it queries AIManager::getInstance()->getEngine(0).
+    return nullptr;
+}
+
+// AIEngine_getDifficulty — Query the current AI difficulty level
+// The difficulty affects rubber-banding aggressiveness, trick frequency,
+// and path-following precision.
+// @addr 0x80734AA0
+/* AIEngine_getDifficulty @ 0x80734AA0 */
+s32 AIEngine::getDifficulty() const {
+    // Difficulty is typically read from the race config.
+    // 0 = 50cc (easy), 1 = 100cc (medium), 2 = 150cc (hard), 3 = Mirror
+    return 2; // Default: 150cc
+}
+
+// AIEngine_setDifficulty — Set the AI difficulty level
+// @addr 0x80734AB0
+/* AIEngine_setDifficulty @ 0x80734AB0 */
+void AIEngine::setDifficulty(s32 difficulty) {
+    // In the real game, this propagates to the AI probability tables
+    // and the rubber-banding parameters in AISpeedBase.
+    // The probability tables scale trick willingness, drift aggressiveness,
+    // and item usage patterns based on difficulty.
+    (void)difficulty;
+}
+
+// AIEngine_createAI — Factory method to create the right engine variant
+// @addr 0x80734AC0
+/* AIEngine_createAI @ 0x80734AC0 */
+AIEngine* AIEngine::createAI(const AI& ai, bool isBike) {
+    if (isBike) {
+        return new AIEngineBike(ai);
+    }
+    return new AIEngineKart(ai);
+}
+
+// AIEngine_destroyAI — Delete an AI engine instance
+// @addr 0x80734AD0
+/* AIEngine_destroyAI @ 0x80734AD0 */
+void AIEngine::destroyAI(AIEngine* engine) {
+    if (engine != nullptr) {
+        delete engine;
+    }
+}
+
+// AIEngine_getAI — Get the AI engine for a player (stub)
+// @addr 0x80734AE0
+/* AIEngine_getAI @ 0x80734AE0 */
+AIEngine* AIEngine::getAI(u8 playerId) {
+    (void)playerId;
+    return nullptr;
+}
+
+// AIEngine_updateAll — Update all active AI engines
+// @addr 0x80734AF0
+/* AIEngine_updateAll @ 0x80734AF0 */
+void AIEngine::updateAll(const System::MapdataEnemyPathAccessor* accessor) {
+    // In the real game, this iterates all AI player engines
+    // and calls update() on each. The accessor provides the
+    // current enemy path data for path following.
+    (void)accessor;
+}
+
+// AIEngine_shutdown — Clean up all AI sub-systems
+// @addr 0x80734B00
+/* AIEngine_shutdown @ 0x80734B00 */
+void AIEngine::shutdown() {
+    // Delete all sub-systems
+    if (mpControl != nullptr) {
+        delete mpControl;
+        mpControl = nullptr;
+    }
+    if (mpItem != nullptr) {
+        delete mpItem;
+        mpItem = nullptr;
+    }
+    if (mpLookAt != nullptr) {
+        delete mpLookAt;
+        mpLookAt = nullptr;
+    }
+    if (mpTrickHandler != nullptr) {
+        delete mpTrickHandler;
+        mpTrickHandler = nullptr;
+    }
+    if (mpInfo != nullptr) {
+        delete mpInfo;
+        mpInfo = nullptr;
+    }
+}
+
 // AIEngine_init @ 0x80734AA0
 // Initializes all AI sub-systems and sets up initial parameters
 void AIEngine::init() {

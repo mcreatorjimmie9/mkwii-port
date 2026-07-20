@@ -395,4 +395,57 @@ f32 KartCollide_calcMomentum(f32 massA, f32 massB, f32 relSpeed,
     return impulse;
 }
 
+// @addr 0x805a14E0 (estimated)
+// Get the momentum vector for a kart given its velocity and mass.
+// In the real game, this is mass * velocity, used for kart-kart collisions.
+EGG::Vector3f KartCollide_getMomentum(const EGG::Vector3f& vel, f32 mass) {
+    EGG::Vector3f momentum;
+    momentum.x = vel.x * mass;
+    momentum.y = vel.y * mass;
+    momentum.z = vel.z * mass;
+    return momentum;
+}
+
+// @addr 0x805A1520 (estimated)
+// Compute the impulse magnitude for a collision between two objects.
+// This is the scalar impulse along the collision normal.
+f32 KartCollide_computeImpulse(f32 relSpeed, f32 massA, f32 massB, f32 restitution) {
+    f32 invMassSum = 1.0f / massA + 1.0f / massB;
+    if (invMassSum < 0.0001f) invMassSum = 0.0001f;
+    f32 j = -(1.0f + restitution) * relSpeed / invMassSum;
+    if (j > 50000.0f) j = 50000.0f;
+    if (j < -50000.0f) j = -50000.0f;
+    return j;
+}
+
+// @addr 0x805A1560 (estimated)
+// Check if a KCL surface type triggers a speed penalty.
+// Offroad surfaces, mud, and sand all reduce kart speed.
+bool KartCollide_isSpeedPenaltySurface(u32 kclType) {
+    // KCL types that reduce speed: offroad, mud, sand, ice
+    // These are the lower surface type bits
+    if (kclType >= 0x04 && kclType <= 0x07) return true; // offroad variants
+    if (kclType == 0x0B) return true; // mud
+    if (kclType == 0x0C) return true; // sand
+    return false;
+}
+
+// @addr 0x805A15A0 (estimated)
+// Get the friction coefficient for a given KCL surface type.
+// Normal road = 1.0, offroad = 0.6, ice = 0.2, etc.
+f32 KartCollide_getSurfaceFriction(u32 kclType) {
+    switch (kclType) {
+    case 0x00: return 1.0f;  // Normal road
+    case 0x01: return 1.0f;  // Road (variant)
+    case 0x04: return 0.6f;  // Offroad
+    case 0x05: return 0.5f;  // Heavy offroad
+    case 0x06: return 0.55f; // Gravel
+    case 0x07: return 0.65f; // Light offroad
+    case 0x0B: return 0.4f;  // Mud
+    case 0x0C: return 0.5f;  // Sand
+    case 0x0E: return 0.2f;  // Ice
+    default:  return 1.0f;
+    }
+}
+
 } // namespace Kart

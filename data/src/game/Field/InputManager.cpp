@@ -350,4 +350,33 @@ void InputManager::applySmoothing(f32& value, f32 prev, f32 factor) {
     value = prev * (1.0f - factor) + value * factor;
 }
 
+/* InputManager_resetAll @ 0x804D1680 */
+void InputManager::resetAll() {
+    // Reset all controller states without fully shutting down the PAD system.
+    // This is called between races or when returning to the menu.
+    // All connected controllers are reset to neutral state (no buttons, centered stick).
+
+    mFrameCount = 0;
+
+    for (s32 i = 0; i < MAX_PLAYERS; i++) {
+        // Clear input state
+        mControllers[i].raceInput.mStick.set(0.0f, 0.0f);
+        mControllers[i].raceInput.buttons = 0;
+        mControllers[i].raceInput.currentInputState.mStick.set(0.0f, 0.0f);
+
+        // Reset rumble
+        mControllers[i].rumblePattern = 0;
+        mControllers[i].rumbleTimer = 0;
+
+        // Re-enable all controllers
+        mEnabled[i] = true;
+    }
+
+    // In the real game, this would also:
+    //   - Clear any buffered inputs
+    //   - Reset trigger states (L/R analog)
+    //   - Clear the C-stick / Nunchuk stick
+    //   - Reset Wiimote pointer and motion data
+}
+
 } // namespace Field

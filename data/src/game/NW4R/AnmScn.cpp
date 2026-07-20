@@ -386,3 +386,85 @@ void AnmScn_GetScnInfo(ResAnmScn* res, AnmScnInfo* out) {
     out->_0A = 0;
     out->duration = 60.0f;
 }
+
+// @addr 0x80602560 (estimated)
+// AnmScn_GetFrameCount — Get the total number of frames in the scene.
+// Returns the scene duration as a frame count at 60fps.
+f32 AnmScn_GetFrameCount(const AnmScnData* obj) {
+    if (!obj) return 0.0f;
+    return obj->globalDuration;
+}
+
+// @addr 0x80602580 (estimated)
+// AnmScn_GetAnimationCount — Get the total number of child animations.
+u16 AnmScn_GetAnimationCount(const AnmScnData* obj) {
+    if (!obj) return 0;
+    return (u16)(obj->texPatCount + obj->texSrtCount +
+                 obj->matClrCount + obj->chrCount + obj->shpCount);
+}
+
+// @addr 0x806025A0 (estimated)
+// AnmScn_GetAnimation — Get a child animation by type and index.
+// Returns nullptr if the type/index is out of range.
+void* AnmScn_GetAnimation(AnmScnData* obj, u8 animType, u8 index) {
+    if (!obj) return NULL;
+    switch (animType) {
+    case 0: // TexPat
+        return AnmScn_GetTexPat(obj, index);
+    case 1: // TexSrt
+        return AnmScn_GetTexSrt(obj, index);
+    case 2: // MatClr
+        if (index < obj->matClrCount && index < ANMSCN_MAX_MATCLR)
+            return obj->matClrAnims[index];
+        break;
+    case 3: // Chr
+        if (index < obj->chrCount && index < ANMSCN_MAX_CHR)
+            return obj->chrAnims[index];
+        break;
+    }
+    return NULL;
+}
+
+// @addr 0x806025C0 (estimated)
+// AnmScn_Play — Start playing the animation scene.
+void AnmScn_Play(AnmScnData* obj) {
+    if (!obj) return;
+    obj->flags |= ANMSCN_FLAG_PLAYING;
+    obj->flags &= ~ANMSCN_FLAG_PAUSED;
+    obj->flags &= ~ANMSCN_FLAG_FINISHED;
+}
+
+// @addr 0x806025E0 (estimated)
+// AnmScn_Stop — Stop and reset the animation scene.
+void AnmScn_Stop(AnmScnData* obj) {
+    if (!obj) return;
+    obj->flags &= ~ANMSCN_FLAG_PLAYING;
+    obj->flags &= ~ANMSCN_FLAG_PAUSED;
+    AnmScn_SetFrame(obj, 0.0f);
+}
+
+// @addr 0x80602600 (estimated)
+// AnmScn_Attach — Generic attach for any animation type.
+BOOL AnmScn_Attach(AnmScnData* obj, u8 animType, void* anm) {
+    if (!obj || !anm) return FALSE;
+    switch (animType) {
+    case 0: return AnmScn_AttachTexPat(obj, (AnmObjTexPatData*)anm);
+    case 1: return AnmScn_AttachTexSrt(obj, (AnmObjTexSrtData*)anm);
+    case 2: return AnmScn_AttachMatClr(obj, (AnmObjMatClrData*)anm);
+    default: return FALSE;
+    }
+}
+
+// @addr 0x80602620 (estimated)
+// AnmScn_GetTargetModel — Get the model this scene is attached to.
+G3dObjData* AnmScn_GetTargetModel(const AnmScnData* obj) {
+    if (!obj) return NULL;
+    return obj->targetModel;
+}
+
+// @addr 0x80602640 (estimated)
+// AnmScn_IsPlaying — Check if the animation scene is currently playing.
+BOOL AnmScn_IsPlaying(const AnmScnData* obj) {
+    if (!obj) return FALSE;
+    return (obj->flags & ANMSCN_FLAG_PLAYING) != 0;
+}

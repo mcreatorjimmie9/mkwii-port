@@ -223,6 +223,18 @@ public:
     // Get object count from KMP GOBJ section
     u32 getObjectCount() const { return mObjectCount; }
 
+    // Find nearest route point to a world position
+    // @addr 0x804B20C0
+    s32 findRoutePointNearest(const EGG::Vector3f& pos, f32* outDistSq) const;
+
+    // Find nearest start position to a world position
+    // @addr 0x804B2140
+    s32 findStartPosNearest(const EGG::Vector3f& pos, f32* outDistSq) const;
+
+    // Get highest-priority area containing a position
+    // @addr 0x804B21C0
+    s32 getAreaForPosition(f32 x, f32 y, f32 z) const;
+
 private:
     static const s32 MAX_COURSE_AREAS = 32;
     static const s32 MAX_SCENERY_ZONES = 64;

@@ -164,11 +164,13 @@ public:
     ~ScopedLock() {
         mrMutex.unlock();
     }
-private:
     Mutex& mrMutex;
-    ScopedLock(const ScopedLock&);
-    ScopedLock& operator=(const ScopedLock&);
+    // no copy
 };
+
+// Out-of-line constructor/destructor for ScopedLock
+void ScopedLock_construct(ScopedLock* obj, Mutex& mutex);
+void ScopedLock_destroy(ScopedLock* obj);
 
 // ThreadSemaphore — Binary semaphore for thread synchronization
 // Wraps OSSemaphore with binary behavior (max count = 1)
@@ -213,5 +215,17 @@ private:
 // Called once during early system init (before any thread creation)
 // @addr 0x80170D00
 void Mutex_initializeAll();
+
+// Get a mutex from the global table by index
+// @addr 0x80170E00
+Mutex* Mutex_getGlobalMutex(s32 index);
+
+// Query if the global mutex table has been initialized
+// @addr 0x80170E40
+bool Mutex_isInitialized();
+
+// Get the total number of global mutexes
+// @addr 0x80170E80
+s32 Mutex_getGlobalCount();
 
 } // namespace EGG

@@ -352,4 +352,80 @@ void Scenario_reset(RaceConfig::Scenario* scenario) {
     }
 }
 
+// ============================================================================
+// Scenario class method implementations
+// ============================================================================
+
+// Note: Scenario::clear() is defined in RaceConfig.cpp (original location)
+
+// @addr 0x80530b80 — getSetting (member version)
+const RaceConfig::Settings& RaceConfig::Scenario::getSetting() const {
+    return mSettings;
+}
+
+// @addr 0x80530ba0 — setSetting (member version)
+void RaceConfig::Scenario::setSetting(const RaceConfig::Settings& settings) {
+    mSettings = settings;
+}
+
+// @addr 0x80530bc0 — getPlayerCount (member version)
+u8 RaceConfig::Scenario::getPlayerCount() const {
+    return mPlayerCount;
+}
+
+// @addr 0x80530bd0 — isMultiplayer (member version)
+bool RaceConfig::Scenario::isMultiplayer() const {
+    return mLocalPlayerCount > 1;
+}
+
+// @addr 0x80530be0 — validateSettings
+bool RaceConfig::Scenario::validateSettings() const {
+    // Validate that the current settings are legal for a race.
+    // Checks:
+    //   1. Course ID is within valid range
+    //   2. Engine class is 0-2
+    //   3. Lap count is 1-99
+    //   4. Player count is 1-12
+    //   5. Game mode is valid
+
+    if (mPlayerCount == 0 || mPlayerCount > MAX_PLAYER_COUNT) {
+        return false;
+    }
+
+    if (mSettings.mEngineClass > 2) {
+        return false;
+    }
+
+    if (mSettings.mLapCount == 0 || mSettings.mLapCount > 99) {
+        return false;
+    }
+
+    // Game mode validation
+    u32 mode = (u32)mSettings.mGameMode;
+    if (mode > Settings::GAMEMODE_CREDITS) {
+        return false;
+    }
+
+    // Battle mode requires 2+ players
+    if (mSettings.mGameMode == Settings::GAMEMODE_BATTLE && mPlayerCount < 2) {
+        return false;
+    }
+
+    return true;
+}
+
+// @addr 0x80530c00 — getControllerForPlayer (member version)
+s32 RaceConfig::Scenario::getControllerForPlayer(u8 playerIdx) const {
+    if (playerIdx >= MAX_PLAYER_COUNT) {
+        return -1;
+    }
+    return mPlayers[playerIdx].mControllerId;
+}
+
+// @addr 0x80530c20 — resetScenario (member version)
+void RaceConfig::Scenario::reset() {
+    // Delegate to free function
+    Scenario_reset(this);
+}
+
 } // namespace System

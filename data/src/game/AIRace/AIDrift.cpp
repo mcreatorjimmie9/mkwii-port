@@ -392,4 +392,88 @@ void AIDrift::setDriftParams(f32 threshold, f32 outsideTime, f32 insideTime) {
 }
 */
 
+// ---------------------------------------------------------------------------
+// init — Reset drift state to defaults
+//
+// Resets all drift state variables to their initial values.
+// Called at the start of each race or when the AI kart is respawned.
+// ---------------------------------------------------------------------------
+void AIDrift::init() {
+    m_state = DRIFT_NONE;
+    m_driftDirection = 0.0f;
+    m_mtCharge = 0.0f;
+    m_mtLevel = 0;
+    m_driftTimer = 0.0f;
+    m_steerInput = 0.0f;
+}
+
+// ---------------------------------------------------------------------------
+// getDriftType — Returns the current drift type as a string
+//
+// Returns "NONE" if not drifting, "LEFT" for leftward drifts,
+// "RIGHT" for rightward drifts.
+// ---------------------------------------------------------------------------
+const char* AIDrift::getDriftType() const {
+    if (m_state == DRIFT_NONE) return "NONE";
+    if (m_driftDirection < 0.0f) return "LEFT";
+    if (m_driftDirection > 0.0f) return "RIGHT";
+    return "NONE";
+}
+
+// ---------------------------------------------------------------------------
+// calcExitPoint — Compute the optimal point to release the drift
+//
+// Estimates where the AI should end its drift based on the current
+// road context. The exit point is projected along the forward
+// direction from the AI's current position.
+// ---------------------------------------------------------------------------
+void AIDrift::calcExitPoint(AIContext* ctx, f32* outX, f32* outZ) const {
+    if (!ctx || !outX || !outZ) return;
+
+    if (m_state != DRIFT_ACTIVE && m_state != DRIFT_START) {
+        *outX = ctx->position.x;
+        *outZ = ctx->position.z;
+        return;
+    }
+
+    // Estimate how long until MT is ready
+    f32 remainingCharge = MT_LEVEL_3_THRESHOLD - m_mtCharge;
+    if (remainingCharge < 0.0f) remainingCharge = 0.0f;
+    f32 timeToMT = remainingCharge / MT_CHARGE_RATE;
+
+    // Project the exit point forward at current speed
+    f32 dist = ctx->speed * timeToMT;
+    *outX = ctx->position.x + ctx->forward.x * dist;
+    *outZ = ctx->position.z + ctx->forward.z * dist;
+}
+
+// ---------------------------------------------------------------------------
+// getDriftAngle — Get the current drift angle in radians
+//
+// Returns the absolute value of the current drift steering angle.
+// During ACTIVE state, this oscillates as the AI waggles.
+// ---------------------------------------------------------------------------
+f32 AIDrift::getDriftAngle() const {
+    if (m_state != DRIFT_ACTIVE && m_state != DRIFT_START) {
+        return 0.0f;
+    }
+    f32 angle = m_steerInput;
+    if (angle < 0.0f) angle = -angle;
+    return angle;
+}
+
+// ---------------------------------------------------------------------------
+// getOptimalRelease — Get the optimal MT release timing
+//
+// Returns the estimated time in seconds until the MT charge
+// reaches level 3. Returns 0.0 if not drifting or already at max.
+// ---------------------------------------------------------------------------
+f32 AIDrift::getOptimalRelease() const {
+    if (m_state != DRIFT_ACTIVE) return 0.0f;
+
+    f32 remainingCharge = MT_LEVEL_3_THRESHOLD - m_mtCharge;
+    if (remainingCharge <= 0.0f) return 0.0f;
+    return remainingCharge / MT_CHARGE_RATE;
+}
+
 } // namespace Enemy

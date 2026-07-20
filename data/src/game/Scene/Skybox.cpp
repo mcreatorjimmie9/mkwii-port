@@ -364,4 +364,99 @@ void Skybox::drawSkyDome() {
     (void)m_fogColor; (void)m_fogStart; (void)m_fogEnd; (void)m_fogDensity;
 }
 
+// @addr 0x805248C0 (estimated)
+// setTimeOfDay — Set the time of day for sky color interpolation.
+// @param timeOfDay  Time value [0.0, 1.0] (0=midnight, 0.5=noon)
+void Skybox::setTimeOfDay(f32 timeOfDay) {
+    if (!m_loaded) return;
+    // Clamp to valid range
+    if (timeOfDay < 0.0f) timeOfDay = 0.0f;
+    if (timeOfDay > 1.0f) timeOfDay = 1.0f;
+    // Update sky colors based on the new time
+    updateSkyColors(timeOfDay);
+}
+
+// @addr 0x80524900 (estimated)
+// rotate — Apply a rotation offset to the sky dome.
+// The sky dome rotates slowly over time for visual interest.
+void Skybox::rotate(f32 angleDeg) {
+    mRotationAngle += angleDeg;
+    // Keep in [0, 360) range
+    while (mRotationAngle >= 360.0f) {
+        mRotationAngle -= 360.0f;
+    }
+    while (mRotationAngle < 0.0f) {
+        mRotationAngle += 360.0f;
+    }
+}
+
+// @addr 0x80524940 (estimated)
+// getSkyColor — Get interpolated sky color at a given height fraction.
+// @param heightFraction  0.0 = bottom (nadir), 1.0 = top (zenith)
+// @param r, g, b  Output color channels
+void Skybox::getSkyColor(f32 heightFraction, u8* r, u8* g, u8* b) const {
+    if (!r || !g || !b) return;
+    // Clamp height fraction
+    if (heightFraction < 0.0f) heightFraction = 0.0f;
+    if (heightFraction > 1.0f) heightFraction = 1.0f;
+
+    if (heightFraction > 0.5f) {
+        // Upper half: horizon to top
+        f32 t = (heightFraction - 0.5f) * 2.0f;
+        *r = (u8)((f32)m_skyColorHorizon[0] + ((f32)m_skyColorTop[0] - (f32)m_skyColorHorizon[0]) * t);
+        *g = (u8)((f32)m_skyColorHorizon[1] + ((f32)m_skyColorTop[1] - (f32)m_skyColorHorizon[1]) * t);
+        *b = (u8)((f32)m_skyColorHorizon[2] + ((f32)m_skyColorTop[2] - (f32)m_skyColorHorizon[2]) * t);
+    } else {
+        // Lower half: bottom to horizon
+        f32 t = heightFraction * 2.0f;
+        *r = (u8)((f32)m_skyColorBottom[0] + ((f32)m_skyColorHorizon[0] - (f32)m_skyColorBottom[0]) * t);
+        *g = (u8)((f32)m_skyColorBottom[1] + ((f32)m_skyColorHorizon[1] - (f32)m_skyColorBottom[1]) * t);
+        *b = (u8)((f32)m_skyColorBottom[2] + ((f32)m_skyColorHorizon[2] - (f32)m_skyColorBottom[2]) * t);
+    }
+}
+
+// @addr 0x805249C0 (estimated)
+// getFogColor — Get the current fog color as RGB values.
+void Skybox::getFogColor(u8* r, u8* g, u8* b) const {
+    if (r) *r = m_fogColor[0];
+    if (g) *g = m_fogColor[1];
+    if (b) *b = m_fogColor[2];
+}
+
+// @addr 0x805249E0 (estimated)
+// getRotation — Get the current sky dome rotation angle in degrees.
+f32 Skybox::getRotation() const {
+    return mRotationAngle;
+}
+
+// @addr 0x80524A00 (estimated)
+// isLoaded — Check if the skybox resources are loaded.
+bool Skybox::isLoaded() const {
+    return m_loaded;
+}
+
+// @addr 0x80524A20 (estimated)
+// getSkyboxId — Get the currently loaded skybox course ID.
+u32 Skybox::getSkyboxId() const {
+    return m_skyboxId;
+}
+
+// @addr 0x80524A40 (estimated)
+// getRainIntensity — Get the current rain intensity [0.0, 1.0].
+f32 Skybox::getRainIntensity() const {
+    return m_rainIntensity;
+}
+
+// @addr 0x80524A60 (estimated)
+// getWeatherTimer — Get the elapsed time since weather started.
+f32 Skybox::getWeatherTimer() const {
+    return m_weatherTimer;
+}
+
+// @addr 0x80524A80 (estimated)
+// clearOverride — Clear the cutscene sky override.
+void Skybox::clearOverride() {
+    m_skyOverride = false;
+}
+
 } // namespace Scene

@@ -133,4 +133,13 @@ protected:
 
 void SceneBase_printDebugInfo(const SceneBase* scene);
 
+/// Get the name string for a scene state enum value.
+const char* SceneBase_getStateName(SceneBase::SceneState state);
+
+/// Check if a scene is in a state that allows transitions.
+bool SceneBase_canTransition(const SceneBase* scene);
+
+/// Get remaining fade time in frames (0 if not fading).
+s32 SceneBase_getRemainingFadeTime(const SceneBase* scene);
+
 } // namespace Scene

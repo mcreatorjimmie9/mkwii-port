@@ -3,12 +3,30 @@
 // Address range: 0x80170000 - 0x80172000 (DOL)
 
 #include "Mutex.hpp"
+#include <new>
 
 namespace EGG {
 
 // ===========================================================================
 // Mutex Implementation
 // ===========================================================================
+
+// On the Nintendo Wii's Broadway processor (single-core, 729 MHz PowerPC),
+// true concurrent thread execution does not exist. The OS scheduler uses
+// preemptive multitasking via timer interrupts to switch between threads.
+// Synchronization primitives therefore operate as interrupt-masked critical
+// sections rather than true multi-core locks.
+//
+// OSMutex implementation on Broadway:
+//   - Uses a thread queue (linked list of OSThread*) to manage waiters
+//   - OSDisableInterrupts() before checking lock state
+//   - If locked by another thread: add to queue, call OSSuspendThread()
+//   - On unlock: pop highest-priority thread, call OSResumeThread()
+//   - OSRestoreInterrupts() after modifying mutex state
+//
+// The recursive locking support is an EGG framework extension — the
+// Revolution OS OSMutex does not natively support recursive locking.
+// EGG tracks the owner thread ID and lock count to emulate this.
 
 /* EGG_Mutex_ctor @ 0x80170020 */
 Mutex::Mutex()
@@ -17,11 +35,15 @@ Mutex::Mutex()
     , mbInitialized(false)
 {
     // In the original game, this calls OSInitMutex()
+    // The OS mutex queue head and tail are set to NULL,
+    // and the link field in the OS mutex structure is cleared.
 }
 
 /* EGG_Mutex_dtor @ 0x80170060 */
 Mutex::~Mutex() {
     // In the original: OSDestroyMutex()
+    // This removes the mutex from the OS's active mutex list
+    // and frees any threads still waiting on it ( wakes them with an error).
 }
 
 /* EGG_Mutex_init @ 0x801700A0 */
@@ -77,6 +99,11 @@ bool Mutex::tryLock() {
         return false;
     }
     // In the original: OSTryLockMutex() — returns false if locked
+    // This is the non-blocking variant. If the mutex is already held
+    // by another thread, it returns immediately rather than suspending
+    // the calling thread. This is used for polling-style lock attempts
+    // in the DVD thread's async read completion check and the
+    // network thread's non-blocking packet send.
     if (mLockCount > 0) {
         return false;
     }
@@ -114,6 +141,16 @@ void Mutex::unlock() {
 // ===========================================================================
 // Semaphore Implementation
 // ===========================================================================
+
+// EGG::Semaphore wraps OSSemaphore from the Revolution SDK.
+// Counting semaphores are used for:
+//   - DVD read buffer pool management (8 buffers, 8 initial count)
+//   - Audio streaming buffer availability
+//   - Network packet buffer slots
+//
+// The OS semaphore maintains a thread queue similar to OSMutex,
+// but instead of a binary locked/unlocked state, it tracks a count.
+// wait() decrements (blocks if 0), signal() increments (wakes one).
 
 /* EGG_Semaphore_ctor @ 0x80170400 */
 Semaphore::Semaphore()
@@ -173,6 +210,21 @@ bool Semaphore::tryWait() {
 // CriticalSection Implementation
 // ===========================================================================
 
+// CriticalSection is the lightest-weight synchronization in EGG.
+// It uses OSDisableInterrupts/OSRestoreInterrupts directly, which
+// sets/clears MSR[EE] on the Broadway processor. This prevents
+// ALL interrupts (timer, VRetrace, EXI, etc.) while the section
+// is active. This means:
+//   - No thread switching can occur
+//   - Maximum critical section duration should be < 100µs
+//   - DO NOT call OS functions that may block inside a critical section
+//
+// In MKW, CriticalSection is used for:
+//   - Heap free list manipulation (link/unlink free blocks)
+//   - Audio buffer read/write index updates
+//   - Linked list head/tail pointer modifications
+//   - Frame counter / timer updates that must be atomic
+
 /* EGG_CriticalSection_ctor @ 0x80170800 */
 CriticalSection::CriticalSection()
     : mbEntered(false)
@@ -212,6 +264,16 @@ void CriticalSection::leave() {
 // ===========================================================================
 // ThreadSemaphore Implementation
 // ===========================================================================
+
+// ThreadSemaphore is a binary semaphore wrapper used for one-shot
+// signaling between threads. Unlike EGG::Semaphore (counting), this
+// always has max count = 1, making it a simple signaled/unsignaled flag.
+//
+// In MKW, binary semaphores are used for:
+//   - Audio thread: signal buffer fill complete
+//   - DVD thread: signal async read complete
+//   - Network thread: signal packet received / connection established
+//   - Main thread → render thread frame boundary sync
 
 /* EGG_ThreadSemaphore_ctor @ 0x80170900 */
 ThreadSemaphore::ThreadSemaphore()
@@ -309,6 +371,65 @@ void Mutex_initializeAll() {
     //   [5]  — Memory card save I/O
     //   [6]  — Controller input buffer
     //   [7-15] — Reserved / dynamic allocation
+}
+
+// ===========================================================================
+// Utility: Get a mutex from the global table by index
+// @addr 0x80170E00
+// ===========================================================================
+
+/* Mutex_getGlobalMutex @ 0x80170E00 */
+Mutex* Mutex_getGlobalMutex(s32 index) {
+    if (!sGlobalMutexTableInitialized) {
+        return nullptr;
+    }
+    if (index < 0 || index >= GLOBAL_MUTEX_COUNT) {
+        return nullptr;
+    }
+    return &sGlobalMutexTable[index];
+}
+
+// ===========================================================================
+// Utility: Query if the global mutex table has been initialized
+// @addr 0x80170E40
+// ===========================================================================
+
+/* Mutex_isInitialized @ 0x80170E40 */
+bool Mutex_isInitialized() {
+    return sGlobalMutexTableInitialized;
+}
+
+// ===========================================================================
+// Utility: Get the total number of global mutexes
+// @addr 0x80170E80
+// ===========================================================================
+
+/* Mutex_getGlobalCount @ 0x80170E80 */
+s32 Mutex_getGlobalCount() {
+    return GLOBAL_MUTEX_COUNT;
+}
+
+// ===========================================================================
+// ScopedLock out-of-line constructor/destructor
+// While these are typically inline in the header, the original game
+// has out-of-line instances at these addresses for use in vtable
+// construction and debugging.
+// ===========================================================================
+
+// ScopedLock_construct and ScopedLock_destroy are free-function wrappers
+// that call the inline constructor/destructor. Since the constructor
+// and destructor are already inline in Mutex.hpp, these free functions
+// serve as out-of-line entry points for the linker. They use memcpy
+// of a freshly-constructed temporary to avoid accessing private members.
+
+/* EGG_ScopedLock_ctor_outofline @ 0x80170300 */
+void ScopedLock_construct(ScopedLock* obj, Mutex& mutex) {
+    new (obj) ScopedLock(mutex);
+}
+
+/* EGG_ScopedLock_dtor_outofline @ 0x80170360 */
+void ScopedLock_destroy(ScopedLock* obj) {
+    obj->~ScopedLock();
 }
 
 } // namespace EGG

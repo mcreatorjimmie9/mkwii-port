@@ -167,6 +167,18 @@ private:
 f32 KartCollide_calcMomentum(f32 massA, f32 massB, f32 relSpeed,
                               f32 restitution, const EGG::Vector3f& colNormal);
 
+// Get momentum vector for this kart (mass * velocity approximation)
+EGG::Vector3f KartCollide_getMomentum(const EGG::Vector3f& vel, f32 mass);
+
+// Compute collision response impulse magnitude
+f32 KartCollide_computeImpulse(f32 relSpeed, f32 massA, f32 massB, f32 restitution);
+
+// Check if a surface type triggers a speed penalty
+bool KartCollide_isSpeedPenaltySurface(u32 kclType);
+
+// Get the friction coefficient for a KCL surface type
+f32 KartCollide_getSurfaceFriction(u32 kclType);
+
 } // namespace Kart
 
 #endif // GENESIS_KART_COLLIDE_HPP_GUARD

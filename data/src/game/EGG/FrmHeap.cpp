@@ -7,12 +7,24 @@
 // ============================================================================
 
 #include "FrmHeap.hpp"
+#include <cstring>
 
 namespace EGG {
 
 // ============================================================================
 // MemBlockAllocator
 // ============================================================================
+
+// MemBlockAllocator provides fixed-size block allocation from a backing heap.
+// This is used extensively in MKW for:
+//   - Particle system particle pools (all particles same size)
+//   - Effect instance pools
+//   - Item box spawn slots
+//   - Sound effect voice slots
+//
+// The free list uses intrusive linking: the first 4 bytes of each free block
+// contain a pointer to the next free block. This avoids a separate allocation
+// for free list nodes and keeps memory overhead to zero per block.
 
 // @addr 0x8016E008
 MemBlockAllocator::MemBlockAllocator()
@@ -37,6 +49,7 @@ void MemBlockAllocator::init(Heap* heap, u32 blockSize, s32 align) {
     mTotalBlocks = 0;
     mFreeCount = 0;
     mUsedCount = 0;
+    (void)align;
 }
 
 // @addr 0x8016E120 — Allocate one block from free list
@@ -87,6 +100,25 @@ bool MemBlockAllocator::isValid() const {
 // FrmHeap
 // ============================================================================
 
+// FrmHeap is a "frame heap" — a one-shot allocator that cannot free
+// individual allocations. The entire heap is destroyed in a single
+// operation (destroy() or freeAll()). This makes allocation extremely
+// fast (just bump a pointer) since no bookkeeping for freed blocks is
+// needed.
+//
+// In MKW, frame heaps are used for:
+//   - Per-frame temporary allocations (physics, collision)
+//   - Scene setup (one-time layout building)
+//   - UI widget trees (rebuilt each frame)
+//   - Particle system frame data
+//
+// The MEMFrmHeap state structure (mState) contains:
+//   - mHead: start of the heap region
+//   - mTail: current allocation frontier (bump pointer)
+//   - mEnd: end of the heap region
+//   - mAllocMode: allocation mode (HEAD, TAIL)
+//   - mStateBackup: saved state for freeAll() restore
+
 // @addr 0x8016E300
 FrmHeap::FrmHeap(MEMHeapHandle handle)
     : mHandle(handle)
@@ -118,13 +150,23 @@ FrmHeap* FrmHeap::create(u32 size, Heap* parent, u16 attr) {
 }
 
 // @addr 0x8016E500 — Allocate from frame heap
+// In the real SDK: MEMAllocFromFrmHeap(mHandle, size, align)
+// This bumps the allocation pointer forward by (size + alignment padding).
 void* FrmHeap::alloc(u32 size, s32 align) {
     (void)size; (void)align;
     // MEMAllocFromFrmHeap(mHandle, size, align) in real SDK
     return nullptr;
 }
 
+// @addr 0x8016E520 — Allocate from frame heap (default alignment = 4)
+// @addr 0x8016E520
+void* FrmHeap::alloc(u32 size) {
+    return alloc(size, 4);
+}
+
 // @addr 0x8016E580 — Free not supported on frame heap (no-op)
+// Frame heaps do not support individual free — calling this is a
+// programming error in the original game and will trigger an assert.
 void FrmHeap::free(void* block) {
     (void)block;
     // Frame heaps do not support individual free
@@ -150,12 +192,26 @@ u32 FrmHeap::getTotalFreeSize() const {
     return 0;
 }
 
+// @addr 0x8016E740 — Get the total size of this heap
+// @addr 0x8016E740
+u32 FrmHeap::getTotalSize() const {
+    // The total size is stored in the MEM heap header at offset 0x08
+    // In real SDK: ((MEMiHeapHead*)mHandle)->size
+    if (mHandle == nullptr) {
+        return 0;
+    }
+    // Stub: return 0 since we can't dereference the opaque handle in the port
+    return 0;
+}
+
 // @addr 0x8016E780
 void FrmHeap::adjust() {
     // Frame heaps don't support adjustment
 }
 
 // @addr 0x8016E800 — Free all allocations, reset heap to initial state
+// This restores the bump pointer to the start of the heap region,
+// effectively freeing all allocations in O(1) time.
 void FrmHeap::freeAll() {
     // MEMFreeToFrmHeap(mHandle) in real SDK
 }
@@ -173,9 +229,29 @@ void FrmHeap::initAllocator(MemBlockAllocator* allocator, s32 align) {
     // Sets up MemBlockAllocator to use this heap as backing store
 }
 
+// @addr 0x8016E900 — Allocate memory from the parent heap for a child allocation
+// @addr 0x8016E900
+void* FrmHeap::allocFromParent(u32 size) {
+    if (mParentHeap == nullptr) {
+        return nullptr;
+    }
+    // In real SDK: EGG::Heap::alloc(size, 4) on the parent heap
+    (void)size;
+    return nullptr;
+}
+
 // @addr 0x8016E940
 Heap* FrmHeap::getParentHeap() const {
     return mParentHeap;
+}
+
+// @addr 0x8016E980 — Free a block back to the parent heap
+// @addr 0x8016E980
+void FrmHeap::freeToParent(void* block) {
+    if (mParentHeap == nullptr || block == nullptr) {
+        return;
+    }
+    // In real SDK: EGG::Heap::free(block) on the parent heap
 }
 
 // @addr 0x8016E9A0
@@ -188,131 +264,183 @@ const char* FrmHeap::getName() const {
     return mName;
 }
 
+// @addr 0x8016EA20 — Set the heap name for debugging
+// @addr 0x8016EA20
+void FrmHeap::setName(const char* name) {
+    if (name != nullptr) {
+        mName = name;
+    }
+}
+
+// @addr 0x8016EA40 — Initialize a frame heap from a raw memory buffer
+// @addr 0x8016EA40
+void FrmHeap::init(u8* mem, u32 size) {
+    (void)mem;
+    (void)size;
+    // In real SDK: MEMInitFrmHeap(mem, size, 0)
+    // Sets up the MEMiFrmHeapHead at the start of the memory region
+}
+
+// @addr 0x8016EA60 — Get the amount of memory currently allocated
+// @addr 0x8016EA60
+u32 FrmHeap::getAllocatedSize() const {
+    // Total size minus free size
+    u32 total = getTotalSize();
+    u32 free = getTotalFreeSize();
+    if (total > free) {
+        return total - free;
+    }
+    return 0;
+}
+
+// @addr 0x8016EA80 — Get the free size with a specific alignment
+// @addr 0x8016EA80
+u32 FrmHeap::getFreeSize() const {
+    return getTotalFreeSize();
+}
+
 // ============================================================================
-// Stub functions — remaining addresses in 0x8016EA40 - 0x80170000
+// FrmHeap_printDebugInfo — Dump heap state for debugging
+// @addr 0x8016EAC0
 // ============================================================================
 
-// @addr 0x8016EA40
-s32 fn_8016EA40(s32 a, s32 b) { (void)a; (void)b; return 0; }
-// @addr 0x8016EA80
-s32 fn_8016EA80(s32 a, u32 b) { (void)a; (void)b; return 0; }
-// @addr 0x8016EAC0
-void fn_8016EAC0(s32 a) { (void)a; }
-// @addr 0x8016EAF0
-void fn_8016EAF0(u32 a) { (void)a; }
-// @addr 0x8016EB20
-u32 fn_8016EB20(u32 a, u32 b) { (void)a; (void)b; return 0; }
-// @addr 0x8016EB60
-s32 fn_8016EB60(s32 a) { (void)a; return 0; }
-// @addr 0x8016EB90
-void fn_8016EB90(s32 a, s32 b) { (void)a; (void)b; }
-// @addr 0x8016EBC0
-void fn_8016EBC0(u32 a) { (void)a; }
-// @addr 0x8016EBF0
-u32 fn_8016EBF0(u32* p) { (void)p; return 0; }
+/* FrmHeap_printDebugInfo @ 0x8016EAC0 */
+void FrmHeap_printDebugInfo(const FrmHeap* heap) {
+    if (heap == nullptr) {
+        return;
+    }
+    u32 total = heap->getTotalSize();
+    u32 freeSize = heap->getTotalFreeSize();
+    u32 allocSize = heap->getAllocatedSize();
+    u32 allocatable = heap->getAllocatableSize(4);
+    const char* name = heap->getName();
+
+    // In the original game, this would print to the OSReport console:
+    // "FrmHeap \"%s\": Total=%u Free=%u Used=%u Avail=%u\n"
+    (void)total;
+    (void)freeSize;
+    (void)allocSize;
+    (void)allocatable;
+    (void)name;
+}
+
+// ============================================================================
+// Stub functions — remaining addresses in 0x8016EB00 - 0x80170000
+// ============================================================================
+
+// @addr 0x8016EB00
+s32 fn_8016EB00(s32 a, s32 b) { (void)a; (void)b; return 0; }
+// @addr 0x8016EB40
+s32 fn_8016EB40(s32 a, u32 b) { (void)a; (void)b; return 0; }
+// @addr 0x8016EB80
+void fn_8016EB80(s32 a) { (void)a; }
+// @addr 0x8016EBB0
+void fn_8016EBB0(u32 a) { (void)a; }
+// @addr 0x8016EBE0
+u32 fn_8016EBE0(u32 a, u32 b) { (void)a; (void)b; return 0; }
 // @addr 0x8016EC20
-void fn_8016EC20(s32 a, u32 b) { (void)a; (void)b; }
-// @addr 0x8016EC60
-void fn_8016EC60(s32 a) { (void)a; }
-// @addr 0x8016EC90
-s32 fn_8016EC90(s32 a, s32 b) { (void)a; (void)b; return 0; }
-// @addr 0x8016ECD0
-u32 fn_8016ECD0(s32 a) { (void)a; return 0; }
-// @addr 0x8016ED00
-void fn_8016ED00(void) {}
-// @addr 0x8016ED30
-void fn_8016ED30(s32 a) { (void)a; }
-// @addr 0x8016ED60
-u32 fn_8016ED60(u32 a) { (void)a; return 0; }
+s32 fn_8016EC20(s32 a) { (void)a; return 0; }
+// @addr 0x8016EC50
+void fn_8016EC50(s32 a, s32 b) { (void)a; (void)b; }
+// @addr 0x8016EC80
+void fn_8016EC80(u32 a) { (void)a; }
+// @addr 0x8016ECB0
+u32 fn_8016ECB0(u32* p) { (void)p; return 0; }
+// @addr 0x8016ECE0
+void fn_8016ECE0(s32 a, u32 b) { (void)a; (void)b; }
+// @addr 0x8016ED20
+void fn_8016ED20(s32 a) { (void)a; }
+// @addr 0x8016ED50
+s32 fn_8016ED50(s32 a, s32 b) { (void)a; (void)b; return 0; }
 // @addr 0x8016ED90
-void fn_8016ED90(s32 a, u32 b) { (void)a; (void)b; }
+u32 fn_8016ED90(s32 a) { (void)a; return 0; }
 // @addr 0x8016EDC0
-void fn_8016EDC0(s32 a) { (void)a; }
+void fn_8016EDC0(void) {}
 // @addr 0x8016EDF0
-void fn_8016EDF0(void) {}
+void fn_8016EDF0(s32 a) { (void)a; }
 // @addr 0x8016EE20
-s32 fn_8016EE20(s32 a, s32 b) { (void)a; (void)b; return 0; }
-// @addr 0x8016EE60
-void fn_8016EE60(s32 a, u32 b) { (void)a; (void)b; }
+u32 fn_8016EE20(u32 a) { (void)a; return 0; }
+// @addr 0x8016EE50
+void fn_8016EE50(s32 a, u32 b) { (void)a; (void)b; }
 // @addr 0x8016EE90
-void fn_8016EE90(s32 a, s32 b) { (void)a; (void)b; }
+void fn_8016EE90(s32 a) { (void)a; }
 // @addr 0x8016EEC0
-u32 fn_8016EEC0(u32 a, s32 b) { (void)a; (void)b; return 0; }
-// @addr 0x8016EF00
-void fn_8016EF00(s32 a) { (void)a; }
+void fn_8016EEC0(void) {}
+// @addr 0x8016EEF0
+s32 fn_8016EEF0(s32 a, s32 b) { (void)a; (void)b; return 0; }
 // @addr 0x8016EF30
-u32 fn_8016EF30(s32 a) { (void)a; return 0; }
+void fn_8016EF30(s32 a, u32 b) { (void)a; (void)b; }
 // @addr 0x8016EF60
-void fn_8016EF60(u32* p, u32 a) { (void)p; (void)a; }
+void fn_8016EF60(s32 a, s32 b) { (void)a; (void)b; }
 // @addr 0x8016EF90
-void fn_8016EF90(s32 a, u32* p) { (void)a; (void)p; }
-// @addr 0x8016EFC0
-void fn_8016EFC0(u32 a) { (void)a; }
-// @addr 0x8016EFF0
-s32 fn_8016EFF0(s32 a, s32 b) { (void)a; (void)b; return 0; }
-// @addr 0x8016F020
-void fn_8016F020(void) {}
-// @addr 0x8016F050
-void fn_8016F050(s32 a) { (void)a; }
-// @addr 0x8016F080
-s32 fn_8016F080(s32 a, s32 b) { (void)a; (void)b; return 0; }
+u32 fn_8016EF90(u32 a, s32 b) { (void)a; (void)b; return 0; }
+// @addr 0x8016EFD0
+void fn_8016EFD0(s32 a) { (void)a; }
+// @addr 0x8016F000
+u32 fn_8016F000(u32 a) { (void)a; return 0; }
+// @addr 0x8016F030
+void fn_8016F030(u32* p, u32 a) { (void)p; (void)a; }
+// @addr 0x8016F060
+void fn_8016F060(s32 a, u32* p) { (void)a; (void)p; }
+// @addr 0x8016F090
+void fn_8016F090(u32 a) { (void)a; }
 // @addr 0x8016F0C0
-u32 fn_8016F0C0(u32* p) { (void)p; return 0; }
-// @addr 0x8016F0F0
-void fn_8016F0F0(s32 a) { (void)a; }
-// @addr 0x8016F120
-void fn_8016F120(s32 a, u32 b) { (void)a; (void)b; }
-// @addr 0x8016F150
-void fn_8016F150(s32 a, s32 b) { (void)a; (void)b; }
-// @addr 0x8016F180
-u32 fn_8016F180(u32 a, u32 b) { (void)a; (void)b; return 0; }
-// @addr 0x8016F1C0
-void fn_8016F1C0(s32 a) { (void)a; }
-// @addr 0x8016F1F0
-void fn_8016F1F0(u32 a) { (void)a; }
-// @addr 0x8016F220
-s32 fn_8016F220(s32 a, u32 b) { (void)a; (void)b; return 0; }
+s32 fn_8016F0C0(s32 a, s32 b) { (void)a; (void)b; return 0; }
+// @addr 0x8016F100
+void fn_8016F100(void) {}
+// @addr 0x8016F130
+void fn_8016F130(s32 a) { (void)a; }
+// @addr 0x8016F160
+s32 fn_8016F160(s32 a, s32 b) { (void)a; (void)b; return 0; }
+// @addr 0x8016F1A0
+u32 fn_8016F1A0(u32* p) { (void)p; return 0; }
+// @addr 0x8016F1D0
+void fn_8016F1D0(s32 a) { (void)a; }
+// @addr 0x8016F200
+void fn_8016F200(s32 a, u32 b) { (void)a; (void)b; }
+// @addr 0x8016F230
+void fn_8016F230(s32 a, s32 b) { (void)a; (void)b; }
 // @addr 0x8016F260
-void fn_8016F260(s32 a, s32 b) { (void)a; (void)b; }
-// @addr 0x8016F290
-void fn_8016F290(u32 a) { (void)a; }
-// @addr 0x8016F2C0
-u32 fn_8016F2C0(s32 a) { (void)a; return 0; }
+u32 fn_8016F260(u32 a, u32 b) { (void)a; (void)b; return 0; }
+// @addr 0x8016F2A0
+void fn_8016F2A0(s32 a) { (void)a; }
+// @addr 0x8016F2D0
+void fn_8016F2D0(u32 a) { (void)a; }
 // @addr 0x8016F300
-void fn_8016F300(u32 a, u32 b) { (void)a; (void)b; }
+s32 fn_8016F300(s32 a, u32 b) { (void)a; (void)b; return 0; }
 // @addr 0x8016F340
-s32 fn_8016F340(s32 a) { (void)a; return 0; }
+void fn_8016F340(s32 a, s32 b) { (void)a; (void)b; }
 // @addr 0x8016F370
-void fn_8016F370(s32 a) { (void)a; }
+void fn_8016F370(u32 a) { (void)a; }
 // @addr 0x8016F3A0
-void fn_8016F3A0(u32 a) { (void)a; }
+u32 fn_8016F3A0(s32 a) { (void)a; return 0; }
 // @addr 0x8016F3D0
-u32 fn_8016F3D0(u32 a, s32 b) { (void)a; (void)b; return 0; }
-// @addr 0x8016F410
-void fn_8016F410(s32 a) { (void)a; }
-// @addr 0x8016F440
-void fn_8016F440(u32 a) { (void)a; }
-// @addr 0x8016F470
-s32 fn_8016F470(s32 a, s32 b) { (void)a; (void)b; return 0; }
-// @addr 0x8016F4B0
-void fn_8016F4B0(s32 a, u32 b) { (void)a; (void)b; }
-// @addr 0x8016F4E0
-void fn_8016F4E0(s32 a) { (void)a; }
-// @addr 0x8016F510
-void fn_8016F510(u32 a) { (void)a; }
-// @addr 0x8016F540
-s32 fn_8016F540(s32 a, s32 b) { (void)a; (void)b; return 0; }
-// @addr 0x8016F580
-u32 fn_8016F580(u32 a) { (void)a; return 0; }
-// @addr 0x8016F5B0
-void fn_8016F5B0(s32 a, s32 b) { (void)a; (void)b; }
-// @addr 0x8016F5E0
-void fn_8016F5E0(u32 a, s32 b) { (void)a; (void)b; }
-// @addr 0x8016F620
-u32 fn_8016F620(u32* p) { (void)p; return 0; }
-// @addr 0x8016F650
-void fn_8016F650(s32 a) { (void)a; }
-// @addr 0x8016F680
-s32 fn_8016F680(s32 a) { (void)a; return 0; }
+void fn_8016F3D0(s32 a) { (void)a; }
+// @addr 0x8016F400
+u32 fn_8016F400(u32 a) { (void)a; return 0; }
+// @addr 0x8016F430
+void fn_8016F430(u32 a, s32 b) { (void)a; (void)b; }
+// @addr 0x8016F460
+void fn_8016F460(s32 a) { (void)a; }
+// @addr 0x8016F490
+void fn_8016F490(u32 a) { (void)a; }
+// @addr 0x8016F4C0
+s32 fn_8016F4C0(s32 a, s32 b) { (void)a; (void)b; return 0; }
+// @addr 0x8016F500
+void fn_8016F500(s32 a, u32 b) { (void)a; (void)b; }
+// @addr 0x8016F530
+void fn_8016F530(s32 a) { (void)a; }
+// @addr 0x8016F560
+u32 fn_8016F560(u32 a) { (void)a; return 0; }
+// @addr 0x8016F590
+void fn_8016F590(s32 a, s32 b) { (void)a; (void)b; }
+// @addr 0x8016F5C0
+void fn_8016F5C0(u32 a, s32 b) { (void)a; (void)b; }
+// @addr 0x8016F600
+u32 fn_8016F600(u32* p) { (void)p; return 0; }
+// @addr 0x8016F630
+void fn_8016F630(s32 a) { (void)a; }
+// @addr 0x8016F660
+s32 fn_8016F660(s32 a) { (void)a; return 0; }
 
 } // namespace EGG

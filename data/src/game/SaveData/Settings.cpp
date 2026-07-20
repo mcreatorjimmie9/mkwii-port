@@ -364,4 +364,157 @@ const Save::Settings* Settings_getDefault() {
     return &sDefaultSettings;
 }
 
+// ============================================================================
+// getVolume — Get master volume as combined factor [0.0, 1.0]
+// ============================================================================
+// @addr 0x8022A7B0 (estimated)
+f32 Settings::getVolumeFactor() const {
+    return (f32)mSoundVolume / 100.0f;
+}
+
+// ============================================================================
+// getMusicVolume — Get music volume as factor [0.0, 1.0]
+// ============================================================================
+// @addr 0x8022A7B8 (estimated)
+f32 Settings::getMusicVolumeFactor() const {
+    return (f32)mMusicVolume / 100.0f;
+}
+
+// ============================================================================
+// getSFXVolume — Get SFX volume as factor [0.0, 1.0]
+// ============================================================================
+// @addr 0x8022A7C0 (estimated)
+f32 Settings::getSFXVolumeFactor() const {
+    return (f32)mSFXVolume / 100.0f;
+}
+
+// ============================================================================
+// getControls and setControls are inline in hpp
+
+// getDriftMode and setDriftMode are inline in hpp
+
+// getDisplayMode — Get the current screen display mode
+// @addr 0x8022A7F8 (estimated)
+Settings::ScreenMode Settings::getDisplayMode() const {
+    return (ScreenMode)mScreenMode;
+}
+
+// ============================================================================
+// compare — Compare two Settings instances for equality
+// ============================================================================
+bool Settings::compare(const Settings& other) const {
+    return mDriftMode == other.mDriftMode &&
+           mControlScheme == other.mControlScheme &&
+           mSoundVolume == other.mSoundVolume &&
+           mMusicVolume == other.mMusicVolume &&
+           mSFXVolume == other.mSFXVolume &&
+           mRumble == other.mRumble &&
+           mStereoType == other.mStereoType &&
+           mLanguage == other.mLanguage &&
+           mTargetFPS == other.mTargetFPS &&
+           mShowVR == other.mShowVR &&
+           mOnlineNotify == other.mOnlineNotify &&
+           mTractionMode == other.mTractionMode &&
+           mScreenMode == other.mScreenMode;
+}
+
+// ============================================================================
+// copyFrom — Copy all settings from another instance
+// ============================================================================
+void Settings::copyFrom(const Settings& other) {
+    mDriftMode = other.mDriftMode;
+    mControlScheme = other.mControlScheme;
+    mSoundVolume = other.mSoundVolume;
+    mMusicVolume = other.mMusicVolume;
+    mSFXVolume = other.mSFXVolume;
+    mRumble = other.mRumble;
+    mStereoType = other.mStereoType;
+    mLanguage = other.mLanguage;
+    mTargetFPS = other.mTargetFPS;
+    mShowVR = other.mShowVR;
+    mOnlineNotify = other.mOnlineNotify;
+    mTractionMode = other.mTractionMode;
+    mScreenMode = other.mScreenMode;
+    memcpy(_pad2, other._pad2, sizeof(_pad2));
+}
+
+// ============================================================================
+// getStereoTypeName — Get human-readable stereo type name
+// ============================================================================
+const char* Settings::getStereoTypeName() const {
+    switch (mStereoType) {
+        case STEREO_MONO:     return "Mono";
+        case STEREO_STEREO:   return "Stereo";
+        case STEREO_SURROUND: return "Surround";
+        default:              return "Unknown";
+    }
+}
+
+// ============================================================================
+// getVolumePercent — Get master volume as integer 0-100
+// ============================================================================
+u8 Settings::getVolumePercent() const {
+    return mSoundVolume;
+}
+
+// ============================================================================
+// setVolumePercent — Set master volume from integer 0-100
+// ============================================================================
+void Settings::setVolumePercent(u8 vol) {
+    mSoundVolume = vol > 100 ? 100 : vol;
+}
+
+// ============================================================================
+// isDefault — Check if all settings match the defaults
+// ============================================================================
+bool Settings::isDefault() const {
+    Settings def;
+    def.setDefaults();
+    return compare(def);
+}
+
+// ============================================================================
+// getTargetFPSValue — Get the target FPS as an integer (30 or 60)
+// ============================================================================
+u8 Settings::getTargetFPSValue() const {
+    return (mTargetFPS == FPS_60) ? 60 : 30;
+}
+
+// setLanguage is inline in hpp
+
+// ============================================================================
+// isMono — Check if audio output is set to Mono
+// ============================================================================
+bool Settings::isMono() const {
+    return mStereoType == STEREO_MONO;
+}
+
+// ============================================================================
+// isSurround — Check if audio output is set to Surround
+// ============================================================================
+bool Settings::isSurround() const {
+    return mStereoType == STEREO_SURROUND;
+}
+
+// ============================================================================
+// isWideScreen — Check if display mode is widescreen (16:9)
+// ============================================================================
+bool Settings::isWideScreen() const {
+    return mScreenMode == SCREEN_WIDE;
+}
+
+// ============================================================================
+// isManualDrift — Check if drift mode is set to Manual
+// ============================================================================
+bool Settings::isManualDrift() const {
+    return mDriftMode == DRIFT_MANUAL;
+}
+
+// ============================================================================
+// isAutoDrift — Check if drift mode is set to Auto
+// ============================================================================
+bool Settings::isAutoDrift() const {
+    return mDriftMode == DRIFT_AUTO;
+}
+
 } // namespace Save

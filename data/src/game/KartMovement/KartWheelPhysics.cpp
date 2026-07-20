@@ -349,4 +349,157 @@ void WheelPhysicsHolder_applySuspensions(void* holder, const EGG::Vector3f& forw
     // This function coordinates all wheel physics updates per frame
 }
 
+// ============================================================================
+// Extended KartWheelPhysics methods
+// ============================================================================
+
+// calcSuspensionForce — compute the force exerted by the suspension spring
+// @addr 0x8059cba0
+f32 KartWheelPhysics::calcSuspensionForce(f32 gravity) const {
+    // The suspension acts as a spring-damper system.
+    // Force = spring_constant * compression + damping * velocity
+    // The spring constant is derived from the BSP wheel's maxTravel
+    // and a global stiffness factor.
+    //
+    // In the original game:
+    //   - Spring stiffness scales with kart body mass
+    //   - Damping prevents oscillation (critically damped)
+    //   - The force pushes the kart body upward along the down direction
+
+    if (!this->bspWheel) return 0.0f;
+
+    // Maximum spring travel
+    f32 maxTravel = this->bspWheel->maxTravel * sYScale;
+    if (maxTravel <= 0.0f) return 0.0f;
+
+    // Compression ratio: 0 = fully extended, 1 = fully compressed
+    f32 compression = this->susTravel / maxTravel;
+    if (compression > 1.0f) compression = 1.0f;
+    if (compression < 0.0f) compression = 0.0f;
+
+    // Spring stiffness: higher compression = more force
+    // The spring constant is tuned so that at full compression,
+    // the force balances gravity (kart weight).
+    f32 springConstant = 2.0f * gravity / maxTravel;
+    f32 springForce = springConstant * this->susTravel;
+
+    // Damping force: opposes compression velocity
+    // The velocity component along the down direction
+    f32 compressionVel = this->speed.x * this->suspTop.x +
+                         this->speed.y * this->suspTop.y +
+                         this->speed.z * this->suspTop.z;
+    f32 dampingConstant = 2.0f * sqrtf(springConstant);
+    f32 dampingForce = -dampingConstant * compressionVel;
+
+    f32 totalForce = springForce + dampingForce;
+    if (totalForce < 0.0f) totalForce = 0.0f;
+    return totalForce;
+}
+
+// calcTractionCurve — compute traction force from slip ratio
+// @addr 0x8059cc80
+f32 KartWheelPhysics::calcTractionCurve(f32 slipRatio, f32 normalForce) const {
+    // Simplified Pacejka-like traction curve.
+    // Traction = normalForce * friction * f(slipRatio)
+    // where f is a curve that peaks around 10% slip and falls off.
+    //
+    // The slip ratio is: (wheelSpeed - groundSpeed) / max(wheelSpeed, |groundSpeed|)
+    //   0.0 = free rolling, positive = wheel spin, negative = locked/wheel lock
+
+    f32 friction = mSurfaceFriction;
+    if (friction <= 0.0f) friction = 0.8f;
+
+    // Normalize slip ratio to [-1, 1]
+    f32 s = slipRatio;
+    if (s > 1.0f) s = 1.0f;
+    if (s < -1.0f) s = -1.0f;
+
+    // Traction curve: peaks at ~0.1 slip, then decays
+    // f(s) = s * (2.0 - |s|) — a simple parabolic approximation
+    f32 tractionCurve = s * (2.0f - (s > 0.0f ? s : -s));
+
+    return normalForce * friction * tractionCurve;
+}
+
+// getWheelAngle — get the current steering angle
+// @addr 0x8059cd40
+f32 KartWheelPhysics::getWheelAngle() const {
+    return mSteerAngle;
+}
+
+// setSteerAngle — set the steering angle for this wheel
+// @addr 0x8059cd50
+void KartWheelPhysics::setSteerAngle(f32 angle) {
+    // Clamp to reasonable steering range (-45 to +45 degrees)
+    f32 maxAngle = 0.7854f; // ~45 degrees in radians
+    if (angle > maxAngle) angle = maxAngle;
+    if (angle < -maxAngle) angle = -maxAngle;
+    mSteerAngle = angle;
+}
+
+// updateRotation — update cumulative wheel rotation
+// @addr 0x8059cd80
+void KartWheelPhysics::updateRotation(f32 forwardSpeed, f32 wheelRadius, f32 dt) {
+    if (wheelRadius <= 0.0f) return;
+    // Angular velocity = linear velocity / radius
+    f32 angularVel = forwardSpeed / wheelRadius;
+    mWheelRotation += angularVel * dt;
+
+    // Keep rotation in [0, 2*PI) range to prevent float overflow
+    const f32 TWO_PI = 6.2831853f;
+    while (mWheelRotation > TWO_PI) {
+        mWheelRotation -= TWO_PI;
+    }
+    while (mWheelRotation < 0.0f) {
+        mWheelRotation += TWO_PI;
+    }
+}
+
+// isContact — check if wheel is in contact with a surface
+// @addr 0x8059cde0
+bool KartWheelPhysics::isContact() const {
+    return hasFloorCollision();
+}
+
+// getContactNormal — get the floor contact normal vector
+// @addr 0x8059cdf0
+const EGG::Vector3f& KartWheelPhysics::getContactNormal() const {
+    return getCollisionFloorNrm();
+}
+
+// applySurfaceEffect — apply surface-specific effects
+// @addr 0x8059ce00
+void KartWheelPhysics::applySurfaceEffect(f32 friction, f32 speedBoost, f32 offRoadPenalty) {
+    // Update surface friction coefficient
+    mSurfaceFriction = friction;
+
+    // Apply speed boost (boost pads)
+    if (speedBoost > 0.0f) {
+        // Boost pads add velocity along the floor normal's tangent
+        // The actual boost force is applied by the kart dynamics system
+        // based on the surface type flags from the collision info
+        (void)speedBoost;
+    }
+
+    // Apply off-road speed penalty
+    if (offRoadPenalty > 0.0f && hasFloorCollision()) {
+        // Off-road penalty reduces the kart's top speed
+        // by scaling the effective engine force
+        // This is handled by KartDynamics, not directly here
+        (void)offRoadPenalty;
+    }
+}
+
+// getWheelSpeed — get the current wheel linear speed
+// @addr 0x8059ce80
+f32 KartWheelPhysics::getWheelSpeed() const {
+    // The wheel speed is the magnitude of the velocity vector
+    // projected onto the wheel's forward direction.
+    // For simplicity, use the speed vector magnitude.
+    f32 speedSq = this->speed.x * this->speed.x +
+                  this->speed.y * this->speed.y +
+                  this->speed.z * this->speed.z;
+    return sqrtf(speedSq);
+}
+
 } // namespace Kart

@@ -363,4 +363,94 @@ bool CourseData_verifyChecksum(const u8* data, u32 size) {
     return false;
 }
 
+// ============================================================================
+// Phase 40 — CourseData expanded methods
+// ============================================================================
+
+/* CourseData_findRoutePointNearest @ 0x804B20C0 */
+s32 CourseData::findRoutePointNearest(const EGG::Vector3f& pos, f32* outDistSq) const {
+    // Find the nearest route/respawn point to the given position.
+    // Used by the respawn system to find the closest Jugem point.
+    // Returns the index of the nearest point, or -1 if none found.
+
+    if (!mbLoaded || mRoutePointCount == 0) {
+        if (outDistSq) *outDistSq = 0.0f;
+        return -1;
+    }
+
+    s32 bestIdx = -1;
+    f32 bestDistSq = 1.0e18f;
+
+    for (u32 i = 0; i < mRoutePointCount && i < MAX_ROUTE_POINTS; i++) {
+        const RoutePoint& rp = mRoutePoints[i];
+        f32 dx = rp.position.x - pos.x;
+        f32 dy = rp.position.y - pos.y;
+        f32 dz = rp.position.z - pos.z;
+        f32 distSq = dx * dx + dy * dy + dz * dz;
+
+        if (distSq < bestDistSq) {
+            bestDistSq = distSq;
+            bestIdx = (s32)i;
+        }
+    }
+
+    if (outDistSq) *outDistSq = bestDistSq;
+    return bestIdx;
+}
+
+/* CourseData_findStartPosNearest @ 0x804B2140 */
+s32 CourseData::findStartPosNearest(const EGG::Vector3f& pos, f32* outDistSq) const {
+    // Find the nearest starting grid position to the given position.
+    // Used when determining which grid slot a kart should use.
+
+    if (!mbLoaded || mStartPositionCount == 0) {
+        if (outDistSq) *outDistSq = 0.0f;
+        return -1;
+    }
+
+    s32 bestIdx = -1;
+    f32 bestDistSq = 1.0e18f;
+
+    for (u32 i = 0; i < mStartPositionCount && i < MAX_START_POSITIONS; i++) {
+        const StartPosition& sp = mStartPositions[i];
+        f32 dx = sp.position.x - pos.x;
+        f32 dy = sp.position.y - pos.y;
+        f32 dz = sp.position.z - pos.z;
+        f32 distSq = dx * dx + dy * dy + dz * dz;
+
+        if (distSq < bestDistSq) {
+            bestDistSq = distSq;
+            bestIdx = (s32)i;
+        }
+    }
+
+    if (outDistSq) *outDistSq = bestDistSq;
+    return bestIdx;
+}
+
+/* CourseData_getAreaForPosition @ 0x804B21C0 */
+s32 CourseData::getAreaForPosition(f32 x, f32 y, f32 z) const {
+    // Find the highest-priority area that contains the given position.
+    // Returns the area index, or -1 if no area contains the point.
+
+    if (!mbLoaded) return -1;
+
+    s32 bestIdx = -1;
+    f32 bestPriority = -1.0f;
+
+    for (s32 i = 0; i < mAreaCount; i++) {
+        const CourseArea& area = mAreas[i];
+        if (x >= area.minBounds.x && x <= area.maxBounds.x &&
+            y >= area.minBounds.y && y <= area.maxBounds.y &&
+            z >= area.minBounds.z && z <= area.maxBounds.z) {
+            if (area.priority > bestPriority) {
+                bestPriority = area.priority;
+                bestIdx = i;
+            }
+        }
+    }
+
+    return bestIdx;
+}
+
 } // namespace Field

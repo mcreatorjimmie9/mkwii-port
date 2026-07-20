@@ -43,6 +43,9 @@ KartTire::KartTire() {
     mFriction = 0.0f;
     mRestitution = 0.0f;
     mColBitmask = 0;
+    mSlipAngle = 0.0f;
+    mTireWear = 0.0f;
+    mTirePressure = 1.0f;
     // Initialize wheel index to invalid
     mWheelIdx = 0xFFFFFFFF;
     mBspWheelIdx = -1;
@@ -356,6 +359,136 @@ void KartTire::setContact(f32 depth, const EGG::Vector3f& normal) {
         mSurfaceType = SURFACE_NORMAL;
         mNormalForce = 0.0f;
     }
+}
+
+// ============================================================================
+// Extended KartTire methods
+// ============================================================================
+
+// @addr 0x8059d080
+f32 KartTire::getSurfaceGrip() const {
+    // Return the effective grip modifier for the current surface.
+    // This combines the base grip with surface type and tire wear.
+    f32 surfaceGrip = 1.0f;
+    switch (mSurfaceType) {
+    case SURFACE_NORMAL:  surfaceGrip = 1.0f;  break;
+    case SURFACE_OFFROAD: surfaceGrip = 0.35f; break;
+    case SURFACE_BOOST:   surfaceGrip = 1.0f;  break;
+    case SURFACE_ICE:     surfaceGrip = 0.15f; break;
+    case SURFACE_TRICK:   surfaceGrip = 0.8f;  break;
+    case SURFACE_HALFPIPE: surfaceGrip = 1.0f;  break;
+    default:              surfaceGrip = 1.0f;  break;
+    }
+
+    // Apply tire wear reduction (worn tires have less grip)
+    f32 wearFactor = 1.0f - mTireWear * 0.3f;
+    if (wearFactor < 0.5f) wearFactor = 0.5f;
+
+    // Apply tire pressure effect
+    f32 pressureFactor = mTirePressure;
+    if (pressureFactor < 0.5f) pressureFactor = 0.5f;
+    if (pressureFactor > 1.2f) pressureFactor = 1.2f;
+
+    return mGrip * surfaceGrip * wearFactor * pressureFactor;
+}
+
+// @addr 0x8059d0C0
+void KartTire::calcSlipAngle(f32 forwardSpeed, f32 lateralSpeed) {
+    // Compute the tire slip angle in radians.
+    // Slip angle = atan2(lateral_speed, |forward_speed|)
+    // This is the angle between the tire's heading and its
+    // actual velocity direction.
+    //
+    // A slip angle of 0 means the tire is moving straight ahead.
+    // Positive slip means the tire is sliding outward (understeer).
+
+    f32 absForward = forwardSpeed;
+    if (absForward < 0.0f) absForward = -absForward;
+
+    // Avoid division by zero — if not moving forward, no slip
+    if (absForward < 0.1f) {
+        mSlipAngle = 0.0f;
+        return;
+    }
+
+    // Clamp lateral speed to prevent atan2 extremes
+    f32 clampedLateral = lateralSpeed;
+    f32 maxLateral = absForward * 2.0f; // max ~63 degrees
+    if (clampedLateral > maxLateral) clampedLateral = maxLateral;
+    if (clampedLateral < -maxLateral) clampedLateral = -maxLateral;
+
+    mSlipAngle = std::atan2(clampedLateral, absForward);
+}
+
+// @addr 0x8059d100
+f32 KartTire::calcLateralForce(f32 slipAngle, f32 normalForce) const {
+    // Compute the lateral (cornering) force using a simplified tire model.
+    // F_lat = C_alpha * slipAngle * normalForce / C_ref
+    // where C_alpha is the cornering stiffness.
+    //
+    // The force peaks at ~10 degrees and then drops off (tire saturation).
+    // This is a simplified Pacejka "Magic Formula" approximation.
+
+    f32 effectiveGrip = getSurfaceGrip();
+    f32 corneringStiffness = 10.0f * effectiveGrip;
+
+    // Linear region: F = C * alpha (for small angles)
+    f32 linearForce = corneringStiffness * slipAngle;
+
+    // Peak slip angle (~10 degrees = 0.175 rad)
+    f32 peakSlip = 0.175f;
+    f32 peakForce = corneringStiffness * peakSlip;
+
+    // Saturated region: force drops after peak
+    if (slipAngle > peakSlip) {
+        // Smooth drop-off using inverse tangent
+        f32 excess = slipAngle - peakSlip;
+        f32 saturation = 0.7f + 0.3f / (1.0f + excess * 5.0f);
+        linearForce = peakForce * saturation;
+    } else if (slipAngle < -peakSlip) {
+        f32 excess = -slipAngle - peakSlip;
+        f32 saturation = 0.7f + 0.3f / (1.0f + excess * 5.0f);
+        linearForce = -peakForce * saturation;
+    }
+
+    return linearForce * normalForce;
+}
+
+// @addr 0x8059d140
+f32 KartTire::getWear() const {
+    return mTireWear;
+}
+
+// @addr 0x8059d150
+void KartTire::setPressure(f32 pressure) {
+    // Set tire pressure (0.5 to 1.2 range).
+    // Lower pressure = more contact patch, more grip but more drag.
+    // Higher pressure = less contact patch, less grip but less drag.
+    if (pressure < 0.3f) pressure = 0.3f;
+    if (pressure > 1.5f) pressure = 1.5f;
+    mTirePressure = pressure;
+
+    // Pressure affects the tire radius slightly
+    f32 radiusAdjust = (pressure - 1.0f) * 0.02f;
+    mTireRadius = 0.35f + radiusAdjust;
+}
+
+// @addr 0x8059d180
+EGG::Vector3f KartTire::getContactPatch() const {
+    // Return the world-space position of the tire's contact patch.
+    // This is the point where the tire touches the ground surface.
+    // It's offset from the wheel center by the contact point offset.
+    if (!mInContact || !mWheelPhysics) {
+        EGG::Vector3f zero;
+        zero.setZero();
+        return zero;
+    }
+
+    EGG::Vector3f patch;
+    patch.x = mWheelPhysics->wheelPos.x + mContactPointOffset.x;
+    patch.y = mWheelPhysics->wheelPos.y + mContactPointOffset.y;
+    patch.z = mWheelPhysics->wheelPos.z + mContactPointOffset.z;
+    return patch;
 }
 
 } // namespace Kart

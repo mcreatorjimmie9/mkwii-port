@@ -189,6 +189,20 @@ public:
     AnmObjChrData* getData() { return &mData; }
     const AnmObjChrData* getData() const { return &mData; }
 
+    // Extended visibility helpers
+    u32 getPrevMask() const;
+    u32 getCurrentMask() const;
+    u32 getShapeCount() const;
+    bool isPlaying() const;
+    f32 getFrameRate() const;
+    void setFrameRate(f32 rate);
+    ResChrAnm* getResource() const;
+    void setShapeVisible(u32 shapeIdx, bool visible);
+    bool isShapeVisible(u32 shapeIdx) const;
+    void showAllShapes();
+    void hideAllShapes();
+    void reset();
+
 private:
     AnmObjChrData mData;    // Underlying animation data
     R3DModel* mpModel;      // Attached model (or nullptr)

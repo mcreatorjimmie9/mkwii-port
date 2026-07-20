@@ -26,6 +26,33 @@ public:
     // @addr 0x807fa9a8
     void refresh();
 
+    // @addr 0x807fa0c0 (estimated)
+    void init(u8 lapCount);
+    // @addr 0x807fa100 (estimated)
+    void update();
+    // @addr 0x807fa0e0 (estimated)
+    void formatTimeString(f32 timeMs);
+    // @addr 0x807fa110 (estimated)
+    const char* getTimeDisplay() const;
+    // @addr 0x807fa130 (estimated)
+    f32 getLapTime(u8 lap) const;
+    // @addr 0x807fa140 (estimated)
+    f32 getTotalTime() const;
+    // @addr 0x807fa150 (estimated)
+    void startClock();
+    // @addr 0x807fa160 (estimated)
+    void stopClock();
+    // @addr 0x807fa170 (estimated)
+    void resetClock();
+    // @addr 0x807fa180 (estimated)
+    void recordLap(f32 lapTimeMs);
+    // @addr 0x807fa190 (estimated)
+    f32 getBestLapTime() const;
+    // @addr 0x807fa1a0 (estimated)
+    void setGhostTime(f32 ghostMs);
+    // @addr 0x807fa1b0 (estimated)
+    f32 getDeltaToGhost() const;
+
     u32 flags;      // 0x00 - bit 23 checked in initSelf
     f32 timeValue;  // 0x50 - stored time value
     f32 lastTime;   // 0xa8 - previous time for refresh diff
@@ -36,6 +63,18 @@ public:
     u32 mLagCounter;          // Frame counter for animation lag
     bool mShowDelta;          // Whether to show time comparison
     u8 mDeltaColor;           // 0 = neutral, 1 = green (faster), 2 = red (slower)
+
+    // Clock state
+    bool mClockRunning;       // Whether the clock is currently running
+    u32 mClockStartFrame;     // Frame when clock was started
+    u8 mLapCount;             // Total number of laps in the race
+    u8 mCurrentLap;           // Current lap (1-indexed)
+    f32 mLapTimes[3];         // Completed lap times in ms
+    f32 mLapStartTimes[3];    // Frame times when each lap started
+    f32 mTotalTimeMs;         // Total elapsed race time in ms
+    f32 mCurrentLapStartMs;   // Time when current lap started
+    f32 mBestLapMs;           // Best lap time so far
+    f32 mGhostTimeMs;         // Ghost reference time for delta display
 };
 
 // CtrlRaceLap is a UI control that displays the current lap count.

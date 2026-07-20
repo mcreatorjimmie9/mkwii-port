@@ -100,6 +100,28 @@ struct AIPathHandler {
     f32 getProgress() const;
     bool isFinished() const;
 
+    // Get waypoint position by index
+    EGG::Vector3f getPoint(s32 index) const;
+
+    // Get total waypoint count
+    s32 getPointCount() const;
+
+    // Get current waypoint index
+    s32 getCurrentIndex() const;
+
+    // Advance to next waypoint (alias)
+    void advance();
+
+    // Enable/disable path looping
+    void setLoop(bool loop);
+    bool isLooping() const;
+
+    // Get speed factor computed during calc
+    f32 getSpeedFactor() const;
+
+    // Get steering correction from calc
+    f32 getSteerCorrection() const;
+
     bool mbIsSwitchingPath;
     PointParam* mpPrevPointParam;
     PointParam* mpCurrPointParam;
@@ -123,6 +145,7 @@ struct AIPathHandler {
     f32 mProgress;
     bool mbFinished;
     f32 mArrivalDistSq;
+    bool mbLoop;
 };
 
 struct AIPathManager {
@@ -132,5 +155,8 @@ struct AIPathManager {
     AIPathHandler* mpPlayers[MAX_PLAYER_COUNT];
     u32 mPlayerCount;
 };
+
+// Free function: compute total path length
+f32 AIPath_getPathLength(const System::MapdataEnemyPathAccessor* accessor);
 
 } // namespace Enemy

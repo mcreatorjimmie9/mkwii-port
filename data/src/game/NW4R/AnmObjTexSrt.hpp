@@ -139,6 +139,12 @@ public:
     void attach(void* mat);
     void detach();
 
+    /// Get the current texture scale values.
+    void getScale(f32* outSX, f32* outSY) const;
+
+    /// Get the current texture rotation in radians.
+    f32 getRotation() const;
+
     AnmObjTexSrtData* getData() { return &m_data; }
     const AnmObjTexSrtData* getData() const { return &m_data; }
 

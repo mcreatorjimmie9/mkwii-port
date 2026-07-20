@@ -45,6 +45,10 @@ public:
     // Initialize grid for a given course
     /* StartGrid_init @ 0x804C3180 */
     void init(u32 courseId);
+    /* StartGrid_initWithCount @ 0x804C31C0 */
+    void init(u32 courseId, u32 count);
+    /* StartGrid_loadFromKMP @ 0x804C3220 */
+    bool loadFromKMP(const void* kmpData);
 
     // Calculate grid positions based on course S/F line and direction
     /* StartGrid_calculatePositions @ 0x804C3200 */
@@ -75,9 +79,6 @@ public:
     /* StartGrid_setFromStandings @ 0x804C3800 */
     void setFromStandings(const s32* playerStandings, s32 playerCount);
 
-    // Get total number of grid slots
-    s32 getSlotCount() const { return MAX_GRID_SLOTS; }
-
     // Reverse grid order (for certain race modes)
     /* StartGrid_reverseOrder @ 0x804C3900 */
     void reverseOrder();
@@ -103,6 +104,34 @@ public:
 
     // Reset all assignments to default (player i → slot i)
     void resetToDefault();
+    /* StartGrid_reset @ 0x804C3CC0 */
+    void reset();
+
+    // --- New accessors ---
+    /* StartGrid_getPosition @ 0x804C3540 */
+    const EGG::Vector3f& getPosition(u8 playerIdx) const;
+    /* StartGrid_getRotation @ 0x804C3580 */
+    f32 getRotation(u8 playerIdx) const;
+    /* StartGrid_getGridWidth @ 0x804C35C0 */
+    f32 getGridWidth() const;
+    /* StartGrid_setGridWidth @ 0x804C3600 */
+    void setGridWidth(f32 width);
+    /* StartGrid_getRowSpacing @ 0x804C3640 */
+    f32 getRowSpacing() const;
+    /* StartGrid_setRowSpacing @ 0x804C3680 */
+    void setRowSpacing(f32 spacing);
+    /* StartGrid_calcIdealSpacing @ 0x804C36C0 */
+    f32 calcIdealSpacing(u32 playerCount) const;
+    /* StartGrid_getSlotCount @ 0x804C3D00 */
+    s32 getSlotCount() const;
+    /* StartGrid_getEffectiveSlotCount @ 0x804C3D40 */
+    s32 getEffectiveSlotCount() const;
+    /* StartGrid_setSlotAssignment @ 0x804C3D80 */
+    void setSlotAssignment(s32 playerIdx, s32 slotIdx);
+    /* StartGrid_getSlotAssignment @ 0x804C3DC0 */
+    s32 getSlotAssignment(s32 playerIdx) const;
+    /* StartGrid_getGridLength @ 0x804C3E00 */
+    f32 getGridLength() const;
 
 private:
     static const s32 MAX_GRID_SLOTS = MAX_PLAYER_COUNT; // 12 slots

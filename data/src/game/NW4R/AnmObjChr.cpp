@@ -357,3 +357,80 @@ AnmObjChr* AnmObjChr_createFromRes(const void* data, u32 size) {
     }
     return obj;
 }
+
+// ============================================================================
+// Extended AnmObjChr helpers
+// ============================================================================
+
+/* AnmObjChr_getPrevMask @ 0x80601D40 */
+u32 AnmObjChr::getPrevMask() const {
+    return mData.prevMask;
+}
+
+/* AnmObjChr_getCurrentMask @ 0x80601D50 */
+u32 AnmObjChr::getCurrentMask() const {
+    return mData.currentMask;
+}
+
+/* AnmObjChr_getShapeCount @ 0x80601D60 */
+u32 AnmObjChr::getShapeCount() const {
+    return mData.shapeCount;
+}
+
+/* AnmObjChr_isPlaying @ 0x80601D70 */
+bool AnmObjChr::isPlaying() const {
+    return (mData.flags & ANMSCN_FLAG_PLAYING) != 0;
+}
+
+/* AnmObjChr_getFrameRate @ 0x80601D80 */
+f32 AnmObjChr::getFrameRate() const {
+    return mData.frameRate;
+}
+
+/* AnmObjChr_setFrameRate_obj @ 0x80601D90 */
+void AnmObjChr::setFrameRate(f32 rate) {
+    AnmObjChr_SetFrameRate(&mData, rate);
+}
+
+/* AnmObjChr_getResource @ 0x80601DA0 */
+ResChrAnm* AnmObjChr::getResource() const {
+    return mData.resource;
+}
+
+/* AnmObjChr_setShapeVisible @ 0x80601DB0 */
+void AnmObjChr::setShapeVisible(u32 shapeIdx, bool visible) {
+    if (shapeIdx >= 32) return;
+    if (visible) {
+        mData.currentMask |= (1u << shapeIdx);
+    } else {
+        mData.currentMask &= ~(1u << shapeIdx);
+    }
+}
+
+/* AnmObjChr_isShapeVisible @ 0x80601DC0 */
+bool AnmObjChr::isShapeVisible(u32 shapeIdx) const {
+    if (shapeIdx >= 32) return false;
+    return (mData.currentMask & (1u << shapeIdx)) != 0;
+}
+
+/* AnmObjChr_showAllShapes @ 0x80601DD0 */
+void AnmObjChr::showAllShapes() {
+    // Set all bits up to shapeCount
+    if (mData.shapeCount >= 32) {
+        mData.currentMask = 0xFFFFFFFF;
+    } else {
+        mData.currentMask = (1u << mData.shapeCount) - 1;
+    }
+}
+
+/* AnmObjChr_hideAllShapes @ 0x80601DE0 */
+void AnmObjChr::hideAllShapes() {
+    mData.currentMask = 0;
+}
+
+/* AnmObjChr_reset @ 0x80601DF0 */
+void AnmObjChr::reset() {
+    AnmObjChr_SetFrame(&mData, 0.0f);
+    mData.flags &= ~ANMSCN_FLAG_FINISHED;
+    mData.flags |= ANMSCN_FLAG_PLAYING;
+}

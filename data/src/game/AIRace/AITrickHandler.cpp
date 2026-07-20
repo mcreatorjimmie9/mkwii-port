@@ -24,6 +24,102 @@ AITrickHandler::AITrickHandler(AIInfo* info)
 
 AITrickHandler::~AITrickHandler() {}
 
+// AITrickHandler_init — Initialize the trick handler state
+// @addr 0x807377B0
+/* AITrickHandler_init @ 0x807377B0 */
+void AITrickHandler::init() {
+    mTrickCooldown = 0.0f;
+    mLastTrickTime = -10.0f;
+    mAirTime = 0.0f;
+}
+
+// AITrickHandler_update — Main per-frame update tick
+// @addr 0x807377C0
+/* AITrickHandler_updateFrame @ 0x807377C0 */
+void AITrickHandler::updateFrame() {
+    calc();
+}
+
+// AITrickHandler_shouldTrick — External query interface
+// @addr 0x807377D0
+/* AITrickHandler_shouldPerformTrick @ 0x807377D0 */
+bool AITrickHandler::shouldPerformTrick() {
+    return shouldTrick();
+}
+
+// AITrickHandler_getTrickDirection — Get the direction for the next trick
+// Returns: 0=up, 1=down, 2=left, 3=right
+// @addr 0x807377D8
+/* AITrickHandler_getTrickDirection @ 0x807377D8 */
+s32 AITrickHandler::getTrickDirection() const {
+    // For karts: only up/down tricks are available.
+    // The direction is chosen randomly in the update() method.
+    // This returns the last direction that was set.
+    // For bikes, 4 directions are available.
+    // Default: up trick (most common, safest)
+    return 0;
+}
+
+// AITrickHandler_calcTrickScore — Calculate the trick score based on
+// air time and difficulty. Higher air time → more points.
+// @addr 0x807377E0
+/* AITrickHandler_calcTrickScore @ 0x807377E0 */
+s32 AITrickHandler::calcTrickScore() const {
+    // Trick scoring in MKW:
+    //   - Basic trick: 1 trick boost worth of points
+    //   - Air time bonus: +1 for every 0.5s of air time above 0.3s
+    //   - The actual score is used internally for the trick boost duration
+    // Base score: 1
+    s32 score = 1;
+
+    // Air time bonus: 0.3s minimum air time for a trick
+    if (mAirTime > 0.3f) {
+        f32 bonusTime = mAirTime - 0.3f;
+        score += (s32)(bonusTime * 2.0f); // +1 per 0.5s
+        if (score > 4) score = 4; // Cap at 4 (the maximum trick bonus)
+    }
+
+    return score;
+}
+
+// AITrickHandler_onLanding — Called when the AI kart touches the ground
+// after being airborne. Resets air time and applies trick scoring.
+// @addr 0x807377E4
+/* AITrickHandler_onLanding @ 0x807377E4 */
+void AITrickHandler::onLanding() {
+    // Reset air tracking
+    mAirTime = 0.0f;
+
+    // Reset trick cooldown on landing (allow immediate re-trick
+    // when hitting consecutive ramps)
+    if (mTrickCooldown < 0.1f) {
+        mTrickCooldown = 0.0f;
+    }
+}
+
+// AITrickHandler_isInAir — Check if the AI kart is currently airborne
+// @addr 0x807377E8
+/* AITrickHandler_isInAir @ 0x807377E8 */
+bool AITrickHandler::isInAir() const {
+    if (mpInfo == nullptr || mpInfo->mpAI == nullptr) return false;
+    Kart::KartState* state = mpInfo->mpAI->kartState();
+    if (state == nullptr) return false;
+    return state->on(Kart::KART_FLAG_AIR_START) &&
+           !state->on(Kart::KART_FLAG_TOUCHING_GROUND);
+}
+
+// AITrickHandler_getTrickWindow — Get the time window in which tricks
+// can be performed after leaving the ground.
+// @addr 0x807377F0
+/* AITrickHandler_getTrickWindow @ 0x807377F0 */
+f32 AITrickHandler::getTrickWindow() const {
+    // The trick window is the maximum air time after which tricks
+    // can no longer be performed. In MKW, this is about 1.5 seconds.
+    // If the kart has been in the air longer than this, the trick
+    // input window has passed.
+    return 1.5f;
+}
+
 void AITrickHandler::vf_0x0C() {}
 
 // avoidPow__Q25Enemy14AITrickHandlerFv

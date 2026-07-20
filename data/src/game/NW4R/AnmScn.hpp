@@ -147,3 +147,27 @@ AnmObjTexSrtData* AnmScn_GetTexSrt(AnmScnData* obj, u8 idx);
 
 // @addr 0x80602520 — Parse scene info from resource
 void AnmScn_GetScnInfo(ResAnmScn* res, AnmScnInfo* out);
+
+// @addr 0x80602560 — Get total frame count (duration)
+f32 AnmScn_GetFrameCount(const AnmScnData* obj);
+
+// @addr 0x80602580 — Get total child animation count
+u16 AnmScn_GetAnimationCount(const AnmScnData* obj);
+
+// @addr 0x806025A0 — Get child animation by type and index
+void* AnmScn_GetAnimation(AnmScnData* obj, u8 animType, u8 index);
+
+// @addr 0x806025C0 — Start playing the animation scene
+void AnmScn_Play(AnmScnData* obj);
+
+// @addr 0x806025E0 — Stop and reset the animation scene
+void AnmScn_Stop(AnmScnData* obj);
+
+// @addr 0x80602600 — Generic attach for any animation type
+BOOL AnmScn_Attach(AnmScnData* obj, u8 animType, void* anm);
+
+// @addr 0x80602620 — Get the target model
+G3dObjData* AnmScn_GetTargetModel(const AnmScnData* obj);
+
+// @addr 0x80602640 — Check if scene is currently playing
+BOOL AnmScn_IsPlaying(const AnmScnData* obj);

@@ -90,6 +90,11 @@ public:
     /// Finish respawn: restore normal physics, set final position, clear invincibility timer.
     void completeRespawn();
 
+    // Extended respawn methods
+    const EGG::Vector3f& getRespawnPosition() const;
+    void setRespawnDelay(s32 frames);
+    void onRespawnComplete();
+
 private:
     static const f32 LIFT_HEIGHT;          // Height to lift kart before flying
     static const f32 LIFT_SPEED;           // Vertical lift speed
@@ -124,5 +129,10 @@ private:
     static const f32 OOB_THRESHOLD_Y;        // Y threshold for OOB detection
     static const s32 OOB_GRACE_FRAMES;       // Frames before OOB triggers respawn
 };
+
+// Free function: find nearest road surface point for respawn
+// @addr 0x804B0580
+void KartRespawn_calcNearestRoad(const EGG::Vector3f& pos,
+                                  EGG::Vector3f* outPos, f32* outRot);
 
 } // namespace Kart

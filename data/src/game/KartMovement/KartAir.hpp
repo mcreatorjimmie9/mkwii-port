@@ -157,6 +157,19 @@ public:
     // Default trick result for each trick type
     static TrickResult getTrickResult(TrickType type);
 
+    // Extended state queries
+    f32 getStateTime() const;
+    f32 getLaunchSpeed() const;
+    bool isLanding() const;
+    f32 getLandingLagTime() const;
+    bool isTrickBoostActive() const;
+    f32 getTrickBoostTime() const;
+    f32 getSquashProgress() const;
+    f32 getMaxHeight() const;
+    f32 getLaunchHeight() const;
+    void reset();
+    void setConfig(const AirConfig& config);
+
 private:
     AirStateData mState;
     AirConfig mConfig;
@@ -168,5 +181,8 @@ private:
 // Free function: returns trick type name string for debug/logging
 /* KartAir_getTrickName @ 0x805D1400 */
 const char* KartAir_getTrickName(TrickType type);
+bool KartAir_isFlipTrick(TrickType type);
+bool KartAir_isSpinTrick(TrickType type);
+f32 KartAir_getTrickScore(TrickType type);
 
 } // namespace Kart

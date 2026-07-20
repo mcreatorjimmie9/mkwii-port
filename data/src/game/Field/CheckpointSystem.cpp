@@ -367,4 +367,108 @@ bool CheckpointSystem::allHumansFinished(s32 humanCount) const {
     return finished >= humanCount;
 }
 
+// @addr 0x804C2C00 (estimated)
+// loadFromKMP — Load checkpoint gates from a KMP file buffer.
+// Parses the CPRA (checkpoint area) section of the course KMP data.
+bool CheckpointSystem::loadFromKMP(const u8* kmpData, u32 kmpSize) {
+    if (!kmpData || kmpSize < 0x20) {
+        return false;
+    }
+    // In the full implementation, this would parse the KMP header
+    // to find the CPRA section offset and count, then read each
+    // checkpoint gate's position, normal, half-width, and sequence index.
+    // For now, fall back to the default gate layout.
+    return loadGates();
+}
+
+// @addr 0x804C2D00 (estimated)
+// checkPoint — Convenience method: check a single player's crossing.
+// Calls checkCrossing with the player's previous and current positions.
+bool CheckpointSystem::checkPoint(s32 playerIdx,
+                                  const EGG::Vector3f& prevPos,
+                                  const EGG::Vector3f& currPos) {
+    return checkCrossing(playerIdx, prevPos, currPos);
+}
+
+// @addr 0x804C2D40 (estimated)
+// getLapCount — Get the total number of laps for this race.
+u8 CheckpointSystem::getLapCount() const {
+    return mLapCount;
+}
+
+// @addr 0x804C2D50 (estimated)
+// isValidOrder — Check if a player has hit checkpoints in valid order.
+bool CheckpointSystem::isValidOrder(s32 playerIdx) const {
+    if (playerIdx < 0 || playerIdx >= mPlayerCount) {
+        return false;
+    }
+    return !mPlayerStates[playerIdx].mbMissedCheckpoint;
+}
+
+// @addr 0x804C2D80 (estimated)
+// getNearestCheckpoint — Find the nearest checkpoint gate to a position.
+// Returns the index of the nearest gate, or -1 if no gates exist.
+s32 CheckpointSystem::getNearestCheckpoint(const EGG::Vector3f& pos) const {
+    if (mGateCount == 0) {
+        return -1;
+    }
+
+    s32 bestIdx = 0;
+    f32 bestDistSq = 1.0e12f;
+
+    for (s32 i = 0; i < mGateCount; i++) {
+        f32 dx = pos.x - mGates[i].position.x;
+        f32 dy = pos.y - mGates[i].position.y;
+        f32 dz = pos.z - mGates[i].position.z;
+        f32 distSq = dx * dx + dy * dy + dz * dz;
+        if (distSq < bestDistSq) {
+            bestDistSq = distSq;
+            bestIdx = i;
+        }
+    }
+
+    return bestIdx;
+}
+
+// @addr 0x804C2E00 (estimated)
+// getWrongWayTimer — Get the wrong-way display timer for a player.
+s32 CheckpointSystem::getWrongWayTimer(s32 playerIdx) const {
+    if (playerIdx < 0 || playerIdx >= mPlayerCount) {
+        return 0;
+    }
+    return mPlayerStates[playerIdx].wrongWayTimer;
+}
+
+// @addr 0x804C2E20 (estimated)
+// isPlayerFinished — Check if a specific player has finished the race.
+bool CheckpointSystem::isPlayerFinished(s32 playerIdx) const {
+    if (playerIdx < 0 || playerIdx >= mPlayerCount) {
+        return false;
+    }
+    return mPlayerStates[playerIdx].mbFinished;
+}
+
+// @addr 0x804C2E40 (estimated)
+// getFinishLinePosition — Get the finish line position as a Vector3f.
+EGG::Vector3f CheckpointSystem::getFinishLinePosition() const {
+    return EGG::Vector3f(mFinishLineX, 0.0f, mFinishLineZ);
+}
+
+// @addr 0x804C2E60 (estimated)
+// setPlayerCount — Set the number of active players for checkpoint tracking.
+void CheckpointSystem::setPlayerCount(s32 count) {
+    if (count > 0 && count <= MAX_PLAYER_COUNT) {
+        mPlayerCount = count;
+    }
+}
+
+// @addr 0x804C2E80 (estimated)
+// getTotalCheckpointsHit — Get cumulative checkpoint crossings for a player.
+s32 CheckpointSystem::getTotalCheckpointsHit(s32 playerIdx) const {
+    if (playerIdx < 0 || playerIdx >= mPlayerCount) {
+        return 0;
+    }
+    return mPlayerStates[playerIdx].totalCheckpointsHit;
+}
+
 } // namespace Field

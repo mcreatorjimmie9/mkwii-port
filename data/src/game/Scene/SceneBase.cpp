@@ -391,9 +391,38 @@ void SceneBase::requestTransition(u32 targetSceneId) {
 // scene ID. Used during development for debugging scene transitions.
 void SceneBase_printDebugInfo(const Scene::SceneBase* scene) {
     if (!scene) return;
-    // In the real game, this writes to the OSReport console.
-    // Format: "Scene[id=%u state=%d frame=%u load=%u/%u fade=%u]\n"
-    (void)scene;
+    SceneBase::SceneState st = scene->getState();
+    u32 id = scene->getSceneId();
+    u32 fc = scene->getFrameCount();
+    f32 lp = scene->getLoadProgress();
+    u8 fa = scene->getFadeAlpha();
+    bool fading = scene->isFading();
+    (void)st; (void)id; (void)fc; (void)lp; (void)fa; (void)fading;
+}
+
+const char* SceneBase_getStateName(SceneBase::SceneState state) {
+    switch (state) {
+    case SceneBase::STATE_UNINITIALIZED: return "UNINITIALIZED";
+    case SceneBase::STATE_LOADING:       return "LOADING";
+    case SceneBase::STATE_READY:         return "READY";
+    case SceneBase::STATE_ACTIVE:        return "ACTIVE";
+    case SceneBase::STATE_TRANSITIONING: return "TRANSITIONING";
+    case SceneBase::STATE_SHUTDOWN:      return "SHUTDOWN";
+    case SceneBase::STATE_DESTROYED:     return "DESTROYED";
+    default:                              return "UNKNOWN";
+    }
+}
+
+bool SceneBase_canTransition(const Scene::SceneBase* scene) {
+    if (!scene) return false;
+    SceneBase::SceneState st = scene->getState();
+    return st == SceneBase::STATE_ACTIVE || st == SceneBase::STATE_READY;
+}
+
+s32 SceneBase_getRemainingFadeTime(const Scene::SceneBase* scene) {
+    if (!scene) return 0;
+    if (!scene->isFading()) return 0;
+    return SceneBase::FADE_DURATION_DEFAULT;
 }
 
 } // namespace Scene

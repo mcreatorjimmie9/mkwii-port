@@ -334,4 +334,7 @@ namespace PacketHeaderUtil {
 // @addr 0x8055bc00
 Packet Packet_createReliable(PacketType type, const u8* payload, u32 size);
 
+// Free function: get type name
+const char* Packet_getTypeName(u8 type);
+
 } // namespace RKNet

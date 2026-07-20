@@ -28,6 +28,15 @@ struct AIEngine: public Util::StateSequencer<AIEngine> {
     f32 getTotalSpeedMod() const;
     bool isDrifting() const;
     s32 getCurrentSection() const;
+    s32 getDifficulty() const;
+    void setDifficulty(s32 difficulty);
+
+    // --- Static factory ---
+    static AIEngine* createAI(const AI& ai, bool isBike);
+    static void destroyAI(AIEngine* engine);
+    static AIEngine* getAI(u8 playerId);
+    static void updateAll(const System::MapdataEnemyPathAccessor* accessor);
+    void shutdown();
 
     Util::State<AIEngine> mStateReady;
     Util::State<AIEngine> mStateRunCPU;
@@ -59,5 +68,8 @@ struct AIEngineBike: public AIEngine {
     AIEngineBike(const AI&);
     ~AIEngineBike();
 };
+
+// Singleton-style accessor
+AIEngine* AIEngine_getInstance();
 
 } // namespace Enemy

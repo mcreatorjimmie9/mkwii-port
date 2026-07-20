@@ -122,6 +122,15 @@ public:
     bool isEmpty() const { return mHeader.inputSize == 0; }
     void reset();
 
+    // Extended API
+    void init();
+    bool load(const void* data, u32 size);
+    bool save(void* data) const;
+    const u8* getData() const;
+    u32 getSize() const;
+    u32 compress(u8* outBuf, u32 outSize) const;
+    bool decompress(const u8* compressed, u32 compSize);
+
     const char* getHeaderInfo(char* buf, u32 bufSize) const;
 
     void setCourseId(u8 courseId) { mHeader.courseId = courseId; }
@@ -143,3 +152,7 @@ private:
 };
 
 } // namespace System
+
+// Verify ghost file magic/header validity (free function)
+// @addr 0x80542120
+bool GhostFile_verifyMagic(const void* data, u32 size);

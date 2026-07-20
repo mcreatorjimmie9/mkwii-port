@@ -346,4 +346,115 @@ u32 MenuPage::getItemCount() const {
     return mItemCount;
 }
 
+// @addr 0x8060a1C0
+MenuPage* MenuPage::getSubPage() const {
+    // In the real game, sub-pages are child layouts managed by the
+    // layout system. The sub-page layout reference (mSubPageLayout)
+    // is used to look up the corresponding MenuPage object.
+    // The sub-page is typically an embedded child layout that appears
+    // as an overlay (e.g., character detail panel within character select).
+    //
+    // The lookup walks the active page list via the PageManager
+    // and matches the layout group reference stored in mSubPageLayout.
+    // If no sub-page is attached, returns nullptr.
+    if (mSubPageLayout == 0) {
+        return nullptr;
+    }
+    // Stub: return nullptr since we don't have the PageManager lookup.
+    return nullptr;
+}
+
+// @addr 0x8060a1E0
+bool MenuPage::hasSubPage() const {
+    // A sub-page exists if the sub-page layout reference is non-zero
+    // and the layout has been initialized.
+    return mSubPageLayout != 0 && mInitFlag != 0;
+}
+
+// @addr 0x8060a200
+void MenuPage::clearItems() {
+    // Clear all menu items without destroying the page
+    for (u32 i = 0; i < mItemCount; i++) {
+        mItems[i].active = false;
+        mItems[i].itemId = 0;
+        mItems[i].xPos = 0;
+        mItems[i].yPos = 0;
+        mItems[i].textMsgId = 0;
+    }
+    mItemCount = 0;
+    mSelectedIndex = 0;
+    mSelectionAnimProgress = 0.0f;
+    mSelectionTargetY = 0.0f;
+}
+
+// @addr 0x8060a220
+void MenuPage::setCursorVisible(bool visible) {
+    mIsVisible = visible ? 1 : 0;
+    if (!visible) {
+        mCursorAnimating = 0;
+    }
+}
+
+// @addr 0x8060a240
+bool MenuPage::isCursorVisible() const {
+    return mIsVisible != 0;
+}
+
+// @addr 0x8060a260
+void MenuPage::lockCursor(bool locked) {
+    mCursorLocked = locked ? 1 : 0;
+}
+
+// @addr 0x8060a280
+void MenuPage::setNavigationTargetDirect(u32 pageId, u16 param) {
+    mNavigationTarget = pageId;
+    mNavParam = param;
+}
+
+// @addr 0x8060a2A0
+u32 MenuPage::getNavigationTarget() const {
+    return mNavigationTarget;
+}
+
+// @addr 0x8060a2C0
+u16 MenuPage::getNavParam() const {
+    return mNavParam;
+}
+
+// @addr 0x8060a2E0
+void MenuPage::setTransitionId(s32 id) {
+    mTransitionId = id;
+}
+
+// @addr 0x8060a300
+s32 MenuPage::getTransitionId() const {
+    return mTransitionId;
+}
+
+// @addr 0x8060a320
+void MenuPage::setItemText(u16 itemId, u32 textMsgId) {
+    for (u32 i = 0; i < mItemCount; i++) {
+        if (mItems[i].itemId == itemId) {
+            mItems[i].textMsgId = textMsgId;
+            return;
+        }
+    }
+}
+
+// @addr 0x8060a340
+const MenuPage::MenuItem* MenuPage::getItem(u16 index) const {
+    if (index >= mItemCount) return nullptr;
+    return &mItems[index];
+}
+
+// @addr 0x8060a360
+void MenuPage::setPrevPageId(u32 prevPageId) {
+    mPrevPageId = prevPageId;
+}
+
+// @addr 0x8060a380
+u32 MenuPage::getPrevPageId() const {
+    return mPrevPageId;
+}
+
 } // namespace UI

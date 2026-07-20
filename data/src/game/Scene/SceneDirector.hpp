@@ -48,6 +48,18 @@ public:
     // Scene access
     SceneBase* getCurrentScene() const { return m_currentScene; }
     SceneBase* getNextScene() const { return m_nextScene; }
+    SceneBase* getPreviousScene() const;
+
+    // Register scene factory
+    void registerScene(SceneId sceneId);
+
+    // Scene ready callback
+    void onSceneReady(SceneBase* scene);
+
+    // Fade accessors
+    u8 getFadeAlpha() const;
+    void setFadeColor(u8 r, u8 g, u8 b);
+    f32 getFadeProgress() const;
 
     // Scene lookup
     SceneBase* getSceneByID(SceneId sceneId) const;
@@ -63,6 +75,8 @@ public:
     bool isChanging() const { return m_nextScene != nullptr; }
     TransitionType getTransitionType() const { return m_transitionType; }
     u32 getFrameCount() const { return m_frameCount; }
+    u32 getSceneCount() const;
+    bool hasScene(SceneId sceneId) const;
 
     // Init / shutdown
     void init();

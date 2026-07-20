@@ -134,13 +134,47 @@ public:
     };
 
     ScreenMode getScreenMode() const { return (ScreenMode)mScreenMode; }
-    ScreenMode getDisplayMode() const { return (ScreenMode)mScreenMode; }
     void setScreenMode(ScreenMode mode) { mScreenMode = (u8)mode; }
+
+    // --- Volume as float factors ---
+    // @addr 0x8022A7B0 (estimated)
+    f32 getVolumeFactor() const;
+    // @addr 0x8022A7B8 (estimated)
+    f32 getMusicVolumeFactor() const;
+    // @addr 0x8022A7C0 (estimated)
+    f32 getSFXVolumeFactor() const;
+
+    // --- Extended display mode ---
+    // @addr 0x8022A7F8 (estimated)
+    ScreenMode getDisplayMode() const;
+
+    // --- Comparison ---
+    bool compare(const Settings& other) const;
+    void copyFrom(const Settings& other);
+    bool isDefault() const;
+
+    // --- Volume helpers ---
+    u8 getVolumePercent() const;
+    void setVolumePercent(u8 vol);
 
     // --- Descriptive names ---
     const char* getDriftModeName() const;
     const char* getControlSchemeName() const;
     const char* getLanguageName() const;
+    const char* getStereoTypeName() const;
+
+    // --- FPS ---
+    u8 getTargetFPSValue() const;
+
+    // --- Language setter ---
+    // (inline version already declared above)
+
+    // --- Query helpers ---
+    bool isMono() const;
+    bool isSurround() const;
+    bool isWideScreen() const;
+    bool isManualDrift() const;
+    bool isAutoDrift() const;
 
     // --- Validate ---
     bool validate() const;

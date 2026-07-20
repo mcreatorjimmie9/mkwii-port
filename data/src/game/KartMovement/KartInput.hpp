@@ -113,6 +113,25 @@ public:
     // Check if item use button pressed this frame
     bool isItemUse() const;
 
+    // D-pad helpers
+    bool isDpadUp() const;
+    bool isDpadDown() const;
+    bool isDpadLeft() const;
+    bool isDpadRight() const;
+    bool isDpadAny() const;
+    bool isPausePressed() const;
+    void getDpadDirection(s32* outX, s32* outY) const;
+
+    // Raw input access
+    f32 getRawStickX() const;
+    f32 getRawStickY() const;
+
+    // Edge detection
+    bool isButtonReleased(u32 button) const;
+    u32 getButtons() const;
+    u32 getButtonsChanged() const;
+    u32 getTrickDirection() const;
+
     u8 field_0x04[36];
     System::KPadRaceInputState currentInputState;
     System::KPadRaceInputState lastInputState;

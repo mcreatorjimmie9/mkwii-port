@@ -131,6 +131,9 @@ public:
     void attach(void* mat);
     void detach();
 
+    /// Get the current animated color values.
+    void getColor(f32* r, f32* g, f32* b, f32* a) const;
+
     AnmObjMatClrData* getData() { return &m_data; }
     const AnmObjMatClrData* getData() const { return &m_data; }
 

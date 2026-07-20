@@ -83,6 +83,17 @@ public:
     // Return the last collision normal vector
     const EGG::Vector3f& getCollisionNormal() const;
 
+    // Extended body methods
+    void update(f32 dt);
+    const EGG::Vector3f& getScale() const;
+    void setScale(f32 scaleX, f32 scaleY, f32 scaleZ);
+    const EGG::Vector3f& getPosition() const;
+    void setPosition(const EGG::Vector3f& pos);
+    EGG::Vector3f getRotation() const;
+    f32 getBoundingRadius() const;
+    void calcBoundingBox(EGG::Vector3f& outMin, EGG::Vector3f& outMax) const;
+    bool isMega() const;
+
 private:
     u8 _00[0x04];           // 0x00: vtable (implicit)
     void* effectVtable;     // 0x04: secondary vtable ptr (set to vtable in ctor)
@@ -116,6 +127,11 @@ private:
     EGG::Vector3f mCollisionNormal;   // Last collision normal vector
     u32 mCompressionTimer;            // Frames remaining for spring-back
     static const u32 COMPRESSION_RECOVERY_FRAMES = 10;
+
+    // Extended state
+    EGG::Vector3f mBodyScale;          // Current body visual scale
+    EGG::Vector3f mBodyPos;            // Body center position
+    f32 mBoundingRadius;               // Precomputed bounding sphere radius
 };
 // static_assert(sizeof(KartBody) == 0x38);
 

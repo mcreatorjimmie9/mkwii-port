@@ -394,3 +394,14 @@ const f32 (*AnmObjTexSrt_GetTexMtx(const AnmObjTexSrtData* obj))[3] {
     if (!obj) return nullptr;
     return obj->texMtx;
 }
+
+// Get the current texture scale from the SRT data
+void AnmObjTexSrt::getScale(f32* outSX, f32* outSY) const {
+    if (outSX) *outSX = m_data.current.scaleX;
+    if (outSY) *outSY = m_data.current.scaleY;
+}
+
+// Get the current texture rotation in radians
+f32 AnmObjTexSrt::getRotation() const {
+    return m_data.current.rotation;
+}

@@ -5,6 +5,7 @@
 #include "StartGrid.hpp"
 #include <cmath>
 #include <stdlib.h>
+#include <cstring>
 
 namespace Field {
 
@@ -46,6 +47,126 @@ void StartGrid::init(u32 courseId) {
     for (s32 i = 0; i < MAX_GRID_SLOTS; i++) {
         mSlotAssignment[i] = i;
     }
+}
+
+// =============================================================================
+// init (courseId + count) — Initialize for a specific player count
+// @addr 0x804C31C0
+// =============================================================================
+
+/* StartGrid_initWithCount @ 0x804C31C0 */
+void StartGrid::init(u32 courseId, u32 count) {
+    init(courseId);
+
+    // Clamp count to valid range
+    if (count > (u32)MAX_GRID_SLOTS) {
+        count = (u32)MAX_GRID_SLOTS;
+    }
+    if (count < 2) {
+        count = 2;
+    }
+
+    // Store the active player count in the config for later queries
+    // (column count is always 2 in MKW; max rows adjusts to count)
+    mConfig.maxRows = (count + 1) / 2;
+    if (mConfig.maxRows > MAX_GRID_SLOTS / 2) {
+        mConfig.maxRows = MAX_GRID_SLOTS / 2;
+    }
+}
+
+// =============================================================================
+// loadFromKMP — Parse grid data from a KMP (course map parameter) buffer
+// @addr 0x804C3220
+//
+// The KMP STGI (start info) section contains the starting grid data.
+// Layout (simplified):
+//   [u32 numPlayers] [u32 numLaps]
+//   For each player up to 12:
+//     [f32 posX, posY, posZ] [u16 pointId] [u16 padding]
+// =============================================================================
+
+/* StartGrid_loadFromKMP @ 0x804C3220 */
+bool StartGrid::loadFromKMP(const void* kmpData) {
+    if (kmpData == nullptr) {
+        return false;
+    }
+
+    const u8* data = static_cast<const u8*>(kmpData);
+
+    // In a real KMP parse, we would locate the STGI section by scanning
+    // the section headers. For this implementation, we assume the pointer
+    // is already at the STGI data.
+
+    // STGI header:
+    //   0x00: u32 sectionSize
+    //   0x04: u8  playerCount
+    //   0x05: u8  unknown
+    //   0x06: u16 numLaps
+    //   0x08: u32[] (padding to 0x10)
+    //   0x10: Start entries begin
+    // Each start entry is 0x28 bytes:
+    //   0x00: f32 posX
+    //   0x04: f32 posY
+    //   0x08: f32 posZ
+    //   0x0C: f32 rotAngle (degrees → radians)
+    //   0x10: u16 pointId
+    //   0x12: u16 playerIndex
+    //   0x14: u8  padding[0x14]
+
+    u8 playerCount = data[0x04];
+    u16 numLaps = *(const u16*)(data + 0x06);
+    (void)numLaps;
+
+    // Clamp player count
+    if (playerCount > MAX_GRID_SLOTS) {
+        playerCount = MAX_GRID_SLOTS;
+    }
+
+    // Parse each start position entry
+    for (u8 i = 0; i < playerCount; i++) {
+        u32 entryOffset = 0x10 + (u32)i * 0x28;
+
+        f32 posX = *(const f32*)(data + entryOffset + 0x00);
+        f32 posY = *(const f32*)(data + entryOffset + 0x04);
+        f32 posZ = *(const f32*)(data + entryOffset + 0x08);
+        f32 rotAngle = *(const f32*)(data + entryOffset + 0x0C);
+
+        mSlots[i].position.x = posX;
+        mSlots[i].position.y = posY;
+        mSlots[i].position.z = posZ;
+        mSlots[i].rotation = rotAngle * (3.14159265f / 180.0f); // deg → rad
+        mSlots[i].slotIndex = i;
+        mSlots[i].row = i / 2;
+        mSlots[i].col = i % 2;
+
+        // Map player index from KMP entry
+        u16 playerIndex = *(const u16*)(data + entryOffset + 0x12);
+        if (playerIndex < MAX_GRID_SLOTS) {
+            mSlotAssignment[playerIndex] = i;
+        }
+    }
+
+    // Recompute the grid config from the loaded positions
+    if (playerCount >= 2) {
+        mConfig.startPositionX = (mSlots[0].position.x + mSlots[1].position.x) * 0.5f;
+        mConfig.startPositionZ = (mSlots[0].position.z + mSlots[1].position.z) * 0.5f;
+        mConfig.baseRotation = mSlots[0].rotation;
+
+        // Compute col spacing from first row
+        f32 dx = mSlots[1].position.x - mSlots[0].position.x;
+        f32 dz = mSlots[1].position.z - mSlots[0].position.z;
+        mConfig.colSpacing = std::sqrt(dx * dx + dz * dz);
+
+        // Compute row spacing from first two rows
+        if (playerCount >= 4) {
+            dx = mSlots[2].position.x - mSlots[0].position.x;
+            dz = mSlots[2].position.z - mSlots[0].position.z;
+            mConfig.rowSpacing = std::sqrt(dx * dx + dz * dz);
+        }
+    }
+
+    mbPositionsCalculated = true;
+    return true;
 }
 
 // =============================================================================
@@ -146,20 +267,110 @@ f32 StartGrid::getSlotRotation(s32 slotIdx) const {
     return mSlots[slotIdx].rotation;
 }
 
-/* StartGrid_setConfig @ 0x804C3600 */
+// =============================================================================
+// getPosition (u8 playerIdx) — Get a player's assigned grid position
+// @addr 0x804C3540
+// =============================================================================
+
+/* StartGrid_getPosition @ 0x804C3540 */
+const EGG::Vector3f& StartGrid::getPosition(u8 playerIdx) const {
+    s32 slot = getPositionForPlayer(playerIdx);
+    return getSlotPosition(slot);
+}
+
+// =============================================================================
+// getRotation (u8 playerIdx) — Get a player's assigned grid rotation
+// @addr 0x804C3580
+// =============================================================================
+
+/* StartGrid_getRotation @ 0x804C3580 */
+f32 StartGrid::getRotation(u8 playerIdx) const {
+    s32 slot = getPositionForPlayer(playerIdx);
+    return getSlotRotation(slot);
+}
+
+// =============================================================================
+// getGridWidth — Total lateral width of the grid formation
+// @addr 0x804C35C0
+// =============================================================================
+
+/* StartGrid_getGridWidth @ 0x804C35C0 */
+f32 StartGrid::getGridWidth() const {
+    return (f32)(mConfig.columns - 1) * mConfig.colSpacing;
+}
+
+// =============================================================================
+// setGridWidth — Adjust column spacing to achieve a desired total width
+// @addr 0x804C3600
+// =============================================================================
+
+/* StartGrid_setGridWidth @ 0x804C3600 */
+void StartGrid::setGridWidth(f32 width) {
+    if (mConfig.columns <= 1) {
+        mConfig.colSpacing = 0.0f;
+        return;
+    }
+    mConfig.colSpacing = width / (f32)(mConfig.columns - 1);
+    // Recalculate positions if they were previously computed
+    mbPositionsCalculated = false;
+}
+
+// =============================================================================
+// getRowSpacing — Get the spacing between consecutive grid rows
+// @addr 0x804C3640
+// =============================================================================
+
+/* StartGrid_getRowSpacing @ 0x804C3640 */
+f32 StartGrid::getRowSpacing() const {
+    return mConfig.rowSpacing;
+}
+
+// =============================================================================
+// setRowSpacing — Set the spacing between consecutive grid rows
+// @addr 0x804C3680
+// =============================================================================
+
+/* StartGrid_setRowSpacing @ 0x804C3680 */
+void StartGrid::setRowSpacing(f32 spacing) {
+    mConfig.rowSpacing = spacing;
+    mbPositionsCalculated = false;
+}
+
+// =============================================================================
+// calcIdealSpacing — Compute ideal row spacing based on the number of
+// players and a desired grid depth (distance from pole to last row).
+// @addr 0x804C36C0
+// =============================================================================
+
+/* StartGrid_calcIdealSpacing @ 0x804C36C0 */
+f32 StartGrid::calcIdealSpacing(u32 playerCount) const {
+    if (playerCount <= 1) {
+        return 0.0f;
+    }
+    u32 rowCount = (playerCount + 1) / 2;
+    if (rowCount <= 1) {
+        return DEFAULT_ROW_SPACING;
+    }
+    // MKW aims for a total grid depth of ~90m (6 rows * 15m).
+    // Scale proportionally for smaller grids.
+    f32 idealDepth = (f32)rowCount * DEFAULT_ROW_SPACING;
+    return idealDepth / (f32)(rowCount - 1);
+}
+
+/* StartGrid_setConfig @ 0x804C3800 */
 void StartGrid::setConfig(const GridConfig& config) {
     mConfig = config;
     mbPositionsCalculated = false;
 }
 
-/* StartGrid_getConfig @ 0x804C3700 */
+/* StartGrid_getConfig @ 0x804C3900 */
 const GridConfig& StartGrid::getConfig() const {
     return mConfig;
 }
 
 // =============================================================================
 // setFromStandings - GP standings with tie-breaking logic
-// @addr 0x804C3800
+// @addr 0x804C3A00
 // =============================================================================
 
 void StartGrid::setFromStandings(const s32* playerStandings, s32 playerCount) {
@@ -187,7 +398,7 @@ void StartGrid::setFromStandings(const s32* playerStandings, s32 playerCount) {
     }
 }
 
-/* StartGrid_reverseOrder @ 0x804C3900 */
+/* StartGrid_reverseOrder @ 0x804C3B00 */
 void StartGrid::reverseOrder() {
     for (s32 i = 0; i < MAX_GRID_SLOTS / 2; i++) {
         s32 tmp = mSlotAssignment[i];
@@ -198,7 +409,7 @@ void StartGrid::reverseOrder() {
 
 // =============================================================================
 // getStartPosition - Pole position (slot 0)
-// @addr 0x804C3A00
+// @addr 0x804C3B40
 // =============================================================================
 
 const EGG::Vector3f& StartGrid::getStartPosition() const {
@@ -207,7 +418,7 @@ const EGG::Vector3f& StartGrid::getStartPosition() const {
 
 // =============================================================================
 // getPositionForPlayer - Player index → grid slot
-// @addr 0x804C3A40
+// @addr 0x804C3B80
 // =============================================================================
 
 s32 StartGrid::getPositionForPlayer(s32 playerIdx) const {
@@ -219,7 +430,7 @@ s32 StartGrid::getPositionForPlayer(s32 playerIdx) const {
 
 // =============================================================================
 // getPlayerForPosition - Grid slot → player index (inverse mapping)
-// @addr 0x804C3A80
+// @addr 0x804C3BC0
 // =============================================================================
 
 s32 StartGrid::getPlayerForPosition(s32 slotIdx) const {
@@ -237,7 +448,7 @@ s32 StartGrid::getPlayerForPosition(s32 slotIdx) const {
 
 // =============================================================================
 // getRandomizedOrder - VS race random grid positions
-// @addr 0x804C3AC0
+// @addr 0x804C3C00
 // =============================================================================
 
 void StartGrid::getRandomizedOrder(s32* outOrder, s32 count) const {
@@ -260,7 +471,7 @@ void StartGrid::getRandomizedOrder(s32* outOrder, s32 count) const {
 
 // =============================================================================
 // adjustForReverse - Mirror mode lateral flip
-// @addr 0x804C3B00
+// @addr 0x804C3C40
 // =============================================================================
 
 void StartGrid::adjustForReverse() {
@@ -297,7 +508,7 @@ void StartGrid::adjustForReverse() {
 
 // =============================================================================
 // resetToDefault - Clear custom assignments
-// @addr 0x804C3B40
+// @addr 0x804C3C80
 // =============================================================================
 
 void StartGrid::resetToDefault() {
@@ -305,6 +516,105 @@ void StartGrid::resetToDefault() {
         mSlotAssignment[i] = i;
     }
     mbPositionsCalculated = false;
+}
+
+// =============================================================================
+// reset — Full reset to freshly-constructed state
+// @addr 0x804C3CC0
+// =============================================================================
+
+/* StartGrid_reset @ 0x804C3CC0 */
+void StartGrid::reset() {
+    mCourseId = 0;
+    mbPositionsCalculated = false;
+
+    mConfig.rowSpacing = DEFAULT_ROW_SPACING;
+    mConfig.colSpacing = DEFAULT_COL_SPACING;
+    mConfig.startPositionX = 0.0f;
+    mConfig.startPositionZ = -100.0f;
+    mConfig.baseRotation = 0.0f;
+    mConfig.columns = 2;
+    mConfig.maxRows = MAX_GRID_SLOTS / 2;
+
+    for (s32 i = 0; i < MAX_GRID_SLOTS; i++) {
+        mSlots[i].position = EGG::Vector3f::zero;
+        mSlots[i].rotation = 0.0f;
+        mSlots[i].slotIndex = i;
+        mSlots[i].row = 0;
+        mSlots[i].col = 0;
+        mSlotAssignment[i] = i;
+    }
+}
+
+// =============================================================================
+// getSlotCount — Return the total number of grid slots
+// @addr 0x804C3D00
+// =============================================================================
+
+/* StartGrid_getSlotCount @ 0x804C3D00 */
+s32 StartGrid::getSlotCount() const {
+    return MAX_GRID_SLOTS;
+}
+
+// =============================================================================
+// getEffectiveSlotCount — Return the number of active grid slots
+// based on the current maxRows configuration
+// @addr 0x804C3D40
+// =============================================================================
+
+/* StartGrid_getEffectiveSlotCount @ 0x804C3D40 */
+s32 StartGrid::getEffectiveSlotCount() const {
+    s32 count = mConfig.maxRows * mConfig.columns;
+    if (count > MAX_GRID_SLOTS) {
+        count = MAX_GRID_SLOTS;
+    }
+    return count;
+}
+
+// =============================================================================
+// setSlotAssignment — Directly assign a player to a specific slot
+// @addr 0x804C3D80
+// =============================================================================
+
+/* StartGrid_setSlotAssignment @ 0x804C3D80 */
+void StartGrid::setSlotAssignment(s32 playerIdx, s32 slotIdx) {
+    if (playerIdx < 0 || playerIdx >= MAX_GRID_SLOTS) return;
+    if (slotIdx < 0 || slotIdx >= MAX_GRID_SLOTS) return;
+    mSlotAssignment[playerIdx] = slotIdx;
+}
+
+// =============================================================================
+// getSlotAssignment — Query which slot a player is assigned to
+// @addr 0x804C3DC0
+// =============================================================================
+
+/* StartGrid_getSlotAssignment @ 0x804C3DC0 */
+s32 StartGrid::getSlotAssignment(s32 playerIdx) const {
+    if (playerIdx < 0 || playerIdx >= MAX_GRID_SLOTS) return -1;
+    return mSlotAssignment[playerIdx];
+}
+
+// =============================================================================
+// getGridLength — Total depth of the grid from pole to last row
+// @addr 0x804C3E00
+// =============================================================================
+
+/* StartGrid_getGridLength @ 0x804C3E00 */
+f32 StartGrid::getGridLength() const {
+    s32 maxRow = mConfig.maxRows - 1;
+    if (maxRow < 1) return 0.0f;
+    return (f32)maxRow * mConfig.rowSpacing;
+}
+
+// =============================================================================
+// StartGrid_getDefault — Free function returning a default-constructed grid
+// @addr 0x804C3E40
+// =============================================================================
+
+/* StartGrid_getDefault @ 0x804C3E40 */
+Field::StartGrid* StartGrid_getDefault() {
+    static Field::StartGrid sDefault;
+    return &sDefault;
 }
 
 } // namespace Field

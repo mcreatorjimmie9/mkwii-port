@@ -365,4 +365,63 @@ f32 KartWheelie::getWheelieBalance() const {
     return balance;
 }
 
+// @addr 0x805B13A0 (estimated)
+// applyPenalty — Apply a bump penalty to the wheelie system.
+// Called when the bike is bumped during a wheelie, causing a spin-out.
+// Sets a cooldown timer before the next wheelie can be initiated.
+void KartWheelie::applyPenalty(f32 penaltyDuration) {
+    forceCancel();
+    // Set the bump cooldown to the given duration (minimum 0.5s)
+    if (penaltyDuration > 0.5f) {
+        mState.bumpCooldownTimer = penaltyDuration;
+    } else {
+        mState.bumpCooldownTimer = 0.5f;
+    }
+}
+
+// @addr 0x805B13C0 (estimated)
+// getStateData — Get the full wheelie runtime state for serialization.
+WheelieRuntimeState KartWheelie::getStateData() const {
+    return mState;
+}
+
+// @addr 0x805B13D0 (estimated)
+// getConfig — Get the current wheelie configuration.
+WheelieConfig KartWheelie::getConfig() const {
+    return mConfig;
+}
+
+// @addr 0x805B13E0 (estimated)
+// getCooldownRemaining — Get the remaining time before a wheelie can start.
+f32 KartWheelie::getCooldownRemaining() const {
+    if (mState.bumpCooldownTimer < 0.0f) {
+        return 0.0f;
+    }
+    return mState.bumpCooldownTimer;
+}
+
+// @addr 0x805B13F0 (estimated)
+// getMaxWheelieAngle — Get the maximum wheelie angle from config.
+f32 KartWheelie::getMaxWheelieAngle() const {
+    return mConfig.maxWheelieAngle;
+}
+
+// @addr 0x805B1400 (estimated)
+// getSpeedBoostValue — Get the speed boost multiplier from config.
+f32 KartWheelie::getSpeedBoostValue() const {
+    return mConfig.speedBoost;
+}
+
+// @addr 0x805B1410 (estimated)
+// isBike — Check if this wheelie system is for a bike.
+bool KartWheelie::isBike() const {
+    return mbIsBike;
+}
+
+// @addr 0x805B1420 (estimated)
+// getBumpVulnerability — Get the bump vulnerability factor from config.
+f32 KartWheelie::getBumpVulnerability() const {
+    return mConfig.bumpVulnerability;
+}
+
 } // namespace Kart

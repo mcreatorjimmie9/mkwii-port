@@ -11,7 +11,14 @@ ParticleEffect::ParticleEffect()
     : m_activeCount(0)
     , m_particleLimit(MAX_PARTICLES)
     , m_globalAlpha(1.0f)
-    , m_initialized(false) {}
+    , m_initialized(false)
+    , m_emitterX(0.0f), m_emitterY(0.0f), m_emitterZ(0.0f)
+    , m_emitterDX(0.0f), m_emitterDY(0.0f), m_emitterDZ(0.0f)
+    , m_lifetimeMult(1.0f)
+    , m_sizeScale(1.0f)
+    , m_baseR(0xFF), m_baseG(0xFF), m_baseB(0xFF), m_baseA(0xFF)
+    , m_useEmitterPos(false)
+    , m_useEmitterDir(false) {}
 
 ParticleEffect::~ParticleEffect() {}
 
@@ -389,6 +396,76 @@ void ParticleEffect::setGlobalAlpha(f32 alpha) {
     if (alpha < 0.0f) alpha = 0.0f;
     if (alpha > 1.0f) alpha = 1.0f;
     m_globalAlpha = alpha;
+}
+
+// @addr 0x80542F00 (estimated)
+// Stop all particles immediately. Alias for killAll() that
+// also resets the emitter state.
+void ParticleEffect::stop() {
+    killAll();
+    m_useEmitterPos = false;
+    m_useEmitterDir = false;
+    m_lifetimeMult = 1.0f;
+    m_sizeScale = 1.0f;
+    m_baseR = 0xFF;
+    m_baseG = 0xFF;
+    m_baseB = 0xFF;
+    m_baseA = 0xFF;
+}
+
+// @addr 0x80542F20 (estimated)
+// Set the emitter world position. When set, subsequent spawn calls
+// will use this position instead of the per-spawn position parameter.
+void ParticleEffect::setEmitterPos(f32 x, f32 y, f32 z) {
+    m_emitterX = x;
+    m_emitterY = y;
+    m_emitterZ = z;
+    m_useEmitterPos = true;
+}
+
+// @addr 0x80542F40 (estimated)
+// Set the emitter direction. When set, this direction is added to
+// the velocity of each spawned particle, creating a directional emission.
+void ParticleEffect::setEmitterDir(f32 dx, f32 dy, f32 dz) {
+    m_emitterDX = dx;
+    m_emitterDY = dy;
+    m_emitterDZ = dz;
+    m_useEmitterDir = true;
+}
+
+// @addr 0x80542F60 (estimated)
+// Set the lifetime multiplier for newly spawned particles.
+// A value of 2.0 makes particles live twice as long.
+void ParticleEffect::setLifetime(f32 multiplier) {
+    if (multiplier < 0.01f) multiplier = 0.01f;
+    if (multiplier > 10.0f) multiplier = 10.0f;
+    m_lifetimeMult = multiplier;
+}
+
+// @addr 0x80542F80 (estimated)
+// Set the base color for new particles. Existing particles are not affected.
+void ParticleEffect::setColor(u8 r, u8 g, u8 b, u8 a) {
+    m_baseR = r;
+    m_baseG = g;
+    m_baseB = b;
+    m_baseA = a;
+}
+
+// @addr 0x80542FA0 (estimated)
+// Set the base size scale for new particles. A value of 2.0 makes
+// particles twice their normal size.
+void ParticleEffect::setScale(f32 scale) {
+    if (scale < 0.01f) scale = 0.01f;
+    if (scale > 10.0f) scale = 10.0f;
+    m_sizeScale = scale;
+}
+
+// @addr 0x80542FC0 (estimated)
+// Get the current emitter position.
+void ParticleEffect::getEmitterPos(f32* x, f32* y, f32* z) const {
+    if (x) *x = m_emitterX;
+    if (y) *y = m_emitterY;
+    if (z) *z = m_emitterZ;
 }
 
 } // namespace Scene

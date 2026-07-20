@@ -370,4 +370,72 @@ bool AIPathHandler::isFinished() const {
     return mbFinished;
 }
 
+// @addr 0x80566000 (estimated)
+// getPoint — Get waypoint position by index.
+EGG::Vector3f AIPathHandler::getPoint(s32 index) const {
+    if (mpPathPoint && index == mWaypointIndex) {
+        return mpPathPoint->mTargetTrans;
+    }
+    if (mpCurrPointParam) {
+        f32 offset = static_cast<f32>(index - mWaypointIndex) * 200.0f;
+        return EGG::Vector3f(
+            (f32)mpCurrPointParam->mParam1 + offset,
+            0.0f,
+            (f32)mpCurrPointParam->mParam2
+        );
+    }
+    return EGG::Vector3f::zero;
+}
+
+// @addr 0x80566020 (estimated)
+// getPointCount — Get the total number of waypoints in the path.
+s32 AIPathHandler::getPointCount() const {
+    return mPathPointCount;
+}
+
+// @addr 0x80566030 (estimated)
+// getCurrentIndex — Get the current waypoint index.
+s32 AIPathHandler::getCurrentIndex() const {
+    return mWaypointIndex;
+}
+
+// @addr 0x80566040 (estimated)
+// advance — Advance to the next waypoint.
+void AIPathHandler::advance() {
+    advanceToNextWaypoint();
+}
+
+// @addr 0x80566050 (estimated)
+// setLoop — Enable or disable path looping.
+void AIPathHandler::setLoop(bool loop) {
+    mbLoop = loop;
+}
+
+// @addr 0x80566060 (estimated)
+// isLooping — Check if the path is set to loop.
+bool AIPathHandler::isLooping() const {
+    return mbLoop;
+}
+
+// @addr 0x80566070 (estimated)
+// getSpeedFactor — Get the speed factor computed during calc().
+f32 AIPathHandler::getSpeedFactor() const {
+    return field_0x3C;
+}
+
+// @addr 0x80566080 (estimated)
+// getSteerCorrection — Get the steering correction value from calc().
+f32 AIPathHandler::getSteerCorrection() const {
+    return field_0x38;
+}
+
+// @addr 0x80566090 (estimated)
+// AIPath_getPathLength — Compute total path length in world units.
+f32 AIPath_getPathLength(const System::MapdataEnemyPathAccessor* accessor) {
+    if (!accessor) return 0.0f;
+    s32 count = (s32)accessor->size();
+    if (count <= 1) return 0.0f;
+    return static_cast<f32>((count - 1)) * 200.0f;
+}
+
 } // namespace Enemy

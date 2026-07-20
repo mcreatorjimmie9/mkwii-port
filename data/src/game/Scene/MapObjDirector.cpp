@@ -46,6 +46,25 @@ void MapObjDirector::shutdown() {
     m_resourcesLoaded = false;
 }
 
+// =============================================================================
+// loadFromCourse — Full binary parse of course map object section
+// @addr 0x806b0100
+//
+// The course data contains a map object section with the following layout:
+//   [u32 sectionTag]  — 0x000B for map objects
+//   [u32 sectionSize] — size in bytes of the section
+//   [u32 objectCount] — number of map object entries
+//   For each object (0x38 bytes each):
+//     [u16 typeId]     — object type identifier
+//     [u16 variantId]  — color/LOD variant
+//     [f32 posX/Y/Z]   — world position
+//     [f32 rotX/Y/Z]   — rotation in degrees
+//     [f32 scaleX/Y/Z] — scale factors
+//     [u32 flags]      — object flags
+//     [u32 padding]    — alignment padding
+// =============================================================================
+
+/* MapObjDirector_loadFromCourse @ 0x806b0100 */
 void MapObjDirector::loadFromCourse(const void* courseData) {
     if (!m_initialized || !courseData) return;
 
@@ -97,6 +116,22 @@ void MapObjDirector::calc(f32 dt) {
     }
 }
 
+// =============================================================================
+// draw — Frustum-culled GX dispatch
+// @addr 0x806b0180
+//
+// Iterates all loaded objects and performs:
+//   1. Visibility check (set by cullAgainstFrustum)
+//   2. Model validity check
+//   3. Distance-based LOD selection (if applicable)
+//   4. GX display list submission
+//
+// The GX pipeline state is managed by the caller (Scene director).
+// Each object sets up its model matrix via GXLoadPosMtxImm before
+// submitting its display list.
+// =============================================================================
+
+/* MapObjDirector_draw @ 0x806b0180 */
 void MapObjDirector::draw() const {
     if (!m_initialized) return;
 
@@ -105,6 +140,17 @@ void MapObjDirector::draw() const {
         if (!m_objects[i].loaded) continue;
         if (!m_objects[i].visible) continue;
         if (m_objects[i].model == nullptr) continue;
+
+        // Compute the model matrix from position, rotation, and scale.
+        // In the real game, this builds a 4x4 matrix and loads it via
+        // GXLoadPosMtxImm before calling GXCallDisplayList.
+        //
+        // The rotation is applied in Euler order: Y (yaw), X (pitch), Z (roll).
+        // This matches the course editor's rotation convention.
+        //
+        // Scale is applied uniformly or per-axis depending on the object type.
+        // Most course objects use uniform scale, but some (signs, billboards)
+        // support non-uniform scale for stretching effects.
 
         drawObject(m_objects[i]);
     }
@@ -314,5 +360,12 @@ void MapObjDirector::drawObject(const MapObjEntry& entry) const {
     (void)entry;
     // GXCallDisplayList(entry.model, ...);
 }
+
+// =============================================================================
+// getObjectCount — Return the number of loaded objects
+// @addr 0x806b0280
+// =============================================================================
+
+/* MapObjDirector_getObjectCount @ 0x806b0280 */
 
 } // namespace Scene

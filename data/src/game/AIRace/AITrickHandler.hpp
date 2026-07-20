@@ -16,6 +16,14 @@ struct AITrickHandler {
     bool shouldTrick();
     void setTrickCooldown(f32 cooldown);
     bool allowWheelie() const;
+    void init();
+    void updateFrame();
+    bool shouldPerformTrick();
+    s32 getTrickDirection() const;
+    s32 calcTrickScore() const;
+    void onLanding();
+    bool isInAir() const;
+    f32 getTrickWindow() const;
 
     AIInfo* mpInfo;
     f32 mTrickCooldown;    // Minimum time between trick attempts

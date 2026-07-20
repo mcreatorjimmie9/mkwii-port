@@ -370,4 +370,127 @@ void KartState::resetAllEffects() {
     mStunTimer = 0;
 }
 
+// @addr 0x80596c00 (estimated)
+// setFlag — Set a specific kart state flag.
+void KartState::setFlag(size_t bit) {
+    set(bit);
+}
+
+// @addr 0x80596c10 (estimated)
+// clearFlag — Clear a specific kart state flag.
+void KartState::clearFlag(size_t bit) {
+    reset(bit);
+}
+
+// @addr 0x80596c20 (estimated)
+// hasFlag — Check if a specific kart state flag is set.
+bool KartState::hasFlag(size_t bit) const {
+    return on(bit);
+}
+
+// @addr 0x80596c30 (estimated)
+// getState — Get the combined state as a bitmask.
+u32 KartState::getState() const {
+    return getActiveEffectMask();
+}
+
+// @addr 0x80596c40 (estimated)
+// setState — Set the kart state from a bitmask.
+// Clears all effect flags and sets only the ones in the mask.
+void KartState::setState(u32 stateMask) {
+    resetAllEffects();
+    if (stateMask & (1u << 0)) set(KART_FLAG_STAR);
+    if (stateMask & (1u << 1)) set(KART_FLAG_MEGA);
+    if (stateMask & (1u << 2)) set(EFFECT_BIT_INK);
+    if (stateMask & (1u << 3)) set(EFFECT_BIT_SQUISH);
+    if (stateMask & (1u << 4)) set(EFFECT_BIT_STUN);
+    if (stateMask & (1u << 5)) set(KART_FLAG_BULLET);
+    if (stateMask & (1u << 6)) set(KART_FLAG_THUNDER);
+}
+
+// @addr 0x80596c60 (estimated)
+// isStarPowered — Check if star power is currently active.
+bool KartState::isStarPowered() const {
+    return on(KART_FLAG_STAR) || on(EFFECT_BIT_STAR);
+}
+
+// @addr 0x80596c70 (estimated)
+// isMega — Check if mega mushroom is currently active.
+bool KartState::isMega() const {
+    return on(KART_FLAG_MEGA) || on(EFFECT_BIT_MEGA);
+}
+
+// @addr 0x80596c80 (estimated)
+// getStarTimer — Get remaining star power frames.
+u32 KartState::getStarTimer() const {
+    return mStarTimer;
+}
+
+// @addr 0x80596c90 (estimated)
+// getMegaTimer — Get remaining mega mushroom frames.
+u32 KartState::getMegaTimer() const {
+    return mMegaTimer;
+}
+
+// @addr 0x80596ca0 (estimated)
+// getStunTimer — Get remaining stun frames.
+u32 KartState::getStunTimer() const {
+    return mStunTimer;
+}
+
+// @addr 0x80596cb0 (estimated)
+// getInkTimer — Get remaining ink frames.
+u32 KartState::getInkTimer() const {
+    return mInkTimer;
+}
+
+// @addr 0x80596cc0 (estimated)
+// getSquishTimer — Get remaining squish frames.
+u32 KartState::getSquishTimer() const {
+    return mSquishTimer;
+}
+
+// @addr 0x80596cd0 (estimated)
+// setStun — Activate or deactivate stun effect.
+void KartState::setStun(bool active, u32 duration) {
+    if (active) {
+        set(EFFECT_BIT_STUN);
+        mStunTimer = (duration > 0) ? duration : 120; // 2 seconds default
+    } else {
+        reset(EFFECT_BIT_STUN);
+        mStunTimer = 0;
+    }
+}
+
+// @addr 0x80596ce0 (estimated)
+// isOffRoad — Check if the kart is currently off-road.
+bool KartState::isOffRoad() const {
+    return on(KART_FLAG_OOB) || on(KART_FLAG_REJECT_ROAD);
+}
+
+// @addr 0x80596cf0 (estimated)
+// isInCannon — Check if the kart is currently in a cannon.
+bool KartState::isInCannon() const {
+    return on(KART_FLAG_CANNON_START) || on(KART_FLAG_IN_CANNON);
+}
+
+// @addr 0x80596d00 (estimated)
+// isOnGround — Check if the kart is touching the ground.
+bool KartState::isOnGround() const {
+    return on(KART_FLAG_TOUCHING_GROUND);
+}
+
+// @addr 0x80596d10 (estimated)
+// isBullet — Check if the kart is in bullet bill state.
+bool KartState::isBullet() const {
+    return on(KART_FLAG_BULLET) || on(KART_FLAG_IN_BULLET) ||
+           on(KART_FLAG_IN_A_BULLET);
+}
+
+// @addr 0x80596d20 (estimated)
+// getAirtime — Get the number of frames the kart has been airborne.
+u32 KartState::getAirtime() const {
+    return mAirtime;
+}
+
 } // namespace Kart

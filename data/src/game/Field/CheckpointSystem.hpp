@@ -95,6 +95,37 @@ public:
     /* CheckpointSystem_allHumansFinished @ 0x804C2A00 */
     bool allHumansFinished(s32 humanCount) const;
 
+    // Load checkpoint gates from KMP file data
+    bool loadFromKMP(const u8* kmpData, u32 kmpSize);
+
+    // Convenience: check a player crossing
+    bool checkPoint(s32 playerIdx, const EGG::Vector3f& prevPos,
+                   const EGG::Vector3f& currPos);
+
+    // Get total lap count for this race
+    u8 getLapCount() const;
+
+    // Check if a player has valid checkpoint order
+    bool isValidOrder(s32 playerIdx) const;
+
+    // Find nearest checkpoint gate to a position
+    s32 getNearestCheckpoint(const EGG::Vector3f& pos) const;
+
+    // Get wrong-way timer for a player
+    s32 getWrongWayTimer(s32 playerIdx) const;
+
+    // Check if a specific player has finished
+    bool isPlayerFinished(s32 playerIdx) const;
+
+    // Get finish line position
+    EGG::Vector3f getFinishLinePosition() const;
+
+    // Set the number of active players
+    void setPlayerCount(s32 count);
+
+    // Get total checkpoint crossings for a player
+    s32 getTotalCheckpointsHit(s32 playerIdx) const;
+
 private:
     static const s32 MAX_GATES = 64;
     static const u8  DEFAULT_LAP_COUNT = 3;

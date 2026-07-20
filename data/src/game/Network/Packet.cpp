@@ -382,4 +382,10 @@ Packet Packet_createReliable(PacketType type, const u8* payload, u32 size) {
     return pkt;
 }
 
+// @addr 0x8055bc20 (estimated)
+// Packet_getTypeName — Free function wrapper for PacketHeaderUtil::getTypeName.
+const char* Packet_getTypeName(u8 type) {
+    return PacketHeaderUtil::getTypeName(type);
+}
+
 } // namespace RKNet

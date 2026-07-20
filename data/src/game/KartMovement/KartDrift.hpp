@@ -140,6 +140,27 @@ public:
     /* KartDrift_calcDriftScore @ 0x805C1340 */
     f32 calcDriftScore() const;
 
+    // Get boost color (RGB) for current turbo level
+    void getBoostColor(u8* r, u8* g, u8* b) const;
+
+    // Get turbo charge as percentage [0, 100]
+    f32 getChargePercent() const;
+
+    // Get time spent charging
+    f32 getChargeTime() const;
+
+    // Check if mini-turbo can be released
+    bool canRelease() const;
+
+    // Get outside drift amount
+    f32 getOutsideDriftAmount() const;
+
+    // Get drift direction as float
+    f32 getDriftDirectionF() const;
+
+    // Get remaining boost time
+    f32 getRemainingBoostTime() const;
+
     // Get the turbo boost data for a given level
     static TurboBoostData getTurboBoostData(TurboLevel level);
 

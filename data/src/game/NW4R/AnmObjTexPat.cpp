@@ -343,3 +343,107 @@ void AnmObjTexPat_Reset(AnmObjTexPatData* obj) {
         obj->current.maxU = 1.0f; obj->current.maxV = 1.0f;
     }
 }
+
+// ============================================================================
+// AnmObjTexPat C++ Class Implementation
+// ============================================================================
+
+/* AnmObjTexPat_ctor @ 0x80600500 */
+AnmObjTexPat::AnmObjTexPat()
+    : mpMaterial(NULL) {
+    std::memset(&mData, 0, sizeof(AnmObjTexPatData));
+}
+
+/* AnmObjTexPat_dtor */
+AnmObjTexPat::~AnmObjTexPat() {
+    AnmObjTexPat_Destroy(&mData);
+    mpMaterial = NULL;
+}
+
+/* AnmObjTexPat_init @ 0x80600500 */
+bool AnmObjTexPat::init(ResTexPatAnm* res) {
+    if (!res) return false;
+    AnmObjTexPatData* result = AnmObjTexPat_Create(&mData, res);
+    return result != NULL;
+}
+
+/* AnmObjTexPat_calc @ 0x80600540 */
+void AnmObjTexPat::calc(f32 deltaTime) {
+    // Advance animation state
+    AnmObjTexPat_Calc(&mData, deltaTime);
+
+    // If attached to a material, automatically apply UV
+    if (mpMaterial != NULL) {
+        applyToMaterial(mpMaterial, 0);
+    }
+}
+
+/* AnmObjTexPat_setFrame @ 0x80600580 */
+void AnmObjTexPat::setFrame(f32 frame) {
+    AnmObjTexPat_SetFrame(&mData, frame);
+}
+
+/* AnmObjTexPat_getFrame @ 0x806005A0 */
+f32 AnmObjTexPat::getFrame() const {
+    return AnmObjTexPat_GetFrame(&mData);
+}
+
+/* AnmObjTexPat_getFrameCount @ 0x806005C0 */
+f32 AnmObjTexPat::getFrameCount() const {
+    return AnmObjTexPat_GetDuration(&mData);
+}
+
+/* AnmObjTexPat_applyToMaterial @ 0x806005E0 */
+void AnmObjTexPat::applyToMaterial(MaterialData* mat, u8 texMapIdx) {
+    if (!mat) return;
+    AnmObjTexPat_Apply(&mData, mat, texMapIdx);
+}
+
+/* AnmObjTexPat_setPlayMode @ 0x80600600 */
+void AnmObjTexPat::setPlayMode(u8 mode) {
+    AnmObjTexPat_SetPlayMode(&mData, mode);
+}
+
+/* AnmObjTexPat_attach @ 0x80600620 */
+void AnmObjTexPat::attach(MaterialData* mat) {
+    mpMaterial = mat;
+    // In real NW4R, attaching stores a pointer to the material's
+    // texcoord gen settings so that applyToMaterial() can modify them
+    // directly during the scene graph animation traversal.
+    // The material's texture map index is used to select which
+    // texcoord gen stage to modify.
+}
+
+/* AnmObjTexPat_detach @ 0x80600640 */
+void AnmObjTexPat::detach() {
+    mpMaterial = NULL;
+}
+
+// ============================================================================
+// AnmObjTexPat Factory
+// ============================================================================
+
+/* AnmObjTexPat_createFromRes @ 0x80600680 */
+AnmObjTexPat* AnmObjTexPat_createFromRes(const void* data, u32 size) {
+    if (!data || size < sizeof(ResTexPatAnm)) {
+        return NULL;
+    }
+    // Allocate AnmObjTexPat from the current heap
+    // In the original: new (heap) AnmObjTexPat()
+    AnmObjTexPat* obj = new AnmObjTexPat();
+    if (!obj) {
+        return NULL;
+    }
+    // Cast the raw data to a ResTexPatAnm pointer
+    // In real NW4R, the data is validated as a PAT0 block before use.
+    // The PAT0 header contains: magic "PAT0", size, frame count,
+    // and a list of keyframes with UV sub-rects.
+    ResTexPatAnm res;
+    std::memcpy(&res, data, (size < sizeof(ResTexPatAnm)) ? size : sizeof(ResTexPatAnm));
+
+    if (!obj->init(&res)) {
+        delete obj;
+        return NULL;
+    }
+    return obj;
+}

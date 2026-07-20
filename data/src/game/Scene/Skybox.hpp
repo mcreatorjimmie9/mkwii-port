@@ -54,19 +54,13 @@ public:
     WeatherType getWeatherType() const { return m_weatherType; }
 
     /// Get the current sky color (top of dome).
-    void getSkyColorTop(u8* r, u8* g, u8* b) const {
-        *r = m_skyColorTop[0]; *g = m_skyColorTop[1]; *b = m_skyColorTop[2];
-    }
+    void getSkyColorTop(u8* r, u8* g, u8* b) const;
 
     /// Get the current sky color (horizon).
-    void getSkyColorHorizon(u8* r, u8* g, u8* b) const {
-        *r = m_skyColorHorizon[0]; *g = m_skyColorHorizon[1]; *b = m_skyColorHorizon[2];
-    }
+    void getSkyColorHorizon(u8* r, u8* g, u8* b) const;
 
     /// Get fog color.
-    void getFogColor(u8* r, u8* g, u8* b) const {
-        *r = m_fogColor[0]; *g = m_fogColor[1]; *b = m_fogColor[2];
-    }
+    void getFogColor(u8* r, u8* g, u8* b) const;
 
     /// Get ambient light color derived from sky color.
     void getAmbientLightColor(u8* r, u8* g, u8* b) const;
@@ -91,6 +85,35 @@ public:
 
     /// Get sky override active flag.
     bool isSkyOverrideActive() const { return m_skyOverride; }
+
+    /// Set time of day for sky color interpolation
+    /// @param timeOfDay  [0.0, 1.0] (0=midnight, 0.5=noon)
+    void setTimeOfDay(f32 timeOfDay);
+
+    /// Rotate the sky dome by the given angle in degrees
+    void rotate(f32 angleDeg);
+
+    /// Get interpolated sky color at a height fraction
+    /// @param heightFraction  0.0=bottom, 1.0=top
+    void getSkyColor(f32 heightFraction, u8* r, u8* g, u8* b) const;
+
+    /// Get the current sky dome rotation angle in degrees
+    f32 getRotation() const;
+
+    /// Check if skybox resources are loaded
+    bool isLoaded() const;
+
+    /// Get the currently loaded skybox course ID
+    u32 getSkyboxId() const;
+
+    /// Get the current rain intensity [0.0, 1.0]
+    f32 getRainIntensity() const;
+
+    /// Get the elapsed time since weather started
+    f32 getWeatherTimer() const;
+
+    /// Clear the cutscene sky override
+    void clearOverride();
 
 private:
     void updateSkyColors(f32 timeOfDay);
@@ -125,6 +148,9 @@ private:
     u8 m_overrideTop[3];
     u8 m_overrideHorizon[3];
     u8 m_overrideBottom[3];
+
+    // Rotation
+    f32 mRotationAngle;
 };
 
 } // namespace Scene

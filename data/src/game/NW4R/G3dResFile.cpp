@@ -330,3 +330,116 @@ const void* G3dResFile_GetBlock(G3dResFileData* obj, u32 blockType) {
         default: return NULL;
     }
 }
+
+// ============================================================================
+// G3dResFile::load — Class method wrapper for G3dResFile_Load
+// @addr 0x80603C40
+// ============================================================================
+
+/* G3dResFile_load @ 0x80603C40 */
+bool G3dResFileData::load(const void* data, u32 size) {
+    return G3dResFile_Load(this, data, size) != NULL;
+}
+
+// ============================================================================
+// G3dResFile::parseHeader — Parse and cache header fields
+// @addr 0x80603C80
+// ============================================================================
+
+/* G3dResFile_parseHeader @ 0x80603C80 */
+bool G3dResFileData::parseHeader() {
+    if (fileData == NULL || fileSize == 0) return false;
+
+    const BRRESHeader* hdr = static_cast<const BRRESHeader*>(fileData);
+    if (hdr->magic[0] != 'b' || hdr->magic[1] != 'r' ||
+        hdr->magic[2] != 'e' || hdr->magic[3] != 's') {
+        return false;
+    }
+    if (hdr->byteOrder != 0xFEFF) return false;
+    if (hdr->fileSize > fileSize) return false;
+
+    blockCount = hdr->blockCount;
+    return true;
+}
+
+// ============================================================================
+// G3dResFile::getSectionCount — Return number of blocks in the file
+// @addr 0x80603CC0
+// ============================================================================
+
+/* G3dResFile_getSectionCount @ 0x80603CC0 */
+u16 G3dResFileData::getSectionCount() const {
+    return blockCount;
+}
+
+// ============================================================================
+// G3dResFile::getSectionData — Get raw pointer to a section by index
+// @addr 0x80603CE0
+// ============================================================================
+
+/* G3dResFile_getSectionData @ 0x80603CE0 */
+const void* G3dResFileData::getSectionData(u16 index) const {
+    if (fileData == NULL || index >= blockCount) return NULL;
+
+    const u8* base = static_cast<const u8*>(fileData);
+    u32 dirOffset = 0x10 + (u32)index * 0x10;
+    u32 fileSz = fileSize;
+
+    if (dirOffset + 0x08 > fileSz) return NULL;
+
+    u32 blockOffset = *reinterpret_cast<const u32*>(base + dirOffset + 4);
+    if (blockOffset >= fileSz) return NULL;
+
+    return base + blockOffset;
+}
+
+// ============================================================================
+// G3dResFile::getScnData — Get the SCN0 (animation scene) block
+// @addr 0x80603D20
+// ============================================================================
+
+/* G3dResFile_getScnData @ 0x80603D20 */
+const void* G3dResFileData::getScnData() const {
+    return scnBlock;
+}
+
+// ============================================================================
+// G3dResFile::getBmdData — Get the MDL3 (model) block
+// @addr 0x80603D40
+// ============================================================================
+
+/* G3dResFile_getBmdData @ 0x80603D40 */
+const void* G3dResFileData::getBmdData() const {
+    return mdlBlock;
+}
+
+// ============================================================================
+// G3dResFile::validate — Full validation of the loaded file
+// @addr 0x80603D60
+// ============================================================================
+
+/* G3dResFile_validate @ 0x80603D60 */
+bool G3dResFileData::validate() const {
+    if (fileData == NULL || fileSize == 0) return false;
+    return G3dResFile_Validate(fileData, fileSize) == TRUE;
+}
+
+// ============================================================================
+// G3dResFile_getModelCount — Free function to get model count
+// @addr 0x80603DA0
+//
+// In a full implementation, this reads the MDL3 block header to determine
+// how many model definitions are present. For a standard BRRES, there is
+// typically one MDL3 block containing one model. However, some BRRES files
+// used in MKW (e.g., course models) may contain multiple.
+// ============================================================================
+
+/* G3dResFile_getModelCount @ 0x80603DA0 */
+u16 G3dResFile_getModelCount(const G3dResFileData* obj) {
+    if (!obj || !obj->mdlBlock) return 0;
+
+    // MDL3 header: {char tag[4], u32 size, u16 revision, u16 mdlCount, ...}
+    const u8* mdlBase = static_cast<const u8*>(obj->mdlBlock);
+    u16 mdlCount = *reinterpret_cast<const u16*>(mdlBase + 0x08);
+    return mdlCount;
+}

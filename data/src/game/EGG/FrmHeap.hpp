@@ -84,6 +84,8 @@ public:
     // --- Heap interface ---
     // @addr 0x8016E500
     void* alloc(u32 size, s32 align);
+    // @addr 0x8016E520 — Allocate with default alignment (4)
+    void* alloc(u32 size);
     // @addr 0x8016E580
     void free(void* block);
     // @addr 0x8016E600
@@ -92,6 +94,12 @@ public:
     u32 getAllocatableSize(s32 align) const;
     // @addr 0x8016E700
     u32 getTotalFreeSize() const;
+    // @addr 0x8016E740 — Get total heap size
+    u32 getTotalSize() const;
+    // @addr 0x8016EA60 — Get currently allocated size
+    u32 getAllocatedSize() const;
+    // @addr 0x8016EA80 — Get free size (alias for getTotalFreeSize)
+    u32 getFreeSize() const;
     // @addr 0x8016E780
     void adjust();
     // @addr 0x8016E800
@@ -108,6 +116,14 @@ public:
     void becomeCurrentHeap();
     // @addr 0x8016EA00
     const char* getName() const;
+    // @addr 0x8016EA20 — Set heap name for debugging
+    void setName(const char* name);
+    // @addr 0x8016EA40 — Initialize from raw memory buffer
+    void init(u8* mem, u32 size);
+    // @addr 0x8016E900 — Allocate from parent heap
+    void* allocFromParent(u32 size);
+    // @addr 0x8016E980 — Free block back to parent heap
+    void freeToParent(void* block);
 
     MEMHeapHandle getHandle() const { return mHandle; }
 
@@ -121,5 +137,9 @@ private:
     const char* mName;       // 0x14 — heap name (default "NoName")
     void* mChildList;        // 0x18 — linked list of child disposers
 };
+
+// Print heap debug information to the console
+// @addr 0x8016EAC0
+void FrmHeap_printDebugInfo(const FrmHeap* heap);
 
 } // namespace EGG

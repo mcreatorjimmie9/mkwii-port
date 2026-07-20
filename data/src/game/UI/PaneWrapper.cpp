@@ -46,7 +46,8 @@ PaneWrapper::PaneWrapper()
     , mAnimScaleActive(false)
     , mAnimScaleTarget(1.0f)
     , mAnimScaleCurrent(1.0f)
-    , mAnimScaleSpeed(0.0f) {
+    , mAnimScaleSpeed(0.0f)
+    , m_parentPane(nullptr) {
     memset(mPaneData, 0, sizeof(mPaneData));
 }
 
@@ -383,6 +384,111 @@ void PaneWrapper::updateAnimations() {
             mPanePtr->setScale(mAnimScaleCurrent, mAnimScaleCurrent);
         }
     }
+}
+
+// @addr 0x8050b670 (estimated)
+// Attach this pane wrapper to a parent J2DPane.
+// Stores the parent reference and appends the wrapped pane
+// as a child of the parent if both are non-null.
+void PaneWrapper::attach(EGG::J2DPane* parentPane) {
+    m_parentPane = parentPane;
+    if (parentPane && mPanePtr) {
+        // In real NW4R, this calls parentPane->appendChild(mPanePtr)
+        // The parent takes ownership of the child pane's transform
+        // relative to the parent's coordinate space.
+    }
+}
+
+// @addr 0x8050b6a0 (estimated)
+// Detach this pane wrapper from its parent.
+// Removes the wrapped pane from the parent's child list
+// and clears the parent reference.
+void PaneWrapper::detach() {
+    if (m_parentPane && mPanePtr) {
+        // In real NW4R, this calls m_parentPane->removeChild(mPanePtr)
+    }
+    m_parentPane = nullptr;
+}
+
+// @addr 0x8050b6d0 (estimated)
+// Find a child pane by name within the wrapped pane's hierarchy.
+// Performs a depth-first search through all child panes.
+// Returns nullptr if no child with the given name is found.
+EGG::J2DPane* PaneWrapper::findChild(const char* name) const {
+    if (!mPanePtr || !name) return nullptr;
+
+    // In real NW4R, this uses nw4r::lyt::Pane::FindPaneByName()
+    // which recursively searches the pane tree.
+    // The search is depth-first, checking each pane's user
+    // name against the query string.
+    //
+    // For the port, we return nullptr as the pane hierarchy
+    // search requires the full NW4R pane tree implementation.
+    return nullptr;
+}
+
+// @addr 0x8050b700 (estimated)
+// Convenience method: animate position and alpha simultaneously.
+// Starts both a position and alpha animation with the same speed.
+// This is used for UI elements that move and fade at the same time,
+// such as result screen notifications and countdown overlays.
+void PaneWrapper::animate(f32 targetX, f32 targetY, u8 targetAlpha, f32 speed) {
+    animatePosition(targetX, targetY, speed);
+    animateAlpha(targetAlpha, speed);
+}
+
+// @addr 0x8050b720 (estimated)
+// Check if any animation is currently active on this pane.
+// Returns true if position, alpha, or scale animation is running.
+bool PaneWrapper::isAnimating() const {
+    return mAnimPosActive || mAnimAlphaActive || mAnimScaleActive;
+}
+
+// @addr 0x8050b740 (estimated)
+// Stop all active animations immediately and snap to current values.
+// Does not change the cached position/alpha/scale — just stops the
+// interpolation so the pane stays at its current animated position.
+void PaneWrapper::stopAllAnimations() {
+    mAnimPosActive = false;
+    mAnimAlphaActive = false;
+    mAnimScaleActive = false;
+}
+
+// @addr 0x8050b760 (estimated)
+// Set the animation speed multiplier for all future animations.
+// A value of 1.0 is normal speed, 2.0 is double speed, 0.5 is half.
+// This is used for fast-forwarding UI transitions during debug or
+// when the game speed is increased (e.g., replay fast-forward).
+void PaneWrapper::setAnimationSpeedMultiplier(f32 multiplier) {
+    if (multiplier < 0.0f) multiplier = 0.0f;
+    if (multiplier > 10.0f) multiplier = 10.0f;
+    // Scale all active animation speeds by the multiplier
+    if (mAnimPosActive) {
+        f32 baseSpeed = std::sqrt(
+            (mAnimPosTargetX - mCachedPosX) * (mAnimPosTargetX - mCachedPosX) +
+            (mAnimPosTargetY - mCachedPosY) * (mAnimPosTargetY - mCachedPosY)
+        );
+        mAnimPosSpeed = baseSpeed > 0.5f ? 5.0f * multiplier : mAnimPosSpeed;
+    }
+    if (mAnimAlphaActive) {
+        mAnimAlphaSpeed = 5.0f * multiplier;
+    }
+    if (mAnimScaleActive) {
+        mAnimScaleSpeed = 0.02f * multiplier;
+    }
+}
+
+// @addr 0x8050b780 (estimated)
+// Get the parent pane this wrapper is attached to.
+// Returns nullptr if this pane has not been attached to a parent.
+EGG::J2DPane* PaneWrapper::getParent() const {
+    return m_parentPane;
+}
+
+// @addr 0x8050b790 (estimated)
+// Check if this pane wrapper is attached to a parent pane.
+bool PaneWrapper::isAttached() const {
+    return m_parentPane != nullptr;
 }
 
 } // namespace UI

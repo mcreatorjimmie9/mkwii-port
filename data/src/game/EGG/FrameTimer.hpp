@@ -90,6 +90,14 @@ public:
     s32 getStartTick() const { return mStartTick; }
     s32 getEndTick() const { return mEndTick; }
 
+    // Extended queries
+    f32 getTotalTime() const;
+    u32 getFramesSinceFpsUpdate() const;
+    u32 getVSyncInterval() const;
+    bool isVSyncEnabled() const;
+    f32 getTargetFrameRate() const;
+    f32 getFrameBudget() const;
+
 private:
     s32 mStartTick;        // 0x00 — tick at frame start
     s32 mEndTick;          // 0x04 — tick at frame end

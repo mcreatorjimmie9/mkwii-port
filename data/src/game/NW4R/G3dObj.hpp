@@ -159,3 +159,33 @@ void G3dObj_SetScale(G3dObjData* obj, f32 scale);
 
 // @addr 0x806030C0 — Initialize bone transforms to bind pose
 void G3dObj_InitBindPose(G3dObjData* obj);
+
+// @addr 0x80603100 — Initialize G3dObj to default state
+void G3dObj_Init(G3dObjData* obj);
+
+// @addr 0x80603140 — Load model from resource (destroy + create)
+G3dObjData* G3dObj_Load(G3dObjData* obj, G3dResFileData* resFile);
+
+// @addr 0x80603180 — Set model resource
+G3dObjData* G3dObj_SetModel(G3dObjData* obj, G3dResFileData* resFile);
+
+// @addr 0x806031C0 — Get model resource
+G3dResFileData* G3dObj_GetModel(const G3dObjData* obj);
+
+// @addr 0x80603200 — Set world position
+void G3dObj_SetPosition(G3dObjData* obj, f32 x, f32 y, f32 z);
+
+// @addr 0x80603240 — Set rotation (Euler angles)
+void G3dObj_SetRotation(G3dObjData* obj, f32 rx, f32 ry, f32 rz);
+
+// @addr 0x80603280 — Set per-axis scale
+void G3dObj_SetScaleXYZ(G3dObjData* obj, f32 sx, f32 sy, f32 sz);
+
+// @addr 0x806032C0 — Get position
+void G3dObj_GetPosition(const G3dObjData* obj, f32* x, f32* y, f32* z);
+
+// @addr 0x80603300 — Get scale
+f32 G3dObj_GetScale(const G3dObjData* obj);
+
+// @addr 0x80603320 — Set LOD threshold
+void G3dObj_SetLODThreshold(G3dObjData* obj, f32 threshold);

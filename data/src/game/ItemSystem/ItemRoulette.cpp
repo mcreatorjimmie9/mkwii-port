@@ -276,7 +276,6 @@ ItemType ItemRoulette::selectItem() {
 
 } // namespace Item
 
-#ifdef ASSEMBLY_REFERENCE
 /* Raw PowerPC assembly from StaticR.rel */
 /* 0x807bc864: 81 05 00 04              lwz      r8, 4(r5) */
 /* 0x807bc868: 7f c4 f3 78              mr       r4, r30 */
@@ -325,8 +324,6 @@ ItemType ItemRoulette::selectItem() {
 /* 0x807bc914: 2c 03 00 00              cmpwi    r3, 0 */
 /* 0x807bc918: 40 82 ff 9c              bne      0x807bc8b4 */
 /* 0x807bc91c: 7f 63 db 78              mr       r3, r27 */
-#endif
-
 
 /* === DISASSEMBLY === */
 
@@ -378,3 +375,66 @@ ItemType ItemRoulette::selectItem() {
 //   0x807bc914:  cmpwi    r3, 0
 //   0x807bc918:  bne      0x807bc8b4
 //   0x807bc91c:  mr       r3, r27
+
+
+
+namespace Item {
+// @addr 0x807bc960 (estimated)
+// setSpeed — Set the spin speed manually (for debugging/cutscenes).
+void ItemRoulette::setSpeed(f32 speed) {
+    mSpinSpeed = speed;
+    if (mSpinSpeed < 0.5f) {
+        mSpinSpeed = 0.5f;
+    }
+}
+
+// @addr 0x807bc980 (estimated)
+// setPosition — Set the player's race position and recalculate probabilities.
+void ItemRoulette::setPosition(u8 position) {
+    if (position == 0) position = 1;
+    mPlayerPosition = position;
+    calcItemProbability(mPlayerPosition, mPlayerCount);
+}
+
+// @addr 0x807bc9A0 (estimated)
+// isComplete — Check if the roulette has completed selection.
+bool ItemRoulette::isComplete() const {
+    return (mFlags & FLAG_COMPLETE) != 0;
+}
+
+// @addr 0x807bc9B0 (estimated)
+// clearResult — Clear the result and prepare for a new spin.
+void ItemRoulette::clearResult() {
+    mResult = ITEM_NONE;
+    mItemBitmask = 0;
+    mFlags = 0;
+    mAnimFrame = 0;
+    mSpinSpeed = 0.0f;
+    mSpinTimer = 0;
+}
+
+// @addr 0x807bc9C0 (estimated)
+// getSpinTimer — Get the remaining spin timer value.
+s32 ItemRoulette::getSpinTimer() const {
+    return mSpinTimer;
+}
+
+// @addr 0x807bc9D0 (estimated)
+// getPlayerPosition — Get the player's race position.
+u8 ItemRoulette::getPlayerPosition() const {
+    return mPlayerPosition;
+}
+
+// @addr 0x807bc9E0 (estimated)
+// getSpinSpeed — Get the current spin speed.
+f32 ItemRoulette::getSpinSpeed() const {
+    return mSpinSpeed;
+}
+
+// @addr 0x807bc9F0 (estimated)
+// getItemBitmask — Get the accumulated item type bitmask.
+u32 ItemRoulette::getItemBitmask() const {
+    return mItemBitmask;
+}
+
+} // namespace Item

@@ -133,6 +133,33 @@ public:
     void animateSelection(f32 dt);
     void scrollToItem(u16 index);
     u32 getItemCount() const;
+    MenuPage* getSubPage() const;
+    bool hasSubPage() const;
+
+    // --- Extended menu item helpers ---
+    void clearItems();
+    void setCursorVisible(bool visible);
+    bool isCursorVisible() const;
+    void lockCursor(bool locked);
+    void setNavigationTargetDirect(u32 pageId, u16 param);
+    u32 getNavigationTarget() const;
+    u16 getNavParam() const;
+    void setTransitionId(s32 id);
+    s32 getTransitionId() const;
+    // Menu items for list-based pages
+    static const u16 MAX_MENU_ITEMS = 64;
+    struct MenuItem {
+        u16 itemId;
+        u16 xPos;
+        u16 yPos;
+        u32 textMsgId;    // message ID for text binding
+        bool active;
+    };
+
+    void setItemText(u16 itemId, u32 textMsgId);
+    const MenuItem* getItem(u16 index) const;
+    void setPrevPageId(u32 prevPageId);
+    u32 getPrevPageId() const;
 
     // --- State queries ---
     PageState getPageState() const { return mState; }
@@ -192,15 +219,6 @@ protected:
     u8 mCursorLocked;          // 0xFB9
     u16 _FBA;
 
-    // Menu items for list-based pages
-    static const u16 MAX_MENU_ITEMS = 64;
-    struct MenuItem {
-        u16 itemId;
-        u16 xPos;
-        u16 yPos;
-        u32 textMsgId;    // message ID for text binding
-        bool active;
-    };
     MenuItem mItems[MAX_MENU_ITEMS];
     u32 mItemCount;
     f32 mSelectionAnimProgress;  // 0..1 for cursor lerp

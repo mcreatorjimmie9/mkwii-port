@@ -360,4 +360,75 @@ void KartRespawn::completeRespawn() {
     m_oobTimer = 0;
 }
 
+// ============================================================================
+// Extended KartRespawn methods
+// ============================================================================
+
+// @addr 0x804B0500
+const EGG::Vector3f& KartRespawn::getRespawnPosition() const {
+    // Return the target respawn position (the destination point).
+    // This is where the kart will be placed after the respawn
+    // sequence completes. During PHASE_FLY, this is the point
+    // the helicopter is flying towards.
+    return m_targetPos;
+}
+
+// @addr 0x804B0520
+void KartRespawn::setRespawnDelay(s32 frames) {
+    // Set the respawn countdown delay before the kart is
+    // actually rescued. This is the time the player must
+    // spend off-track before the Lakitu picks them up.
+    if (frames < 0) frames = 0;
+    if (frames > 600) frames = 600; // Cap at 10 seconds
+    m_respawnCountdown = frames;
+}
+
+// @addr 0x804B0540
+void KartRespawn::onRespawnComplete() {
+    // Called when the respawn sequence finishes.
+    // Restores the kart to normal gameplay state:
+    //   - Re-enables physics
+    //   - Places kart at respawn position
+    //   - Grants post-respawn invincibility
+    //   - Resets all respawn state
+    completeRespawn();
+}
+
+// KartRespawn_calcNearestRoad — find the nearest road surface point
+// @addr 0x804B0580
+void KartRespawn_calcNearestRoad(const EGG::Vector3f& pos,
+                                  EGG::Vector3f* outPos, f32* outRot) {
+    // Find the nearest point on the road surface to the given position.
+    // This is used to determine where to respawn a kart that has
+    // fallen off the track.
+    //
+    // Algorithm:
+    //   1. Query the KMP route point array for the nearest point
+    //   2. Also check Jugem (rescue) points
+    //   3. Perform a KCL downward raycast from the nearest point
+    //   4. Return the floor intersection as the respawn position
+    //
+    // In the original game, this function:
+    //   - Gets the CourseColManager instance
+    //   - Queries the KMP RPPN (respawn point) section
+    //   - For each respawn point, computes squared distance to pos
+    //   - Selects the nearest respawn point
+    //   - Performs a downward KCL raycast to find the road surface
+    //   - Writes the result to outPos and outRot
+
+    if (outPos) {
+        // Default: return the input position clamped to a minimum Y
+        outPos->x = pos.x;
+        outPos->y = pos.y;
+        outPos->z = pos.z;
+        if (outPos->y < -300.0f) {
+            outPos->y = -300.0f;
+        }
+    }
+
+    if (outRot) {
+        *outRot = 0.0f;
+    }
+}
+
 } // namespace Kart

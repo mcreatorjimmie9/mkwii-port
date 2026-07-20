@@ -96,6 +96,7 @@ public:
     ~Course();
 
     // Lifecycle
+    void init();
     bool load(u16 courseId);
     void unload();
     void calc(f32 dt);
@@ -124,6 +125,9 @@ public:
     u16 getCourseId() const { return m_courseId; }
     f32 getGravity() const { return m_gravity; }
     bool isLoaded() const { return m_loaded; }
+    const char* getName() const;
+    void* getKCL() const;
+    void* getKMP() const;
 
     // Boundaries
     f32 getBoundaryMinX() const { return m_boundaryMin.x; }
@@ -157,6 +161,7 @@ public:
 
     // Course bounding box
     void getCourseBounds(Vec3& outMin, Vec3& outMax) const;
+    void getBoundingBox(Vec3& outMin, Vec3& outMax) const;
 
     // Height query via KCL-style downward raycast
     // @addr 0x806901d8
@@ -203,6 +208,9 @@ private:
     static const u32 MAX_JUGEM_POINTS = 64;
     JugemPoint* m_jugemPoints;
     u32 m_jugemPointCount;
+
+    // Course name (loaded from BRRES or course database)
+    const char* m_courseName;
 };
 
 } // namespace Scene

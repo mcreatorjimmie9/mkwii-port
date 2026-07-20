@@ -389,4 +389,92 @@ bool KartInput::isItemUse() const {
     return isButtonPressed(PAD_BUTTON_X) || isButtonPressed(PAD_TRIGGER_Z);
 }
 
+// @addr 0x805945A0 (estimated)
+// Check if the D-pad up button is held.
+bool KartInput::isDpadUp() const {
+    return isButtonHeld(PAD_DPAD_UP);
+}
+
+// @addr 0x805945C0 (estimated)
+// Check if the D-pad down button is held.
+bool KartInput::isDpadDown() const {
+    return isButtonHeld(PAD_DPAD_DOWN);
+}
+
+// @addr 0x805945E0 (estimated)
+// Check if the D-pad left button is held.
+bool KartInput::isDpadLeft() const {
+    return isButtonHeld(PAD_DPAD_LEFT);
+}
+
+// @addr 0x80594600 (estimated)
+// Check if the D-pad right button is held.
+bool KartInput::isDpadRight() const {
+    return isButtonHeld(PAD_DPAD_RIGHT);
+}
+
+// @addr 0x80594620 (estimated)
+// Check if the Start/Pause button was pressed this frame.
+bool KartInput::isPausePressed() const {
+    return isButtonPressed(PAD_BUTTON_START);
+}
+
+// @addr 0x80594640 (estimated)
+// Get the combined D-pad direction as a 2D vector.
+void KartInput::getDpadDirection(s32* outX, s32* outY) const {
+    s32 x = 0;
+    s32 y = 0;
+    if (currentInputState.buttons & PAD_DPAD_LEFT)  x = -1;
+    if (currentInputState.buttons & PAD_DPAD_RIGHT) x = 1;
+    if (currentInputState.buttons & PAD_DPAD_UP)    y = -1;
+    if (currentInputState.buttons & PAD_DPAD_DOWN)  y = 1;
+    if (outX) *outX = x;
+    if (outY) *outY = y;
+}
+
+// @addr 0x80594680 (estimated)
+// Check if any D-pad button is currently held.
+bool KartInput::isDpadAny() const {
+    u32 dpad = PAD_DPAD_UP | PAD_DPAD_DOWN | PAD_DPAD_LEFT | PAD_DPAD_RIGHT;
+    return (currentInputState.buttons & dpad) != 0;
+}
+
+// @addr 0x805946A0 (estimated)
+// Get the raw stick X value before deadzone processing.
+f32 KartInput::getRawStickX() const {
+    return currentInputState.stickX;
+}
+
+// @addr 0x805946C0 (estimated)
+// Get the raw stick Y value before deadzone processing.
+f32 KartInput::getRawStickY() const {
+    return currentInputState.stickY;
+}
+
+// @addr 0x805946E0 (estimated)
+// Check if a button was just released this frame (falling edge).
+bool KartInput::isButtonReleased(u32 button) const {
+    return !(currentInputState.buttons & button) &&
+           (lastInputState.buttons & button);
+}
+
+// @addr 0x80594700 (estimated)
+// Get the current button state bitmask.
+u32 KartInput::getButtons() const {
+    return currentInputState.buttons;
+}
+
+// @addr 0x80594720 (estimated)
+// Get the buttons that changed state this frame.
+u32 KartInput::getButtonsChanged() const {
+    return currentInputState.buttons ^ lastInputState.buttons;
+}
+
+// @addr 0x80594740 (estimated)
+// Check if the player is pressing any trick-related input.
+u32 KartInput::getTrickDirection() const {
+    u32 dpad = PAD_DPAD_UP | PAD_DPAD_DOWN | PAD_DPAD_LEFT | PAD_DPAD_RIGHT;
+    return currentInputState.buttons & dpad;
+}
+
 } // namespace Kart

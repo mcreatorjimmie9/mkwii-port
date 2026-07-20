@@ -70,6 +70,30 @@ public:
     u32 getMtLevel() const { return m_mtLevel; }
     bool isDrifting() const { return m_state == DRIFT_ACTIVE || m_state == DRIFT_START; }
 
+    /// Initialize drift system to default state.
+    /// @addr estimated
+    void init();
+
+    /// Get the current drift type as a string.
+    /// Returns "NONE", "LEFT", or "RIGHT".
+    /// @addr estimated
+    const char* getDriftType() const;
+
+    /// Calculate the optimal exit point for the current drift.
+    /// This is the point on the road where the AI should release the drift
+    /// to maximize the mini-turbo boost in the desired direction.
+    /// @addr estimated
+    void calcExitPoint(AIContext* ctx, f32* outX, f32* outZ) const;
+
+    /// Get the current drift angle in radians.
+    /// @addr estimated
+    f32 getDriftAngle() const;
+
+    /// Get the optimal release time for the MT based on current charge.
+    /// Returns the estimated remaining time until MT level 3 is reached.
+    /// @addr estimated
+    f32 getOptimalRelease() const;
+
 private:
     static const f32 MT_CHARGE_RATE;         // MT charge per second of drifting
     static const f32 MT_LEVEL_1_THRESHOLD;   // MT level 1 (blue sparks)

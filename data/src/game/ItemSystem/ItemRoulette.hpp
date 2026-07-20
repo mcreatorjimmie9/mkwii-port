@@ -99,6 +99,36 @@ public:
     // (slw r3, r28, r0; or r0, r0, r3).
     ItemType selectItem();
 
+    // Force-stop the roulette immediately
+    void stopSpin();
+
+    // Get probability weight for a specific item type
+    u8 calcProbability(u8 itemType) const;
+
+    // Set spin speed manually
+    void setSpeed(f32 speed);
+
+    // Set player position and recalculate probabilities
+    void setPosition(u8 position);
+
+    // Check if selection is complete
+    bool isComplete() const;
+
+    // Clear result and prepare for new spin
+    void clearResult();
+
+    // Get remaining spin timer
+    s32 getSpinTimer() const;
+
+    // Get player's race position
+    u8 getPlayerPosition() const;
+
+    // Get current spin speed
+    f32 getSpinSpeed() const;
+
+    // Get accumulated item type bitmask
+    u32 getItemBitmask() const;
+
     // ========================================================================
     // Constants
     // ============================================================================

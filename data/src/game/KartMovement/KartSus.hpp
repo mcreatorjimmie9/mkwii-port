@@ -25,6 +25,43 @@ public:
     // 0x8059b0bc - KartSus_initPhysics
     void initPhysics();
 
+    /// Calculate the spring force for a given compression.
+    /// @addr estimated
+    f32 calcSpringForce(f32 compression) const;
+
+    /// Calculate the damping force for a given compression velocity.
+    /// @addr estimated
+    f32 calcDampingForce(f32 compressionVel) const;
+
+    /// Per-frame suspension update.
+    /// @addr estimated
+    void update(f32 dt);
+
+    /// Set the spring stiffness (N/m).
+    /// @addr estimated
+    void setStiffness(f32 stiffness);
+
+    /// Get the current suspension compression ratio [0, 1].
+    /// 0 = fully extended, 1 = fully compressed (bottomed out).
+    /// @addr estimated
+    f32 getCompression() const;
+
+    /// Check if the suspension is fully compressed (bottomed out).
+    /// @addr estimated
+    bool isBottomedOut() const;
+
+    /// Handle rough terrain effects (offroad, bumps).
+    /// @addr estimated
+    void handleRoughTerrain(f32 roughness);
+
+    /// Get the rest length (natural length) of the suspension.
+    /// @addr estimated
+    f32 getRestLength() const;
+
+    /// Set the rest length (natural length) of the suspension.
+    /// @addr estimated
+    void setRestLength(f32 length);
+
 private:
     void* vtable;
     void* _04;
@@ -38,7 +75,16 @@ private:
     f32 _2c;
     f32 _3c;
     f32 _4c;
+    f32 m_compression;      // current compression [0,1]
+    f32 m_compressionVel;   // rate of compression change
+    f32 m_restLength;       // suspension rest length
 };
+
+// Free function: get default suspension parameters
+/// @addr estimated
+f32 KartSus_getDefaultStiffness();
+f32 KartSus_getDefaultDamping();
+f32 KartSus_getDefaultTravel();
 
 // ===== KartPhysics =====
 // Main kart physics controller

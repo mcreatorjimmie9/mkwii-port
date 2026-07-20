@@ -123,6 +123,30 @@ public:
     // Get wheelie balance factor for visual tilt [0.0, 1.0]
     f32 getWheelieBalance() const;
 
+    // Apply a bump penalty (spin-out from being hit)
+    void applyPenalty(f32 penaltyDuration);
+
+    // Get full wheelie runtime state
+    WheelieRuntimeState getStateData() const;
+
+    // Get current wheelie config
+    WheelieConfig getConfig() const;
+
+    // Get remaining cooldown time
+    f32 getCooldownRemaining() const;
+
+    // Get max wheelie angle from config
+    f32 getMaxWheelieAngle() const;
+
+    // Get speed boost multiplier from config
+    f32 getSpeedBoostValue() const;
+
+    // Check if this is for a bike
+    bool isBike() const;
+
+    // Get bump vulnerability factor
+    f32 getBumpVulnerability() const;
+
 private:
     WheelieRuntimeState mState;
     WheelieConfig mConfig;

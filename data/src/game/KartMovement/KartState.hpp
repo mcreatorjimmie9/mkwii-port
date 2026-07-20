@@ -108,6 +108,32 @@ public:
     u32 getActiveEffectMask() const;
     void resetAllEffects();
 
+    // Flag management (explicit named wrappers)
+    void setFlag(size_t bit);
+    void clearFlag(size_t bit);
+    bool hasFlag(size_t bit) const;
+    u32 getState() const;
+    void setState(u32 stateMask);
+
+    // Specific state checks
+    bool isStarPowered() const;
+    bool isMega() const;
+    bool isOffRoad() const;
+    bool isInCannon() const;
+    bool isOnGround() const;
+    bool isBullet() const;
+
+    // Timer accessors
+    u32 getStarTimer() const;
+    u32 getMegaTimer() const;
+    u32 getStunTimer() const;
+    u32 getInkTimer() const;
+    u32 getSquishTimer() const;
+    u32 getAirtime() const;
+
+    // Stun activation
+    void setStun(bool active, u32 duration = 120);
+
     bool on(size_t n) const { return mFlags.on(n); }
     void set(size_t n) { mFlags.set(n); }
     void reset(size_t n) { mFlags.reset(n); }

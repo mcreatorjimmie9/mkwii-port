@@ -97,7 +97,7 @@ void CtrlRaceTime::initSelf() {
         lastTime = 0.0f;
 
         // Set initial text content to "0:00.000"
-        formatTime(mTimeText, sizeof(mTimeText), 0.0f);
+        ::System::formatTime(mTimeText, sizeof(mTimeText), 0.0f);
 
         mDeltaDisplay = 0.0f;
         mLagCounter = 0;
@@ -141,7 +141,7 @@ void CtrlRaceTime::calcSelf() {
 
     // Handle negative time (countdown)
     if (currentMs < 0.0f) {
-        formatTime(mTimeText, sizeof(mTimeText), currentMs);
+        ::System::formatTime(mTimeText, sizeof(mTimeText), currentMs);
         timeValue = currentMs;
         return;
     }
@@ -151,7 +151,7 @@ void CtrlRaceTime::calcSelf() {
 
     // Format as MM:SS.mmm for display
     // 0x8051aeac (time formatting) stores result at self+0x134
-    formatTime(mTimeText, sizeof(mTimeText), currentMs);
+    ::System::formatTime(mTimeText, sizeof(mTimeText), currentMs);
 
     // Update lap delta display for Time Attack mode
     if (RaceConfig::spInstance != nullptr) {
@@ -211,6 +211,166 @@ void CtrlRaceTime::refresh() {
 } // namespace System
 
 namespace System {
+
+// @addr 0x807fa0c0 (estimated)
+// Initialize the race timer for a new race.
+// Resets all timing state and prepares the display for the given lap count.
+void CtrlRaceTime::init(u8 lapCount) {
+    flags = 0;
+    timeValue = 0.0f;
+    lastTime = 0.0f;
+    memset(mTimeText, 0, sizeof(mTimeText));
+    mDeltaDisplay = 0.0f;
+    mLagCounter = 0;
+    mShowDelta = false;
+    mDeltaColor = 0;
+    mLapCount = lapCount > 0 ? lapCount : 3;
+    mClockRunning = false;
+    mClockStartFrame = 0;
+    mLapTimes[0] = 0.0f;
+    mLapTimes[1] = 0.0f;
+    mLapTimes[2] = 0.0f;
+    mLapStartTimes[0] = 0.0f;
+    mLapStartTimes[1] = 0.0f;
+    mLapStartTimes[2] = 0.0f;
+    mTotalTimeMs = 0.0f;
+    mCurrentLapStartMs = 0.0f;
+    mBestLapMs = 999999.0f;
+    mGhostTimeMs = 0.0f;
+
+    // Set initial display to "0:00.000"
+    ::System::formatTime(mTimeText, sizeof(mTimeText), 0.0f);
+}
+
+// @addr 0x807fa100 (estimated)
+// Per-frame update for the race timer.
+// Called every frame during the race to refresh the displayed time.
+void CtrlRaceTime::update() {
+    if (!mClockRunning) {
+        return;
+    }
+    calcSelf();
+    refresh();
+}
+
+// @addr 0x807fa0e0 (estimated)
+// Format a time value in milliseconds to a display string.
+// This wraps the free function formatTime but is a method version
+// that updates the internal mTimeText buffer.
+void CtrlRaceTime::formatTimeString(f32 timeMs) {
+    // Handle negative values (countdown phase)
+    if (timeMs < 0.0f) {
+        timeMs = 0.0f;
+    }
+    // Clamp to max displayable (9:59.999)
+    if (timeMs > 599999.999f) {
+        timeMs = 599999.999f;
+    }
+    ::System::formatTime(mTimeText, sizeof(mTimeText), timeMs);
+}
+
+// @addr 0x807fa110 (estimated)
+// Get the current formatted time display string.
+// Returns pointer to the internal text buffer.
+const char* CtrlRaceTime::getTimeDisplay() const {
+    return mTimeText;
+}
+
+// @addr 0x807fa130 (estimated)
+// Get the time for a specific lap (1-indexed).
+// Returns 0.0 if the lap index is out of range or the lap hasn't been completed.
+f32 CtrlRaceTime::getLapTime(u8 lap) const {
+    if (lap == 0 || lap > mLapCount || lap > 3) {
+        return 0.0f;
+    }
+    return mLapTimes[lap - 1];
+}
+
+// @addr 0x807fa140 (estimated)
+// Get the total elapsed race time in milliseconds.
+f32 CtrlRaceTime::getTotalTime() const {
+    return mTotalTimeMs;
+}
+
+// @addr 0x807fa150 (estimated)
+// Start the race clock. Called when the race begins (after countdown).
+void CtrlRaceTime::startClock() {
+    mClockRunning = true;
+    mClockStartFrame = mLagCounter;
+    mCurrentLapStartMs = 0.0f;
+    // Clear delta display
+    mShowDelta = false;
+    mDeltaDisplay = 0.0f;
+    mDeltaColor = 0;
+}
+
+// @addr 0x807fa160 (estimated)
+// Stop the race clock. Called when the player finishes the race.
+void CtrlRaceTime::stopClock() {
+    mClockRunning = false;
+    // Freeze the displayed time at the final value
+    ::System::formatTime(mTimeText, sizeof(mTimeText), timeValue);
+}
+
+// @addr 0x807fa170 (estimated)
+// Reset the race clock to zero. Called on race restart.
+void CtrlRaceTime::resetClock() {
+    mClockRunning = false;
+    timeValue = 0.0f;
+    lastTime = 0.0f;
+    mTotalTimeMs = 0.0f;
+    mCurrentLapStartMs = 0.0f;
+    mBestLapMs = 999999.0f;
+    mGhostTimeMs = 0.0f;
+    for (u8 i = 0; i < 3; i++) {
+        mLapTimes[i] = 0.0f;
+        mLapStartTimes[i] = 0.0f;
+    }
+    mShowDelta = false;
+    mDeltaDisplay = 0.0f;
+    mDeltaColor = 0;
+    ::System::formatTime(mTimeText, sizeof(mTimeText), 0.0f);
+}
+
+// Record a lap completion time
+// @addr 0x807fa180 (estimated)
+void CtrlRaceTime::recordLap(f32 lapTimeMs) {
+    if (mCurrentLap > 0 && mCurrentLap <= 3) {
+        u8 idx = mCurrentLap - 1;
+        mLapTimes[idx] = lapTimeMs;
+        // Update best lap
+        if (lapTimeMs < mBestLapMs && lapTimeMs > 0.0f) {
+            mBestLapMs = lapTimeMs;
+        }
+    }
+    // Set the start time for the next lap
+    mCurrentLapStartMs = mTotalTimeMs;
+}
+
+// Get the best lap time recorded so far
+// @addr 0x807fa190 (estimated)
+f32 CtrlRaceTime::getBestLapTime() const {
+    if (mBestLapMs >= 999999.0f) {
+        return 0.0f;
+    }
+    return mBestLapMs;
+}
+
+// Set the ghost reference time for delta display
+// @addr 0x807fa1a0 (estimated)
+void CtrlRaceTime::setGhostTime(f32 ghostMs) {
+    mGhostTimeMs = ghostMs;
+    mShowDelta = (ghostMs > 0.0f);
+}
+
+// Get the current delta relative to the ghost (negative = ahead)
+// @addr 0x807fa1b0 (estimated)
+f32 CtrlRaceTime::getDeltaToGhost() const {
+    if (!mShowDelta || mGhostTimeMs <= 0.0f) {
+        return 0.0f;
+    }
+    return timeValue - mGhostTimeMs;
+}
 
 CtrlRaceLap::CtrlRaceLap() {
     lapTime = 0.0f;

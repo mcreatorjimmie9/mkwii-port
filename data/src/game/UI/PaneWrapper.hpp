@@ -64,11 +64,22 @@ public:
     u8 getAlpha() const { return mCachedAlpha; }
     void setColor(u8 r, u8 g, u8 b, u8 a);
 
+    // --- Attachment ---
+    void attach(EGG::J2DPane* parentPane);
+    void detach();
+    EGG::J2DPane* findChild(const char* name) const;
+
     // --- Animation ---
     void animatePosition(f32 targetX, f32 targetY, f32 speed);
     void animateAlpha(u8 targetAlpha, f32 speed);
     void animateScale(f32 targetScale, f32 speed);
     void updateAnimations();
+    void animate(f32 targetX, f32 targetY, u8 targetAlpha, f32 speed);
+    bool isAnimating() const;
+    void stopAllAnimations();
+    void setAnimationSpeedMultiplier(f32 multiplier);
+    EGG::J2DPane* getParent() const;
+    bool isAttached() const;
 
     // @addr 0x8050b634
     static u32 getCourseMessageId(u16 courseId);
@@ -114,6 +125,10 @@ protected:
     f32 mAnimScaleTarget;
     f32 mAnimScaleCurrent;
     f32 mAnimScaleSpeed;
+
+    // --- Parent tracking ---
+    EGG::J2DPane* m_parentPane;    // parent pane for attach/detach
+    f32 m_animSpeedMult;       // animation speed multiplier
 };
 
 } // namespace UI

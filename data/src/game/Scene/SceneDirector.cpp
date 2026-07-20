@@ -384,4 +384,67 @@ void SceneDirector::finalizeTransition() {
     m_isFadingOut = 0;
 }
 
+// @addr 0x805c0100 (estimated)
+// getPreviousScene — Get the scene that was active before the current one.
+// Returns nullptr if there was no previous scene or the stack is empty.
+SceneBase* SceneDirector::getPreviousScene() const {
+    if (m_stackTop > 0) {
+        return m_sceneStack[m_stackTop - 1];
+    }
+    return nullptr;
+}
+
+// @addr 0x805c0120 (estimated)
+// registerScene — Register a scene factory function for a given SceneId.
+// This is typically called during game startup to register all available scenes.
+void SceneDirector::registerScene(SceneId sceneId) {
+    // In the full implementation, this registers a scene factory function
+    // with the SceneCreator singleton so that changeScene(id) can create it.
+    // The actual registration happens during game startup in SceneCreator::initGlobal().
+    (void)sceneId;
+}
+
+// @addr 0x805c0140 (estimated)
+// onSceneReady — Called by a scene when it has finished loading.
+// Transitions the scene from READY to ACTIVE state.
+void SceneDirector::onSceneReady(SceneBase* scene) {
+    if (!scene) return;
+    if (scene == m_currentScene) {
+        scene->setState(SceneBase::STATE_ACTIVE);
+    }
+}
+
+// @addr 0x805c0160 (estimated)
+// getFadeAlpha — Get the current fade overlay alpha value.
+u8 SceneDirector::getFadeAlpha() const {
+    return m_fadeAlpha;
+}
+
+// @addr 0x805c0170 (estimated)
+// setFadeColor — Set the fade transition color.
+void SceneDirector::setFadeColor(u8 r, u8 g, u8 b) {
+    m_fadeColorR = r;
+    m_fadeColorG = g;
+    m_fadeColorB = b;
+}
+
+// @addr 0x805c0180 (estimated)
+// getSceneCount — Get the number of scenes on the stack.
+u32 SceneDirector::getSceneCount() const {
+    return m_stackTop;
+}
+
+// @addr 0x805c0190 (estimated)
+// hasScene — Check if a scene with the given ID exists in the stack.
+bool SceneDirector::hasScene(SceneId sceneId) const {
+    return getSceneByID(sceneId) != nullptr;
+}
+
+// @addr 0x805c01A0 (estimated)
+// getFadeProgress — Get the fade transition progress [0.0, 1.0].
+f32 SceneDirector::getFadeProgress() const {
+    if (m_maxFadeSteps == 0) return 0.0f;
+    return static_cast<f32>(m_fadeProgress) / static_cast<f32>(m_maxFadeSteps);
+}
+
 } // namespace Scene

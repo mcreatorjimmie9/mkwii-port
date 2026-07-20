@@ -88,6 +88,8 @@ public:
     // --- Initialization ---
     // @addr 0x80465000
     void init(const DirectorConfig& config);
+    // @addr 0x80465100 — Simple init with default config
+    void init();
     // @addr 0x804651A0
     void shutdown();
 
@@ -96,6 +98,10 @@ public:
     void startSeries();
     // @addr 0x80465500
     void startNextRace();
+    // @addr 0x80465200 — Begin the race (countdown → racing)
+    void beginRace();
+    // @addr 0x80465240 — End the current race immediately
+    void endRace();
     // @addr 0x804656C0
     void onRaceComplete();
     // @addr 0x80465880
@@ -106,7 +112,10 @@ public:
     void update();
 
     // --- State ---
-    DirectorPhase getPhase() const { return mPhase; }
+    // @addr 0x80466840
+    DirectorPhase getPhase() const;
+    // @addr 0x80466800
+    void setPhase(DirectorPhase phase);
     u32 getCurrentRace() const { return mCurrentRace; }
     u32 getTotalRaces() const { return mConfig.totalRaces; }
     u16 getCurrentCourse() const;
@@ -135,6 +144,14 @@ public:
     // @addr 0x804664C0
     bool hasPlayerWon(u32 playerId) const;
     u32 getPlayerTrophy(u32 playerId) const; // 0=none, 1=bronze, 2=silver, 3=gold
+
+    // --- Phase handlers ---
+    // @addr 0x80466500
+    void handleCountdown();
+    // @addr 0x80466600
+    void handleFinish();
+    // @addr 0x80466700
+    void handleRestart();
 
 private:
     static const u32 MAX_RACE_PLAYERS = 12;
@@ -165,5 +182,9 @@ private:
     void processCupResults();
     void processAwardCeremony();
 };
+
+// Check if a race is actively running
+// @addr 0x80466900
+bool RaceDirector_isRaceActive(const RaceDirector* director);
 
 } // namespace RaceEngine

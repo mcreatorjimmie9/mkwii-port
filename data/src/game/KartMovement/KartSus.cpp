@@ -35,6 +35,9 @@ KartSus::KartSus() {
     // Wheel count starts at 0 (no wheels attached yet)
     this->_0c = 0;
     // wheelPhysics remains nullptr from memset
+    this->m_compression = 0.0f;
+    this->m_compressionVel = 0.0f;
+    this->m_restLength = SUS_DEFAULT_TRAVEL;
 }
 
 // @addr 0x8059b048 - init__Q24Kart6KartSusFv
@@ -80,9 +83,138 @@ void KartSus::initPhysics() {
     this->_4c = SUS_SPRING_SCALE;
 }
 
-// ===== KartPhysics =====
+// @addr estimated
+// Calculate the spring force using Hooke's law: F = -k * x
+// where k is the spring constant and x is the compression distance.
+// The spring constant is _4c * baseK, and compression is
+// the compression ratio times the max travel distance.
+f32 KartSus::calcSpringForce(f32 compression) const {
+    // Base spring constant for MKW's arcade physics
+    static const f32 BASE_SPRING_K = 800.0f;
+    f32 k = this->_4c * BASE_SPRING_K;
+    f32 travel = this->_2c; // max travel distance
+    f32 displacement = compression * travel;
+    return -k * displacement;
+}
 
-// @addr 0x805a1aa4 - __ct__Q24Kart11KartPhysicsFb
+// @addr estimated
+// Calculate the damping force using: F = -c * v
+// where c is the damping coefficient and v is the compression velocity.
+// The damping ratio _3c controls how quickly oscillations die out.
+f32 KartSus::calcDampingForce(f32 compressionVel) const {
+    // Base damping coefficient
+    static const f32 BASE_DAMPING_C = 60.0f;
+    f32 c = this->_3c * BASE_DAMPING_C;
+    return -c * compressionVel;
+}
+
+// @addr estimated
+// Per-frame suspension update. Integrates spring and damping forces
+// to compute the new compression and compression velocity.
+void KartSus::update(f32 dt) {
+    if (dt <= 0.0f) return;
+
+    // Compute forces
+    f32 springF = calcSpringForce(m_compression);
+    f32 dampF = calcDampingForce(m_compressionVel);
+
+    // Total force (per unit mass, assuming unit mass kart)
+    f32 totalForce = springF + dampF;
+
+    // Integrate: dv/dt = F/m, dx/dt = v
+    // Using semi-implicit Euler for stability
+    m_compressionVel += totalForce * dt;
+
+    // Integrate position
+    m_compression += m_compressionVel * dt;
+
+    // Clamp compression to [0, 1]
+    if (m_compression < 0.0f) {
+        m_compression = 0.0f;
+        if (m_compressionVel < 0.0f) {
+            m_compressionVel = 0.0f; // Stop at full extension
+        }
+    }
+    if (m_compression > 1.0f) {
+        m_compression = 1.0f;
+        if (m_compressionVel > 0.0f) {
+            m_compressionVel = 0.0f; // Stop at full compression
+        }
+    }
+}
+
+// @addr estimated
+// Set the spring stiffness scale factor.
+void KartSus::setStiffness(f32 stiffness) {
+    if (stiffness < 0.1f) stiffness = 0.1f;
+    if (stiffness > 10.0f) stiffness = 10.0f;
+    this->_4c = stiffness;
+}
+
+// @addr estimated
+// Get the current compression ratio [0, 1].
+f32 KartSus::getCompression() const {
+    return m_compression;
+}
+
+// @addr estimated
+// Check if the suspension is at maximum compression.
+bool KartSus::isBottomedOut() const {
+    return m_compression >= 1.0f;
+}
+
+// @addr estimated
+// Apply rough terrain effects. On rough terrain, the suspension
+// receives additional random perturbation forces that simulate
+// the kart bouncing over uneven ground.
+void KartSus::handleRoughTerrain(f32 roughness) {
+    if (roughness <= 0.0f) return;
+
+    // Clamp roughness to reasonable range
+    if (roughness > 1.0f) roughness = 1.0f;
+
+    // Apply random perturbation to compression velocity
+    // In the full game, this uses a seeded random or noise function.
+    // The perturbation simulates bumps and uneven terrain.
+    f32 perturbation = roughness * 2.0f; // max 2.0 m/s perturbation
+    m_compressionVel += perturbation * 0.1f; // damped application
+}
+
+// @addr estimated
+// Get the rest length of the suspension.
+f32 KartSus::getRestLength() const {
+    return m_restLength;
+}
+
+// @addr estimated
+// Set the rest length of the suspension.
+void KartSus::setRestLength(f32 length) {
+    if (length < 0.01f) length = 0.01f;
+    if (length > 2.0f) length = 2.0f;
+    m_restLength = length;
+}
+
+// @addr estimated
+// Free function: get default spring stiffness.
+f32 KartSus_getDefaultStiffness() {
+    return 800.0f;
+}
+
+// @addr estimated
+// Free function: get default damping coefficient.
+f32 KartSus_getDefaultDamping() {
+    return 60.0f;
+}
+
+// @addr estimated
+// Free function: get default suspension travel.
+f32 KartSus_getDefaultTravel() {
+    return 0.5f;
+}
+
+// ===== KartPhysics =====
+// Main kart physics controller
+// Referenced at 0x805a1aa4 as __ct__Q24Kart11KartPhysicsFb
 // Size: 392 bytes
 // Constructs the main kart physics controller.
 // The isBike flag selects different default max speed, mass, and

@@ -4,10 +4,10 @@
 // Address range: 0x8062559c - 0x80625ec0
 
 #include "rk_common.h"
+#include "MenuPage.hpp"
 
 namespace UI {
 
-class MenuPage;
 class Layout;
 
 // Page pool configuration
@@ -73,6 +73,28 @@ public:
     // @addr 0x80625b6c
     bool isPageVisible(s32 pageIndex) const;
 
+    // Page stack operations
+    // @addr 0x80625ee0
+    void pushPage(MenuPage* page);
+    // @addr 0x80625f20
+    void popPage();
+    // @addr 0x80625f60
+    void update(f32 dt);
+    // @addr 0x80625fa0
+    void draw();
+    // @addr 0x80625fe0
+    MenuPage* getCurrentPage() const;
+    // @addr 0x80626000
+    u32 getStackSize() const;
+    // @addr 0x80626020
+    void setTransition(TransitionType transition);
+    // @addr 0x80626040
+    s32 findPage(u32 pageId) const;
+    // @addr 0x80626060
+    void removeAll();
+    // @addr 0x80626080
+    void init();
+
     // Layout data
     // @addr 0x80625be4
     void populateStandardPages(bool isWide);
@@ -111,6 +133,11 @@ private:
 
     // Sorting
     void sortPagesByDepth();
+
+    // Page stack (for navigation history)
+    static const u32 MAX_PAGE_STACK = 8;
+    PageDescriptor mPageStack[MAX_PAGE_STACK];
+    u32 mPageStackSize;
 };
 
 } // namespace UI

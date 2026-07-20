@@ -48,6 +48,20 @@ void RaceDirector::init(const DirectorConfig& config) {
     }
 }
 
+// @addr 0x80465100 — Simple initialization (no config struct)
+/* RaceDirector_initSimple @ 0x80465100 */
+void RaceDirector::init() {
+    DirectorConfig defaultConfig;
+    memset(&defaultConfig, 0, sizeof(DirectorConfig));
+    defaultConfig.raceType = RACE_TYPE_VS;
+    defaultConfig.playerCount = 12;
+    defaultConfig.totalRaces = 1;
+    defaultConfig.lapsPerRace = 3;
+    defaultConfig.isOnline = 0;
+    defaultConfig.engineClass = 2; // 150cc
+    init(defaultConfig);
+}
+
 // @addr 0x804651A0
 void RaceDirector::shutdown() {
     if (mRaceSequence != nullptr) {
@@ -58,6 +72,29 @@ void RaceDirector::shutdown() {
     mCurrentRaceConfig = nullptr;
     mPhase = DIRECTOR_IDLE;
     mPlayerCount = 0;
+}
+
+// @addr 0x80465200 — Begin a single race (transition from PRE_RACE to RACING)
+/* RaceDirector_beginRace @ 0x80465200 */
+void RaceDirector::beginRace() {
+    if (mPhase != DIRECTOR_PRE_RACE) {
+        return;
+    }
+    if (mRaceSequence == nullptr) {
+        return;
+    }
+    mRaceSequence->startCountdown();
+    mPhase = DIRECTOR_RACING;
+}
+
+// @addr 0x80465240 — End the current race immediately
+/* RaceDirector_endRace @ 0x80465240 */
+void RaceDirector::endRace() {
+    if (mRaceSequence == nullptr) {
+        return;
+    }
+    mRaceSequence->endRace();
+    onRaceComplete();
 }
 
 // @addr 0x80465340
@@ -283,6 +320,100 @@ u32 RaceDirector::getPlayerTrophy(u32 playerId) const {
     return 0;
 }
 
+// =============================================================================
+// handleCountdown — Process the pre-race countdown phase
+// @addr 0x80466500
+//
+// During the countdown (3-2-1-GO), the race sequence manages the timer.
+// The director monitors the countdown and transitions to racing when
+// the countdown completes. The countdown also handles:
+//   - Camera swooping animation
+//   - Engine rev sound start
+//   - Lakitu's signal animation
+// =============================================================================
+
+/* RaceDirector_handleCountdown @ 0x80466500 */
+void RaceDirector::handleCountdown() {
+    if (mRaceSequence == nullptr) return;
+    if (mPhase != DIRECTOR_PRE_RACE) return;
+
+    mRaceSequence->update();
+
+    // The race sequence transitions from COUNTDOWN to RACING
+    // automatically when the countdown timer reaches zero.
+    // We detect this transition to update the director's phase.
+    if (mRaceSequence->getPhase() == RACE_PHASE_RACING) {
+        mPhase = DIRECTOR_RACING;
+    }
+}
+
+// =============================================================================
+// handleFinish — Process race finish (all players crossed the line)
+// @addr 0x80466600
+//
+// Called when all players have finished or the time limit expired.
+// Transitions from RACING to POST_RACE and triggers result recording.
+// =============================================================================
+
+/* RaceDirector_handleFinish @ 0x80466600 */
+void RaceDirector::handleFinish() {
+    if (mPhase != DIRECTOR_RACING) return;
+    if (mRaceSequence == nullptr) return;
+
+    // Check if the race sequence has ended
+    RacePhase phase = mRaceSequence->getPhase();
+    if (phase == RACE_PHASE_RESULTS || phase == RACE_PHASE_POST_RACE) {
+        onRaceComplete();
+    }
+}
+
+// =============================================================================
+// handleRestart — Restart the current race from the beginning
+// @addr 0x80466700
+//
+// Resets the current race sequence to its initial state without
+// advancing the series counter. Used when a player selects "Restart"
+// from the pause menu during a race.
+// =============================================================================
+
+/* RaceDirector_handleRestart @ 0x80466700 */
+void RaceDirector::handleRestart() {
+    // Clean up the current race sequence
+    if (mRaceSequence != nullptr) {
+        mRaceSequence->shutdown();
+        delete mRaceSequence;
+        mRaceSequence = nullptr;
+    }
+
+    // Recreate the race sequence for the same course
+    mRaceSequence = new RaceSequence();
+    mRaceSequence->init(mCurrentRaceConfig, mPlayerCount);
+    mRaceSequence->setupCheckpoints(mRaceCourses[mCurrentRace]);
+
+    // Go back to pre-race phase
+    mPhase = DIRECTOR_PRE_RACE;
+}
+
+// =============================================================================
+// setPhase — Directly set the director's phase
+// @addr 0x80466800
+// =============================================================================
+
+/* RaceDirector_setPhase @ 0x80466800 */
+void RaceDirector::setPhase(DirectorPhase phase) {
+    mPhase = phase;
+}
+
+// =============================================================================
+// getPhase — Get the current director phase
+// @addr 0x80466840
+// =============================================================================
+
+/* RaceDirector_getPhase @ 0x80466840 */
+DirectorPhase RaceDirector::getPhase() const {
+    return mPhase;
+}
+
 void RaceDirector::processCupIntro() {
     // Stub: UI scene drives transition via startNextRace()
 }
@@ -324,6 +455,21 @@ void RaceDirector::processCupResults() {
 
 void RaceDirector::processAwardCeremony() {
     endSeries();
+}
+
+// =============================================================================
+// RaceDirector_isRaceActive — Free function to check if a race is running
+// @addr 0x80466900
+// =============================================================================
+
+/* RaceDirector_isRaceActive @ 0x80466900 */
+bool RaceDirector_isRaceActive(const RaceDirector* director) {
+    if (director == nullptr) {
+        return false;
+    }
+    DirectorPhase phase = director->getPhase();
+    return phase == DIRECTOR_RACING ||
+           phase == DIRECTOR_PRE_RACE;
 }
 
 } // namespace RaceEngine

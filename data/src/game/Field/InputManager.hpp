@@ -47,6 +47,10 @@ public:
     /* InputManager_shutdown @ 0x804D1450 */
     void shutdown();
 
+    // Reset all controllers to default state
+    /* InputManager_resetAll @ 0x804D1680 */
+    void resetAll();
+
     // Get processed race input for player (u8 overload)
     const System::KPadRaceInputState& getInputState(u8 playerIdx) const;
 

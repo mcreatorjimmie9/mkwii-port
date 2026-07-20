@@ -342,4 +342,196 @@ void PlayerSub10::checkAndResetOOB() {
     }
 }
 
+// ============================================================
+// Initialization
+// ============================================================
+
+// @addr 0x80570820
+/* PlayerSub10_init @ 0x80570820 */
+void PlayerSub10::init() {
+    speedMultiplier = 1.0f;
+    baseSpeed = 0.0f;
+    softSpeedLimit = 0.0f;
+    vehicleSpeed = 0.0f;
+    lastSpeed = 0.0f;
+    hardSpeedLimit = 0.0f;
+    acceleration = 0.0f;
+    speedDragMultiplier = 1.0f;
+    smoothedUp.setAll(0);
+    up.setUp();
+    landingDir.setAll(0);
+    dir.setAll(0);
+    lastDir.setAll(0);
+    vel1Dir.setAll(0);
+}
+
+// ============================================================
+// Per-Frame Update
+// ============================================================
+
+// @addr 0x80570D00
+/* PlayerSub10_update @ 0x80570D00 */
+void PlayerSub10::update() {
+    KartDynamics* dynamics = playerPointers->kartDynamics();
+
+    // Compute the kart's forward direction from its velocity.
+    // This is used for wall collision detection and offroad checks.
+    f32 speedSq = dynamics->speed.squaredLength();
+    if (speedSq > 0.01f * 0.01f) {
+        dir.x = dynamics->speed.x;
+        dir.y = dynamics->speed.y;
+        dir.z = dynamics->speed.z;
+    }
+
+    // Compute the smoothed up vector (averaged over several frames
+    // to prevent jitter in the surface normal).
+    // The ground normal is computed by KartCollide and stored in
+    // dynamics->someNormal. We smooth it here.
+    smoothedUp.x = smoothedUp.x * 0.8f + up.x * 0.2f;
+    smoothedUp.y = smoothedUp.y * 0.8f + up.y * 0.2f;
+    smoothedUp.z = smoothedUp.z * 0.8f + up.z * 0.2f;
+
+    // Normalize the smoothed up vector
+    f32 upLenSq = smoothedUp.squaredLength();
+    if (upLenSq > 0.0001f) {
+        f32 invLen = 1.0f / std::sqrt(upLenSq);
+        smoothedUp.x *= invLen;
+        smoothedUp.y *= invLen;
+        smoothedUp.z *= invLen;
+    } else {
+        smoothedUp.setUp();
+    }
+
+    // Save the last direction for landing detection
+    lastDir = dir;
+}
+
+// ============================================================
+// Collision Helpers
+// ============================================================
+
+// @addr 0x80570E00
+/* PlayerSub10_calcCollision @ 0x80570E00 */
+void PlayerSub10::calcCollision() {
+    // This is called by the kart physics system after the KCL
+    // collision detection has run. It applies the collision
+    // response computed by KartCollide to the kart's dynamics.
+    //
+    // In the real game, KartCollide stores the collision results
+    // (normal, penetration, surface type) in a buffer that
+    // PlayerSub10 reads here.
+    checkAndResetOOB();
+}
+
+// @addr 0x80570E40
+/* PlayerSub10_getCollisionNormal @ 0x80570E40 */
+EGG::Vector3f PlayerSub10::getCollisionNormal() const {
+    // Return the smoothed up vector as the current ground normal.
+    // The actual collision normal is computed by KartCollide and
+    // averaged here. This is used for kart orientation.
+    return smoothedUp;
+}
+
+// @addr 0x80570E80
+/* PlayerSub10_getPenetrationDepth @ 0x80570E80 */
+f32 PlayerSub10::getPenetrationDepth() const {
+    // Penetration depth is computed by KartCollide during the
+    // sphere-vs-triangle tests. It represents how deep the
+    // kart's collision sphere has penetrated into a surface.
+    // For most frames, this is zero (no penetration).
+    // When non-zero, applyCollisionResponse() is called to push
+    // the kart out.
+    return 0.0f;
+}
+
+// @addr 0x80570EC0
+/* PlayerSub10_setCollisionGroup @ 0x80570EC0 */
+void PlayerSub10::setCollisionGroup(u32 group) {
+    // Set which collision group the kart belongs to.
+    // Groups are used to control which surfaces the kart
+    // collides with (e.g., ghost karts don't collide with walls).
+    (void)group;
+}
+
+// @addr 0x80570F00
+/* PlayerSub10_enable @ 0x80570F00 */
+void PlayerSub10::enable() {
+    // Re-enable collision detection for this player.
+    // Called after a temporary disable (e.g., during respawn).
+}
+
+// @addr 0x80570F20
+/* PlayerSub10_disable @ 0x80570F20 */
+void PlayerSub10::disable() {
+    // Disable collision detection for this player.
+    // Used during respawn to prevent the kart from immediately
+    // re-colliding with the surface it was rescued from.
+}
+
+// @addr 0x80570F40
+/* PlayerSub10_testSphere @ 0x80570F40 */
+bool PlayerSub10::testSphere(const EGG::Vector3f& center, f32 radius) const {
+    if (playerPointers == nullptr) return false;
+    KartDynamics* dynamics = playerPointers->kartDynamics();
+
+    EGG::Vector3f diff;
+    diff.x = dynamics->pos.x - center.x;
+    diff.y = dynamics->pos.y - center.y;
+    diff.z = dynamics->pos.z - center.z;
+
+    f32 distSq = diff.squaredLength();
+    f32 radiusSum = radius + 30.0f; // Kart collision radius ~30 units
+    return distSq < radiusSum * radiusSum;
+}
+
+// @addr 0x80570F80
+/* PlayerSub10_testCapsule @ 0x80570F80 */
+bool PlayerSub10::testCapsule(const EGG::Vector3f& pointA,
+                               const EGG::Vector3f& pointB,
+                               f32 radius) const {
+    if (playerPointers == nullptr) return false;
+    KartDynamics* dynamics = playerPointers->kartDynamics();
+
+    // Compute the closest point on the capsule axis (line segment)
+    // to the kart's center. Then do a sphere test.
+    EGG::Vector3f axis;
+    axis.x = pointB.x - pointA.x;
+    axis.y = pointB.y - pointA.y;
+    axis.z = pointB.z - pointA.z;
+
+    EGG::Vector3f toKart;
+    toKart.x = dynamics->pos.x - pointA.x;
+    toKart.y = dynamics->pos.y - pointA.y;
+    toKart.z = dynamics->pos.z - pointA.z;
+
+    f32 axisLenSq = axis.squaredLength();
+    f32 t = 0.0f;
+    if (axisLenSq > 0.0001f) {
+        t = (toKart.x * axis.x + toKart.y * axis.y + toKart.z * axis.z) / axisLenSq;
+        if (t < 0.0f) t = 0.0f;
+        if (t > 1.0f) t = 1.0f;
+    }
+
+    EGG::Vector3f closest;
+    closest.x = pointA.x + axis.x * t;
+    closest.y = pointA.y + axis.y * t;
+    closest.z = pointA.z + axis.z * t;
+
+    // Sphere test from kart center to closest point on capsule axis
+    return testSphere(closest, radius);
+}
+
+// ============================================================
+// Free function: Ground check
+// ============================================================
+
+// @addr 0x80570FC0
+/* PlayerSub10_checkGround @ 0x80570FC0 */
+bool PlayerSub10_checkGround(const PlayerSub10* player) {
+    if (player == nullptr || player->playerPointers == nullptr) return false;
+    KartState* state = player->playerPointers->kartState();
+    if (state == nullptr) return false;
+    return state->on(KART_FLAG_TOUCHING_GROUND);
+}
+
 } // namespace Kart

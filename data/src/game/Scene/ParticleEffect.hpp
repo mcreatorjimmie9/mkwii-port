@@ -118,6 +118,36 @@ public:
     /// Set global alpha multiplier for fade effects.
     void setGlobalAlpha(f32 alpha);
 
+    // --- Extended emitter control ---
+
+    /// Stop all active particles immediately.
+    /// @addr 0x80542F00 (estimated)
+    void stop();
+
+    /// Set the emitter world position for subsequent spawn calls.
+    /// @addr 0x80542F20 (estimated)
+    void setEmitterPos(f32 x, f32 y, f32 z);
+
+    /// Set the emitter direction for subsequent spawn calls.
+    /// @addr 0x80542F40 (estimated)
+    void setEmitterDir(f32 dx, f32 dy, f32 dz);
+
+    /// Set the lifetime multiplier for new particles.
+    /// @addr 0x80542F60 (estimated)
+    void setLifetime(f32 multiplier);
+
+    /// Set the base color for new particles.
+    /// @addr 0x80542F80 (estimated)
+    void setColor(u8 r, u8 g, u8 b, u8 a);
+
+    /// Set the base size scale for new particles.
+    /// @addr 0x80542FA0 (estimated)
+    void setScale(f32 scale);
+
+    /// Get the emitter position.
+    /// @addr 0x80542FC0 (estimated)
+    void getEmitterPos(f32* x, f32* y, f32* z) const;
+
 private:
     void spawnParticle(f32 x, f32 y, f32 z,
                        f32 vx, f32 vy, f32 vz,
@@ -130,6 +160,15 @@ private:
     u32 m_particleLimit;   // Soft cap on active particles
     f32 m_globalAlpha;     // Alpha multiplier for fade effects
     bool m_initialized;
+
+    // Emitter state
+    f32 m_emitterX, m_emitterY, m_emitterZ;  // Emitter position override
+    f32 m_emitterDX, m_emitterDY, m_emitterDZ; // Emitter direction override
+    f32 m_lifetimeMult;    // Lifetime multiplier for new particles
+    f32 m_sizeScale;       // Size scale for new particles
+    u8 m_baseR, m_baseG, m_baseB, m_baseA;  // Base color override
+    bool m_useEmitterPos;  // Whether to override spawn position
+    bool m_useEmitterDir;  // Whether to add emitter direction to velocity
 };
 
 } // namespace Scene

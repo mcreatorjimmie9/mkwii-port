@@ -77,10 +77,8 @@ public:
 
     // Callback
     typedef void (*CallbackFunc)(MessageBoxResult result, void* userData);
-    void setCallback(CallbackFunc callback, void* userData) {
-        mCallback = callback;
-        mUserData = userData;
-    }
+    void setCallback(CallbackFunc callback, void* userData);
+    bool isShowing() const;
 
     // @addr 0x8050a678
     static void* construct(void* buffer);
@@ -144,6 +142,18 @@ private:
     void drawBorder() const;
     void drawText() const;
     void drawButtonHints() const;
+
+    // Extended drawing
+    void drawBox();
+    void drawMessageText();
+    void drawButtonLabels();
+
+    // Extended state (non-duplicate)
+    u32 getTimeoutFramesRemaining() const;
+    void setTimeout(u32 frames);
+    MessageBoxType getType() const;
+    void setType(MessageBoxType type);
+    f32 getFadeAlpha() const;
 };
 
 } // namespace UI

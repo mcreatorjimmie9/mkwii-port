@@ -310,13 +310,54 @@ void FrameTimer::resume() {
     mStartTick = 0; // OSGetTick()
 }
 
-// @addr 0x80174640 — Change target framerate at runtime
+// @addr 0x801744C0 — Change target framerate at runtime
 void FrameTimer::setTargetFPS(f32 fps) {
     if (fps < 1.0f) {
         fps = 1.0f; // Clamp to minimum 1 FPS
     }
     mFrameRate = fps;
     // In the original: mVSyncInterval = OS_TIMER_CLOCK / fps;
+}
+
+// @addr 0x801744F0 — Get total accumulated time in seconds
+// This is the sum of all non-paused delta times since init/reset.
+/* FrameTimer_getAccumulatedTime @ 0x801744F0 */
+f32 FrameTimer::getTotalTime() const {
+    return mAccumulatedTime;
+}
+
+// @addr 0x80174520 — Get the number of frames since the last FPS measurement
+// @addr 0x80174520
+u32 FrameTimer::getFramesSinceFpsUpdate() const {
+    return mFpsFrameCount;
+}
+
+// @addr 0x80174550 — Get the VSync interval in ticks
+// @addr 0x80174550
+u32 FrameTimer::getVSyncInterval() const {
+    return mVSyncInterval;
+}
+
+// @addr 0x80174580 — Check if VSync is enabled
+// @addr 0x80174580
+bool FrameTimer::isVSyncEnabled() const {
+    return mVSyncEnabled;
+}
+
+// @addr 0x801745A0 — Get the target frame rate
+// @addr 0x801745A0
+f32 FrameTimer::getTargetFrameRate() const {
+    return mFrameRate;
+}
+
+// @addr 0x801745C0 — Compute frame budget (time allocated per frame)
+// Returns 1.0f / frameRate, the ideal delta time.
+// @addr 0x801745C0
+f32 FrameTimer::getFrameBudget() const {
+    if (mFrameRate <= 0.0f) {
+        return 1.0f / 60.0f; // Fallback
+    }
+    return 1.0f / mFrameRate;
 }
 
 // ============================================================================

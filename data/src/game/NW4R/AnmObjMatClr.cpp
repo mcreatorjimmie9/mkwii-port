@@ -395,3 +395,11 @@ void AnmObjMatClr_GXColorToFloat(u32 packed, f32& r, f32& g,
     b = static_cast<f32>((packed >> 8) & 0xFF) / 255.0f;
     a = static_cast<f32>(packed & 0xFF) / 255.0f;
 }
+
+// Get the current animated color values
+void AnmObjMatClr::getColor(f32* r, f32* g, f32* b, f32* a) const {
+    if (r) *r = m_data.current.r;
+    if (g) *g = m_data.current.g;
+    if (b) *b = m_data.current.b;
+    if (a) *a = m_data.current.a;
+}

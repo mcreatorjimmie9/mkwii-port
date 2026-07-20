@@ -377,4 +377,60 @@ f32 KartDrift::calcDriftScore() const {
     return timeScore * levelMult * cancelPenalty;
 }
 
+// @addr 0x805C1360 (estimated)
+// getBoostColor — Get the color associated with the current turbo level.
+// Returns RGB as u8 values: blue/orange/red for the three levels, white for none.
+void KartDrift::getBoostColor(u8* r, u8* g, u8* b) const {
+    if (!r || !g || !b) return;
+    switch (mState.turboLevel) {
+    case TURBO_LEVEL_BLUE:
+        *r = 80;  *g = 140; *b = 255; break;
+    case TURBO_LEVEL_ORANGE:
+        *r = 255; *g = 160; *b = 30;  break;
+    case TURBO_LEVEL_RED:
+        *r = 255; *g = 50;  *b = 50;  break;
+    default:
+        *r = 255; *g = 255; *b = 255; break;
+    }
+}
+
+// @addr 0x805C1380 (estimated)
+// getChargePercent — Get the turbo charge as a percentage [0, 100].
+f32 KartDrift::getChargePercent() const {
+    return mState.turboCharge * 100.0f;
+}
+
+// @addr 0x805C1390 (estimated)
+// getChargeTime — Get the time spent charging the current drift.
+f32 KartDrift::getChargeTime() const {
+    return mState.chargeTimer;
+}
+
+// @addr 0x805C13A0 (estimated)
+// canRelease — Check if mini-turbo can be released.
+bool KartDrift::canRelease() const {
+    return mState.mbCanRelease;
+}
+
+// @addr 0x805C13B0 (estimated)
+// getOutsideDriftAmount — Get how far outside the optimal drift the player is.
+f32 KartDrift::getOutsideDriftAmount() const {
+    return mState.outsideDriftAmount;
+}
+
+// @addr 0x805C13C0 (estimated)
+// getDriftDirection — Get the drift direction as a float (-1.0, 0.0, +1.0).
+f32 KartDrift::getDriftDirectionF() const {
+    return static_cast<f32>(mState.driftDirection);
+}
+
+// @addr 0x805C13D0 (estimated)
+// getRemainingBoostTime — Get remaining boost time if boosting.
+f32 KartDrift::getRemainingBoostTime() const {
+    if (mState.mState != DRIFT_STATE_BOOSTING) {
+        return 0.0f;
+    }
+    return mState.boostTimer;
+}
+
 } // namespace Kart

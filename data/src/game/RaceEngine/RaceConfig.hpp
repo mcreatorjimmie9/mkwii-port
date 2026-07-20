@@ -216,6 +216,8 @@ public:
     void initPlayers(u8 playerCount);
     // @addr 0x80532078
     void initRace(Scenario* scenario);
+    // @addr 0x80530c20
+    void reset();
     // @addr 0x80531e0c
     void initRng();
     bool isTeamMode();
@@ -224,6 +226,14 @@ public:
     void resetPlayers();
     // @addr 0x80530c58
     u8 update();
+
+    // Extended scenario methods
+    const Settings& getSetting() const;
+    void setSetting(const Settings& settings);
+    u8 getPlayerCount() const;
+    bool isMultiplayer() const;
+    bool validateSettings() const;
+    s32 getControllerForPlayer(u8 playerIdx) const;
 
     Settings::CameraMode getCameraMode();
     const Player& getPlayer(u8 idx) const;

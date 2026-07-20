@@ -122,3 +122,71 @@ const TexPatKeyFrame* AnmObjTexPat_GetCurrentUV(const AnmObjTexPatData* obj);
 
 // @addr 0x80600460 — Reset animation to frame 0
 void AnmObjTexPat_Reset(AnmObjTexPatData* obj);
+
+// ============================================================================
+// AnmObjTexPat — C++ class wrapper for texture pattern animation
+// ============================================================================
+// Provides an object-oriented interface to the C-style AnmObjTexPatData.
+// Used by the material animation system to drive texture UV animation
+// on materials within the layout/model rendering pipeline.
+// ============================================================================
+
+// Forward declarations
+struct MaterialData;
+
+class AnmObjTexPat {
+public:
+    AnmObjTexPat();
+    ~AnmObjTexPat();
+
+    // Initialize from resource data
+    // @addr 0x80600500
+    bool init(ResTexPatAnm* res);
+
+    // Advance animation frame by delta time
+    // @addr 0x80600540
+    void calc(f32 deltaTime);
+
+    // Set current frame position
+    // @addr 0x80600580
+    void setFrame(f32 frame);
+
+    // Get current frame position
+    // @addr 0x806005A0
+    f32 getFrame() const;
+
+    // Get total frame count (duration)
+    // @addr 0x806005C0
+    f32 getFrameCount() const;
+
+    // Apply current UV rect to a material's texture coordinate settings
+    // @addr 0x806005E0
+    void applyToMaterial(MaterialData* mat, u8 texMapIdx);
+
+    // Set play mode (once/loop/pingpong)
+    // @addr 0x80600600
+    void setPlayMode(u8 mode);
+
+    // Attach to a material for automatic UV application
+    // @addr 0x80600620
+    void attach(MaterialData* mat);
+
+    // Detach from current material
+    // @addr 0x80600640
+    void detach();
+
+    // Access underlying data
+    AnmObjTexPatData* getData() { return &mData; }
+    const AnmObjTexPatData* getData() const { return &mData; }
+
+    // Get the attached material
+    MaterialData* getAttachedMaterial() const { return mpMaterial; }
+
+private:
+    AnmObjTexPatData mData;    // Underlying animation data
+    MaterialData* mpMaterial;  // Attached material (or nullptr)
+};
+
+// Factory: create AnmObjTexPat from raw resource data
+// @addr 0x80600680
+AnmObjTexPat* AnmObjTexPat_createFromRes(const void* data, u32 size);

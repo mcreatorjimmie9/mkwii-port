@@ -358,3 +358,119 @@ KartBodySub::KartBodySub(int a, int b, KartBody* body, int c, int d, void* e, in
 }
 
 // KartCollideArea definitions moved to Collision/KartCollide.cpp (Phase 6b)
+
+// ============================================================================
+// Extended KartBody methods
+// ============================================================================
+
+// @addr 0x805a4900
+void KartBody::update(f32 dt) {
+    // Per-frame update: spring back compression, update audio
+    (void)dt;
+    updateCompression();
+
+    // Update audio effects based on collision state
+    // updateAudio() is called separately by the effect system
+}
+
+// @addr 0x805a4940
+const EGG::Vector3f& KartBody::getScale() const {
+    return mBodyScale;
+}
+
+// @addr 0x805a4960
+void KartBody::setScale(f32 scaleX, f32 scaleY, f32 scaleZ) {
+    mBodyScale.x = scaleX;
+    mBodyScale.y = scaleY;
+    mBodyScale.z = scaleZ;
+
+    // If any scale component > 1.5, treat as mega
+    f32 maxScale = scaleX;
+    if (scaleY > maxScale) maxScale = scaleY;
+    if (scaleZ > maxScale) maxScale = scaleZ;
+
+    // Update hitbox scale based on visual scale
+    if (maxScale > 1.5f) {
+        setHitboxScale(maxScale);
+    }
+}
+
+// @addr 0x805a49A0
+const EGG::Vector3f& KartBody::getPosition() const {
+    return mBodyPos;
+}
+
+// @addr 0x805a49C0
+void KartBody::setPosition(const EGG::Vector3f& pos) {
+    mBodyPos = pos;
+}
+
+// @addr 0x805a49E0
+EGG::Vector3f KartBody::getRotation() const {
+    // Return a simplified rotation vector (Euler angles)
+    // In the full Kart::KartBody (not this effect manager),
+    // rotation comes from the dynamics quaternion.
+    // This stub returns zero rotation.
+    EGG::Vector3f rot;
+    rot.setAll(0);
+    return rot;
+}
+
+// @addr 0x805a4A00
+f32 KartBody::getBoundingRadius() const {
+    // Return the precomputed bounding sphere radius.
+    // This is the maximum distance from the body center to
+    // any hitbox edge (position + radius).
+    if (mBoundingRadius > 0.0f) {
+        return mBoundingRadius;
+    }
+
+    // Compute on first call: max(dist(center, hitboxEdge)) over all hitboxes
+    f32 maxDist = 0.0f;
+    for (s32 i = 0; i < mHitboxCount && i < 8; i++) {
+        if (!mBodyHitboxes[i].enabled) continue;
+
+        EGG::Vector3f delta;
+        delta.x = mBodyHitboxes[i].pos.x - mBodyPos.x;
+        delta.y = mBodyHitboxes[i].pos.y - mBodyPos.y;
+        delta.z = mBodyHitboxes[i].pos.z - mBodyPos.z;
+
+        f32 distSq = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+        f32 dist = std::sqrt(distSq) + mBodyHitboxes[i].radius * mCollisionScale;
+        if (dist > maxDist) {
+            maxDist = dist;
+        }
+    }
+
+    // Cache the result
+    const_cast<KartBody*>(this)->mBoundingRadius = maxDist;
+    return maxDist;
+}
+
+// @addr 0x805a4A80
+void KartBody::calcBoundingBox(EGG::Vector3f& outMin, EGG::Vector3f& outMax) const {
+    // Compute an axis-aligned bounding box from all active hitboxes.
+    // Initialize to extreme values.
+    outMin.x = 99999.0f; outMin.y = 99999.0f; outMin.z = 99999.0f;
+    outMax.x = -99999.0f; outMax.y = -99999.0f; outMax.z = -99999.0f;
+
+    for (s32 i = 0; i < mHitboxCount && i < 8; i++) {
+        if (!mBodyHitboxes[i].enabled) continue;
+
+        const BspHitbox& hb = mBodyHitboxes[i];
+        f32 r = hb.radius;
+
+        if (hb.pos.x - r < outMin.x) outMin.x = hb.pos.x - r;
+        if (hb.pos.y - r < outMin.y) outMin.y = hb.pos.y - r;
+        if (hb.pos.z - r < outMin.z) outMin.z = hb.pos.z - r;
+        if (hb.pos.x + r > outMax.x) outMax.x = hb.pos.x + r;
+        if (hb.pos.y + r > outMax.y) outMax.y = hb.pos.y + r;
+        if (hb.pos.z + r > outMax.z) outMax.z = hb.pos.z + r;
+    }
+}
+
+// @addr 0x805a4B00
+bool KartBody::isMega() const {
+    // Check if the kart is currently mega-sized (Mega Mushroom effect)
+    return mCollisionScale > 1.5f;
+}

@@ -47,6 +47,14 @@ public:
     // Check if tire has ground contact
     bool isInContact() const { return mInContact; }
 
+    // Extended tire methods
+    f32 getSurfaceGrip() const;
+    void calcSlipAngle(f32 forwardSpeed, f32 lateralSpeed);
+    f32 calcLateralForce(f32 slipAngle, f32 normalForce) const;
+    f32 getWear() const;
+    void setPressure(f32 pressure);
+    EGG::Vector3f getContactPatch() const;
+
     // Accessors for per-wheel tuning data
     f32 getSteerRatio() const { return mSteerRatio; }
     f32 getDriveRatio() const { return mDriveRatio; }
@@ -82,6 +90,9 @@ private:
     f32 mFriction;           // 0x54: contact friction coefficient
     f32 mRestitution;        // 0x58: contact restitution
     u32 mColBitmask;         // 0x5C: collision bitmask
+    f32 mSlipAngle;          // Current tire slip angle (radians)
+    f32 mTireWear;           // Tire wear factor (0.0=new, 1.0=fully worn)
+    f32 mTirePressure;       // Tire pressure (1.0=normal)
 };
 
 // ===== KartTirePhysics (used in PlayerKart_createTires) =====

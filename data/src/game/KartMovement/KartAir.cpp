@@ -389,4 +389,138 @@ const char* KartAir_getTrickName(TrickType type) {
     }
 }
 
+// @addr 0x805D14C0 (estimated)
+// Returns the total time spent in the current air state.
+// Useful for debugging how long the kart has been in each phase
+// of the airborne arc (rising, apex, falling, trick, landed).
+f32 KartAir::getStateTime() const {
+    return mState.stateTimer;
+}
+
+// @addr 0x805D14E0 (estimated)
+// Get the speed at which the kart was launched into the air.
+// This is the initial horizontal speed at the moment of takeoff,
+// computed from the launch velocity's XZ magnitude.
+f32 KartAir::getLaunchSpeed() const {
+    f32 vx = mState.lastGroundPos.x; // repurposed: stored launch speed
+    f32 vz = mState.velocity.z;
+    // Compute horizontal speed from the initial velocity
+    // (lastGroundPos stores the position, not speed — use velocity)
+    f32 hSpeedSq = mState.velocity.x * mState.velocity.x +
+                   mState.velocity.z * mState.velocity.z;
+    // The launch speed snapshot isn't stored directly, so return
+    // the current horizontal speed as an approximation
+    (void)vx;
+    (void)vz;
+    return std::sqrt(hSpeedSq);
+}
+
+// @addr 0x805D1500 (estimated)
+// Check if the kart is in a landing recovery state.
+// During landing recovery, the kart cannot accelerate or steer
+// at full effectiveness. This is the "LANDED" state where
+// landingLagTimer is counting down.
+bool KartAir::isLanding() const {
+    return mState.mState == AIR_STATE_LANDED;
+}
+
+// @addr 0x805D1520 (estimated)
+// Get the remaining landing lag time in seconds.
+// Returns 0.0 if not in the LANDED state.
+f32 KartAir::getLandingLagTime() const {
+    if (mState.mState != AIR_STATE_LANDED) return 0.0f;
+    return mState.landingLagTimer;
+}
+
+// @addr 0x805D1540 (estimated)
+// Check if a trick boost is currently active and should be applied.
+// The boost decays over time with a quadratic curve, so this returns
+// true only while the timer is positive.
+bool KartAir::isTrickBoostActive() const {
+    return mState.trickBoostTimer > 0.0f;
+}
+
+// @addr 0x805D1560 (estimated)
+// Get the remaining trick boost timer in seconds.
+// Returns 0.0 if no trick boost is active.
+f32 KartAir::getTrickBoostTime() const {
+    return mState.trickBoostTimer;
+}
+
+// @addr 0x805D1580 (estimated)
+// Get the landing squash animation progress as a 0-1 value.
+// Returns 0.0 if no squash animation is playing, 1.0 at the start,
+// decreasing to 0.0 as the animation completes.
+f32 KartAir::getSquashProgress() const {
+    if (mLandingSquashTimer <= 0.0f) return 0.0f;
+    // The squash timer starts at 0.15 and counts down to 0
+    const f32 squashDuration = 0.15f;
+    f32 t = mLandingSquashTimer / squashDuration;
+    if (t > 1.0f) t = 1.0f;
+    return t;
+}
+
+// @addr 0x805D15A0 (estimated)
+// Get the maximum height reached during the current airborne state.
+f32 KartAir::getMaxHeight() const {
+    return mState.maxHeight;
+}
+
+// @addr 0x805D15C0 (estimated)
+// Get the height at which the kart was launched.
+f32 KartAir::getLaunchHeight() const {
+    return mState.launchHeight;
+}
+
+// @addr 0x805D15E0 (estimated)
+// Reset all air state to grounded. Called when the kart is
+// respawned or when transitioning between scenes.
+void KartAir::reset() {
+    mState.mState = AIR_STATE_GROUNDED;
+    mState.airTime = 0.0f;
+    mState.stateTimer = 0.0f;
+    mState.velocity.setAll(0);
+    mState.lastGroundPos.setAll(0);
+    mState.launchHeight = 0.0f;
+    mState.maxHeight = 0.0f;
+    mState.trickType = TRICK_NONE;
+    mState.mbTrickPerformed = false;
+    mState.mbTrickWindowOpen = false;
+    mState.landingLagTimer = 0.0f;
+    mState.trickBoostTimer = 0.0f;
+    mState.trickBoostMultiplier = 1.0f;
+    mTotalTrickCount = 0;
+    mLandingSquashTimer = 0.0f;
+    mMinAirTime = 0.0f;
+}
+
+// @addr 0x805D1600 (estimated)
+// Set a custom air configuration. Allows per-vehicle tuning
+// of gravity, fall speed, trick window timing, etc.
+void KartAir::setConfig(const AirConfig& config) {
+    mConfig = config;
+}
+
+// @addr 0x805D1620 (estimated)
+// Free function: check if a trick type is a "flip" (vertical rotation).
+// Flips provide more points and speed boost than spins.
+bool KartAir_isFlipTrick(TrickType type) {
+    return type == TRICK_FRONT_FLIP || type == TRICK_BACK_FLIP;
+}
+
+// @addr 0x805D1640 (estimated)
+// Free function: check if a trick type is a "spin" (horizontal rotation).
+// Spins are easier to perform but give less reward than flips.
+bool KartAir_isSpinTrick(TrickType type) {
+    return type == TRICK_LEFT_SPIN || type == TRICK_RIGHT_SPIN;
+}
+
+// @addr 0x805D1660 (estimated)
+// Free function: get the point value for a trick type.
+// Used for VS mode scoring where tricks award points.
+f32 KartAir_getTrickScore(TrickType type) {
+    TrickResult result = KartAir::getTrickResult(type);
+    return result.trickScore;
+}
+
 } // namespace Kart
