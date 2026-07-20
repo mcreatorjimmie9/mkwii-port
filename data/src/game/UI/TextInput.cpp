@@ -5,6 +5,7 @@
 #include "Layout.hpp"
 #include "LayoutLoader.hpp"
 #include "ui_stubs.h"
+#include <cstring>
 
 namespace UI {
 
@@ -34,10 +35,18 @@ TextInput::TextInput()
     , mIsWidePane(0)
     , mConfirmAllowed(0)
     , mCursorAnimTime(0.0f)
-    , mCursorConfirmed(0) {
+    , mCursorConfirmed(0)
+    , mMaxLen(MAX_TEXT_LENGTH)
+    , mCursorTextPos(0)
+    , mTextPosX(0)
+    , mTextPosY(0)
+    , mCursorBlinkPeriod(0.5f)
+    , mCursorVisible(1)
+    , mFilter(nullptr) {
     memset(mGrid, 0, sizeof(mGrid));
     memset(mTextBuffer, 0, sizeof(mTextBuffer));
     memset(_6B1, 0, sizeof(_6B1));
+    memset(_pad2, 0, sizeof(_pad2));
 }
 
 TextInput::~TextInput() {
@@ -262,6 +271,132 @@ void TextInput::moveCursor(s32 dx, s32 dy) {
 
     // Update cursor blink
     mBlinkTimer = 0.0f;
+}
+
+// Initialize text input field with position and max length
+void TextInput::init(u8 maxLen, u16 xPos, u16 yPos) {
+    mMaxLen = maxLen > MAX_TEXT_LENGTH ? MAX_TEXT_LENGTH : maxLen;
+    mTextPosX = xPos;
+    mTextPosY = yPos;
+    mCursorTextPos = 0;
+    mTextLength = 0;
+    mBlinkTimer = 0.0f;
+    mCursorVisible = 1;
+    memset(mTextBuffer, 0, sizeof(mTextBuffer));
+}
+
+// Update cursor blink and input buffer state
+void TextInput::update(f32 dt) {
+    if (mState != TEXTINPUT_ACTIVE && mState != TEXTINPUT_ENTERING) return;
+
+    // Update cursor blink timer
+    mBlinkTimer += dt;
+    if (mBlinkTimer >= mCursorBlinkPeriod) {
+        mBlinkTimer -= mCursorBlinkPeriod;
+        mCursorVisible = !mCursorVisible;
+    }
+
+    // Update entry/exit timers
+    if (mState == TEXTINPUT_ENTERING) {
+        mEnterTimer += dt;
+        if (mEnterTimer >= 0.3f) {
+            mState = TEXTINPUT_ACTIVE;
+        }
+    } else if (mState == TEXTINPUT_EXITING) {
+        mExitTimer += dt;
+        if (mExitTimer >= 0.3f) {
+            mState = TEXTINPUT_INACTIVE;
+        }
+    }
+}
+
+// Insert a character at the current cursor position in the text buffer
+void TextInput::insertChar(char c) {
+    if (mState != TEXTINPUT_ACTIVE) return;
+    if (mTextLength >= mMaxLen) return;
+
+    // Apply character filter if set
+    if (mFilter != nullptr && !mFilter(c)) return;
+
+    // Shift characters right from cursor position
+    u16 pos = mCursorTextPos;
+    if (pos > mTextLength) pos = mTextLength;
+
+    for (u16 i = mTextLength; i > pos; i--) {
+        mTextBuffer[i] = mTextBuffer[i - 1];
+    }
+
+    mTextBuffer[pos] = c;
+    mTextLength++;
+    mCursorTextPos = pos + 1;
+    mTextBuffer[mTextLength] = '\0';
+
+    // Reset cursor blink on input
+    mBlinkTimer = 0.0f;
+    mCursorVisible = 1;
+}
+
+// Delete the character at the current cursor position
+void TextInput::deleteChar() {
+    if (mState != TEXTINPUT_ACTIVE) return;
+    if (mTextLength == 0 || mCursorTextPos >= mTextLength) return;
+
+    u16 pos = mCursorTextPos;
+
+    // Shift characters left
+    for (u16 i = pos; i < mTextLength - 1; i++) {
+        mTextBuffer[i] = mTextBuffer[i + 1];
+    }
+
+    mTextLength--;
+    mTextBuffer[mTextLength] = '\0';
+    mBlinkTimer = 0.0f;
+    mCursorVisible = 1;
+}
+
+// Delete the character before the cursor (backspace)
+void TextInput::backspace() {
+    if (mState != TEXTINPUT_ACTIVE) return;
+    if (mTextLength == 0 || mCursorTextPos == 0) return;
+
+    mCursorTextPos--;
+
+    // Shift characters left
+    for (u16 i = mCursorTextPos; i < mTextLength - 1; i++) {
+        mTextBuffer[i] = mTextBuffer[i + 1];
+    }
+
+    mTextLength--;
+    mTextBuffer[mTextLength] = '\0';
+    mBlinkTimer = 0.0f;
+    mCursorVisible = 1;
+}
+
+// Clear all text in the buffer
+void TextInput::clear() {
+    mTextLength = 0;
+    mCursorTextPos = 0;
+    memset(mTextBuffer, 0, sizeof(mTextBuffer));
+    mBlinkTimer = 0.0f;
+    mCursorVisible = 1;
+}
+
+// Set the cursor position within the text buffer
+void TextInput::setCursorPos(u8 pos) {
+    if (pos > mTextLength) pos = mTextLength;
+    mCursorTextPos = pos;
+    mBlinkTimer = 0.0f;
+    mCursorVisible = 1;
+}
+
+// Check if the text input is currently active
+bool TextInput::isActive() const {
+    return mState == TEXTINPUT_ACTIVE || mState == TEXTINPUT_ENTERING;
+}
+
+// Set a character filter function for input validation
+void TextInput::setFilter(TextFilter filter) {
+    mFilter = filter;
 }
 
 } // namespace UI

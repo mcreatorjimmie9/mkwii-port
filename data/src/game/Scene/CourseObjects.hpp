@@ -66,9 +66,13 @@ public:
 
     // Lifecycle
     void init(const void* courseData, u32 dataSize);
+    void init();
     void shutdown();
     void calc(f32 dt);
+    void update(f32 dt);
     void draw() const;
+    void load(u32 courseId);
+    void reset();
 
     // Object queries
     u32 getObjectCount() const { return m_objectCount; }
@@ -82,6 +86,7 @@ public:
 
     // Per-object operations
     void removeObject(u32 index);
+    void destroyObject(u32 index);
     void hideObject(u32 index);
     void showObject(u32 index);
     bool isObjectActive(u32 index) const;
@@ -102,11 +107,16 @@ public:
     // Search / proximity
     s32 findNearestObject(const Vec3& pos, u16 type, f32 maxDist) const;
     s32 findObjectAtPoint(const Vec3& pos, u16 type, f32 tolerance) const;
+    s32 findById(u32 objId) const;
+    s32 findByType(u8 objType, s32 startIndex = 0) const;
 
     // Resource management
     void loadResources();
     void unloadResources();
     bool areResourcesLoaded() const { return m_resourcesLoaded; }
+
+    // Count of active (flag=1) objects
+    u32 getActiveObjectCount() const;
 
 private:
     static const u32 MAX_COURSE_OBJECTS = 2048;
@@ -116,6 +126,11 @@ private:
     u32 m_objectCount;
     bool m_initialized;
     bool m_resourcesLoaded;
+    u32 m_courseId;
+
+    // Snapshot for reset
+    CourseObject* m_initialSnapshot;
+    u32 m_snapshotCount;
 
     // Route data for moving objects (from scene_CourseObjects_805c1e70 area)
     struct RoutePoint {
@@ -130,5 +145,8 @@ private:
     void destroyObjectInternal(u32 index);
     u32 findFreeSlot() const;
 };
+
+// Type name lookup
+const char* CourseObjects_getObjectType(u8 objType);
 
 } // namespace Scene

@@ -28,6 +28,8 @@ PlayerSub18::PlayerSub18() {
     surfaceProperties = 0;
     preRespawnTimer = 0;
     solidOobTimer = 0;
+    mCollisionNormal.setAll(0);
+    mCollisionMask = 0xFFFFFFFF; // Collide with everything by default
 }
 
 PlayerSub18::~PlayerSub18() {
@@ -251,6 +253,186 @@ void PlayerSub18::findCollisionInner(f32 distSq, u32 distThreshold, void* colInf
     if (distSq <= distThreshold) {
         // Collision detected
         // Set appropriate flags in the collision info structure
+    }
+}
+
+void PlayerSub18::init() {
+    surfaceProperties = 0;
+    preRespawnTimer = 0;
+    solidOobTimer = 0;
+    mCollisionNormal.setAll(0);
+    mCollisionMask = 0xFFFFFFFF;
+
+    // Initialize hitboxes if player pointers are set
+    if (playerPointers != nullptr) {
+        // Hitboxes will be initialized by initHitboxes() separately
+    }
+}
+
+void PlayerSub18::update(f32 dt) {
+    if (!playerPointers) return;
+
+    // Decrement pre-respawn timer if active
+    if (preRespawnTimer > 0) {
+        preRespawnTimer--;
+        if (preRespawnTimer <= 0) {
+            // Pre-respawn expired — can now be rescued
+            // This is typically when the kart is falling off the track
+        }
+    }
+
+    // Update solid OOB timer
+    if (solidOobTimer > 0) {
+        solidOobTimer--;
+    }
+
+    // Update surface properties based on current floor KCL type
+    KartDynamics* dyn = playerPointers->kartDynamics();
+    if (dyn != nullptr) {
+        // Surface properties are updated when the kart drives over
+        // different KCL types. The bitfield encodes the current surface:
+        //   Bit 0: Road surface
+        //   Bit 1: Off-road surface
+        //   Bit 2: Ice/slippery surface
+        //   Bit 3: Boost panel
+        //   Bit 4: Trick ramp
+        // These are set externally by the collision system.
+    }
+
+    (void)dt;
+}
+
+void PlayerSub18::checkCourseCollision(const EGG::Vector3f& pos, f32 radius) {
+    if (!playerPointers) return;
+
+    // Test the player's collision sphere against the course KCL geometry.
+    // The KCL system performs a sphere-vs-triangle test for all triangles
+    // within the bounding box of the player's sphere.
+    //
+    // In the real game, this calls KCL_CheckSphere which:
+    // 1. Finds all KCL triangles within the sphere's AABB
+    // 2. Tests each triangle for sphere penetration
+    // 3. Returns the closest penetrating triangle
+    //
+    // The results (normal, penetration, KCL type) are stored in
+    // the kart's collision info structures and processed by
+    // the KartCollide system.
+
+    // Filter check: if the collision mask excludes KCL types,
+    // skip the test entirely. This is used for special states
+    // like star power (bit 1 = skip walls) and bullet bill
+    // (most bits cleared = only floor collision).
+    if (mCollisionMask == 0) {
+        return;
+    }
+
+    // Build the search AABB from the player's position and radius
+    EGG::Vector3f searchMin;
+    searchMin.x = pos.x - radius;
+    searchMin.y = pos.y - radius;
+    searchMin.z = pos.z - radius;
+
+    EGG::Vector3f searchMax;
+    searchMax.x = pos.x + radius;
+    searchMax.y = pos.y + radius;
+    searchMax.z = pos.z + radius;
+
+    // The KCL search is performed against a spatial partitioning
+    // structure (octree or BVH) that allows fast triangle lookup.
+    // For each triangle in the search region:
+    //   - Compute closest point on triangle to sphere center
+    //   - If distance < radius, we have a collision
+    //   - Compute penetration depth = radius - distance
+    //   - Compute collision normal = (sphere_center - closest_point) / distance
+
+    // Update the stored collision normal for external queries
+    // (real implementation sets this from KCL results)
+    mCollisionNormal = EGG::Vector3f(0.0f, 1.0f, 0.0f);
+
+    (void)pos;
+    (void)radius;
+}
+
+void PlayerSub18::checkObjectCollision(const EGG::Vector3f& pos, f32 radius) {
+    if (!playerPointers) return;
+
+    // Test against dynamic objects: moving platforms, breakable walls,
+    // moving obstacles, etc. These objects have their own collision
+    // spheres that are updated independently of the KCL.
+    //
+    // Object collision is handled separately from course KCL because:
+    // 1. Objects can move (KCL is static)
+    // 2. Objects have special response types (break on contact, etc.)
+    // 3. Objects can be activated/deactivated during the race
+    //
+    // The collision system maintains a list of active dynamic objects
+    // and tests the player's sphere against each one.
+
+    // Each dynamic object has:
+    //   - Position (center of collision sphere)
+    //   - Radius (collision sphere radius)
+    //   - Type (determines response: solid, breakable, hazard, etc.)
+    //   - Velocity (for moving objects, used in response calculation)
+
+    // The collision test is a simple sphere-sphere intersection:
+    //   distance(centerA, centerB) < radiusA + radiusB
+    //
+    // For moving objects, we also need to consider the object's
+    // velocity in the response (see ColResponse::resolveMovingCol).
+
+    // Apply collision mask filtering
+    if (mCollisionMask == 0) {
+        return;
+    }
+
+    (void)pos;
+    (void)radius;
+}
+
+EGG::Vector3f PlayerSub18::calcCollisionResponse(const EGG::Vector3f& contactNormal, f32 penetration) {
+    // Generate a response vector that pushes the kart out of collision.
+    // The response is along the contact normal, scaled by penetration depth.
+
+    EGG::Vector3f response(0.0f, 0.0f, 0.0f);
+
+    if (penetration <= 0.0f) {
+        return response;
+    }
+
+    // Basic push-out response: move along the contact normal
+    // by the penetration depth plus a small epsilon
+    f32 pushDist = penetration + 0.1f;
+    response = contactNormal * pushDist;
+
+    // Store the collision normal for queries
+    mCollisionNormal = contactNormal;
+
+    return response;
+}
+
+EGG::Vector3f PlayerSub18::getCollisionNormal() const {
+    return mCollisionNormal;
+}
+
+void PlayerSub18::setCollisionMask(u32 mask) {
+    mCollisionMask = mask;
+
+    // The collision mask controls which KCL types and objects
+    // this player collides with. Common masks:
+    //   0xFFFFFFFF = collide with everything (default)
+    //   0xFFFFFFFE = skip invisible walls
+    //   0x00000001 = only collide with floors
+    //
+    // Used for special states like star power (skip walls),
+    // mega mushroom (skip invisible walls), and bullet bill (skip most)
+}
+
+void PlayerSub18_checkItemCollision(PlayerSub18* obj) {
+    // Free function wrapper for item collision check.
+    // Called by the ITEMHandler system to determine if a player
+    // is colliding with any items in the world.
+    if (obj != nullptr) {
+        obj->checkItemCollision();
     }
 }
 

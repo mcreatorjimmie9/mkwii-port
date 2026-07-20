@@ -217,3 +217,195 @@ bool PlayerBoost::update(bool* outActive) {
     *outActive = false;
     return false;
 }
+
+void PlayerBoost::init() {
+    reset();
+    // Initialize with default multiplier (no boost = 1.0x)
+    multiplier = 1.0f;
+    acceleration = 0.0f;
+    _1c = 1.5f; // Maximum possible multiplier
+    speedLimit = 0.0f;
+}
+
+void PlayerBoost::activateMushroom() {
+    // Mushroom boost: slot 2, ~45 frames (0.75 seconds at 60fps)
+    // Provides a moderate speed burst with acceleration
+    // Multiple mushrooms can stack (longer duration wins)
+    activate(BOOST_TYPE_MUSHROOM, 45);
+
+    // Mushroom boost provides:
+    //   - Speed multiplier: +0.3x (1.3x total)
+    //   - Acceleration boost: immediate speed kick
+    //   - No invincibility
+    // The multiplier is applied through the global boost table
+    // which is indexed by the slot type in the update() method.
+}
+
+void PlayerBoost::activateStar() {
+    // Star power: slot 1, ~720 frames (12 seconds at 60fps)
+    // Provides continuous speed boost and invincibility.
+    // The star is one of the most powerful items:
+    //   - Speed multiplier: +0.2x (1.2x total)
+    //   - Full invincibility to all hazards
+    //   - Spin-out effect on contacted karts
+    //   - No off-road penalty while active
+    activate(BOOST_TYPE_STAR, 720);
+
+    // Star activation also sets invincibility flags on the kart state.
+    // The KartState system tracks star state separately for:
+    //   - Visual effects (rainbow coloring)
+    //   - Audio effects (star music)
+    //   - Collision immunity (pass through hazards)
+}
+
+void PlayerBoost::activateMega() {
+    // Mega mushroom: slot 5, ~600 frames (10 seconds at 60fps)
+    // Makes the kart large and provides speed boost.
+    // The mega mushroom transforms the kart:
+    //   - Size: 2.5x normal
+    //   - Speed multiplier: +0.15x (1.15x total)
+    //   - Invincibility to most hazards (but not star users)
+    //   - Can crush small karts on contact
+    //   - Reduced handling due to larger size
+    activate(BOOST_TYPE_MEGA, 600);
+
+    // Mega activation also triggers the kart body scale change.
+    // The KartBody system handles the visual size increase and
+    // the hitbox expansion.
+}
+
+void PlayerBoost::activateBulletBill() {
+    // Bullet bill: slot 3, ~300 frames (5 seconds at 60fps)
+    // Auto-pilot boost that follows the track automatically.
+    // The bullet bill transforms the kart:
+    //   - Speed: fixed high speed (follows track path)
+    //   - Auto-pilot: player has no control
+    //   - Invincibility to all hazards
+    //   - Visual: kart becomes a bullet bill
+    // The bullet bill is ended early if the player hits a wall.
+    activate(BOOST_TYPE_BULLET, 300);
+
+    // Bullet bill also sets the KART_FLAG_IN_BULLET and KART_FLAG_BULLET
+    // flags on the kart state, which the movement system uses to
+    // disable player input and switch to auto-pilot control.
+}
+
+void PlayerBoost::activateSlipstream() {
+    // Slipstream/drafting boost: slot 0, ~30 frames (0.5 seconds)
+    // Triggered when drafting behind another kart for long enough.
+    // The slipstream system:
+    //   1. Kart drives behind another within a cone-shaped zone
+    //   2. After ~3 seconds of drafting, the boost is ready
+    //   3. The boost gives a short but significant speed burst
+    //   4. The boost is smaller than a mushroom but stacks with it
+    activate(BOOST_TYPE_MINI_TURBO, 30);
+
+    // Slipstream uses the mini-turbo slot because it behaves
+    // similarly: a short speed boost that decays over time.
+    // The multiplier is applied through the global boost table.
+}
+
+BoostType PlayerBoost::getActiveBoostType() const {
+    // Return the highest-priority active boost type.
+    // Priority order (highest first):
+    //   Star > Mega > Bullet > Mushroom > Trick > Mini-Turbo
+    //
+    // This priority matters when multiple boosts overlap:
+    // e.g., a star + trick boost active simultaneously —
+    // the star takes priority for UI display and certain
+    // physics interactions.
+
+    // Check each slot in priority order
+    // Slot 1: Star (highest priority — invincibility)
+    if (types & (1u << BOOST_TYPE_STAR))    return BOOST_TYPE_STAR;
+
+    // Slot 5: Mega mushroom (size + speed)
+    if (types & (1u << BOOST_TYPE_MEGA))    return BOOST_TYPE_MEGA;
+
+    // Slot 3: Bullet bill (auto-pilot)
+    if (types & (1u << BOOST_TYPE_BULLET))  return BOOST_TYPE_BULLET;
+
+    // Slot 2: Mushroom / boost panel
+    if (types & (1u << BOOST_TYPE_MUSHROOM)) return BOOST_TYPE_MUSHROOM;
+
+    // Slot 4: Trick / zipper ramp
+    if (types & (1u << BOOST_TYPE_TRICK))   return BOOST_TYPE_TRICK;
+
+    // Slot 0: Mini-turbo / slipstream / start boost (lowest priority)
+    if (types & (1u << BOOST_TYPE_MINI_TURBO)) return BOOST_TYPE_MINI_TURBO;
+
+    // No active boost — return MINI_TURBO as sentinel (caller checks isActive() first)
+    return BOOST_TYPE_MINI_TURBO;
+}
+
+f32 PlayerBoost::getTotalBoostMultiplier() const {
+    // Return the current computed multiplier from the last update().
+    // This is the product/sum of all active boost multipliers.
+    //
+    // The multiplier is computed in update() by summing contributions
+    // from each active slot's entry in the global boost table.
+    // For example:
+    //   - Mushroom alone: 1.0 + 0.3 = 1.3x
+    //   - Star + Mushroom: 1.0 + 0.2 + 0.3 = 1.5x
+    //   - Trick + Mini-Turbo: 1.0 + 0.15 + 0.1 = 1.25x
+    //
+    // The multiplier is applied to the kart's top speed and
+    // acceleration values in the KartMove system.
+
+    // Also factor in the speed limit if active
+    f32 effectiveMultiplier = multiplier;
+    if (speedLimit > 0.0f) {
+        // When a speed limit is active (from boost table),
+        // it caps the effective multiplier rather than adding to it.
+        // The speed limit represents an absolute speed ceiling.
+        // We convert it to a multiplier-like value for consistency.
+        f32 limitAsMult = speedLimit / 100.0f; // Normalize to ~1.0 range
+        if (limitAsMult < effectiveMultiplier) {
+            effectiveMultiplier = limitAsMult;
+        }
+    }
+
+    return effectiveMultiplier;
+}
+
+void PlayerBoost::cancelBoost(BoostType type) {
+    if (type >= 6) return;
+
+    u16 typeBit = 1u << type;
+    if (types & typeBit) {
+        types &= ~typeBit;
+        frames[type] = 0;
+    }
+}
+
+f32 PlayerBoost::getRemainingTime() const {
+    // Find the remaining time of the longest active boost.
+    // This is used for UI display (boost timer bar) and for
+    // determining if a boost is about to expire.
+    //
+    // When multiple boosts are active, we report the longest
+    // one so the UI shows the total remaining boost time.
+
+    s16 maxFrames = 0;
+    s16 maxSlot = -1;
+
+    for (int i = 0; i < 6; i++) {
+        u16 typeBit = 1u << i;
+        if ((types & typeBit) != 0) {
+            if (frames[i] > maxFrames) {
+                maxFrames = frames[i];
+                maxSlot = i;
+            }
+        }
+    }
+
+    // Convert frames to seconds (at 60fps)
+    f32 remaining = static_cast<f32>(maxFrames) / 60.0f;
+
+    // If no boost is active, return 0
+    if (maxSlot < 0) {
+        return 0.0f;
+    }
+
+    return remaining;
+}

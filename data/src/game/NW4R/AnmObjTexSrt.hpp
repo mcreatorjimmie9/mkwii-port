@@ -121,3 +121,43 @@ void AnmObjTexSrt_GetAnimInfo(ResTexSrtAnm* res, SrtAnimInfo* out);
 
 // @addr 0x80600BC0 — Get the target texcoord gen index
 u8 AnmObjTexSrt_GetTexCoordIdx(const AnmObjTexSrtData* obj);
+
+// Class-style wrapper for texture SRT animation object
+// Provides init/calc/attach/detach on AnmObjTexSrtData
+class AnmObjTexSrt {
+public:
+    AnmObjTexSrt();
+    ~AnmObjTexSrt();
+
+    void init();
+    void calc(f32 dt);
+    void setFrame(f32 frame);
+    f32 getFrame() const;
+    f32 getFrameCount() const;
+    void applyToMaterial();
+    void setPlayMode(u8 mode);
+    void attach(void* mat);
+    void detach();
+
+    AnmObjTexSrtData* getData() { return &m_data; }
+    const AnmObjTexSrtData* getData() const { return &m_data; }
+
+private:
+    AnmObjTexSrtData m_data;
+    void* m_material;
+
+    friend AnmObjTexSrt* AnmObjTexSrt_createFromRes(ResTexSrtAnm* res);
+};
+
+// Factory: create AnmObjTexSrt from a resource
+AnmObjTexSrt* AnmObjTexSrt_createFromRes(ResTexSrtAnm* res);
+
+// Utility functions
+void AnmObjTexSrt_ResetTransform(AnmObjTexSrtData* obj);
+BOOL AnmObjTexSrt_IsKeyframeEqual(const SrtKeyFrame* a, const SrtKeyFrame* b);
+void AnmObjTexSrt_LerpKeyframes(const SrtKeyFrame* a, const SrtKeyFrame* b,
+                                 f32 t, SrtKeyFrame* out);
+void AnmObjTexSrt_SetSRT(AnmObjTexSrtData* obj, f32 sx, f32 sy,
+                          f32 rot, f32 tx, f32 ty);
+const SrtKeyFrame* AnmObjTexSrt_GetCurrentSRT(const AnmObjTexSrtData* obj);
+const f32 (*AnmObjTexSrt_GetTexMtx(const AnmObjTexSrtData* obj))[3];

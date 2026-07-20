@@ -337,3 +337,220 @@ void PlayerPhysics::update(f32 dt) {
 done:
     m_interpFactor = one;
 }
+
+f32 PlayerPhysics::calcTopSpeed() const {
+    // Top speed is derived from the vehicle's base speed stat
+    // plus any active boosts. The base value is looked up from
+    // the KartStats system and cached in m_statTopSpeed.
+
+    f32 baseTopSpeed = m_statTopSpeed;
+
+    // Scale by the effective speed (which includes boost multipliers)
+    f32 effectiveTopSpeed = baseTopSpeed;
+
+    // Apply boost multiplier from PlayerBoost system
+    // In the full game, this queries the active PlayerBoost object
+    if (m_speed > 0.0f) {
+        // Boosts scale the top speed, not the current speed directly
+        effectiveTopSpeed *= 1.0f; // Placeholder — real value from PlayerBoost
+    }
+
+    // Off-road reduces top speed significantly
+    if ((m_statusFlags & 0x0010) != 0) {
+        // Off-road speed penalty
+        effectiveTopSpeed *= 0.65f;
+    }
+
+    return effectiveTopSpeed;
+}
+
+f32 PlayerPhysics::calcAcceleration() const {
+    // Acceleration follows a curve that decreases as speed approaches
+    // top speed. This creates a realistic feel where the kart accelerates
+    // quickly at low speeds and gradually levels off.
+    //
+    // The curve is: accel = base_accel * (1 - (speed/topSpeed)^2)
+    // This is a quadratic falloff that reaches zero at top speed.
+
+    f32 topSpeed = calcTopSpeed();
+    if (topSpeed < 1.0f) return 0.0f;
+
+    f32 speedRatio = m_speed / topSpeed;
+    if (speedRatio > 1.0f) speedRatio = 1.0f;
+
+    // Quadratic acceleration falloff
+    f32 accelFactor = 1.0f - speedRatio * speedRatio;
+
+    return m_statAcceleration * accelFactor;
+}
+
+f32 PlayerPhysics::calcHandling() const {
+    // Handling (turn rate) decreases linearly with speed.
+    // At low speeds, the kart turns sharply; at top speed, turning is gradual.
+    //
+    // handling = base_handling * (1 - speed/topSpeed * handlingDroop)
+    // The handlingDroop factor controls how much handling decreases (typically ~0.5)
+
+    f32 topSpeed = calcTopSpeed();
+    if (topSpeed < 1.0f) return m_statHandling;
+
+    f32 speedRatio = m_speed / topSpeed;
+    if (speedRatio > 1.0f) speedRatio = 1.0f;
+
+    // Handling droop: at top speed, handling is reduced by ~50%
+    const f32 HANDLING_DROOP = 0.5f;
+    f32 handlingFactor = 1.0f - speedRatio * HANDLING_DROOP;
+
+    return m_statHandling * handlingFactor;
+}
+
+f32 PlayerPhysics::calcOffroadSpeed() const {
+    // Off-road speed cap is a fixed percentage of the on-road top speed.
+    // The exact percentage depends on the surface type:
+    //   Grass:    65% of top speed
+    //   Sand:     55% of top speed
+    //   Deep mud: 40% of top speed
+    //
+    // The surface type is encoded in m_statusFlags.
+
+    f32 topSpeed = calcTopSpeed();
+
+    // Default off-road penalty
+    f32 offroadFactor = 0.65f;
+
+    // Check if the kart is in a particularly bad off-road surface
+    // (encoded in the status flags from KCL collision data)
+    if ((m_statusFlags & 0x0200) != 0) {
+        offroadFactor = 0.40f; // Deep off-road
+    } else if ((m_statusFlags & 0x0100) != 0) {
+        offroadFactor = 0.55f; // Sand/dirt
+    }
+
+    return topSpeed * offroadFactor;
+}
+
+void PlayerPhysics::calcDriftStats(f32& outsideDrift, f32& insideDrift) const {
+    // Drift handling is different from normal handling:
+    //   - Outside drift: wider turn, allows for MT charging
+    //   - Inside drift: tighter turn, less MT charge
+    //
+    // The turn rate during drift depends on:
+    //   1. Base handling stat
+    //   2. Current speed (higher speed = wider drift)
+    //   3. Drift type (outside vs inside)
+
+    f32 baseHandling = m_statHandling;
+    f32 speed = m_speed;
+
+    // Speed scaling: drift radius increases with speed
+    f32 speedFactor = 1.0f;
+    if (speed > 30.0f) {
+        speedFactor = 30.0f / speed;
+        if (speedFactor < 0.4f) speedFactor = 0.4f;
+    }
+
+    // Outside drift: ~80% of normal handling at drift speed
+    outsideDrift = baseHandling * 0.8f * speedFactor;
+
+    // Inside drift: ~60% of normal handling (tighter)
+    insideDrift = baseHandling * 0.6f * speedFactor;
+}
+
+void PlayerPhysics::getMiniTurboStats(f32& duration, f32& boost, s32 level) const {
+    // Mini-turbo (MT) stats depend on the charge level:
+    //   Level 1 (outside): shortest duration, smallest boost
+    //   Level 2 (inside):  medium duration, medium boost
+    //   Level 3 (super):   longest duration, largest boost
+
+    if (level < 1) level = 1;
+    if (level > 3) level = 3;
+
+    // Duration in frames (at 60fps)
+    // Level 1: ~20 frames (0.33 sec)
+    // Level 2: ~40 frames (0.67 sec)
+    // Level 3: ~60 frames (1.00 sec)
+    static const f32 mtDurations[3] = { 20.0f, 40.0f, 60.0f };
+
+    // Speed boost multiplier
+    // Level 1: 1.15x
+    // Level 2: 1.25x
+    // Level 3: 1.40x
+    static const f32 mtBoosts[3] = { 1.15f, 1.25f, 1.40f };
+
+    s32 idx = level - 1;
+    duration = mtDurations[idx];
+    boost = mtBoosts[idx];
+}
+
+void PlayerPhysics::applyMass(f32 dt) {
+    // Mass affects how the kart responds to forces:
+    //   - Heavier karts have more momentum (harder to stop/start)
+    //   - Lighter karts accelerate faster but lose speed on collision
+    //
+    // In MKWii, mass is a discrete value based on the vehicle's
+    // weight class. It affects:
+    //   1. Acceleration (lighter = faster accel)
+    //   2. Collision response (heavier = less knockback)
+    //   3. Off-road penalty (heavier = worse off-road)
+
+    f32 massFactor = m_cachedStats.mass;
+
+    // Mass inversely affects acceleration
+    // Higher mass = slower acceleration
+    f32 accelReduction = 1.0f / (1.0f + massFactor * 0.1f);
+    m_statAcceleration = m_cachedStats.acceleration * accelReduction;
+
+    // Mass affects top speed slightly (heavier = slightly faster top speed
+    // due to momentum carrying through corners)
+    m_statTopSpeed = m_cachedStats.topSpeed * (1.0f + massFactor * 0.01f);
+
+    (void)dt;
+}
+
+VehicleStats PlayerPhysics::getVehicleStats() const {
+    return m_cachedStats;
+}
+
+void PlayerPhysics::updateStats() {
+    // Refresh cached stats from the KartStats system.
+    // Called when the vehicle changes (e.g., in a vehicle-changing mode).
+
+    // Default stat values (medium vehicle)
+    m_cachedStats.topSpeed = 80.0f;
+    m_cachedStats.acceleration = 5.0f;
+    m_cachedStats.handling = 0.04f;
+    m_cachedStats.offroadSpeed = 52.0f;
+    m_cachedStats.driftHandling = 0.03f;
+    m_cachedStats.miniTurboDuration = 40.0f;
+    m_cachedStats.miniTurboBoost = 1.25f;
+    m_cachedStats.mass = 1.0f;
+    m_cachedStats.weight = 3.0f; // Medium weight class
+
+    // Initialize derived stats from cached values
+    m_statTopSpeed = m_cachedStats.topSpeed;
+    m_statAcceleration = m_cachedStats.acceleration;
+    m_statHandling = m_cachedStats.handling;
+}
+
+VehicleStats PlayerPhysics_interpolateStats(const VehicleStats& base,
+                                             const VehicleStats& modified,
+                                             f32 t) {
+    // Linear interpolation between base and modified stats.
+    // Clamped to [0, 1] range.
+
+    if (t < 0.0f) t = 0.0f;
+    if (t > 1.0f) t = 1.0f;
+
+    VehicleStats result;
+    result.topSpeed = base.topSpeed + (modified.topSpeed - base.topSpeed) * t;
+    result.acceleration = base.acceleration + (modified.acceleration - base.acceleration) * t;
+    result.handling = base.handling + (modified.handling - base.handling) * t;
+    result.offroadSpeed = base.offroadSpeed + (modified.offroadSpeed - base.offroadSpeed) * t;
+    result.driftHandling = base.driftHandling + (modified.driftHandling - base.driftHandling) * t;
+    result.miniTurboDuration = base.miniTurboDuration + (modified.miniTurboDuration - base.miniTurboDuration) * t;
+    result.miniTurboBoost = base.miniTurboBoost + (modified.miniTurboBoost - base.miniTurboBoost) * t;
+    result.mass = base.mass + (modified.mass - base.mass) * t;
+    result.weight = base.weight + (modified.weight - base.weight) * t;
+
+    return result;
+}

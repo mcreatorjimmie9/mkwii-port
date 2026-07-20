@@ -250,3 +250,147 @@ u8 AnmObjTexSrt_GetTexCoordIdx(const AnmObjTexSrtData* obj) {
     if (!obj) return 0;
     return obj->texCoordIdx;
 }
+
+// ============================================================================
+// AnmObjTexSrt class implementation
+// ============================================================================
+
+AnmObjTexSrt::AnmObjTexSrt()
+    : m_material(nullptr) {
+    std::memset(&m_data, 0, sizeof(m_data));
+}
+
+AnmObjTexSrt::~AnmObjTexSrt() {
+    detach();
+    AnmObjTexSrt_Destroy(&m_data);
+}
+
+// Initialize the texture SRT animation to default state
+void AnmObjTexSrt::init() {
+    std::memset(&m_data, 0, sizeof(m_data));
+    m_data.frameRate = 1.0f;
+    m_data.playMode = ANM_PLAY_LOOP;
+    m_data.flags = ANMSCN_FLAG_PLAYING;
+    m_data.texCoordIdx = 0;
+    m_data.current.scaleX = 1.0f;
+    m_data.current.scaleY = 1.0f;
+    m_data.current.rotation = 0.0f;
+    m_data.current.transX = 0.0f;
+    m_data.current.transY = 0.0f;
+    AnmObjTexSrt_ComputeTexMtx(&m_data.current, m_data.texMtx);
+}
+
+// Per-frame animation update
+void AnmObjTexSrt::calc(f32 dt) {
+    AnmObjTexSrt_Calc(&m_data, dt);
+}
+
+// Set the current animation frame
+void AnmObjTexSrt::setFrame(f32 frame) {
+    AnmObjTexSrt_SetFrame(&m_data, frame);
+}
+
+// Get the current animation frame
+f32 AnmObjTexSrt::getFrame() const {
+    return AnmObjTexSrt_GetFrame(&m_data);
+}
+
+// Get the total frame count (duration)
+f32 AnmObjTexSrt::getFrameCount() const {
+    return AnmObjTexSrt_GetDuration(&m_data);
+}
+
+// Apply the current SRT transform to the bound material
+void AnmObjTexSrt::applyToMaterial() {
+    if (m_material == nullptr) return;
+    AnmObjTexSrt_Apply(&m_data, m_data.texCoordIdx);
+}
+
+// Set play mode (loop/once/pingpong)
+void AnmObjTexSrt::setPlayMode(u8 mode) {
+    AnmObjTexSrt_SetPlayMode(&m_data, mode);
+}
+
+// Bind to a material for auto-apply
+void AnmObjTexSrt::attach(void* mat) {
+    m_material = mat;
+}
+
+// Unbind from material
+void AnmObjTexSrt::detach() {
+    m_material = nullptr;
+}
+
+// ============================================================================
+// AnmObjTexSrt_createFromRes() — Factory
+// ============================================================================
+// Create an AnmObjTexSrt object from a resource, allocating on heap.
+// ============================================================================
+AnmObjTexSrt* AnmObjTexSrt_createFromRes(ResTexSrtAnm* res) {
+    if (!res) return nullptr;
+
+    AnmObjTexSrt* obj = new AnmObjTexSrt();
+    if (obj == nullptr) return nullptr;
+
+    AnmObjTexSrt_Create(&obj->m_data, res);
+    return obj;
+}
+
+// Reset the SRT transform to identity (scale=1, rot=0, trans=0)
+void AnmObjTexSrt_ResetTransform(AnmObjTexSrtData* obj) {
+    if (!obj) return;
+    obj->current.scaleX = 1.0f;
+    obj->current.scaleY = 1.0f;
+    obj->current.rotation = 0.0f;
+    obj->current.transX = 0.0f;
+    obj->current.transY = 0.0f;
+    obj->current._14 = 0.0f;
+    AnmObjTexSrt_ComputeTexMtx(&obj->current, obj->texMtx);
+}
+
+// Check if two SRT keyframes are equal
+BOOL AnmObjTexSrt_IsKeyframeEqual(const SrtKeyFrame* a, const SrtKeyFrame* b) {
+    if (!a || !b) return FALSE;
+    if (a->scaleX != b->scaleX) return FALSE;
+    if (a->scaleY != b->scaleY) return FALSE;
+    if (a->rotation != b->rotation) return FALSE;
+    if (a->transX != b->transX) return FALSE;
+    if (a->transY != b->transY) return FALSE;
+    return TRUE;
+}
+
+// Lerp between two SRT keyframes
+void AnmObjTexSrt_LerpKeyframes(const SrtKeyFrame* a, const SrtKeyFrame* b,
+                                 f32 t, SrtKeyFrame* out) {
+    if (!a || !b || !out) return;
+    out->scaleX   = a->scaleX   + (b->scaleX   - a->scaleX)   * t;
+    out->scaleY   = a->scaleY   + (b->scaleY   - a->scaleY)   * t;
+    out->rotation = a->rotation + (b->rotation - a->rotation) * t;
+    out->transX   = a->transX   + (b->transX   - a->transX)   * t;
+    out->transY   = a->transY   + (b->transY   - a->transY)   * t;
+    out->_14 = 0.0f;
+}
+
+// Set SRT values directly (bypassing animation)
+void AnmObjTexSrt_SetSRT(AnmObjTexSrtData* obj, f32 sx, f32 sy,
+                          f32 rot, f32 tx, f32 ty) {
+    if (!obj) return;
+    obj->current.scaleX = sx;
+    obj->current.scaleY = sy;
+    obj->current.rotation = rot;
+    obj->current.transX = tx;
+    obj->current.transY = ty;
+    AnmObjTexSrt_ComputeTexMtx(&obj->current, obj->texMtx);
+}
+
+// Get the current SRT values
+const SrtKeyFrame* AnmObjTexSrt_GetCurrentSRT(const AnmObjTexSrtData* obj) {
+    if (!obj) return nullptr;
+    return &obj->current;
+}
+
+// Get the computed texture matrix
+const f32 (*AnmObjTexSrt_GetTexMtx(const AnmObjTexSrtData* obj))[3] {
+    if (!obj) return nullptr;
+    return obj->texMtx;
+}

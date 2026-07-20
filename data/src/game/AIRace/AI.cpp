@@ -2,11 +2,13 @@
 #include "AIEngine.hpp"
 #include "AIControl.hpp"
 #include "AILookAt.hpp"
+#include "AIRank.hpp"
 #include "game/kart/KartInput.hpp"
 #include "game/kart/KartState.hpp"
 #include "RaceConfig.hpp"
 #include "CourseMap.hpp"
 #include <egg/core/eggHeap.hpp>
+#include <cmath>
 
 namespace Enemy {
 
@@ -248,6 +250,298 @@ bool AI::isAutoDrift() {
 // Size: 20 bytes, 5 instructions
 bool AI::isInBullet() {
     return kartState()->on(28); // KART_FLAG_IN_BULLET
+}
+
+// ============================================================
+// Phase 38: Deepened AI methods
+// ============================================================
+
+// calcDrivingDirection__Q25Enemy2AIFRCQ23EGG8Vector3f
+// Compute target direction vector from AI path + current position,
+// applying steering correction toward the next waypoint.
+void AI::calcDrivingDirection(EGG::Vector3f& out) const {
+    out.setZero();
+
+    if (mpEngine == nullptr || mpEngine->mpInfo == nullptr) {
+        return;
+    }
+
+    const AIInfo* info = mpEngine->mpInfo;
+    if (info->mpPathHandler == nullptr) {
+        return;
+    }
+
+    // Get the kart's current world position
+    const EGG::Vector3f& kartPos = getPos();
+
+    // Get the target waypoint position from the path handler
+    EGG::Vector3f targetTrans = info->mpPathHandler->getDirection();
+
+    // Compute direction from kart to target
+    EGG::Vector3f toTarget;
+    toTarget.x = targetTrans.x - kartPos.x;
+    toTarget.y = targetTrans.y - kartPos.y;
+    toTarget.z = targetTrans.z - kartPos.z;
+
+    f32 distSq = toTarget.x * toTarget.x + toTarget.y * toTarget.y
+               + toTarget.z * toTarget.z;
+    if (distSq < 0.001f) {
+        // Already at target — use body forward as fallback
+        getBodyForward(out);
+        return;
+    }
+
+    // Normalize to unit direction
+    f32 invDist = 1.0f / sqrtf(distSq);
+    out.x = toTarget.x * invDist;
+    out.y = toTarget.y * invDist;
+    out.z = toTarget.z * invDist;
+
+    // Apply avoidance correction if active
+    if (mAvoidanceStrength > 0.0f) {
+        EGG::Vector3f avoidDir;
+        avoidCollision(avoidDir);
+        out.x += avoidDir.x * mAvoidanceStrength;
+        out.y += avoidDir.y * mAvoidanceStrength;
+        out.z += avoidDir.z * mAvoidanceStrength;
+
+        // Re-normalize after blending
+        f32 outLenSq = out.x * out.x + out.y * out.y + out.z * out.z;
+        if (outLenSq > 0.001f) {
+            invDist = 1.0f / sqrtf(outLenSq);
+            out.x *= invDist;
+            out.y *= invDist;
+            out.z *= invDist;
+        }
+    }
+
+    // Project onto horizontal plane (ignore Y for steering)
+    out.y = 0.0f;
+    f32 horizLenSq = out.x * out.x + out.z * out.z;
+    if (horizLenSq > 0.001f) {
+        invDist = 1.0f / sqrtf(horizLenSq);
+        out.x *= invDist;
+        out.z *= invDist;
+    }
+}
+
+// calcOptimalSpeed__Q25Enemy2AIFv
+// Determine target speed based on upcoming turns, surface type,
+// and item state.
+f32 AI::calcOptimalSpeed() {
+    f32 baseSpeed = 80.0f;
+
+    if (mpEngine == nullptr || mpEngine->mpInfo == nullptr) {
+        return baseSpeed;
+    }
+
+    const AIInfo* info = mpEngine->mpInfo;
+    if (info->mpPathHandler == nullptr) {
+        return baseSpeed;
+    }
+
+    // Reduce speed for upcoming sharp turns
+    f32 upcomingAngle = info->mpPathHandler->getUpcomingAngle();
+    if (upcomingAngle > 0.5f) {
+        // Sharper turn — reduce speed proportionally
+        f32 turnPenalty = 1.0f - (upcomingAngle - 0.5f) * 0.6f;
+        if (turnPenalty < 0.4f) {
+            turnPenalty = 0.4f;
+        }
+        baseSpeed *= turnPenalty;
+    }
+
+    // Apply morale modifier: lower morale = slightly slower driving
+    if (mMorale < 0.5f) {
+        baseSpeed *= 0.85f + mMorale * 0.3f;
+    }
+
+    // Off-road speed penalty
+    if (!isOnGround()) {
+        baseSpeed *= 0.7f;
+    }
+
+    return baseSpeed;
+}
+
+// avoidCollision__Q25Enemy2AIFv
+// Detect nearby karts/objects, compute avoidance vector.
+void AI::avoidCollision(EGG::Vector3f& out) const {
+    out.setZero();
+
+    if (mpEngine == nullptr || mpEngine->mpInfo == nullptr) {
+        return;
+    }
+
+    const EGG::Vector3f& kartPos = getPos();
+    EGG::Vector3f bodyForward;
+    getBodyForward(bodyForward);
+
+    // Get forward direction on horizontal plane
+    EGG::Vector3f fwd2D;
+    fwd2D.x = bodyForward.x;
+    fwd2D.y = 0.0f;
+    fwd2D.z = bodyForward.z;
+    f32 fwdLenSq = fwd2D.x * fwd2D.x + fwd2D.z * fwd2D.z;
+    if (fwdLenSq < 0.0001f) {
+        return;
+    }
+    f32 invFwdLen = 1.0f / sqrtf(fwdLenSq);
+    fwd2D.x *= invFwdLen;
+    fwd2D.z *= invFwdLen;
+
+    // Compute a lateral vector (perpendicular to forward, on XZ plane)
+    EGG::Vector3f lateral;
+    lateral.x = -fwd2D.z;
+    lateral.y = 0.0f;
+    lateral.z = fwd2D.x;
+
+    // Default: steer right to avoid
+    out.x = lateral.x;
+    out.y = 0.0f;
+    out.z = lateral.z;
+
+    // Check the current smoothed steering to determine avoid direction
+    if (mpEngine->mpInfo->mStickXSmoothed < -0.1f) {
+        // Already steering left, continue left avoidance
+        out.x = -lateral.x;
+        out.z = -lateral.z;
+    }
+}
+
+// handleRamp__Q25Enemy2AIFv
+// Detect upcoming ramp, pre-compute trick direction.
+void AI::handleRamp() {
+    if (mpEngine == nullptr || mpEngine->mpInfo == nullptr) {
+        return;
+    }
+
+    // Only process ramp logic periodically (every 10 frames)
+    mFramesSinceLastRamp++;
+    if (mFramesSinceLastRamp < 10) {
+        return;
+    }
+    mFramesSinceLastRamp = 0;
+
+    const AIInfo* info = mpEngine->mpInfo;
+    if (info->mpPathHandler == nullptr) {
+        return;
+    }
+
+    // Check if current path point has ramp-related eflags
+    if (info->mpPathHandler->mpCurrPointParam == nullptr) {
+        return;
+    }
+
+    // Determine trick direction based on upcoming turn
+    EGG::Vector3f dir;
+    calcDrivingDirection(dir);
+    f32 upcomingAngle = info->mpPathHandler->getUpcomingAngle();
+
+    // If turning left after ramp, trick right to align; vice versa
+    if (dir.x > 0.1f || upcomingAngle > 0.3f) {
+        // Right trick for left turn
+        info->mpInput->setTrick(System::KPadRaceInputState_Tricks::RIGHT_TRICK);
+    } else if (dir.x < -0.1f || upcomingAngle < -0.3f) {
+        // Left trick for right turn
+        info->mpInput->setTrick(System::KPadRaceInputState_Tricks::LEFT_TRICK);
+    } else {
+        // Straight — up trick for maximum boost
+        info->mpInput->setTrick(System::KPadRaceInputState_Tricks::UP_TRICK);
+    }
+}
+
+// handleItemUsage__Q25Enemy2AIFv
+// AI item logic: hold/use decisions based on position.
+void AI::handleItemUsage() {
+    if (mpEngine == nullptr || mpEngine->mpInfo == nullptr) {
+        return;
+    }
+
+    const AIInfo* info = mpEngine->mpInfo;
+    f32 risk = getRiskTolerance();
+
+    // Higher risk tolerance = more aggressive item usage
+    // Lower risk = save items for defense
+    if (risk > 0.6f) {
+        // Aggressive: use items when available
+        AIInfo_setItemValue(const_cast<AIInfo*>(info), true);
+    } else if (risk > 0.3f) {
+        // Balanced: use items with 50% probability per frame check
+        if (mMorale > 0.4f) {
+            AIInfo_setItemValue(const_cast<AIInfo*>(info), true);
+        }
+    }
+    // Low risk: hold items for defense (no action)
+}
+
+// getRiskTolerance__Q25Enemy2AIFv
+// Returns float [0..1] based on difficulty setting and race situation.
+f32 AI::getRiskTolerance() const {
+    f32 risk = 0.5f; // Default moderate risk
+
+    // Morale adjustment: confident AI takes more risks
+    risk += (mMorale - 0.5f) * 0.3f;
+
+    // Being in last place increases risk tolerance (nothing to lose)
+    if (mLastPosition >= 8.0f) {
+        risk += 0.2f;
+    }
+
+    // Being in first place decreases risk tolerance (protect lead)
+    if (mLastPosition <= 2.0f) {
+        risk -= 0.2f;
+    }
+
+    // Clamp to [0.0, 1.0]
+    if (risk < 0.0f) {
+        risk = 0.0f;
+    } else if (risk > 1.0f) {
+        risk = 1.0f;
+    }
+
+    return risk;
+}
+
+// updateMorale__Q25Enemy2AIFv
+// Adjust AI aggression based on position changes during race.
+void AI::updateMorale() {
+    if (mpEngine == nullptr || mpEngine->mpInfo == nullptr) {
+        return;
+    }
+
+    const AIInfo* info = mpEngine->mpInfo;
+    if (info->mpPathHandler == nullptr) {
+        return;
+    }
+
+    // Compute position proxy from path progress
+    f32 progress = info->mpPathHandler->getProgress();
+    f32 positionEstimate = progress * 12.0f; // Scale to player count
+
+    if (mLastPosition > 0.0f) {
+        f32 delta = positionEstimate - mLastPosition;
+
+        // Gaining positions (negative delta = moving up) boosts morale
+        if (delta < -0.1f) {
+            mMorale += 0.02f;
+        } else if (delta > 0.1f) {
+            // Losing positions drops morale
+            mMorale -= 0.03f;
+        }
+    }
+
+    mLastPosition = positionEstimate;
+
+    // Clamp morale to [0.0, 1.0]
+    if (mMorale < 0.0f) {
+        mMorale = 0.0f;
+    } else if (mMorale > 1.0f) {
+        mMorale = 1.0f;
+    }
+
+    // Natural decay toward 0.5 (neutral) over time
+    mMorale += (0.5f - mMorale) * 0.005f;
 }
 
 } // namespace Enemy

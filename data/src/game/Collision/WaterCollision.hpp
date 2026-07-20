@@ -82,6 +82,30 @@ public:
     // Reset all player states
     void reset();
 
+    /// Check if a player's position contacts any water plane
+    /* WaterCollision_detectWater @ 0x804D1600 */
+    bool detectWater(s32 playerIdx, const EGG::Vector3f& playerPos) const;
+
+    /// Calculate water entry effects: splash intensity, speed reduction
+    /* WaterCollision_calcWaterEntry @ 0x804D1700 */
+    f32 calcWaterEntry(s32 playerIdx, const EGG::Vector3f& playerVel);
+
+    /// Calculate viscous drag force from water resistance
+    /* WaterCollision_calcWaterDrag @ 0x804D1800 */
+    EGG::Vector3f calcWaterDrag(s32 playerIdx, const EGG::Vector3f& playerVel) const;
+
+    /// Check if a player is fully submerged
+    /* WaterCollision_isSubmerged @ 0x804D1900 */
+    bool isSubmerged(s32 playerIdx) const;
+
+    /// Get the water surface height at a given world position
+    /* WaterCollision_getWaterHeight @ 0x804D1A00 */
+    f32 getWaterHeight(const EGG::Vector3f& pos) const;
+
+    /// Handle drowning logic: check submersion depth and trigger rescue
+    /* WaterCollision_handleDrowning @ 0x804D1B00 */
+    bool handleDrowning(s32 playerIdx, f32 dt);
+
 private:
     static const s32 MAX_WATER_ZONES = 8;
     static const f32 RESCUE_TIMEOUT;      // Frames before Lakitu rescue

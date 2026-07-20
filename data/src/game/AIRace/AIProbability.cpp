@@ -24,6 +24,11 @@ AIProbabilityRace::AIProbabilityRace()
     , field_0x10(0)
     , mbCanDrift(true)
     , mbCanMiniturbo(true)
+    , mItemWeight(0.5f)
+    , mRiskWeight(0.3f)
+    , mDriftWeight(0.7f)
+    , mOvertakeWeight(0.4f)
+    , mDefendWeight(0.3f)
 {
     mGroupKind = 0;
     mStartBoostLevel = 1;
@@ -249,6 +254,252 @@ void AIProbabilityBattle::setDoTrick(bool doTrick) {
 bool AIProbabilityBattle::vf_0x2C() {
     // Battle-specific probability check
     return mbDoTrick;
+}
+
+// ============================================================
+// Phase 38: Deepened AIProbabilityRace methods
+// ============================================================
+
+// calcItemUseProbability__Q25Enemy18AIProbabilityRaceCFi
+// Weighted probability of using items based on position.
+f32 AIProbabilityRace::calcItemUseProbability(s32 position) const {
+    f32 baseProb = mItemWeight;
+
+    // Front runners are more conservative with items
+    // They prefer to save defensive items
+    if (position <= 3) {
+        baseProb *= 0.6f;
+    } else if (position <= 6) {
+        baseProb *= 1.0f; // Normal usage
+    } else {
+        baseProb *= 1.3f; // Back of pack uses items more aggressively
+    }
+
+    // Group kind modifier
+    switch (mGroupKind) {
+    case 0: baseProb *= 0.7f; break;  // Easy: less item usage
+    case 1: baseProb *= 1.0f; break;  // Medium
+    case 2: baseProb *= 1.2f; break;  // Hard: more strategic item use
+    }
+
+    if (baseProb > 1.0f) baseProb = 1.0f;
+    if (baseProb < 0.0f) baseProb = 0.0f;
+
+    return baseProb;
+}
+
+// calcRiskProbability__Q25Enemy18AIProbabilityRaceCFi
+// Probability of risky maneuvers (shortcut attempts).
+f32 AIProbabilityRace::calcRiskProbability(s32 position) const {
+    f32 baseProb = mRiskWeight;
+
+    // Back-of-pack AIs are more willing to take risks
+    if (position >= 8) {
+        baseProb *= 1.5f;
+    } else if (position >= 5) {
+        baseProb *= 1.0f;
+    } else {
+        baseProb *= 0.5f; // Leaders avoid risky shortcuts
+    }
+
+    // Group kind strongly affects risk-taking
+    switch (mGroupKind) {
+    case 0: baseProb *= 0.3f; break;  // Easy: very risk-averse
+    case 1: baseProb *= 0.7f; break;  // Medium
+    case 2: baseProb *= 1.0f; break;  // Hard: takes calculated risks
+    }
+
+    if (baseProb > 1.0f) baseProb = 1.0f;
+    if (baseProb < 0.0f) baseProb = 0.0f;
+
+    return baseProb;
+}
+
+// calcDriftProbability__Q25Enemy18AIProbabilityRaceCFf
+// Likelihood AI will drift through a turn based on angle.
+f32 AIProbabilityRace::calcDriftProbability(f32 upcomingAngle) const {
+    f32 angleAbs = upcomingAngle;
+    if (angleAbs < 0.0f) angleAbs = -angleAbs;
+
+    // Wider turns = more likely to drift (drift is beneficial)
+    f32 baseProb = mDriftWeight;
+
+    // Scale with angle magnitude
+    // angle < 0.1: no drift needed
+    // angle 0.1-0.3: moderate drift probability
+    // angle > 0.3: high drift probability
+    if (angleAbs < 0.1f) {
+        baseProb *= 0.1f;
+    } else if (angleAbs < 0.3f) {
+        baseProb *= (angleAbs - 0.1f) / 0.2f;
+    } else {
+        baseProb *= 1.0f;
+    }
+
+    // Can't drift if disabled
+    if (!mbCanDrift) {
+        baseProb = 0.0f;
+    }
+
+    // Group kind modifier
+    switch (mGroupKind) {
+    case 0: baseProb *= 0.6f; break;
+    case 1: baseProb *= 0.85f; break;
+    case 2: baseProb *= 1.0f; break;
+    }
+
+    if (baseProb > 1.0f) baseProb = 1.0f;
+    if (baseProb < 0.0f) baseProb = 0.0f;
+
+    return baseProb;
+}
+
+// calcOvertakeProbability__Q25Enemy18AIProbabilityRaceCFf
+// Chance AI attempts overtake based on gap to next kart.
+f32 AIProbabilityRace::calcOvertakeProbability(f32 gapDistance) const {
+    f32 baseProb = mOvertakeWeight;
+
+    // Larger gap = lower overtake attempt probability
+    // (AI won't attempt impossible overtakes)
+    if (gapDistance > 200.0f) {
+        baseProb *= 0.1f; // Too far, not worth trying
+    } else if (gapDistance > 100.0f) {
+        baseProb *= 0.3f;
+    } else if (gapDistance > 50.0f) {
+        baseProb *= 0.6f;
+    } else {
+        baseProb *= 0.9f; // Close behind, likely to attempt
+    }
+
+    // Group kind modifier
+    switch (mGroupKind) {
+    case 0: baseProb *= 0.5f; break;  // Easy: rarely attempts
+    case 1: baseProb *= 0.8f; break;  // Medium
+    case 2: baseProb *= 1.0f; break;  // Hard: aggressive overtaking
+    }
+
+    if (baseProb > 1.0f) baseProb = 1.0f;
+    if (baseProb < 0.0f) baseProb = 0.0f;
+
+    return baseProb;
+}
+
+// calcDefendProbability__Q25Enemy18AIProbabilityRaceCFf
+// Chance AI uses defensive driving based on gap behind.
+f32 AIProbabilityRace::calcDefendProbability(f32 gapBehind) const {
+    f32 baseProb = mDefendWeight;
+
+    // Smaller gap behind = more defensive
+    if (gapBehind < 30.0f) {
+        baseProb *= 1.5f; // Very close, high defense
+    } else if (gapBehind < 80.0f) {
+        baseProb *= 1.0f;
+    } else {
+        baseProb *= 0.3f; // Large gap, no need to defend
+    }
+
+    // Group kind modifier
+    switch (mGroupKind) {
+    case 0: baseProb *= 0.4f; break;  // Easy: poor defense
+    case 1: baseProb *= 0.7f; break;  // Medium
+    case 2: baseProb *= 1.0f; break;  // Hard: strong defense
+    }
+
+    if (baseProb > 1.0f) baseProb = 1.0f;
+    if (baseProb < 0.0f) baseProb = 0.0f;
+
+    return baseProb;
+}
+
+// calcTargetLane__Q25Enemy18AIProbabilityRaceCFPf
+// Weighted random lane choice at junctions.
+// @param weights  Array of 4 weights for lanes [inner, mid-inner, mid-outer, outer]
+// @return         Selected lane index [0..3]
+s32 AIProbabilityRace::calcTargetLane(f32 weights[4]) const {
+    // Sum all weights
+    f32 totalWeight = 0.0f;
+    for (s32 i = 0; i < 4; i++) {
+        if (weights[i] < 0.0f) weights[i] = 0.0f;
+        totalWeight += weights[i];
+    }
+
+    // If all weights are zero, pick center lane
+    if (totalWeight < 0.001f) {
+        return 1; // mid-inner as default
+    }
+
+    // Weighted random selection using the instance's RNG seed
+    f32 roll = (f32)field_0x10 / 100.0f;
+    f32 cumulative = 0.0f;
+
+    for (s32 i = 0; i < 4; i++) {
+        cumulative += weights[i] / totalWeight;
+        if (roll <= cumulative) {
+            return i;
+        }
+    }
+
+    return 3; // Fallback to outer lane
+}
+
+// updateWeights__Q25Enemy18AIProbabilityRaceFif
+// Adjust probability weights based on race events.
+void AIProbabilityRace::updateWeights(s32 position, f32 morale) {
+    // Position-based weight adjustments
+    if (position <= 3) {
+        // Leading: focus on defense and item conservation
+        mItemWeight = 0.4f;
+        mRiskWeight = 0.15f;
+        mDriftWeight = 0.6f;
+        mOvertakeWeight = 0.3f;
+        mDefendWeight = 0.7f;
+    } else if (position <= 6) {
+        // Mid-pack: balanced approach
+        mItemWeight = 0.5f;
+        mRiskWeight = 0.35f;
+        mDriftWeight = 0.7f;
+        mOvertakeWeight = 0.5f;
+        mDefendWeight = 0.4f;
+    } else {
+        // Trailing: aggressive approach
+        mItemWeight = 0.7f;
+        mRiskWeight = 0.6f;
+        mDriftWeight = 0.8f;
+        mOvertakeWeight = 0.7f;
+        mDefendWeight = 0.1f;
+    }
+
+    // Morale adjustment: high morale increases all weights slightly
+    f32 moraleMult = 0.8f + morale * 0.4f;
+    mItemWeight *= moraleMult;
+    mRiskWeight *= moraleMult;
+    mDriftWeight *= moraleMult;
+    mOvertakeWeight *= moraleMult;
+
+    // Clamp all weights
+    if (mItemWeight > 1.0f) mItemWeight = 1.0f;
+    if (mRiskWeight > 1.0f) mRiskWeight = 1.0f;
+    if (mDriftWeight > 1.0f) mDriftWeight = 1.0f;
+    if (mOvertakeWeight > 1.0f) mOvertakeWeight = 1.0f;
+    if (mDefendWeight > 1.0f) mDefendWeight = 1.0f;
+}
+
+// getOptimalAction__Q25Enemy18AIProbabilityRaceCFPf
+// Return highest-probability action from an array of 4 probabilities.
+// @param probs  Array of 4 action probabilities
+// @return       Index of highest probability action [0..3]
+s32 AIProbabilityRace::getOptimalAction(f32 probs[4]) const {
+    s32 bestIdx = 0;
+    f32 bestProb = probs[0];
+
+    for (s32 i = 1; i < 4; i++) {
+        if (probs[i] > bestProb) {
+            bestProb = probs[i];
+            bestIdx = i;
+        }
+    }
+
+    return bestIdx;
 }
 
 } // namespace Enemy

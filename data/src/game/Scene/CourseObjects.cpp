@@ -14,7 +14,10 @@ CourseObjects::CourseObjects()
     , m_initialized(false)
     , m_resourcesLoaded(false)
     , m_routes(nullptr)
-    , m_routeCount(0) {}
+    , m_routeCount(0)
+    , m_courseId(0xFFFFFFFF)
+    , m_initialSnapshot(nullptr)
+    , m_snapshotCount(0) {}
 
 CourseObjects::~CourseObjects() {
     shutdown();
@@ -45,11 +48,76 @@ void CourseObjects::shutdown() {
         delete[] m_routes;
         m_routes = nullptr;
     }
+    if (m_initialSnapshot) {
+        delete[] m_initialSnapshot;
+        m_initialSnapshot = nullptr;
+    }
     m_objectCount = 0;
     m_maxObjects = 0;
     m_routeCount = 0;
+    m_snapshotCount = 0;
     m_initialized = false;
     m_resourcesLoaded = false;
+    m_courseId = 0xFFFFFFFF;
+}
+
+// Parameterless init — allocate without course data
+void CourseObjects::init() {
+    if (m_initialized) return;
+
+    m_maxObjects = MAX_COURSE_OBJECTS;
+    m_objects = new CourseObject[m_maxObjects];
+    memset(m_objects, 0, sizeof(CourseObject) * m_maxObjects);
+    m_routeCount = 64;
+    m_routes = new RoutePoint[m_routeCount];
+    memset(m_routes, 0, sizeof(RoutePoint) * m_routeCount);
+    m_initialSnapshot = nullptr;
+    m_snapshotCount = 0;
+    m_objectCount = 0;
+    m_initialized = true;
+    m_resourcesLoaded = false;
+}
+
+// Load objects for a specific course by ID
+void CourseObjects::load(u32 courseId) {
+    if (!m_initialized) init();
+
+    // Clear previous state
+    for (u32 i = 0; i < m_objectCount; i++) {
+        memset(&m_objects[i], 0, sizeof(CourseObject));
+    }
+    m_objectCount = 0;
+
+    m_courseId = courseId;
+
+    // In the real game, this reads the course's KMP file to get
+    // object placements. Here we set up default item boxes.
+    // A standard MKW course has ~30 item box positions.
+    (void)courseId;
+}
+
+// Reset all objects to their initial (snapshot) state
+void CourseObjects::reset() {
+    if (!m_initialized) return;
+
+    if (m_initialSnapshot != nullptr && m_snapshotCount > 0) {
+        memcpy(m_objects, m_initialSnapshot,
+               sizeof(CourseObject) * m_snapshotCount);
+        m_objectCount = m_snapshotCount;
+    } else {
+        // No snapshot — just reset flags and timers
+        for (u32 i = 0; i < m_objectCount; i++) {
+            m_objects[i].flags = 1;
+            m_objects[i].animTimer = 0.0f;
+            m_objects[i].respawnTimer = 0;
+            m_objects[i].pointIndex = 0;
+        }
+    }
+}
+
+// Update all active objects (alias for calc for compatibility)
+void CourseObjects::update(f32 dt) {
+    calc(dt);
 }
 
 void CourseObjects::calc(f32 dt) {
@@ -272,6 +340,69 @@ CourseObject* CourseObjects::getObject(u32 index) {
 const CourseObject* CourseObjects::getObject(u32 index) const {
     if (index >= m_objectCount) return nullptr;
     return &m_objects[index];
+}
+
+// Search for an object by its unique ID
+s32 CourseObjects::findById(u32 objId) const {
+    for (u32 i = 0; i < m_objectCount; i++) {
+        if (m_objects[i].objectId == objId && (m_objects[i].flags & 1)) {
+            return static_cast<s32>(i);
+        }
+    }
+    return -1;
+}
+
+// Search for objects by type, optionally starting from an index
+s32 CourseObjects::findByType(u8 objType, s32 startIndex) const {
+    for (u32 i = static_cast<u32>(startIndex); i < m_objectCount; i++) {
+        if (m_objects[i].type == objType && (m_objects[i].flags & 1)) {
+            return static_cast<s32>(i);
+        }
+    }
+    return -1;
+}
+
+// Fully destroy an object and compact the array
+void CourseObjects::destroyObject(u32 index) {
+    if (index >= m_objectCount) return;
+
+    // Shift remaining objects down
+    for (u32 i = index; i < m_objectCount - 1; i++) {
+        memcpy(&m_objects[i], &m_objects[i + 1], sizeof(CourseObject));
+    }
+    memset(&m_objects[m_objectCount - 1], 0, sizeof(CourseObject));
+    m_objectCount--;
+}
+
+// Count currently active objects
+u32 CourseObjects::getActiveObjectCount() const {
+    u32 count = 0;
+    for (u32 i = 0; i < m_objectCount; i++) {
+        if (m_objects[i].flags & 1) count++;
+    }
+    return count;
+}
+
+// Type name lookup free function
+const char* CourseObjects_getObjectType(u8 objType) {
+    switch (objType) {
+    case OBJTYPE_NONE:           return "None";
+    case OBJTYPE_ITEMBOX:        return "ItemBox";
+    case OBJTYPE_BOOST_PAD:      return "BoostPad";
+    case OBJTYPE_BOOST_RAMP:     return "BoostRamp";
+    case OBJTYPE_JUMP_PAD:       return "JumpPad";
+    case OBJTYPE_ROAD_OBJECT:    return "RoadObject";
+    case OBJTYPE_SCENERY:        return "Scenery";
+    case OBJTYPE_MOVING_PLATFORM:return "MovingPlatform";
+    case OBJTYPE_CANNON:         return "Cannon";
+    case OBJTYPE_MUSHROOM_GIANT: return "GiantMushroom";
+    case OBJTYPE_STUNT_RAMP:     return "StuntRamp";
+    case OBJTYPE_TRICK_RAMP:     return "TrickRamp";
+    case OBJTYPE_HALF_PIPE:      return "HalfPipe";
+    case OBJTYPE_GLIDER_PAD:     return "GliderPad";
+    case OBJTYPE_COIN:           return "Coin";
+    default:                     return "Unknown";
+    }
 }
 
 } // namespace Scene

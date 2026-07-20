@@ -21,6 +21,16 @@
 // vtable: 0x808b5fd8
 // ============================================================================
 
+// Boost type indices for slot activation
+enum BoostType {
+    BOOST_TYPE_MINI_TURBO = 0,     // Slot 0: MT, SSMT, start boost
+    BOOST_TYPE_STAR = 1,            // Slot 1: star power
+    BOOST_TYPE_MUSHROOM = 2,        // Slot 2: mushroom, boost panel
+    BOOST_TYPE_BULLET = 3,          // Slot 3: bullet bill
+    BOOST_TYPE_TRICK = 4,           // Slot 4: trick, zipper
+    BOOST_TYPE_MEGA = 5,            // Slot 5: mega mushroom, TC
+};
+
 class PlayerBoost {
 public:
     virtual ~PlayerBoost();                // 0x8057811c
@@ -33,6 +43,36 @@ public:
     // Non-virtual helpers
     PlayerBoost();                         // 0x80588d28
     void reset();                          // 0x80588d74
+
+    /// Initialize boost state machine with default values
+    void init();
+
+    /// Activate a mushroom boost
+    void activateMushroom();
+
+    /// Activate star power (invincibility + speed)
+    void activateStar();
+
+    /// Activate mega mushroom (size increase + speed)
+    void activateMega();
+
+    /// Activate bullet bill (auto-pilot boost)
+    void activateBulletBill();
+
+    /// Activate slipstream/drafting speed boost
+    void activateSlipstream();
+
+    /// Get the highest-priority active boost type
+    BoostType getActiveBoostType() const;
+
+    /// Get the total combined speed multiplier from all active boosts
+    f32 getTotalBoostMultiplier() const;
+
+    /// Cancel a specific boost type early
+    void cancelBoost(BoostType type);
+
+    /// Get remaining time of the longest active boost
+    f32 getRemainingTime() const;
 
     // Accessors
     f32 getMultiplier() const { return multiplier; }

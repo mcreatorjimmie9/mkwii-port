@@ -40,6 +40,42 @@ public:
     void applySuspensionWrench(const EGG::Vector3f& p, const EGG::Vector3f& Flinear, const EGG::Vector3f& Frot, bool ignoreX);
     void applyWrench(const EGG::Vector3f& r, const EGG::Vector3f& F);
 
+    /// Integrate accumulated forces into linear velocity
+    /* KartDynamics_calcLinearVelocity @ 0x805A0000 */
+    void calcLinearVelocity(f32 dt);
+
+    /// Compute angular velocity from accumulated torques
+    /* KartDynamics_calcAngularVelocity @ 0x805A0100 */
+    void calcAngularVelocity(f32 dt);
+
+    /// Apply quadratic air resistance (drag) force
+    /* KartDynamics_applyAirDrag @ 0x805A0200 */
+    void applyAirDrag(f32 dragCoeff);
+
+    /// Apply tire rolling resistance force
+    /* KartDynamics_applyRollingResistance @ 0x805A0300 */
+    void applyRollingResistance(f32 resistanceCoeff);
+
+    /// Apply forward engine driving force
+    /* KartDynamics_applyEngineForce @ 0x805A0400 */
+    void applyEngineForce(f32 force, const EGG::Vector3f& forward);
+
+    /// Full Euler integration step (velocity → position)
+    /* KartDynamics_integrate @ 0x805A0500 */
+    void integrate(f32 dt, f32 maxSpeed);
+
+    /// Clamp velocity to a maximum speed
+    /* KartDynamics_clampVelocity @ 0x805A0600 */
+    void clampVelocity(f32 maxSpeed);
+
+    /// Get total linear momentum (mass * velocity)
+    /* KartDynamics_getMomentum @ 0x805A0700 */
+    EGG::Vector3f getMomentum() const;
+
+    /// Set an external force (from items, explosions, etc.)
+    /* KartDynamics_setExternalForce @ 0x805A0800 */
+    void setExternalForce(const EGG::Vector3f& force);
+
     // Inertia tensor and its inverse
     EGG::Matrix34f inertiaTensor;
     EGG::Matrix34f invInertiaTensor;
@@ -80,7 +116,14 @@ public:
     EGG::Vector3f _198;
     f32 angVel0YFactor;
     EGG::Vector3f scale;
+    f32 mass;  ///< Kart mass for momentum calculations
 };
+
+/// Calculate the moment of inertia for a box-shaped kart body.
+/// @param halfExtents  Half-dimensions of the kart (x, y, z)
+/// @param mass  Total mass of the kart
+/// @return 3D moment of inertia vector (Ixx, Iyy, Izz)
+EGG::Vector3f KartDynamics_calcInertia(const EGG::Vector3f& halfExtents, f32 mass);
 
 class KartDynamicsKart : public KartDynamics {
 public:

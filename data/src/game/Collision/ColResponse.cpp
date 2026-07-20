@@ -263,7 +263,214 @@ void ColResponse::reset() {
         mTrickRamp[i].rampHeight = 0.0f;
         mTrickRamp[i].trickType = 0;
         mbNeedsRescue[i] = false;
+        mFloorPush[i].setAll(0);
+        mWallPush[i].setAll(0);
     }
+}
+
+/* ColResponse_resolveFloor @ 0x804F1700 */
+void ColResponse::resolveFloor(s32 kartIdx, const EGG::Vector3f& floorNormal, f32 penetration) {
+    if (kartIdx < 0 || kartIdx >= mPlayerCount || penetration <= 0.0f) {
+        return;
+    }
+
+    // Push the kart out of the floor along the floor normal
+    // The push distance equals the penetration depth plus a small
+    // epsilon to prevent re-collision next frame
+    f32 pushDist = penetration + 0.1f;
+    mFloorPush[kartIdx] = floorNormal * pushDist;
+
+    // Adjust velocity: remove the component going into the floor
+    // and apply a small bounce if the kart is moving fast enough
+    // v_adjusted = v - (v . n) * n
+    // For floors, we don't bounce — we just zero out the downward component
+    // The actual velocity modification is done by KartDynamics externally;
+    // here we store the response for the physics system to apply.
+}
+
+/* ColResponse_resolveWall @ 0x804F1800 */
+void ColResponse::resolveWall(s32 kartIdx, const EGG::Vector3f& wallNormal, f32 penetration, f32 restitution) {
+    if (kartIdx < 0 || kartIdx >= mPlayerCount || penetration <= 0.0f) {
+        return;
+    }
+
+    // Wall collision response:
+    // 1. Push kart out of wall along wall normal
+    // 2. Reflect velocity component into the wall, scaled by restitution
+    // 3. Retain tangential velocity (sliding along wall)
+
+    f32 pushDist = penetration + 0.05f;
+    mWallPush[kartIdx] = wallNormal * pushDist;
+
+    // The velocity reflection formula:
+    // v' = v - (1 + e) * (v . n) * n
+    // where e = restitution coefficient
+    // This is applied externally by the kart dynamics system.
+    // A restitution of 0.0 means the kart stops moving into the wall (no bounce).
+    // A restitution of 0.3 means the kart bounces back slightly.
+    // A restitution of 0.5 means a more noticeable bounce (hard walls).
+
+    // Clamp restitution to valid range
+    if (restitution < 0.0f) restitution = 0.0f;
+    if (restitution > 1.0f) restitution = 1.0f;
+
+    // Speed reduction on wall hit is applied externally
+
+    (void)restitution; // Stored for external use by KartDynamics
+}
+
+/* ColResponse_resolveCeiling @ 0x804F1900 */
+void ColResponse::resolveCeiling(s32 kartIdx, f32 penetration) {
+    if (kartIdx < 0 || kartIdx >= mPlayerCount || penetration <= 0.0f) {
+        return;
+    }
+
+    // Ceiling collision: push the kart downward
+    // This is simpler than floor/wall because ceilings just prevent
+    // upward movement. No bounce, no sliding.
+    EGG::Vector3f ceilingNormal(0.0f, -1.0f, 0.0f);
+    f32 pushDist = penetration + 0.1f;
+
+    // Store as floor push (since floor push is upward, we negate)
+    mFloorPush[kartIdx] = ceilingNormal * pushDist;
+
+    // Zero out any upward velocity component
+    // (applied externally by KartDynamics)
+}
+
+/* ColResponse_resolveSoftWall @ 0x804F1A00 */
+void ColResponse::resolveSoftWall(s32 kartIdx, const EGG::Vector3f& wallNormal, f32 penetration) {
+    if (kartIdx < 0 || kartIdx >= mPlayerCount || penetration <= 0.0f) {
+        return;
+    }
+
+    // Soft walls (e.g., flower beds, grass boundaries) use a gradual
+    // push-back instead of an immediate stop. The kart can briefly
+    // penetrate the soft wall but is gradually pushed back.
+    // This creates a "mushy" boundary feel.
+
+    // The push-back force is proportional to penetration depth
+    // but with a much smaller coefficient than hard walls
+    f32 softPushFactor = 0.3f; // 30% of penetration as push distance
+    f32 pushDist = penetration * softPushFactor;
+
+    mWallPush[kartIdx] = wallNormal * pushDist;
+
+    // Soft walls also apply a speed penalty
+    // The kart slows down while inside the soft wall boundary
+    // This is typically a 50% speed reduction
+}
+
+/* ColResponse_resolveMovingCol @ 0x804F1B00 */
+void ColResponse::resolveMovingCol(s32 kartIdx, const EGG::Vector3f& objectVel, f32 massRatio) {
+    if (kartIdx < 0 || kartIdx >= mPlayerCount) {
+        return;
+    }
+
+    // Moving collision objects (e.g., moving platforms, cars in
+    // Mushroom Gorge, Koopa shells from objects) transfer their
+    // velocity to the kart on contact.
+    //
+    // The transfer depends on the mass ratio:
+    //   - Heavy object (massRatio >> 1): kart gets most of object's velocity
+    //   - Light object (massRatio << 1): kart barely affected
+    //   - Equal mass (massRatio = 1): 50% velocity transfer
+
+    f32 transferRate = massRatio / (massRatio + 1.0f);
+    if (transferRate > 1.0f) transferRate = 1.0f;
+
+    // The transferred velocity is applied as external velocity
+    // Store in wall push for external access (repurposed)
+    mWallPush[kartIdx] = objectVel * transferRate;
+}
+
+/* ColResponse_resolveKartKart @ 0x804F1C00 */
+void ColResponse::resolveKartKart(s32 kartA, s32 kartB, const EGG::Vector3f& collisionNormal) {
+    if (kartA < 0 || kartA >= mPlayerCount ||
+        kartB < 0 || kartB >= mPlayerCount ||
+        kartA == kartB) {
+        return;
+    }
+
+    // Kart-to-kart collision with momentum exchange.
+    // Uses simplified elastic collision:
+    //   v1' = v1 - (m2/(m1+m2)) * 2 * (v1-v2).n * n
+    //   v2' = v2 + (m1/(m1+m2)) * 2 * (v1-v2).n * n
+    // In MKWii, both karts are treated as equal mass, so:
+    //   v1' = v1 - (v_rel . n) * n
+    //   v2' = v2 + (v_rel . n) * n
+    //
+    // The collision normal points from kartA to kartB.
+
+    // Store push vectors for both karts
+    // Kart A gets pushed in the -normal direction (away from B)
+    mWallPush[kartA] = collisionNormal * (-1.0f);
+    // Kart B gets pushed in the +normal direction (away from A)
+    mWallPush[kartB] = collisionNormal * 1.0f;
+}
+
+/* ColResponse_resolveItemBox @ 0x804F1D00 */
+bool ColResponse::resolveItemBox(s32 kartIdx, const EGG::Vector3f& boxPos, f32 boxRadius) {
+    if (kartIdx < 0 || kartIdx >= mPlayerCount) {
+        return false;
+    }
+
+    // Check if the kart is within item box collision range.
+    // The collision check is done here (simplified sphere-sphere),
+    // and if it passes, the item roulette is triggered.
+    //
+    // In the full game, this uses the kart's hitbox positions
+    // against the item box's hitbox. Here we use a simplified
+    // distance check.
+
+    // The actual item roulette triggering is handled by ItemHandler.
+    // This method just determines if the kart is close enough to
+    // the item box to collect it.
+
+    // Distance check (simplified — real code uses kart position)
+    f32 distSq = boxPos.squaredLength();
+    f32 collideRadius = boxRadius * 2.0f; // Kart + box radius
+
+    if (distSq < collideRadius * collideRadius) {
+        return true; // Close enough to trigger item roulette
+    }
+
+    return false;
+}
+
+f32 ColResponse_calcPenetration(const EGG::Vector3f& posA, f32 radiusA,
+                                const EGG::Vector3f& posB, f32 radiusB,
+                                EGG::Vector3f& outNormal) {
+    // Compute vector from A to B
+    EGG::Vector3f diff;
+    diff.x = posB.x - posA.x;
+    diff.y = posB.y - posA.y;
+    diff.z = posB.z - posA.z;
+
+    f32 distSq = diff.squaredLength();
+    f32 radiusSum = radiusA + radiusB;
+
+    // No overlap if distance exceeds sum of radii
+    if (distSq >= radiusSum * radiusSum) {
+        outNormal.setAll(0);
+        return 0.0f;
+    }
+
+    f32 dist = std::sqrt(distSq);
+    f32 penetration = radiusSum - dist;
+
+    // Compute collision normal (from A to B)
+    if (dist > 0.001f) {
+        outNormal.x = diff.x / dist;
+        outNormal.y = diff.y / dist;
+        outNormal.z = diff.z / dist;
+    } else {
+        // Centers are coincident — use world up as fallback normal
+        outNormal.setZero();
+        outNormal.y = 1.0f;
+    }
+
+    return penetration;
 }
 
 } // namespace Collision

@@ -63,6 +63,20 @@ public:
     // @addr 0x80595720
     u16 getSuspensionCount() const;
 
+    // Stat accessors
+    f32 getSpeedStat() const;
+    f32 getAcceleration() const;
+    f32 getHandling() const;
+    f32 getDriftStat() const;
+    f32 getOffroadStat() const;
+    f32 getWeightStat() const;
+    f32 getMiniTurboDuration() const;
+    f32 getItemProbability() const;
+
+    // Data loading
+    void loadFromBinary(const void* data);
+    void setStat(s32 statId, f32 value);
+
     u32 isBike;
     u32 vehicle;
     u32 character;
@@ -80,6 +94,20 @@ public:
     GpStats* gpStats;
     RaceStats* raceStats;
 };
-// static_assert(sizeof(KartSettings) == 0x3c);
+
+// Stat ID enum for setStat
+enum KartStatId {
+    STAT_TOP_SPEED = 0,
+    STAT_ACCELERATION = 1,
+    STAT_WEIGHT = 2,
+    STAT_HANDLING = 3,
+    STAT_DRIFT = 4,
+    STAT_OFFROAD = 5,
+    STAT_MINI_TURBO = 6,
+    STAT_COUNT = 7,
+};
+
+// Free function: get default kart parameters
+HandlingStats KartSettings_getDefaultKart();
 
 } // namespace Kart

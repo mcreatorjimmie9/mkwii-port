@@ -21,6 +21,18 @@ public:
     Settings();
     ~Settings();
 
+    // --- Initialization ---
+    // Initialize settings from save data
+    // @param buffer  Raw settings data from save file
+    // @param size    Size of the buffer
+    void init(const u8* buffer, u32 size);
+
+    // Load settings from a binary buffer (parse and validate)
+    s32 load(const u8* buffer, u32 size);
+
+    // Save settings to a binary buffer
+    s32 save(u8* buffer, u32 bufferSize) const;
+
     // --- Drift Mode ---
     enum DriftMode {
         DRIFT_MANUAL = 0,
@@ -42,6 +54,8 @@ public:
     void setControlScheme(ControlScheme scheme) { mControlScheme = (u8)scheme; }
 
     // --- Volume ---
+    // Get master volume (0-100), which is the sound volume
+    u8 getVolume() const { return mSoundVolume; }
     u8 getSoundVolume() const { return mSoundVolume; }
     void setSoundVolume(u8 vol) { mSoundVolume = vol > 100 ? 100 : vol; }
 
@@ -50,6 +64,13 @@ public:
 
     u8 getSFXVolume() const { return mSFXVolume; }
     void setSFXVolume(u8 vol) { mSFXVolume = vol > 100 ? 100 : vol; }
+
+    // Set all three volume channels at once
+    void setVolume(u8 master, u8 music, u8 sfx);
+
+    // --- Controls ---
+    ControlScheme getControls() const { return (ControlScheme)mControlScheme; }
+    void setControls(ControlScheme scheme) { mControlScheme = (u8)scheme; }
 
     // --- Rumble ---
     bool isRumbleEnabled() const { return mRumble != 0; }
@@ -108,11 +129,12 @@ public:
 
     // --- Display settings ---
     enum ScreenMode {
-        SCREEN_NORMAL = 0,
-        SCREEN_WIDE   = 1,
+        SCREEN_NORMAL = 0,  // 4:3
+        SCREEN_WIDE   = 1,  // 16:9
     };
 
     ScreenMode getScreenMode() const { return (ScreenMode)mScreenMode; }
+    ScreenMode getDisplayMode() const { return (ScreenMode)mScreenMode; }
     void setScreenMode(ScreenMode mode) { mScreenMode = (u8)mode; }
 
     // --- Descriptive names ---
@@ -128,6 +150,9 @@ public:
 
     // --- Defaults ---
     void setDefaults();
+
+    // Factory reset: reset all to defaults
+    void resetToDefault();
 
     // --- Serialization ---
     u32 serialize(u8* buffer, u32 bufferSize) const;
@@ -149,5 +174,9 @@ private:
     u8  mScreenMode;      // Display mode (0: Normal, 1: Wide)
     u8  _pad2[0x07];      // Padding to 0x14 bytes total
 };
+
+// Get a default settings instance (singleton)
+// @addr 0x8022A780 (estimated)
+const Save::Settings* Settings_getDefault();
 
 } // namespace Save

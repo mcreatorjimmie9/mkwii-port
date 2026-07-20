@@ -14,6 +14,32 @@
 
 namespace EGG {
 
+enum CullMode {
+    CULL_NONE = 0,
+    CULL_FRONT = 1,
+    CULL_BACK = 2,
+    CULL_ALL = 3,
+};
+
+enum CompareFunc {
+    CMP_NEVER = 0,
+    CMP_LESS = 1,
+    CMP_EQUAL = 2,
+    CMP_LEQUAL = 3,
+    CMP_GREATER = 4,
+    CMP_NEQUAL = 5,
+    CMP_GEQUAL = 6,
+    CMP_ALWAYS = 7,
+};
+
+enum BlendMode {
+    BLEND_NONE = 0,
+    BLEND_ALPHA = 1,
+    BLEND_ADD = 2,
+    BLEND_SUB = 3,
+    BLEND_MUL = 4,
+};
+
 class Graphics {
 public:
     // @addr 0x80170008
@@ -26,6 +52,26 @@ public:
     static void beginDraw();
     // @addr 0x80170120
     static void endDraw();
+
+    // --- Instance methods ---
+    void init();
+    void beginFrame();
+    void endFrame();
+    void setViewport(s32 x, s32 y, s32 w, s32 h);
+    void setScissorRect(s32 x, s32 y, s32 w, s32 h);
+    void setClearColorRGBA(u8 r, u8 g, u8 b, u8 a);
+    void setCullModeEnum(CullMode mode);
+    void setDepthTest(bool enable, CompareFunc func);
+    void setBlendModeEnum(BlendMode mode);
+    void setZBuffer(bool enable);
+    void saveState();
+    void restoreState();
+    void invalidateVertexCache();
+    void flushTextureCache();
+    void waitGpuDone();
+    void* getFrameBuffer() const;
+    s32 getWidth() const;
+    s32 getHeight() const;
 
     // --- Viewport ---
     // @addr 0x80170180
@@ -83,7 +129,19 @@ private:
     u32 mDrawCount;       // 0x04
     u32 mPadding[2];      // 0x08-0x0F
 
+    // Frame buffer state
+    void* mFrameBuffer;
+    s32 mWidth;
+    s32 mHeight;
+    u8 mClearColorR;
+    u8 mClearColorG;
+    u8 mClearColorB;
+    u8 mClearColorA;
+
     static Graphics* sInstance;
 };
+
+// Free function singleton accessor
+inline Graphics* Graphics_getInstance() { return Graphics::getInstance(); }
 
 } // namespace EGG

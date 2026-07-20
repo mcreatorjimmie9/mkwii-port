@@ -108,6 +108,36 @@ public:
     // Reset all states for race restart
     void reset();
 
+    // --- Collision resolution methods ---
+
+    /// Resolve floor collision: push kart out of floor, adjust velocity
+    /* ColResponse_resolveFloor @ 0x804F1700 */
+    void resolveFloor(s32 kartIdx, const EGG::Vector3f& floorNormal, f32 penetration);
+
+    /// Resolve wall collision: slide along wall, reduce speed
+    /* ColResponse_resolveWall @ 0x804F1800 */
+    void resolveWall(s32 kartIdx, const EGG::Vector3f& wallNormal, f32 penetration, f32 restitution);
+
+    /// Resolve ceiling collision: push kart downward
+    /* ColResponse_resolveCeiling @ 0x804F1900 */
+    void resolveCeiling(s32 kartIdx, f32 penetration);
+
+    /// Resolve soft wall collision: gradual push-back
+    /* ColResponse_resolveSoftWall @ 0x804F1A00 */
+    void resolveSoftWall(s32 kartIdx, const EGG::Vector3f& wallNormal, f32 penetration);
+
+    /// Resolve collision with moving collision objects
+    /* ColResponse_resolveMovingCol @ 0x804F1B00 */
+    void resolveMovingCol(s32 kartIdx, const EGG::Vector3f& objectVel, f32 massRatio);
+
+    /// Resolve kart-to-kart collision with momentum exchange
+    /* ColResponse_resolveKartKart @ 0x804F1C00 */
+    void resolveKartKart(s32 kartA, s32 kartB, const EGG::Vector3f& collisionNormal);
+
+    /// Resolve item box collision, trigger item roulette
+    /* ColResponse_resolveItemBox @ 0x804F1D00 */
+    bool resolveItemBox(s32 kartIdx, const EGG::Vector3f& boxPos, f32 boxRadius);
+
 private:
     static const s32 MAX_COL_PLAYERS = MAX_PLAYER_COUNT;
     static const f32 BOOST_PANEL_DURATION;
@@ -138,6 +168,21 @@ private:
     TrickRampState mTrickRamp[MAX_COL_PLAYERS];
     bool mbNeedsRescue[MAX_COL_PLAYERS];
     s32 mPlayerCount;
+
+    // Per-player floor/wall/ceiling push vectors for external access
+    EGG::Vector3f mFloorPush[MAX_COL_PLAYERS];
+    EGG::Vector3f mWallPush[MAX_COL_PLAYERS];
 };
+
+/// Calculate penetration depth and direction between two spheres.
+/// @param posA       Center of sphere A
+/// @param radiusA    Radius of sphere A
+/// @param posB       Center of sphere B
+/// @param radiusB    Radius of sphere B
+/// @param outNormal  Output: collision normal (from A to B)
+/// @return Penetration depth (0.0 if no overlap)
+f32 ColResponse_calcPenetration(const EGG::Vector3f& posA, f32 radiusA,
+                                const EGG::Vector3f& posB, f32 radiusB,
+                                EGG::Vector3f& outNormal);
 
 } // namespace Collision

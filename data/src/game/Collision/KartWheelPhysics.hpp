@@ -80,6 +80,23 @@ public:
     const EGG::Vector3f& getCollisionFloorNrm() const;
     const KartCollisionInfo& getKartCollisionInfo() const;
 
+    /// Ray cast downward for ground contact, compute spring compression
+    f32 calcSuspensionTravel(const EGG::Vector3f& downDir);
+    /// Friction force based on surface type and floor normal
+    EGG::Vector3f calcTractionForce(const EGG::Vector3f& floorNormal, f32 engineForce) const;
+    /// Engine/brake torque distribution to this wheel
+    f32 calcWheelTorque(f32 totalTorque, bool isRearWheel) const;
+    /// Visual wheel spin rate based on ground speed
+    f32 updateWheelRotation(f32 dt);
+    /// Detect surface transitions and trigger effects
+    void handleSurfaceChange(u32 newKclType);
+    /// Ground contact position (wheel edge on floor)
+    EGG::Vector3f getContactPoint() const;
+    /// Check if wheel is losing traction (slip ratio exceeds threshold)
+    bool isSlipping() const;
+    /// Brake force calculation
+    void applyBraking(f32 brakeStrength, f32 dt);
+
     f32 getSusTravel() const { return susTravel; }
     void setWheelPos(const EGG::Vector3f& wheelPos) { this->wheelPos = wheelPos; }
     inline f32 getYScale() { return kartPhysicsEngine()->getYScale(); }
@@ -108,6 +125,14 @@ public:
     f32 isAtSuspLimit;
     /// Topmost point of the suspension the wheel can reach
     EGG::Vector3f suspTop;
+    /// Visual wheel rotation angle (radians)
+    f32 wheelRotation;
+    /// Previous frame KCL surface type for transition detection
+    u32 prevSurfaceType;
+    /// Slip ratio (> 1.0 = wheel spinning faster than ground speed)
+    f32 slipRatio;
+    /// Current brake force being applied
+    f32 brakeForce;
 };
 // static_assert(sizeof(KartWheelPhysics) == 0x84);
 

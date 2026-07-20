@@ -25,6 +25,15 @@ struct AISpeedBase {
     void resetBoost();
     void updateRubberBanding();
 
+    // Phase 38 additions
+    f32 calcMaxSpeed() const;
+    f32 calcAcceleration(f32 currentSpeed) const;
+    f32 calcOffroadPenalty();
+    f32 calcBoostMultiplier() const;
+    void applyDriftBoost(f32 driftProgress, f32& speedOut) const;
+    f32 getSpeedCap() const;
+    void recordSpeedStats(f32 currentSpeed);
+
     AIInfo* mpInfo;
     AIParamSpeed* mpParamSpeed;
     f32 field_0x0C;
@@ -33,6 +42,12 @@ struct AISpeedBase {
     f32 mBoostPadMultiplier;
     s32 mRaceStartTimer;
     bool mbBoosted;
+
+    // Phase 38 member variables
+    f32 mSpeedMin;
+    f32 mSpeedMax;
+    f32 mSpeedAccum;
+    s32 mSpeedSamples;
 };
 
 } // namespace Enemy

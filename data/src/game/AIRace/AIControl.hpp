@@ -65,6 +65,16 @@ struct AIControlBase: public Util::StateSequencer<AIControlBase> {
     virtual void doUpdate_(const DriveInfo&);
     virtual void setBasicDriveInfo_(const DriveInfo&);
 
+    // Phase 38 additions
+    f32 calcSteeringCorrection(const EGG::Vector3f& targetDir, f32 currentAngle);
+    f32 calcSpeedControl(f32 idealSpeed, f32 currentSpeed) const;
+    void handleSharpTurn(f32 turnAngle, f32& steerOut, f32& speedMod) const;
+    void handleStraight(f32& speedMod) const;
+    void handleSlope(f32 slopeAngle, f32& speedMod) const;
+    void handleBoostPanel(f32& speedMod) const;
+    void updateInternal();
+    void setLookaheadDist(f32 dist);
+
     const AIInfo* mpInfo;
     AIPathHandler* mpPathHandler;
     void* mpStuck;
@@ -75,6 +85,12 @@ struct AIControlBase: public Util::StateSequencer<AIControlBase> {
     AIAirtimeTracker* mpAirtimeTracker;
     AIPowAvoider* mpPowAvoider;
     s32 field_0x5C;
+
+    // Phase 38 member variables
+    f32 mLookaheadDist;
+    f32 mPrevSteerError;
+    f32 mSteerIntegral;
+    f32 mBoostPanelTimer;
 };
 
 } // namespace Enemy

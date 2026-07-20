@@ -69,6 +69,37 @@ bool CourseColManager::load(u32 courseId) {
     return true;
 }
 
+// ============================================================================
+// load (KCL data overload) — Parse KCL from raw binary buffer
+// ============================================================================
+
+bool CourseColManager::load(const void* kclData, u32 size) {
+    if (!kclData || size < sizeof(KCLHeader)) return false;
+
+    // Validate header
+    KCLHeader header;
+    if (!CourseColManager_parseKCLHeader(kclData, size, &header)) {
+        return false;
+    }
+
+    // Unload previous course
+    unload();
+
+    // Pass KCL data to the collision engine
+    const u8* data = static_cast<const u8*>(kclData);
+    if (!mKCollision.loadKCL(data, size)) {
+        return false;
+    }
+
+    // Parse course-specific data
+    parseRespawnPoints();
+    parseCannonPoints();
+    cacheBoostPads();
+
+    mLoaded = true;
+    return true;
+}
+
 void CourseColManager::unload() {
     mKCollision.init();
     mLoaded = false;
@@ -214,6 +245,152 @@ bool CourseColManager::getCannonTarget(s32 cannonId, f32* outPos, f32* outDir) {
 }
 
 // ============================================================================
+// rayCast — Ray-world intersection
+// ============================================================================
+
+bool CourseColManager::rayCast(const f32* origin, const f32* dir, f32 maxDist,
+                                RayColResult* result) {
+    if (!mLoaded || !origin || !dir || !result) return false;
+
+    // Copy origin/dir into mutable arrays for KCollision
+    f32 o[3] = { origin[0], origin[1], origin[2] };
+    f32 d[3] = { dir[0], dir[1], dir[2] };
+
+    return mKCollision.checkRayCollision(o, d, maxDist, result);
+}
+
+// ============================================================================
+// sphereTest — Sphere-world overlap test
+// ============================================================================
+
+bool CourseColManager::sphereTest(f32 x, f32 y, f32 z, f32 radius,
+                                  SphereColResult* result) {
+    if (!mLoaded || !result) return false;
+
+    return mKCollision.checkSphereCollision(x, y, z, radius, result);
+}
+
+// ============================================================================
+// getFloorAt — Get floor Y at position
+// ============================================================================
+
+f32 CourseColManager::getFloorAt(f32 x, f32 y, f32 z) {
+    if (!mLoaded) return y;
+
+    f32 floorY = 0.0f;
+    f32 normal[3] = { 0.0f, 1.0f, 0.0f };
+
+    if (mKCollision.getFloor(x, y + 100.0f, z, &floorY, normal)) {
+        return floorY;
+    }
+
+    return y;
+}
+
+// ============================================================================
+// getWallAt — Find nearby walls
+// ============================================================================
+
+bool CourseColManager::getWallAt(f32 x, f32 y, f32 z, f32 radius,
+                                  EGG::Vector3f* outNormals, u32* outCount) {
+    if (!mLoaded || !outNormals || !outCount) return false;
+
+    *outCount = 0;
+    const u32 maxWalls = 4;
+
+    // Perform a sphere test at the position
+    SphereColResult result;
+    if (!mKCollision.checkSphereCollision(x, y, z, radius, &result)) {
+        return false;
+    }
+
+    // Check if the hit triangle is a wall type
+    u32 kclType = KCL_ATTRIBUTE_TYPE(result.attribute);
+    if (kclType == KCL_TYPE_PLAYER_WALL_CAT1 ||
+        kclType == KCL_TYPE_PLAYER_WALL_CAT2 ||
+        kclType == KCL_TYPE_DRIVER_WALL) {
+
+        outNormals[*outCount] = result.normal;
+        (*outCount)++;
+        return true;
+    }
+
+    return false;
+}
+
+// ============================================================================
+// getSurfaceType — KCL attribute at a world point
+// ============================================================================
+
+u32 CourseColManager::getSurfaceType(f32 x, f32 y, f32 z) {
+    if (!mLoaded) return 0;
+
+    f32 origin[3] = { x, y + 5.0f, z };
+    f32 dir[3] = { 0.0f, -1.0f, 0.0f };
+
+    RayColResult rayResult;
+    if (mKCollision.checkRayCollision(origin, dir, 50.0f, &rayResult)) {
+        return rayResult.attribute; // Full attribute (type + variant + sink)
+    }
+
+    return 0;
+}
+
+// ============================================================================
+// isOnRoad — Check if position is on road surface
+// ============================================================================
+
+bool CourseColManager::isOnRoad(f32 x, f32 y, f32 z) {
+    if (!mLoaded) return false;
+
+    u32 surfType = getSurfaceType(x, y, z);
+    u32 kclType = KCL_ATTRIBUTE_TYPE(surfType);
+
+    // Road surfaces are type 0x01 (floor) but not off-road
+    if (kclType == KCL_TYPE_FLOOR) {
+        return (surfType & KCL_TYPE_OFFROAD_ANY) == 0;
+    }
+
+    return false;
+}
+
+// ============================================================================
+// getCollisionTriangle — Get triangle vertex data
+// ============================================================================
+
+bool CourseColManager::getCollisionTriangle(u32 triIdx, EGG::Vector3f* outV0,
+                                             EGG::Vector3f* outV1,
+                                             EGG::Vector3f* outV2,
+                                             EGG::Vector3f* outNormal,
+                                             u32* outAttr) {
+    if (!mLoaded) return false;
+    if (triIdx >= mKCollision.getTriangleCount()) return false;
+
+    // Get the triangle attribute
+    u32 attr = mKCollision.getTriangleAttribute(triIdx);
+    if (outAttr) *outAttr = attr;
+
+    // Get the triangle normal
+    if (outNormal) {
+        f32 n[3];
+        mKCollision.getTriangleNormal(triIdx, n);
+        outNormal->x = n[0];
+        outNormal->y = n[1];
+        outNormal->z = n[2];
+    }
+
+    // Get the vertex positions
+    // We need to read vertex indices from the triangle data
+    // The KCollision stores converted triangle data internally
+    // For now, output zero vectors as the vertex fetch is internal
+    if (outV0) outV0->set(0.0f, 0.0f, 0.0f);
+    if (outV1) outV1->set(0.0f, 0.0f, 0.0f);
+    if (outV2) outV2->set(0.0f, 0.0f, 0.0f);
+
+    return true;
+}
+
+// ============================================================================
 // Internal: Parse Respawn Points
 // ============================================================================
 
@@ -264,6 +441,58 @@ void CourseColManager::cacheBoostPads() {
             mBoostPadCount++;
         }
     }
+}
+
+// ============================================================================
+// CourseColManager_parseKCLHeader — Parse and validate KCL file header
+// ============================================================================
+
+bool CourseColManager_parseKCLHeader(const void* data, u32 size,
+                                     KCLHeader* outHeader) {
+    if (!data || size < sizeof(KCLHeader) || !outHeader) return false;
+
+    const u8* ptr = static_cast<const u8*>(data);
+
+    // Read the magic bytes (big-endian 'KCOL' = 0x4B434F4C)
+    u32 magic = (u32(ptr[0]) << 24) | (u32(ptr[1]) << 16) |
+                (u32(ptr[2]) << 8)  | u32(ptr[3]);
+
+    if (magic != 0x4B434F4C) return false; // Not a valid KCL file
+
+    // Read header fields (all big-endian on Wii)
+    auto readBE32 = [](const u8* p) -> u32 {
+        return (u32(p[0]) << 24) | (u32(p[1]) << 16) |
+               (u32(p[2]) << 8)  | u32(p[3]);
+    };
+
+    outHeader->magic = magic;
+    outHeader->blockSize = readBE32(ptr + 0x04);
+    outHeader->numTriangles = readBE32(ptr + 0x08);
+    outHeader->numVertices = readBE32(ptr + 0x0C);
+    outHeader->numNormals = readBE32(ptr + 0x10);
+    outHeader->numOctreeNodes = readBE32(ptr + 0x14);
+    outHeader->_18 = readBE32(ptr + 0x18);
+    outHeader->_1C = readBE32(ptr + 0x1C);
+    outHeader->triDataOffset = readBE32(ptr + 0x20);
+    outHeader->vertexDataOffset = readBE32(ptr + 0x24);
+    outHeader->normalDataOffset = readBE32(ptr + 0x28);
+    outHeader->octreeDataOffset = readBE32(ptr + 0x2C);
+
+    // Validate that the block size matches the file size
+    if (outHeader->blockSize > size) return false;
+
+    // Validate that data offsets are within the file
+    if (outHeader->triDataOffset >= size) return false;
+    if (outHeader->vertexDataOffset >= size) return false;
+    if (outHeader->normalDataOffset >= size) return false;
+    if (outHeader->octreeDataOffset >= size) return false;
+
+    // Validate reasonable counts (sanity check)
+    if (outHeader->numTriangles > 1000000) return false;
+    if (outHeader->numVertices > 1000000) return false;
+    if (outHeader->numNormals > 1000000) return false;
+
+    return true;
 }
 
 } // namespace Field

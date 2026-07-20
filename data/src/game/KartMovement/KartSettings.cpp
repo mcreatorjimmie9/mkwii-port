@@ -261,4 +261,143 @@ u16 KartSettings::getSuspensionCount() const {
     return this->susCount;
 }
 
+// Get top speed stat from cached handling stats
+f32 KartSettings::getSpeedStat() const {
+    return sCachedStats.topSpeed;
+}
+
+// Get acceleration stat
+f32 KartSettings::getAcceleration() const {
+    return sCachedStats.acceleration;
+}
+
+// Get handling (ground steering responsiveness)
+f32 KartSettings::getHandling() const {
+    return sCachedStats.handling;
+}
+
+// Get drift stat (drift steering responsiveness)
+f32 KartSettings::getDriftStat() const {
+    return sCachedStats.drift;
+}
+
+// Get off-road speed retention stat
+f32 KartSettings::getOffroadStat() const {
+    return sCachedStats.offroad;
+}
+
+// Get weight class stat
+f32 KartSettings::getWeightStat() const {
+    return sCachedStats.weight;
+}
+
+// Get mini-turbo boost duration stat
+f32 KartSettings::getMiniTurboDuration() const {
+    f32 base = 1.0f;
+    f32 scale = sCachedStats.miniTurbo / 50.0f;
+    return base + (scale - 1.0f) * 0.4f;
+}
+
+// Get item probability bias based on position/weight
+f32 KartSettings::getItemProbability() const {
+    f32 weightFactor = sCachedStats.weight / BASE_WEIGHT;
+    f32 bias = (weightFactor - 0.8f) * 2.5f;
+    if (bias < 0.0f) bias = 0.0f;
+    if (bias > 1.0f) bias = 1.0f;
+    return bias;
+}
+
+// Load vehicle parameters from binary data
+void KartSettings::loadFromBinary(const void* data) {
+    if (data == nullptr) return;
+    const f32* stats = static_cast<const f32*>(data);
+    sCachedStats.topSpeed     = stats[0];
+    sCachedStats.acceleration = stats[1];
+    sCachedStats.weight        = stats[2];
+    sCachedStats.handling      = stats[3];
+    sCachedStats.drift         = stats[4];
+    sCachedStats.offroad       = stats[5];
+    sCachedStats.miniTurbo    = stats[6];
+}
+
+// Set a single stat by ID
+void KartSettings::setStat(s32 statId, f32 value) {
+    switch (statId) {
+    case STAT_TOP_SPEED:    sCachedStats.topSpeed = value; break;
+    case STAT_ACCELERATION: sCachedStats.acceleration = value; break;
+    case STAT_WEIGHT:       sCachedStats.weight = value; break;
+    case STAT_HANDLING:     sCachedStats.handling = value; break;
+    case STAT_DRIFT:        sCachedStats.drift = value; break;
+    case STAT_OFFROAD:      sCachedStats.offroad = value; break;
+    case STAT_MINI_TURBO:   sCachedStats.miniTurbo = value; break;
+    default: break;
+    }
+}
+
+// Free function: return default kart handling stats
+HandlingStats KartSettings_getDefaultKart() {
+    HandlingStats stats;
+    stats.topSpeed     = BASE_TOP_SPEED;
+    stats.acceleration = BASE_ACCELERATION;
+    stats.weight        = BASE_WEIGHT;
+    stats.handling      = BASE_HANDLING;
+    stats.drift         = BASE_DRIFT;
+    stats.offroad       = BASE_OFFROAD;
+    stats.miniTurbo    = BASE_MINI_TURBO;
+    return stats;
+}
+
+// Get normalized stat value (0.0 to 1.0) for display purposes
+// MKW's 1-5 stat bars map to internal ranges
+static f32 normalizeStat(f32 value, f32 minVal, f32 maxVal) {
+    if (maxVal <= minVal) return 0.0f;
+    f32 norm = (value - minVal) / (maxVal - minVal);
+    if (norm < 0.0f) norm = 0.0f;
+    if (norm > 1.0f) norm = 1.0f;
+    return norm;
+}
+
+// Get the display bar value (1-5) for top speed
+s32 KartSettings_getSpeedBar(const HandlingStats& stats) {
+    f32 norm = normalizeStat(stats.topSpeed, 30.0f, 80.0f);
+    return 1 + static_cast<s32>(norm * 4.0f + 0.5f);
+}
+
+// Get the display bar value (1-5) for acceleration
+s32 KartSettings_getAccelBar(const HandlingStats& stats) {
+    f32 norm = normalizeStat(stats.acceleration, 30.0f, 70.0f);
+    return 1 + static_cast<s32>(norm * 4.0f + 0.5f);
+}
+
+// Get the display bar value (1-5) for handling
+s32 KartSettings_getHandlingBar(const HandlingStats& stats) {
+    f32 norm = normalizeStat(stats.handling, 30.0f, 80.0f);
+    return 1 + static_cast<s32>(norm * 4.0f + 0.5f);
+}
+
+// Get the display bar value (1-5) for drift
+s32 KartSettings_getDriftBar(const HandlingStats& stats) {
+    f32 norm = normalizeStat(stats.drift, 25.0f, 70.0f);
+    return 1 + static_cast<s32>(norm * 4.0f + 0.5f);
+}
+
+// Get the display bar value (1-5) for off-road
+s32 KartSettings_getOffroadBar(const HandlingStats& stats) {
+    f32 norm = normalizeStat(stats.offroad, 20.0f, 65.0f);
+    return 1 + static_cast<s32>(norm * 4.0f + 0.5f);
+}
+
+// Get the display bar value (1-5) for mini-turbo
+s32 KartSettings_getMiniTurboBar(const HandlingStats& stats) {
+    f32 norm = normalizeStat(stats.miniTurbo, 25.0f, 70.0f);
+    return 1 + static_cast<s32>(norm * 4.0f + 0.5f);
+}
+
+// Get the weight class index (0=Light, 1=Medium, 2=Heavy) from weight stat
+s32 KartSettings_getWeightClassIndex(f32 weight) {
+    if (weight < 58.0f) return 0;  // Light
+    if (weight < 72.0f) return 1;  // Medium
+    return 2;                       // Heavy
+}
+
 } // namespace Kart

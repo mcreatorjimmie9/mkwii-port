@@ -5,6 +5,7 @@
 #include "AIRank.hpp"
 #include "RaceConfig.hpp"
 #include <egg/core/eggHeap.hpp>
+#include <cmath>
 
 namespace Enemy {
 
@@ -132,6 +133,12 @@ AIControlBase::AIControlBase(const AIInfo& info) {
     mpAirtimeTracker = new AIAirtimeTracker(info);
     mpPowAvoider = new AIPowAvoider(info);
     field_0x5C = 0;
+
+    // Phase 38: Initialize control state
+    mLookaheadDist = 100.0f;
+    mPrevSteerError = 0.0f;
+    mSteerIntegral = 0.0f;
+    mBoostPanelTimer = 0.0f;
 }
 
 // __dt__Q25Enemy13AIControlBaseFv
@@ -286,6 +293,189 @@ void AIControlBase::vf_0x48() {}
 
 void* AIControlBase::getAIBlockLine() {
     return nullptr;
+}
+
+// ============================================================
+// Phase 38: Deepened AIControlBase methods
+// ============================================================
+
+// calcSteeringCorrection__Q25Enemy13AIControlBaseCFRCQ23EGG8Vector3ff
+// PD-controller steering with lookahead.
+// Computes a steering correction value [-1.0, 1.0] using proportional
+// and derivative terms on the angle error between current heading
+// and target direction.
+f32 AIControlBase::calcSteeringCorrection(
+    const EGG::Vector3f& targetDir, f32 currentAngle) {
+
+    // Compute target angle from the direction vector (on XZ plane)
+    f32 targetAngle = atan2f(targetDir.x, targetDir.z);
+
+    // Angle error: difference between target and current heading
+    f32 error = targetAngle - currentAngle;
+
+    // Normalize error to [-PI, PI]
+    while (error > 3.14159265f) error -= 6.28318530f;
+    while (error < -3.14159265f) error += 6.28318530f;
+
+    // PD controller gains
+    const f32 KP = 2.5f;  // Proportional gain
+    const f32 KD = 1.2f;  // Derivative gain
+
+    // Proportional term
+    f32 pTerm = error * KP;
+
+    // Derivative term (rate of change of error)
+    f32 dTerm = (error - mPrevSteerError) * KD;
+
+    // Store error for next frame's derivative calculation
+    mPrevSteerError = error;
+
+    // Combine PD terms
+    f32 correction = pTerm + dTerm;
+
+    // Clamp to [-1.0, 1.0] for stick input range
+    if (correction > 1.0f) correction = 1.0f;
+    if (correction < -1.0f) correction = -1.0f;
+
+    return correction;
+}
+
+// calcSpeedControl__Q25Enemy13AIControlBaseCFff
+// Speed maintenance around ideal racing line speed.
+// Returns an acceleration modifier [-1.0, 1.0].
+f32 AIControlBase::calcSpeedControl(f32 idealSpeed, f32 currentSpeed) const {
+    f32 speedError = idealSpeed - currentSpeed;
+
+    // Proportional speed control
+    const f32 SPEED_KP = 0.05f;
+    f32 accel = speedError * SPEED_KP;
+
+    // Clamp to valid range
+    if (accel > 1.0f) accel = 1.0f;
+    if (accel < -1.0f) accel = -1.0f;
+
+    return accel;
+}
+
+// handleSharpTurn__Q25Enemy13AIControlBaseCFfRfRf
+// Special logic for hairpin/U-turns.
+void AIControlBase::handleSharpTurn(f32 turnAngle, f32& steerOut,
+    f32& speedMod) const {
+    f32 angleAbs = turnAngle;
+    if (angleAbs < 0.0f) angleAbs = -angleAbs;
+
+    // Hairpin threshold: angle > 2.0 radians (~115 degrees)
+    if (angleAbs < 1.5f) {
+        return; // Not a sharp turn
+    }
+
+    // For very sharp turns, increase steering effort and reduce speed
+    if (angleAbs > 2.5f) {
+        // U-turn or hairpin: very aggressive steering, heavy braking
+        if (steerOut > 0.0f) {
+            steerOut = 1.0f;
+        } else {
+            steerOut = -1.0f;
+        }
+        speedMod *= 0.4f; // Reduce to 40% speed
+    } else {
+        // Standard sharp turn: moderate adjustments
+        f32 sharpFactor = (angleAbs - 1.5f) / 1.0f; // 0.0 to 1.0
+        if (sharpFactor > 1.0f) sharpFactor = 1.0f;
+
+        // Increase steering by up to 30%
+        if (steerOut > 0.0f) {
+            steerOut += (1.0f - steerOut) * sharpFactor * 0.3f;
+        } else if (steerOut < 0.0f) {
+            steerOut -= (-1.0f - steerOut) * sharpFactor * 0.3f;
+        }
+
+        // Reduce speed by up to 30%
+        speedMod *= (1.0f - sharpFactor * 0.3f);
+    }
+}
+
+// handleStraight__Q25Enemy13AIControlBaseCFRf
+// Optimal straight-line behavior.
+void AIControlBase::handleStraight(f32& speedMod) const {
+    if (mpPathHandler == nullptr) {
+        return;
+    }
+
+    // Check if upcoming angle is small (straight section)
+    f32 upcomingAngle = mpPathHandler->getUpcomingAngle();
+    f32 angleAbs = upcomingAngle;
+    if (angleAbs < 0.0f) angleAbs = -angleAbs;
+
+    // On straight sections, maximize speed
+    if (angleAbs < 0.1f) {
+        speedMod = 1.0f; // Full speed
+    }
+}
+
+// handleSlope__Q25Enemy13AIControlBaseCFfRf
+// Uphill/downhill speed adjustments.
+void AIControlBase::handleSlope(f32 slopeAngle, f32& speedMod) const {
+    // slopeAngle: positive = uphill, negative = downhill
+    if (slopeAngle > 0.0f) {
+        // Uphill: reduce speed based on steepness
+        // At 30 degrees, reduce to ~70% speed
+        f32 uphillPenalty = 1.0f - slopeAngle * 0.01f;
+        if (uphillPenalty < 0.5f) uphillPenalty = 0.5f;
+        speedMod *= uphillPenalty;
+    } else {
+        // Downhill: slight speed increase (gravity assist)
+        // At -30 degrees, increase to ~110% speed
+        f32 downhillBonus = 1.0f - slopeAngle * 0.003f;
+        if (downhillBonus > 1.2f) downhillBonus = 1.2f;
+        speedMod *= downhillBonus;
+    }
+}
+
+// handleBoostPanel__Q25Enemy13AIControlBaseCFRf
+// React to boost panels on racing line.
+void AIControlBase::handleBoostPanel(f32& speedMod) const {
+    // If boost panel timer is active, maintain speed boost
+    if (mBoostPanelTimer > 0.0f) {
+        speedMod = 1.5f; // Boost panel gives 50% speed increase
+    }
+}
+
+// updateInternal__Q25Enemy13AIControlBaseFv
+// Main per-frame control update.
+void AIControlBase::updateInternal() {
+    if (mpInfo == nullptr || mpPathHandler == nullptr) {
+        return;
+    }
+
+    // Update airtime tracker
+    mpAirtimeTracker->update();
+
+    // Update POW avoider
+    mpPowAvoider->update();
+
+    // Decay boost panel timer
+    if (mBoostPanelTimer > 0.0f) {
+        mBoostPanelTimer -= 1.0f / 60.0f;
+        if (mBoostPanelTimer < 0.0f) {
+            mBoostPanelTimer = 0.0f;
+        }
+    }
+
+    // Update the derivative term for steering PD controller
+    // (stored in mPrevSteerError for next frame)
+    // This is a no-op placeholder — the actual error is computed
+    // in calcSteeringCorrection and stored via mutable access.
+}
+
+// setLookaheadDist__Q25Enemy13AIControlBaseFf
+// Dynamic lookahead based on speed.
+void AIControlBase::setLookaheadDist(f32 dist) {
+    // Minimum lookahead of 30 units, maximum of 300 units
+    if (dist < 30.0f) dist = 30.0f;
+    if (dist > 300.0f) dist = 300.0f;
+
+    mLookaheadDist = dist;
 }
 
 } // namespace Enemy

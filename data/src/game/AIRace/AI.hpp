@@ -41,10 +41,25 @@ struct AI: public Kart::KartObjectProxy {
     bool isInBullet();
     Kart::KartState* kartState() { return nullptr; }
 
+    // Phase 38 additions
+    void calcDrivingDirection(EGG::Vector3f& out) const;
+    f32 calcOptimalSpeed();
+    void avoidCollision(EGG::Vector3f& out) const;
+    void handleRamp();
+    void handleItemUsage();
+    f32 getRiskTolerance() const;
+    void updateMorale();
+
     AIEngine* mpEngine;
     EGG::Vector2f mCpuStick;
     u32 mFlags;
     s32 mTeam;
+
+    // Phase 38 member variables
+    f32 mMorale;
+    f32 mLastPosition;
+    f32 mAvoidanceStrength;
+    s32 mFramesSinceLastRamp;
 };
 
 } // namespace Enemy

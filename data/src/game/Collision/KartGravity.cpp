@@ -264,4 +264,200 @@ void KartGravity::applyMovingWater(KartDynamics* dyn, f32 dt) {
     dyn->movingWaterVel = m_movingWaterVel;
 }
 
+void KartGravity::calcGravityVector(const EGG::Vector3f& pos, EGG::Vector3f& outGravity) {
+    EGG::Vector3f up;
+    up.setUp();
+
+    if (m_hasFloorNormal) {
+        // On ground: gravity is primarily downward, with slope influence
+        // tangential component computed via floor normal decomposition
+        outGravity.x = 0.0f;
+        outGravity.y = -GRAVITY_ACCEL;
+        outGravity.z = 0.0f;
+
+        // If on a slope, add tangential (downhill) component
+        if (m_slopeFactor > SLOPE_SLIDE_THRESH) {
+            f32 normalDot = outGravity.dot(m_floorNormal);
+            EGG::Vector3f tangential = outGravity - m_floorNormal * normalDot;
+            f32 tangMag = tangential.normalise();
+            if (tangMag > MAX_SLOPE_FORCE) {
+                tangential *= MAX_SLOPE_FORCE / tangMag;
+            }
+            outGravity = tangential;
+        }
+    } else {
+        // Airborne: full downward gravity
+        outGravity.x = 0.0f;
+        outGravity.y = -GRAVITY_ACCEL * AIR_GRAVITY_SCALE;
+        outGravity.z = 0.0f;
+    }
+
+    (void)pos;
+}
+
+void KartGravity::applyDownforce(KartDynamics* dyn, f32 dt) {
+    if (!dyn || dt <= 0.0f || m_hasFloorNormal) {
+        // Downforce only applies in air (aerodynamic effect)
+        return;
+    }
+
+    // Downforce is proportional to the square of speed (aerodynamic)
+    // This pushes the kart toward the ground, improving air control
+    // and reducing jump height at high speeds
+    f32 speedSq = dyn->speedNorm * dyn->speedNorm;
+    f32 downforceCoeff = 0.0005f; // Tuning constant
+    f32 downforceMag = speedSq * downforceCoeff;
+
+    // Cap downforce to prevent excessive push
+    if (downforceMag > 2.0f) {
+        downforceMag = 2.0f;
+    }
+
+    // Apply as downward force
+    EGG::Vector3f downforce(0.0f, -downforceMag, 0.0f);
+    dyn->addForce(downforce);
+}
+
+EGG::Vector3f KartGravity::calcSlopeEffect(const EGG::Vector3f& normal, f32 kartSpeed) const {
+    EGG::Vector3f slopeForce(0.0f, 0.0f, 0.0f);
+
+    if (m_slopeFactor < SLOPE_SLIDE_THRESH) {
+        return slopeForce; // Flat surface — no slope effect
+    }
+
+    // Gravity decomposed into tangential (along slope) component
+    EGG::Vector3f gravityVec(0.0f, -GRAVITY_ACCEL, 0.0f);
+    f32 normalDot = gravityVec.dot(normal);
+    slopeForce = gravityVec - normal * normalDot;
+
+    // Clamp magnitude
+    f32 mag = sqrtf(slopeForce.x * slopeForce.x + slopeForce.y * slopeForce.y +
+                    slopeForce.z * slopeForce.z);
+    if (mag > MAX_SLOPE_FORCE) {
+        slopeForce *= MAX_SLOPE_FORCE / mag;
+    }
+
+    // Scale by friction: at low speeds, friction prevents sliding
+    // At high speeds, the kart can more easily slide downhill
+    f32 frictionFactor = 1.0f;
+    if (kartSpeed < 5.0f) {
+        frictionFactor = kartSpeed / 5.0f;
+        if (frictionFactor < 0.0f) frictionFactor = 0.0f;
+    }
+    slopeForce *= frictionFactor;
+
+    return slopeForce;
+}
+
+void KartGravity::handleEdgeGravity(const EGG::Vector3f& pos, KartDynamics* dyn) {
+    if (!dyn || !m_hasFloorNormal) {
+        return;
+    }
+
+    // Near track edges, gravity is reduced slightly to allow the kart to
+    // "ride" the edge without immediately falling. This is particularly
+    // noticeable on courses like Rainbow Road and DK Summit.
+    // The edge detection is based on the slope factor — edges typically
+    // have normals that deviate significantly from vertical.
+
+    if (m_slopeFactor > 0.3f && m_slopeFactor < 0.8f) {
+        // Moderate slope — could be a track edge
+        // Reduce gravity by a factor proportional to slope severity
+        f32 gravityReduction = (m_slopeFactor - 0.3f) * 0.3f;
+
+        // Apply upward force to counteract some gravity
+        EGG::Vector3f edgeForce(0.0f, gravityReduction * 0.5f, 0.0f);
+        dyn->addForce(edgeForce);
+    }
+
+    (void)pos;
+}
+
+void KartGravity::handleCannon(KartDynamics* dyn, const EGG::Vector3f& cannonDir, f32 dt) {
+    if (!dyn || dt <= 0.0f) {
+        return;
+    }
+
+    // During cannon flight, gravity is partially overridden.
+    // The kart follows a parabolic trajectory defined by:
+    //   - Initial velocity from cannon direction
+    //   - Reduced gravity (about 40% of normal)
+    //   - No slope or surface effects
+
+    f32 cannonGravity = GRAVITY_ACCEL * 0.4f;
+    EGG::Vector3f cannonForce(0.0f, -cannonGravity, 0.0f);
+
+    dyn->addForce(cannonForce);
+
+    // The cannon direction provides initial impulse on first frame
+    // Subsequent frames just apply reduced gravity
+    // (cannonDir is used by the caller for the initial launch)
+
+    // Disable other gravity effects while in cannon
+    dyn->noGravity = true;
+
+    (void)cannonDir;
+}
+
+void KartGravity::update(KartDynamics* dyn, f32 dt) {
+    if (!dyn || dt <= 0.0f) {
+        return;
+    }
+
+    // Main gravity application
+    applyGravity(dyn, dt);
+
+    // Aerodynamic downforce (airborne only)
+    applyDownforce(dyn, dt);
+
+    // Moving road velocity transfer
+    if (m_onMovingRoad) {
+        applyMovingRoad(dyn, dt);
+    }
+
+    // Moving water current effects
+    if (m_inMovingWater || m_waterVariant > 0) {
+        applyMovingWater(dyn, dt);
+    }
+}
+
+EGG::Vector3f KartGravity::getGravityNormal() const {
+    EGG::Vector3f result(0.0f, -1.0f, 0.0f);
+
+    if (m_hasFloorNormal) {
+        // Blend between world down and floor normal based on slope factor
+        // On flat surfaces: gravity normal = floor normal (straight down)
+        // On slopes: gravity normal tilts with the surface
+        EGG::Vector3f worldDown(0.0f, -1.0f, 0.0f);
+
+        // The gravity "normal" is the direction gravity effectively pulls
+        // On a slope, this is partially along the slope surface
+        f32 normalDot = worldDown.dot(m_floorNormal);
+        EGG::Vector3f tangential = worldDown - m_floorNormal * normalDot;
+
+        // Blend: mostly normal component, small tangential
+        result = m_floorNormal * normalDot + tangential * 0.5f;
+        f32 mag = sqrtf(result.x * result.x + result.y * result.y + result.z * result.z);
+        if (mag > 0.001f) {
+            f32 invMag = 1.0f / mag;
+            result.x *= invMag;
+            result.y *= invMag;
+            result.z *= invMag;
+        }
+    }
+
+    return result;
+}
+
+bool KartGravity_calcFallDamage(f32 fallSpeed) {
+    // Fall damage / rescue threshold:
+    // If the kart's downward velocity exceeds this value, trigger a rescue
+    // In MKWii, falling too fast (e.g., off a cliff) triggers Lakitu
+    // The threshold is tuned so that normal jumps and trick landings
+    // don't trigger it, but falling off the track does
+    const f32 FALL_DAMAGE_THRESHOLD = 120.0f;
+
+    return fallSpeed > FALL_DAMAGE_THRESHOLD;
+}
+
 } // namespace Kart

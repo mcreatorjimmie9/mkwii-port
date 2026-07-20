@@ -9,11 +9,25 @@ class KartPhysicsEngine;
 class ItemHandler;
 class CollisionGroup;
 class PlayerSub10;
+class PlayerBoost;
 
 // Forward declarations for kart subsystems
 class KartWheelPhysics;
 class KartSusPhysics;
 class HitboxGroup;
+
+// Vehicle stats block returned by getVehicleStats()
+struct VehicleStats {
+    f32 topSpeed;           // Maximum forward speed
+    f32 acceleration;       // Forward acceleration rate
+    f32 handling;           // Base turn rate
+    f32 offroadSpeed;       // Speed cap off-road
+    f32 driftHandling;      // Turn rate while drifting
+    f32 miniTurboDuration;  // MT charge duration (frames)
+    f32 miniTurboBoost;     // MT speed boost multiplier
+    f32 mass;               // Vehicle mass (affects momentum)
+    f32 weight;             // Weight class (for collisions)
+};
 
 // =============================================================================
 // PlayerPhysics — The main per-player physics orchestrator
@@ -53,6 +67,35 @@ public:
     // State query
     bool hasAnyFloorCollision() const { return m_anyFloorCol; }
     u32 getFloorCollisionCount() const { return m_floorColCount; }
+
+    // --- Stat calculation methods ---
+
+    /// Calculate vehicle top speed from base stats and modifiers
+    f32 calcTopSpeed() const;
+
+    /// Calculate acceleration curve value at current speed
+    f32 calcAcceleration() const;
+
+    /// Calculate handling (turn rate) at current speed
+    f32 calcHandling() const;
+
+    /// Calculate speed cap when driving off-road
+    f32 calcOffroadSpeed() const;
+
+    /// Calculate drift handling parameters (outside/inside drift turn rates)
+    void calcDriftStats(f32& outsideDrift, f32& insideDrift) const;
+
+    /// Get mini-turbo stats: duration and speed boost per level (1, 2, 3)
+    void getMiniTurboStats(f32& duration, f32& boost, s32 level) const;
+
+    /// Apply mass-based physics (heavier = more momentum, less acceleration)
+    void applyMass(f32 dt);
+
+    /// Return the full vehicle stats block
+    VehicleStats getVehicleStats() const;
+
+    /// Refresh cached stats (called on vehicle change)
+    void updateStats();
 
 private:
     void updateWheelPhysics(f32 dt);
@@ -231,6 +274,21 @@ private:
     // 0x150: Wheel rotation matrix data (stored per update)
     EGG::Vector3f m_wheelRotData[4];
 
-    // 0x160: End of class
+    // 0x160: Cached vehicle stats
+    VehicleStats m_cachedStats;
+    f32 m_statTopSpeed;
+    f32 m_statAcceleration;
+    f32 m_statHandling;
+    // 0x17C: End of class
 };
 // static_assert(sizeof(PlayerPhysics) == 0x160);
+
+/// Interpolate between base and modified vehicle stats.
+/// Used for smooth transitions when stats change (e.g., speed boosts).
+/// @param base      Base (unmodified) stats
+/// @param modified  Modified stats (e.g., with boost applied)
+/// @param t         Interpolation factor [0, 1] (0 = base, 1 = modified)
+/// @return Interpolated stats
+VehicleStats PlayerPhysics_interpolateStats(const VehicleStats& base,
+                                             const VehicleStats& modified,
+                                             f32 t);

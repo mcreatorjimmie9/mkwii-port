@@ -57,6 +57,30 @@ public:
     /// Checks sphere-sphere collision and returns collision info.
     static void findCollisionInner(f32 distSq, u32 distThreshold, void* colInfo);
 
+    /// Initialize player collision sub-state
+    void init();
+
+    /// Per-frame collision sub-update
+    void update(f32 dt);
+
+    /// Test against course KCL geometry
+    void checkCourseCollision(const EGG::Vector3f& pos, f32 radius);
+
+    /// Test against dynamic objects (moving platforms, etc.)
+    void checkObjectCollision(const EGG::Vector3f& pos, f32 radius);
+
+    /// Generate response vector from collision data
+    EGG::Vector3f calcCollisionResponse(const EGG::Vector3f& contactNormal, f32 penetration);
+
+    /// Get the last computed collision normal
+    EGG::Vector3f getCollisionNormal() const;
+
+    /// Filter which objects to collide with using a bitmask
+    void setCollisionMask(u32 mask);
+
+    /// Check item collision (used by ITEMHandler) — free function wrapper
+    static void PlayerSub18_checkItemCollision(PlayerSub18* obj);
+
     PlayerPointers* playerPointers;
     u8 _08[0x2C - 0x08];
     u32 surfaceProperties;
@@ -64,6 +88,8 @@ public:
     s16 preRespawnTimer;
     s16 solidOobTimer;
     u8 _4C[0x74 - 0x4C];
+    EGG::Vector3f mCollisionNormal;  ///< Last collision normal
+    u32 mCollisionMask;            ///< Bitmask for collision filtering
 };
 
 } // namespace Kart

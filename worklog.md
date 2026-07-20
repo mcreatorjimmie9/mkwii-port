@@ -295,3 +295,96 @@ Stage Summary:
 - 485 files / ~126,900 lines total / ~14,700 symbols
 - 30 files changed, +4,091 / -643 lines
 - All 12 targets thickened with real implementation logic
+
+## Phase 38 — UI/Scene/EGG/NW4R Deepening (8 files)
+
+### File 1: `data/src/game/UI/LayoutLoader.cpp` (215→476L)
+- Added `BrltHeader` and `BrltPaneEntry` structs for BRLYT binary format
+- Added `loadFromFile()` — full BRLYT parsing pipeline
+- Added `parseHeader()` — validates magic (RLYT), version, size, section offsets
+- Added `parsePanes()` — validates PAN1 pane name table entries
+- Added `parseAnimations()` — validates PAS1 animation section
+- Added `parseFonts()` — validates FNT1 font section
+- Added `parseMaterials()` — validates MAT1 material section
+- Added `getLayoutData()` / `getError()` accessors
+- Added free function `LayoutLoader_loadFromArchive()` — RARC-based high-level loader
+- Updated constructor to init new members (mLayoutData, mLayoutDataSize, mLastError, mHeader)
+
+### File 2: `data/src/game/UI/AnimationController.cpp` (264→421L)
+- Added `AnimFrameCallback` typedef and `AnimKeyFrame` struct
+- Added `init()` — resets all state, tracks, listeners
+- Added `play(animId, speed, loopCount)` overload
+- Enhanced `update()` — master speed, crossfade blend, frame event listener dispatch, loop reset
+- Added `setFrame(f32)` / `getFrame()` — primary track convenience methods
+- Added `isPlaying()` — any-track-active query
+- Added `getAnimName()` — primary animation name
+- Added `blendTo(animId, blendTime)` — crossfade with weight interpolation
+- Added `addEventListener(animId, triggerFrame, callback, userData)` — frame callbacks
+- Added `FrameListener` struct and `MAX_LISTENERS` support
+
+### File 3: `data/src/game/UI/TextInput.cpp` (266→401L)
+- Added `TextFilter` typedef and standard filter functions (None, Numeric, Alphanumeric, Printable)
+- Added `init(maxLen, xPos, yPos)` — configure text field bounds
+- Added `update(dt)` — cursor blink timer, entry/exit state transitions
+- Added `insertChar(c)` — filter-aware insertion at cursor with shift
+- Added `deleteChar()` / `backspace()` — cursor-relative deletion
+- Added `clear()` — full buffer reset
+- Added `setCursorPos(pos)` / `isActive()` / `setFilter()`
+
+### File 4: `data/src/game/Scene/CourseObjects.cpp` (276→407L)
+- Added `init()` — parameterless allocation for late loading
+- Added `load(courseId)` — course-specific object loading
+- Added `update(dt)` — alias for calc()
+- Added `reset()` — snapshot-based or flag-based restoration
+- Added `findById(objId)` — linear ID search on active objects
+- Added `findByType(objType, startIndex)` — type-based search
+- Added `destroyObject(index)` — compacting array removal
+- Added `getActiveObjectCount()` — active flag count
+- Added `CourseObjects_getObjectType()` — type name lookup (15 types)
+- Added snapshot support (m_initialSnapshot, m_snapshotCount, m_courseId)
+
+### File 5: `data/src/game/EGG/Graphics.cpp` (262→420L)
+- Added `CullMode`, `CompareFunc`, `BlendMode` enums
+- Added `init()` — GX subsystem initialization (640x480 default)
+- Added `beginFrame()` / `endFrame()` — frame buffer clear, vsync swap
+- Added `setViewport(s32, s32, s32, s32)` — integer viewport
+- Added `setScissorRect()` — scissor rectangle
+- Added `setClearColorRGBA()` — separate RGBA components
+- Added `setCullModeEnum()` / `setDepthTest()` / `setBlendModeEnum()` / `setZBuffer()`
+- Added `getFrameBuffer()` / `getWidth()` / `getHeight()`
+- Added `saveState()` / `restoreState()` / `invalidateVertexCache()` / `flushTextureCache()` / `waitGpuDone()`
+- Added `Graphics_getInstance()` free function
+- Fixed pre-existing `AISpeed.cpp` const qualifier error
+
+### File 6: `data/src/game/KartMovement/KartSettings.cpp` (264→403L)
+- Added `getSpeedStat()` / `getAcceleration()` / `getHandling()` / `getDriftStat()` / `getOffroadStat()` / `getWeightStat()` — individual stat accessors
+- Added `getMiniTurboDuration()` — scaled from mini-turbo stat
+- Added `getItemProbability()` — weight-based item RNG bias
+- Added `loadFromBinary(data)` — parse 7-float stat array from binary data
+- Added `setStat(statId, value)` — modify stat by enum ID
+- Added `KartStatId` enum (7 stats)
+- Added `KartSettings_getDefaultKart()` — free function for defaults
+- Added display bar conversion functions (normalizeStat, getSpeedBar, getAccelBar, etc.)
+- Added `KartSettings_getWeightClassIndex()` — weight→class mapping
+
+### File 7: `data/src/game/NW4R/AnmObjTexSrt.cpp` (251→395L)
+- Added `AnmObjTexSrt` class wrapper with init/calc/setFrame/getFrame/getFrameCount/applyToMaterial/setPlayMode/attach/detach
+- Added `AnmObjTexSrt_createFromRes()` factory (friend of class)
+- Added `AnmObjTexSrt_ResetTransform()` — reset to identity
+- Added `AnmObjTexSrt_IsKeyframeEqual()` — component-wise comparison
+- Added `AnmObjTexSrt_LerpKeyframes()` — linear interpolation
+- Added `AnmObjTexSrt_SetSRT()` — direct transform setting
+- Added `AnmObjTexSrt_GetCurrentSRT()` / `AnmObjTexSrt_GetTexMtx()` — data accessors
+
+### File 8: `data/src/game/NW4R/AnmObjMatClr.cpp` (255→396L)
+- Added `AnmObjMatClr` class wrapper with init/calc/setFrame/getFrame/getFrameCount/applyToMaterial/setPlayMode/attach/detach
+- Added `AnmObjMatClr_createFromRes()` factory (friend of class)
+- Added `AnmObjMatClr_ResetColor()` — reset to white
+- Added `AnmObjMatClr_IsKeyframeEqual()` — RGBA comparison
+- Added `AnmObjMatClr_LerpKeyframes()` — linear color interpolation
+- Added `AnmObjMatClr_SetColor()` — direct color setting
+- Added `AnmObjMatClr_GetCurrentColor()` — data accessor
+- Added `AnmObjMatClr_GXColorToFloat()` — packed color unpacking
+
+### Build: 0 errors, 0 warnings from modified files
+Total lines: 215+264+266+276+262+264+251+255 = 2053 → 3319 (62% increase)

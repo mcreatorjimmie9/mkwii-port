@@ -49,6 +49,16 @@ KPadAI::KPadAI() {
     // Zero out all fields including base class and AI-specific data
     memset(&mAIInput, 0, sizeof(KPadRaceInputState));
     mDifficulty = 1; // Default to medium difficulty
+    mPlayerIdx = 0;
+
+    // Phase 38: Initialize target inputs
+    mSteerTargetX = 0.0f;
+    mSteerTargetY = 0.0f;
+    mAccelTarget = 0.0f;
+    mDriftTarget = false;
+    mTrickDir = 0;
+    mItemTarget = false;
+    mReactionTimer = 0;
 
     // Zero out all analog input fields that the AI will populate:
     // These offsets correspond to raw stick X/Y, sub-stick, triggers, etc.
@@ -246,6 +256,192 @@ void KPadAIController::destroyForPlayer(u8 playerIdx) {
 
     // Null out the slot
     sAIPads[playerIdx] = nullptr;
+}
+
+// ============================================================
+// Phase 38: Deepened KPadAI methods
+// ============================================================
+
+// init__Q26System6KPadAIFUc
+// Initialize AI controller with difficulty parameters.
+void KPadAI::init(u8 playerIdx) {
+    mPlayerIdx = playerIdx;
+
+    // Reset all input targets
+    mSteerTargetX = 0.0f;
+    mSteerTargetY = 0.0f;
+    mAccelTarget = 0.0f;
+    mDriftTarget = false;
+    mTrickDir = 0;
+    mItemTarget = false;
+    mReactionTimer = 0;
+
+    // Reset input state
+    resetInput();
+
+    // Set default difficulty based on player index
+    // Front-of-grid players get higher difficulty
+    if (playerIdx < 4) {
+        mDifficulty = 2; // Hard
+    } else if (playerIdx < 8) {
+        mDifficulty = 1; // Medium
+    } else {
+        mDifficulty = 0; // Easy
+    }
+}
+
+// update__Q26System6KPadAIFUi
+// Per-frame AI input generation based on AI decisions.
+void KPadAI::update(u32 frameCount) {
+    // Decrement reaction timer if active
+    if (mReactionTimer > 0) {
+        mReactionTimer--;
+        return; // Skip input update during reaction delay
+    }
+
+    // Apply steering with smoothing
+    setSteering(mSteerTargetX, mSteerTargetY);
+
+    // Apply acceleration
+    setAcceleration(mAccelTarget);
+
+    // Apply drift input
+    setDriftInput(mDriftTarget);
+
+    // Apply trick input (one-shot)
+    if (mTrickDir != 0) {
+        setTrickInput(mTrickDir);
+        mTrickDir = 0; // Reset after one frame
+    }
+
+    // Apply item input
+    setItemInput(mItemTarget);
+
+    // Apply difficulty-based scaling to all inputs
+    applyDifficultyScaling();
+}
+
+// setSteering__Q26System6KPadAIFff
+// Convert AI direction to stick X/Y values with smoothing.
+void KPadAI::setSteering(f32 targetX, f32 targetY) {
+    // Clamp inputs to [-1.0, 1.0]
+    if (targetX < -1.0f) targetX = -1.0f;
+    if (targetX > 1.0f) targetX = 1.0f;
+    if (targetY < -1.0f) targetY = -1.0f;
+    if (targetY > 1.0f) targetY = 1.0f;
+
+    // Exponential smoothing toward target
+    const f32 STEER_SMOOTH = 0.4f;
+    f32 deltaX = targetX - mAIInput.mStick.x;
+    f32 deltaY = targetY - mAIInput.mStick.y;
+
+    mAIInput.mStick.x += deltaX * STEER_SMOOTH;
+    mAIInput.mStick.y += deltaY * STEER_SMOOTH;
+
+    // Also update the current input state stick
+    mAIInput.currentInputState.mStick.x = mAIInput.mStick.x;
+    mAIInput.currentInputState.mStick.y = mAIInput.mStick.y;
+}
+
+// setAcceleration__Q26System6KPadAIFf
+// Convert AI speed decision to trigger values.
+void KPadAI::setAcceleration(f32 accelValue) {
+    // accelValue: 0.0 = no accel, 1.0 = full accel
+    // In MKW, forward is negative Y on the stick
+    if (accelValue > 0.1f) {
+        mAIInput.mStick.y = -accelValue; // Negative Y = forward
+        mAIInput.currentInputState.mStick.y = mAIInput.mStick.y;
+    } else {
+        mAIInput.mStick.y = 0.0f;
+        mAIInput.currentInputState.mStick.y = 0.0f;
+    }
+}
+
+// setDriftInput__Q26System6KPadAIFb
+// Generate drift button presses based on upcoming turns.
+void KPadAI::setDriftInput(bool shouldDrift) {
+    if (shouldDrift) {
+        mAIInput.buttons |= 0x0020; // KPAD_TRIGGER_R
+    } else {
+        mAIInput.buttons &= ~0x0020u;
+    }
+}
+
+// setTrickInput__Q26System6KPadAIFUc
+// Generate trick directional input when airborne.
+void KPadAI::setTrickInput(u8 trickDir) {
+    // trickDir maps to d-pad directions for trick input
+    // 1 = UP, 2 = DOWN, 3 = LEFT, 4 = RIGHT
+    switch (trickDir) {
+    case 1: // Up trick
+        mAIInput.buttons |= 0x0800; // KPAD_DPAD_UP
+        break;
+    case 2: // Down trick
+        mAIInput.buttons |= 0x0400; // KPAD_DPAD_DOWN
+        break;
+    case 3: // Left trick
+        mAIInput.buttons |= 0x0200; // KPAD_DPAD_LEFT
+        break;
+    case 4: // Right trick
+        mAIInput.buttons |= 0x1000; // KPAD_DPAD_RIGHT
+        break;
+    default:
+        break;
+    }
+}
+
+// setItemInput__Q26System6KPadAIFb
+// Generate item use button press.
+void KPadAI::setItemInput(bool useItem) {
+    if (useItem) {
+        mAIInput.buttons |= 0x0001; // KPAD_BUTTON_A
+    } else {
+        mAIInput.buttons &= ~0x0001u;
+    }
+}
+
+// applyDifficultyScaling__Q26System6KPadAIFv
+// Scale reaction time and precision by difficulty.
+void KPadAI::applyDifficultyScaling() {
+    // Reduce stick precision at lower difficulties
+    // This adds a deadzone in the center, making the AI
+    // less responsive to small corrections
+    f32 deadzone = 0.0f;
+    switch (mDifficulty) {
+    case 0: deadzone = 0.1f; break;  // Easy: 10% deadzone
+    case 1: deadzone = 0.04f; break; // Medium: 4% deadzone
+    case 2: deadzone = 0.0f; break;  // Hard: no deadzone
+    }
+
+    if (deadzone > 0.0f) {
+        if (mAIInput.mStick.x > -deadzone && mAIInput.mStick.x < deadzone) {
+            mAIInput.mStick.x = 0.0f;
+        }
+    }
+
+    // Scale maximum steering magnitude by difficulty
+    f32 maxSteer = 1.0f;
+    switch (mDifficulty) {
+    case 0: maxSteer = 0.85f; break; // Easy: can't steer at full lock
+    case 1: maxSteer = 0.95f; break; // Medium: near full
+    case 2: maxSteer = 1.0f; break;  // Hard: full steering
+    }
+
+    if (mAIInput.mStick.x > maxSteer) {
+        mAIInput.mStick.x = maxSteer;
+    } else if (mAIInput.mStick.x < -maxSteer) {
+        mAIInput.mStick.x = -maxSteer;
+    }
+
+    // Copy back to current input state
+    mAIInput.currentInputState.mStick.x = mAIInput.mStick.x;
+    mAIInput.currentInputState.mStick.y = mAIInput.mStick.y;
+}
+
+// getInputStateCopy__Q26System6KPadAIFv
+// Return computed KPadRaceInputState copy.
+KPadRaceInputState KPadAI::getInputStateCopy() const {
+    return mAIInput;
 }
 
 } // namespace System

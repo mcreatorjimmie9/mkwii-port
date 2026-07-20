@@ -10,6 +10,7 @@
 // "rubber-banding" effect that keeps AI races competitive.
 
 #include "AISpeed.hpp"
+#include "AI.hpp"
 #include "AIInfo.hpp"
 #include "AIRank.hpp"
 #include <cmath>
@@ -32,6 +33,12 @@ void AISpeedBase::init() {
     mBoostPadMultiplier = 1.0f;
     mRaceStartTimer = 0;
     mbBoosted = false;
+
+    // Phase 38: Initialize speed statistics
+    mSpeedMin = 0.0f;
+    mSpeedMax = 0.0f;
+    mSpeedAccum = 0.0f;
+    mSpeedSamples = 0;
 }
 
 /* AISpeedBase_update @ 0x80591200 */
@@ -234,6 +241,197 @@ void AISpeedBase::updateRubberBanding() {
     // which calls setRankAdvantage() on each AI's speed object.
     // No additional computation needed here — the smoothing is
     // handled by the rank manager's own interpolation logic.
+}
+
+// ============================================================
+// Phase 38: Deepened AISpeedBase methods
+// ============================================================
+
+// calcMaxSpeed__Q25Enemy12AISpeedBaseCFv
+// Calculate maximum speed based on vehicle stats, surface, and boosts.
+f32 AISpeedBase::calcMaxSpeed() const {
+    f32 maxSpeed = 100.0f; // Default max speed in km/h equivalent
+
+    if (mpParamSpeed != nullptr) {
+        maxSpeed = mpParamSpeed->mBaseSpeed * 1.5f;
+    }
+
+    // Apply the total speed advantage (rubber-banding + boost pad + etc.)
+    maxSpeed *= (1.0f + field_0x0C);
+
+    // Apply off-road penalty if kart is off-road
+    f32 offroadPenalty = const_cast<AISpeedBase*>(this)->calcOffroadPenalty();
+    maxSpeed *= offroadPenalty;
+
+    // Apply combined boost multiplier
+    f32 boostMult = calcBoostMultiplier();
+    if (boostMult > 1.0f) {
+        maxSpeed *= boostMult;
+    }
+
+    // Enforce speed cap
+    f32 cap = getSpeedCap();
+    if (maxSpeed > cap) {
+        maxSpeed = cap;
+    }
+
+    return maxSpeed;
+}
+
+// calcAcceleration__Q25Enemy12AISpeedBaseCFf
+// Acceleration curves based on speed bracket.
+// At low speeds, acceleration is high; near max speed, it tapers off.
+f32 AISpeedBase::calcAcceleration(f32 currentSpeed) const {
+    f32 maxSpd = calcMaxSpeed();
+    if (maxSpd < 1.0f) {
+        return 0.0f;
+    }
+
+    // Normalized speed ratio [0.0, 1.0+]
+    f32 ratio = currentSpeed / maxSpd;
+
+    // Acceleration curve: quadratic falloff near max speed
+    // At ratio 0.0: accel = 1.0 (full)
+    // At ratio 0.5: accel = 0.75
+    // At ratio 1.0: accel = 0.0
+    f32 accel = 1.0f - ratio * ratio;
+
+    if (accel < 0.0f) {
+        accel = 0.0f;
+    }
+
+    // Base acceleration magnitude (units/s^2)
+    f32 baseAccel = 30.0f;
+
+    // During race start ramp, reduce acceleration slightly
+    if (mRaceStartTimer < 180) {
+        f32 startRamp = 0.6f + 0.4f * (f32)mRaceStartTimer / 180.0f;
+        accel *= startRamp;
+    }
+
+    return accel * baseAccel;
+}
+
+// calcOffroadPenalty__Q25Enemy12AISpeedBaseFv
+// Speed reduction on off-road surfaces.
+f32 AISpeedBase::calcOffroadPenalty() {
+    f32 penalty = 1.0f; // 1.0 = no penalty (on-road)
+
+    if (mpInfo == nullptr || mpInfo->mpAI == nullptr) {
+        return penalty;
+    }
+
+    // If kart is not on the ground (all wheels), apply off-road penalty
+    if (!mpInfo->mpAI->isAllWheelsCollision()) {
+        // Off-road speed penalty: 60% of normal speed
+        penalty = 0.6f;
+    }
+
+    return penalty;
+}
+
+// calcBoostMultiplier__Q25Enemy12AISpeedBaseCFv
+// Combined boost effects (mushroom, star, mega, slipstream).
+f32 AISpeedBase::calcBoostMultiplier() const {
+    f32 multiplier = 1.0f;
+
+    // Boost pad multiplier (from course elements)
+    if (mbBoosted && mBoostPadTimer > 0) {
+        multiplier = mBoostPadMultiplier;
+    }
+
+    // If the kart is in bullet state, massive speed boost
+    if (mpInfo != nullptr && mpInfo->mpAI != nullptr) {
+        if (mpInfo->mpAI->isInBullet()) {
+            multiplier = 2.5f; // Bullet bill speed
+        }
+    }
+
+    return multiplier;
+}
+
+// applyDriftBoost__Q25Enemy12AISpeedBaseCFfRf
+// Mini-turbo speed modification during drift.
+// @param driftProgress  Drift charge progress [0.0, 1.0+]
+// @param speedOut       Current speed, modified in-place
+void AISpeedBase::applyDriftBoost(f32 driftProgress, f32& speedOut) const {
+    if (driftProgress <= 0.0f) {
+        return;
+    }
+
+    // Clamp drift progress to valid range
+    if (driftProgress > 1.0f) {
+        driftProgress = 1.0f;
+    }
+
+    // Mini-turbo levels:
+    // 0.0-0.33: No boost (blue sparks phase)
+    // 0.33-0.66: Small boost (orange sparks phase)
+    // 0.66-1.0+: Super boost (purple sparks / max charge)
+    f32 mtBoost = 0.0f;
+    if (driftProgress > 0.66f) {
+        // Super mini-turbo: +15% speed boost
+        mtBoost = 1.15f;
+    } else if (driftProgress > 0.33f) {
+        // Regular mini-turbo: +8% speed boost
+        mtBoost = 1.08f;
+    }
+
+    if (mtBoost > 1.0f) {
+        speedOut *= mtBoost;
+
+        // Cap at speed cap
+        f32 cap = getSpeedCap();
+        if (speedOut > cap) {
+            speedOut = cap;
+        }
+    }
+}
+
+// getSpeedCap__Q25Enemy12AISpeedBaseCFv
+// Maximum speed cap for this vehicle class.
+f32 AISpeedBase::getSpeedCap() const {
+    // Default absolute speed cap to prevent AI from going
+    // unreasonably fast regardless of boosts
+    f32 cap = 150.0f;
+
+    if (mpParamSpeed != nullptr) {
+        // Cap is 2x the base speed — no combination of
+        // boosts should exceed this
+        cap = mpParamSpeed->mBaseSpeed * 2.0f;
+    }
+
+    return cap;
+}
+
+// recordSpeedStats__Q25Enemy12AISpeedBaseFf
+// Track min/max/average speed for debugging.
+void AISpeedBase::recordSpeedStats(f32 currentSpeed) {
+    // Update running statistics
+    if (mSpeedSamples == 0) {
+        mSpeedMin = currentSpeed;
+        mSpeedMax = currentSpeed;
+        mSpeedAccum = currentSpeed;
+    } else {
+        if (currentSpeed < mSpeedMin) {
+            mSpeedMin = currentSpeed;
+        }
+        if (currentSpeed > mSpeedMax) {
+            mSpeedMax = currentSpeed;
+        }
+        mSpeedAccum += currentSpeed;
+    }
+
+    mSpeedSamples++;
+
+    // Prevent accumulator overflow in very long races
+    if (mSpeedSamples > 3600) {
+        // Reset statistics every 60 seconds
+        mSpeedMin = currentSpeed;
+        mSpeedMax = currentSpeed;
+        mSpeedAccum = currentSpeed;
+        mSpeedSamples = 1;
+    }
 }
 
 } // namespace Enemy

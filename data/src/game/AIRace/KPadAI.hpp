@@ -38,11 +38,32 @@ struct KPadAI: public KPad {
     // @addr 0x80523F40
     void setDifficulty(u8 difficulty);
 
+    // Phase 38 additions
+    void init(u8 playerIdx);
+    void update(u32 frameCount);
+    void setSteering(f32 targetX, f32 targetY);
+    void setAcceleration(f32 accelValue);
+    void setDriftInput(bool shouldDrift);
+    void setTrickInput(u8 trickDir);
+    void setItemInput(bool useItem);
+    void applyDifficultyScaling();
+    KPadRaceInputState getInputStateCopy() const;
+
     // AI skill level (0-2), affects input smoothing and reaction time
     u8 mDifficulty;
+    u8 mPlayerIdx;
 
     // The AI-generated input state, copied each frame from the AI engine
     KPadRaceInputState mAIInput;
+
+    // Phase 38 member variables
+    f32 mSteerTargetX;
+    f32 mSteerTargetY;
+    f32 mAccelTarget;
+    bool mDriftTarget;
+    u8 mTrickDir;
+    bool mItemTarget;
+    u32 mReactionTimer;
 
     // The stick values are stored at offsets relative to the base class
     // that correspond to the u16 zeroing in the constructor:

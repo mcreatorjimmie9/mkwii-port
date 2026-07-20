@@ -288,4 +288,164 @@ void KartDynamicsBike::forceUpright() {
     this->angVel0.z = 0.0f;
 }
 
+void KartDynamics::calcLinearVelocity(f32 dt) {
+    if (dt <= 0.0f) return;
+
+    // Integrate accumulated forces into external velocity
+    // F = ma, so a = F/m. Since MKWii uses unit mass for most calcs,
+    // acceleration = totalForce directly.
+    // v += a * dt
+    this->acceleration = this->totalForce;
+    this->externalVel += this->acceleration * dt;
+}
+
+void KartDynamics::calcAngularVelocity(f32 dt) {
+    if (dt <= 0.0f) return;
+
+    // Compute angular acceleration from torque: alpha = I^-1 * tau
+    // Then integrate: omega += alpha * dt
+    EGG::Vector3f angAcc;
+    getAngAcc(angAcc, this->totalTorque);
+
+    this->angVel0 += angAcc * dt;
+
+    // Apply damping to angular velocity
+    this->angVel0 *= 0.98f;
+}
+
+void KartDynamics::applyAirDrag(f32 dragCoeff) {
+    // Quadratic air resistance: F_drag = -Cd * |v|^2 * v_hat
+    // This opposes motion and scales with the square of speed.
+    // Air drag is always applied (unlike rolling resistance which
+    // requires ground contact).
+
+    f32 speedSq = externalVel.squaredLength();
+    if (speedSq < 0.0001f) return;
+
+    f32 speed = sqrtf(speedSq);
+    f32 dragMag = dragCoeff * speedSq;
+
+    // Apply drag as a force opposing the velocity
+    EGG::Vector3f dragForce = externalVel * (-dragMag / speed);
+    this->totalForce += dragForce;
+}
+
+void KartDynamics::applyRollingResistance(f32 resistanceCoeff) {
+    // Rolling resistance: F_rr = -Crr * m * g * v_hat
+    // This is a constant-magnitude force opposing motion,
+    // independent of speed (unlike air drag).
+    // Rolling resistance only applies when the kart is on the ground.
+
+    f32 speedSq = externalVel.squaredLength();
+    if (speedSq < 0.01f) return;
+
+    f32 speed = sqrtf(speedSq);
+
+    // Rolling resistance force magnitude
+    f32 rrMag = resistanceCoeff * mass * 9.8f;
+
+    // Cap at the kart's current kinetic energy to prevent reversal
+    if (rrMag > speed) {
+        rrMag = speed;
+    }
+
+    // Apply as opposing force
+    EGG::Vector3f rrForce = externalVel * (-rrMag / speed);
+    this->totalForce += rrForce;
+}
+
+void KartDynamics::applyEngineForce(f32 force, const EGG::Vector3f& forward) {
+    // Apply engine driving force in the kart's forward direction.
+    // The force is transformed to world space and added to total force.
+
+    // Transform forward from body to world frame
+    EGG::Vector3f worldForward;
+    fullRot.rotateVector(forward, worldForward);
+
+    // Normalize the forward direction
+    f32 fwdLen = sqrtf(worldForward.squaredLength());
+    if (fwdLen > 0.001f) {
+        worldForward *= force / fwdLen;
+        this->totalForce += worldForward;
+    }
+}
+
+void KartDynamics::integrate(f32 dt, f32 maxSpeed) {
+    if (dt <= 0.0f) return;
+
+    // Euler integration: position += velocity * dt
+    // The total speed includes all velocity components
+    this->speed = externalVel * dt + internalVel + movingRoadVel + movingWaterVel;
+    this->speedNorm = speed.normalise();
+
+    // Apply scale factor (e.g., mega mushroom shrinks effective speed)
+    if (this->scale.z < 1.0f) {
+        maxSpeed *= this->scale.z;
+    }
+
+    // Clamp to maximum speed
+    if (this->speedNorm > maxSpeed) {
+        this->speedNorm = maxSpeed;
+    }
+
+    // Update position
+    this->pos += this->speed;
+
+    // Clear accumulated forces and torques for next frame
+    this->totalForce.setAll(0);
+    this->totalTorque.setAll(0);
+    this->angVel2.setAll(0);
+}
+
+void KartDynamics::clampVelocity(f32 maxSpeed) {
+    f32 speedSq = externalVel.squaredLength();
+    if (speedSq <= maxSpeed * maxSpeed) {
+        return; // Already under the cap
+    }
+
+    f32 speed = sqrtf(speedSq);
+    if (speed < 0.001f) return;
+
+    // Scale velocity down to the maximum speed
+    f32 scaleFactor = maxSpeed / speed;
+    externalVel *= scaleFactor;
+    speedNorm = maxSpeed;
+}
+
+EGG::Vector3f KartDynamics::getMomentum() const {
+    // Linear momentum: p = m * v
+    // The total velocity includes all components
+    EGG::Vector3f totalVel = externalVel + internalVel + movingRoadVel + movingWaterVel;
+    return totalVel * mass;
+}
+
+void KartDynamics::setExternalForce(const EGG::Vector3f& force) {
+    // Set (not add) the external force — used for one-shot forces
+    // like item hits, explosions, and cannon launches.
+    // This replaces any accumulated forces.
+    this->totalForce = force;
+}
+
+EGG::Vector3f KartDynamics_calcInertia(const EGG::Vector3f& halfExtents, f32 mass) {
+    // Calculate moment of inertia for a box-shaped body:
+    // Ixx = (m/12) * (y^2 + z^2)
+    // Iyy = (m/12) * (x^2 + z^2)
+    // Izz = (m/12) * (x^2 + y^2)
+    //
+    // halfExtents contains the full half-dimensions (hx, hy, hz),
+    // so we use (2*h)^2 = 4*h^2 for each dimension.
+
+    f32 inv12 = mass / 12.0f;
+
+    f32 x2 = halfExtents.x * halfExtents.x * 4.0f;
+    f32 y2 = halfExtents.y * halfExtents.y * 4.0f;
+    f32 z2 = halfExtents.z * halfExtents.z * 4.0f;
+
+    return EGG::Vector3f(
+        inv12 * (y2 + z2),  // Ixx
+        inv12 * (x2 + z2),  // Iyy
+        inv12 * (x2 + y2)   // Izz
+    );
+}
+
 } // namespace Kart

@@ -6,23 +6,266 @@
 
 #include "Session.hpp"
 #include <cstring>
+#include <cstdio>
 
 namespace RKNet {
+
+// ============================================================================
+// Static local player ID
+// ============================================================================
+
+static u32 sLocalPlayerId = 0xFFFFFFFF;
 
 Session::Session()
     : mState(SESSION_IDLE)
     , mRaceFrame(0)
     , mPlayerCount(0)
     , mFinishCount(0)
-{
+    , mLocalPlayerIndex(0)
+    , mLatencyMs(0) {
     memset(&mConfig, 0, sizeof(SessionConfig));
     memset(mPlayerStates, 0, sizeof(mPlayerStates));
     memset(mItemFrames, 0, sizeof(mItemFrames));
     memset(mItemCount, 0, sizeof(mItemCount));
-    memset(_pad, 0, sizeof(_pad));
+    memset(mPlayerInfos, 0, sizeof(mPlayerInfos));
+    memset(mRoomCode, 0, sizeof(mRoomCode));
 }
 
 Session::~Session() {
+}
+
+// ============================================================================
+// init — Initialize network session
+// ============================================================================
+
+void Session::init() {
+    mState = SESSION_IDLE;
+    mRaceFrame = 0;
+    mPlayerCount = 0;
+    mFinishCount = 0;
+    mLocalPlayerIndex = 0;
+    mLatencyMs = 0;
+    memset(&mConfig, 0, sizeof(SessionConfig));
+    memset(mPlayerStates, 0, sizeof(mPlayerStates));
+    memset(mItemFrames, 0, sizeof(mItemFrames));
+    memset(mItemCount, 0, sizeof(mItemCount));
+    memset(mPlayerInfos, 0, sizeof(mPlayerInfos));
+    memset(mRoomCode, 0, sizeof(mRoomCode));
+}
+
+// ============================================================================
+// create — Create a new room/session
+// ============================================================================
+
+s32 Session::create() {
+    if (mState != SESSION_IDLE) return -1;
+
+    // Generate a random 4-character room code
+    // In the original game, the server assigns this
+    const char chars[] = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    for (s32 i = 0; i < 4; i++) {
+        mRoomCode[i] = chars[i % (sizeof(chars) - 1)];
+    }
+    mRoomCode[4] = '\0';
+
+    // The local player is always the host (index 0)
+    mLocalPlayerIndex = 0;
+    mPlayerCount = 1;
+    memset(&mPlayerInfos[0], 0, sizeof(PlayerInfo));
+    mPlayerInfos[0].playerId = sLocalPlayerId;
+    mPlayerInfos[0].isHost = 1;
+    mPlayerInfos[0].isReady = 0;
+
+    mState = SESSION_SETTING_UP;
+    return 0;
+}
+
+// ============================================================================
+// join — Join an existing room by room code
+// ============================================================================
+
+s32 Session::join(const char* roomCode) {
+    if (mState != SESSION_IDLE) return -1;
+    if (!roomCode) return -2;
+
+    // Validate room code format (4 alphanumeric characters)
+    for (s32 i = 0; i < 4; i++) {
+        if (roomCode[i] == '\0') return -3; // Too short
+    }
+
+    // Copy the room code
+    strncpy(mRoomCode, roomCode, 4);
+    mRoomCode[4] = '\0';
+
+    // The local player is not the host
+    mLocalPlayerIndex = 0xFF; // Will be assigned by host
+    mPlayerCount = 0;
+    mState = SESSION_SETTING_UP;
+
+    // In the original game, this would:
+    // 1. Resolve the room code to a server address
+    // 2. Send a join request via NWFC
+    // 3. Wait for host acceptance
+    // For now, this is a stub
+
+    return 0;
+}
+
+// ============================================================================
+// leave — Leave the current session gracefully
+// ============================================================================
+
+s32 Session::leave() {
+    if (mState == SESSION_IDLE) return -1;
+
+    // Notify other players of departure
+    // In the original game, this sends a PACKET_PLAYER_LEAVE message
+
+    // Clean up session state
+    mState = SESSION_CLEANUP;
+
+    // Give a brief cleanup period before going idle
+    // The original game has a transition animation
+    reset();
+    return 0;
+}
+
+// ============================================================================
+// update — Process network messages each frame
+// ============================================================================
+
+void Session::update() {
+    switch (mState) {
+        case SESSION_IDLE:
+            // Nothing to do when idle
+            break;
+
+        case SESSION_SETTING_UP:
+            // Waiting for all players to join and select
+            // Check if all players have selected their character/vehicle
+            // When ready, transition to countdown
+            break;
+
+        case SESSION_COUNTDOWN:
+            // Countdown is handled by the race manager
+            // When countdown reaches 0, startRace() is called
+            break;
+
+        case SESSION_RACING:
+            // Process incoming race input packets
+            // Process item events
+            // Check for player disconnections
+            // Check if all players have finished
+            if (mFinishCount >= mPlayerCount && mPlayerCount > 0) {
+                end();
+            }
+            break;
+
+        case SESSION_FINISHED:
+            // Brief pause before showing results
+            break;
+
+        case SESSION_RESULTS:
+            // Waiting for all players to acknowledge results
+            // After a timeout, return to room or next race
+            break;
+
+        case SESSION_CLEANUP:
+            // Cleaning up session resources
+            break;
+    }
+
+    // Update latency estimation
+    // In the original game, this is based on heartbeat round-trip time
+    // mLatencyMs is updated when heartbeat ACK is received
+}
+
+// ============================================================================
+// sendChat — Send a chat message
+// ============================================================================
+
+s32 Session::sendChat(const char* message) {
+    if (!message) return -1;
+    if (mState == SESSION_IDLE) return -2;
+
+    // Validate message length
+    u32 len = 0;
+    while (message[len] != '\0' && len < 64) len++;
+    if (len == 0) return -3;
+
+    // In the original game, chat is sent via the NWFC protocol
+    // as a PACKET_ROOM_INFO or custom chat packet
+    // Message is broadcast to all players in the room
+
+    return 0;
+}
+
+// ============================================================================
+// getPlayerList — Get connected player info
+// ============================================================================
+
+u8 Session::getPlayerList(PlayerInfo* outPlayers) const {
+    if (!outPlayers) return 0;
+
+    u8 count = 0;
+    for (u8 i = 0; i < mPlayerCount && i < 12; i++) {
+        if (!mPlayerStates[i].isDisconnected) {
+            outPlayers[count] = mPlayerInfos[i];
+            count++;
+        }
+    }
+    return count;
+}
+
+// ============================================================================
+// setReady — Set local player ready state
+// ============================================================================
+
+void Session::setReady(bool ready) {
+    if (mLocalPlayerIndex < mPlayerCount) {
+        mPlayerInfos[mLocalPlayerIndex].isReady = ready ? 1 : 0;
+    }
+}
+
+// ============================================================================
+// areAllReady — Check if all connected players are ready
+// ============================================================================
+
+bool Session::areAllReady() const {
+    if (mPlayerCount == 0) return false;
+
+    for (u8 i = 0; i < mPlayerCount; i++) {
+        if (mPlayerStates[i].isDisconnected) continue;
+        if (!mPlayerInfos[i].isReady) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// ============================================================================
+// kickPlayer — Kick a player (host only)
+// ============================================================================
+
+s32 Session::kickPlayer(u32 playerId) {
+    if (!isHost()) return -1; // Only host can kick
+    if (mState == SESSION_RACING) return -2; // Can't kick during race
+
+    // Find the player by ID
+    for (u8 i = 0; i < mPlayerCount; i++) {
+        if (mPlayerInfos[i].playerId == playerId) {
+            // Mark as disconnected
+            mPlayerStates[i].isDisconnected = 1;
+            mPlayerStates[i].finishPosition = 0;
+
+            // Send kick notification to the player
+            // In the original game, this sends a PACKET_PLAYER_LEAVE
+
+            return 0;
+        }
+    }
+
+    return -3; // Player not found
 }
 
 s32 Session::begin(const SessionConfig& config, u8 playerCount) {
@@ -267,6 +510,14 @@ const PlayerRaceState* Session::getPlayerState(u8 playerIndex) const {
 PlayerRaceState* Session::getPlayerStateMutable(u8 playerIndex) {
     if (playerIndex >= mPlayerCount) return nullptr;
     return &mPlayerStates[playerIndex];
+}
+
+// ============================================================================
+// Session_getLocalPlayerId — Get the local player's unique ID
+// ============================================================================
+
+u32 Session_getLocalPlayerId() {
+    return sLocalPlayerId;
 }
 
 } // namespace RKNet

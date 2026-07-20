@@ -206,6 +206,285 @@ const KartCollisionInfo& KartWheelPhysics::getKartCollisionInfo() const {
     return this->hitboxGroup->getKartCollisionInfo();
 }
 
+// Additional physics tuning constants
+static f32 SPRING_STIFFNESS = 8.0f;
+static f32 DAMPING_COEFFICIENT = 2.5f;
+static f32 TRACTION_HIGH = 1.0f;       // Road surface grip
+static f32 TRACTION_MEDIUM = 0.7f;     // Off-road grip
+static f32 TRACTION_LOW = 0.3f;        // Ice / slick surface grip
+static f32 SLIP_THRESHOLD = 0.2f;      // Slip ratio threshold for traction loss
+static f32 BRAKE_FORCE_MAX = 5.0f;
+static f32 SURFACE_TRANSITION_COOLDOWN = 10.0f;
+
+f32 KartWheelPhysics::calcSuspensionTravel(const EGG::Vector3f& downDir) {
+    if (!bspWheel) return 0.0f;
+
+    // Compute suspension compression from the wheel's current position
+    // relative to the suspension top anchor, projected onto the down direction
+    EGG::Vector3f wheelToTop = suspTop - wheelPos;
+    f32 rawTravel = downDir.dot(wheelToTop);
+
+    // Clamp to the BSP-defined travel range
+    f32 maxTravel = bspWheel->maxTravel * getYScale();
+    if (rawTravel < 0.0f) {
+        rawTravel = 0.0f;
+    }
+    if (rawTravel > maxTravel) {
+        rawTravel = maxTravel;
+    }
+
+    // Spring-damper model: F = -k * x - c * v
+    // The suspension travel effectively acts as a spring that pushes
+    // the wheel back toward its natural length (maxTravel)
+    f32 compression = maxTravel - rawTravel;
+    f32 compressionRatio = compression / maxTravel;
+
+    // Apply spring force scaled by compression ratio
+    // Higher compression = stronger push-back force
+    f32 springForce = SPRING_STIFFNESS * compressionRatio;
+
+    // Damping: opposes velocity of compression change
+    f32 prevCompression = maxTravel - susTravel;
+    f32 compressionVel = (compression - prevCompression);
+    f32 dampForce = DAMPING_COEFFICIENT * compressionVel;
+
+    // Net suspension force (positive = push wheel down/away from body)
+    f32 netForce = springForce - dampForce;
+
+    // Store the clamped travel
+    this->susTravel = rawTravel;
+
+    return netForce;
+}
+
+EGG::Vector3f KartWheelPhysics::calcTractionForce(const EGG::Vector3f& floorNormal,
+                                                   f32 engineForce) const {
+    EGG::Vector3f tractionForce(0.0f, 0.0f, 0.0f);
+
+    if (!hasFloorCollision()) {
+        return tractionForce;
+    }
+
+    // Determine traction coefficient from surface KCL type
+    const KartCollisionInfo& info = getKartCollisionInfo();
+    f32 tractionCoeff = TRACTION_HIGH;
+
+    u32 kclType = info.floorKclTypeMask;
+    // KCL type bits encode surface material:
+    // Bit 1 = off-road, Bit 2 = ice/slippery
+    if (kclType & 0x04) {
+        tractionCoeff = TRACTION_LOW;    // Ice surface
+    } else if (kclType & 0x02) {
+        tractionCoeff = TRACTION_MEDIUM; // Off-road
+    }
+
+    // Reduce traction if wheel is at suspension limit (barely touching)
+    if (isAtSuspLimit > 0.5f) {
+        tractionCoeff *= 0.5f;
+    }
+
+    // Traction force is applied along the floor plane
+    // Project the kart's forward direction onto the floor
+    EGG::Vector3f forward;
+    getBodyForward(forward);
+
+    // Remove the normal component from the forward vector
+    f32 normalDot = forward.dot(floorNormal);
+    EGG::Vector3f floorForward = forward - floorNormal * normalDot;
+    f32 fwdLen = floorForward.normalise();
+
+    if (fwdLen > 0.001f) {
+        // Traction force = engine force * traction coefficient * floor forward
+        tractionForce = floorForward * (engineForce * tractionCoeff);
+
+        // Reduce traction force based on slip ratio
+        if (slipRatio > SLIP_THRESHOLD) {
+            f32 slipPenalty = 1.0f - (slipRatio - SLIP_THRESHOLD) * 3.0f;
+            if (slipPenalty < 0.0f) slipPenalty = 0.0f;
+            tractionForce *= slipPenalty;
+        }
+    }
+
+    return tractionForce;
+}
+
+f32 KartWheelPhysics::calcWheelTorque(f32 totalTorque, bool isRearWheel) const {
+    if (!bspWheel) return 0.0f;
+
+    // MKWii uses rear-wheel drive for most karts
+    // and all-wheel drive for some heavy karts
+    f32 wheelTorque;
+
+    if (isRearWheel) {
+        // Rear wheels receive the majority of engine torque
+        // For a 4-wheel kart: rear gets ~70% of total torque (35% each)
+        wheelTorque = totalTorque * 0.35f;
+    } else {
+        // Front wheels receive reduced torque (or none for RWD)
+        // Most karts in MKWii are RWD, so front wheels get minimal torque
+        wheelTorque = totalTorque * 0.0f;
+    }
+
+    // Reduce torque if wheel is in the air (no floor contact)
+    if (!hasFloorCollision()) {
+        wheelTorque = 0.0f;
+    }
+
+    // Scale by effective radius (smaller radius = more torque at ground)
+    if (bspWheel->wheelRadius > 0.001f) {
+        wheelTorque *= effectiveRadius / bspWheel->wheelRadius;
+    }
+
+    // Apply brake force as negative torque
+    wheelTorque -= brakeForce;
+
+    return wheelTorque;
+}
+
+f32 KartWheelPhysics::updateWheelRotation(f32 dt) {
+    if (!bspWheel || dt <= 0.0f) {
+        return wheelRotation;
+    }
+
+    // The visual wheel rotation is driven by the ground contact speed
+    // projected onto the wheel's forward direction
+    f32 groundSpeed = 0.0f;
+
+    if (hasFloorCollision()) {
+        // Project speed onto the floor plane's forward direction
+        const EGG::Vector3f& floorNrm = getCollisionFloorNrm();
+        EGG::Vector3f forward;
+        getBodyForward(forward);
+
+        f32 normalDot = forward.dot(floorNrm);
+        EGG::Vector3f floorFwd = forward - floorNrm * normalDot;
+        f32 fwdLen = floorFwd.normalise();
+
+        if (fwdLen > 0.001f) {
+            groundSpeed = speed.dot(floorFwd);
+        }
+    }
+
+    // Angular velocity = linear speed / radius
+    f32 angularVel = 0.0f;
+    if (effectiveRadius > 0.001f) {
+        angularVel = groundSpeed / effectiveRadius;
+    }
+
+    // Update rotation angle
+    wheelRotation += angularVel * dt;
+
+    // Keep rotation in [0, 2*PI)
+    const f32 TWO_PI = 6.2831853f;
+    if (wheelRotation > TWO_PI) {
+        wheelRotation -= TWO_PI;
+    } else if (wheelRotation < 0.0f) {
+        wheelRotation += TWO_PI;
+    }
+
+    // Compute slip ratio for traction calculations
+    // slip_ratio = (wheel_speed - ground_speed) / |ground_speed|
+    if (fabsf(groundSpeed) > 0.1f) {
+        f32 wheelSpeed = angularVel * effectiveRadius;
+        slipRatio = (wheelSpeed - groundSpeed) / fabsf(groundSpeed);
+        // Clamp to reasonable range
+        if (slipRatio < -1.0f) slipRatio = -1.0f;
+        if (slipRatio > 2.0f) slipRatio = 2.0f;
+    } else {
+        slipRatio = 0.0f;
+    }
+
+    return wheelRotation;
+}
+
+void KartWheelPhysics::handleSurfaceChange(u32 newKclType) {
+    if (prevSurfaceType == newKclType) {
+        return;
+    }
+
+    // Surface transition detected — different KCL type from last frame
+    // In the full game, this triggers:
+    //   - Sound effects (grass rustle, gravel crunch, ice screech)
+    //   - Particle effects (dust clouds, water splashes)
+    //   - Speed adjustments (off-road slowdown begins)
+
+    // Check for entry into off-road
+    bool wasOnRoad = (prevSurfaceType & 0x01) != 0;
+    bool isOnRoad = (newKclType & 0x01) != 0;
+
+    if (wasOnRoad && !isOnRoad) {
+        // Left road surface — begin off-road effects
+        // Speed penalty is applied by ColResponse::processOffRoad
+    }
+
+    // Check for ice surface transition
+    bool wasIce = (prevSurfaceType & 0x04) != 0;
+    bool isIce = (newKclType & 0x04) != 0;
+
+    if (!wasIce && isIce) {
+        // Entered ice — reduce handling factor
+        if (hitboxGroup) {
+            hitboxGroup->getKartCollisionInfo().handlingFactor = 0.4f;
+        }
+    } else if (wasIce && !isIce) {
+        // Left ice — restore normal handling
+        if (hitboxGroup) {
+            hitboxGroup->getKartCollisionInfo().handlingFactor = 1.0f;
+        }
+    }
+
+    // Update the previous surface type for next frame's comparison
+    prevSurfaceType = newKclType;
+}
+
+EGG::Vector3f KartWheelPhysics::getContactPoint() const {
+    // The contact point is where the wheel edge touches the ground
+    // This is stored in wheelEdgePos, which is computed during calcCollision
+    return wheelEdgePos;
+}
+
+bool KartWheelPhysics::isSlipping() const {
+    // A wheel is considered slipping if the slip ratio exceeds the threshold
+    // AND the wheel has floor contact (slip only matters on the ground)
+    if (!hasFloorCollision()) {
+        return false;
+    }
+
+    return slipRatio > SLIP_THRESHOLD;
+}
+
+void KartWheelPhysics::applyBraking(f32 brakeStrength, f32 dt) {
+    if (brakeStrength <= 0.0f || dt <= 0.0f) {
+        brakeForce = 0.0f;
+        return;
+    }
+
+    // Brake force is proportional to brake input strength
+    // and the kart's current speed
+    KartDynamics* dyn = kartDynamics();
+    f32 currentSpeed = dyn->speedNorm;
+
+    // Brake force is capped to prevent over-braking
+    // It also only applies when the wheel is on the ground
+    if (hasFloorCollision() && currentSpeed > 0.1f) {
+        brakeForce = BRAKE_FORCE_MAX * brakeStrength;
+
+        // Apply braking as a deceleration to the kart's velocity
+        // Brake deceleration = brake_force / wheel_count (distributed)
+        f32 brakeDecel = brakeForce * dt * 0.25f; // 4 wheels
+        if (brakeDecel > currentSpeed) {
+            brakeDecel = currentSpeed;
+        }
+
+        // Reduce internal velocity in the forward direction
+        EGG::Vector3f forward;
+        getBodyForward(forward);
+        dyn->internalVel -= forward * brakeDecel;
+    } else {
+        brakeForce = 0.0f;
+    }
+}
+
 // --- KartSusPhysics ---
 
 KartSusPhysics::KartSusPhysics(u32 wheelIdx, KartWheelType wheelType, s32 bspWheelIdx) : KartObjectProxy() {

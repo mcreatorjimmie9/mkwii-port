@@ -92,6 +92,60 @@ public:
     /* CourseColManager_unload @ 0x804A2500 */
     void unload();
 
+    // Load KCL data from a raw binary buffer
+    // @param kclData  Pointer to KCL file data (big-endian)
+    // @param size     Size of the KCL data in bytes
+    // @return true if KCL was parsed successfully
+    bool load(const void* kclData, u32 size);
+
+    // Ray-world intersection test
+    // @param origin    Ray start point
+    // @param dir       Ray direction (normalized)
+    // @param maxDist   Maximum ray distance
+    // @param result    Output collision result
+    // @return true if ray hit something
+    bool rayCast(const f32* origin, const f32* dir, f32 maxDist,
+                 RayColResult* result);
+
+    // Sphere-world overlap test (general purpose)
+    // @param x, y, z   Sphere center
+    // @param radius    Sphere radius
+    // @param result    Output collision result
+    // @return true if sphere overlaps any triangle
+    bool sphereTest(f32 x, f32 y, f32 z, f32 radius,
+                    SphereColResult* result);
+
+    // Get floor Y position at a world position
+    // Casts downward from (x, y+range, z) to find the highest floor below.
+    // @return Floor Y coordinate, or y if no floor found
+    f32 getFloorAt(f32 x, f32 y, f32 z);
+
+    // Find nearby wall triangles around a position
+    // @param x, y, z   Search center
+    // @param radius    Search radius
+    // @param outNormals  Output normal array (max 4 entries)
+    // @param outCount  Number of walls found
+    // @return true if any walls found
+    bool getWallAt(f32 x, f32 y, f32 z, f32 radius,
+                   EGG::Vector3f* outNormals, u32* outCount);
+
+    // Get the KCL surface type/attribute at a world point
+    // Casts a short ray downward to sample the surface.
+    u32 getSurfaceType(f32 x, f32 y, f32 z);
+
+    // Check if a position is on a road surface (KCL type floor)
+    bool isOnRoad(f32 x, f32 y, f32 z);
+
+    // Get collision triangle data by index
+    // @param triIdx   Triangle index
+    // @param outV0, outV1, outV2  Output vertex positions
+    // @param outNormal  Output triangle normal
+    // @param outAttr    Output KCL attribute
+    // @return true if index is valid
+    bool getCollisionTriangle(u32 triIdx, EGG::Vector3f* outV0,
+                              EGG::Vector3f* outV1, EGG::Vector3f* outV2,
+                              EGG::Vector3f* outNormal, u32* outAttr);
+
     // Check if course data is loaded
     bool isLoaded() const { return mLoaded; }
 
@@ -143,5 +197,13 @@ private:
     // Singleton instance
     static CourseColManager* sInstance;
 };
+
+// Parse a KCL file header and validate it
+// @param data  Pointer to KCL file data
+// @param size  Size of the data
+// @param outHeader  Output parsed header
+// @return true if header is valid (magic = 'KCOL')
+bool CourseColManager_parseKCLHeader(const void* data, u32 size,
+                                     KCLHeader* outHeader);
 
 } // namespace Field

@@ -96,6 +96,45 @@ public:
     /// Initialize gravity system.
     void init();
 
+    /// Compute the effective gravity vector for the current frame,
+    /// incorporating slope influence and world gravity.
+    /// @param pos  Kart position (for slope queries)
+    /// @param outGravity  Output gravity vector
+    void calcGravityVector(const EGG::Vector3f& pos, EGG::Vector3f& outGravity);
+
+    /// Apply speed-dependent downforce (aerodynamic push toward ground).
+    /// @param dyn  Kart dynamics to apply force to
+    /// @param dt   Frame delta time
+    void applyDownforce(KartDynamics* dyn, f32 dt);
+
+    /// Compute slope acceleration/deceleration effect.
+    /// Returns tangential force along the slope surface.
+    /// @param normal  Surface normal at kart position
+    /// @param kartSpeed  Current kart speed (for friction scaling)
+    /// @return Tangential slope force vector
+    EGG::Vector3f calcSlopeEffect(const EGG::Vector3f& normal, f32 kartSpeed) const;
+
+    /// Reduce gravity near track edges to allow edge-riding tricks.
+    /// @param pos  Kart position
+    /// @param dyn  Kart dynamics
+    void handleEdgeGravity(const EGG::Vector3f& pos, KartDynamics* dyn);
+
+    /// Override gravity during cannon flight (parabolic trajectory).
+    /// @param dyn  Kart dynamics
+    /// @param cannonDir  Cannon launch direction
+    /// @param dt   Frame delta time
+    void handleCannon(KartDynamics* dyn, const EGG::Vector3f& cannonDir, f32 dt);
+
+    /// Per-frame gravity accumulation — calls applyGravity, applyDownforce,
+    /// applyMovingRoad, applyMovingWater in sequence.
+    /// @param dyn  Kart dynamics
+    /// @param dt   Frame delta time
+    void update(KartDynamics* dyn, f32 dt);
+
+    /// Get the gravity vector influenced by floor normal.
+    /// @return Gravity vector adjusted for current floor slope
+    EGG::Vector3f getGravityNormal() const;
+
 private:
     static const f32 GRAVITY_ACCEL;        // Standard gravity acceleration (units/frame^2)
     static const f32 MAX_SLOPE_FORCE;      // Maximum tangential slope force
@@ -115,5 +154,10 @@ private:
     s32 m_waterVariant;                // Water KCL variant (affects behavior)
     f32 m_drowningTimer;               // Time spent underwater (drowning check)
 };
+
+/// Check if fall speed exceeds threshold for fall damage/rescue.
+/// @param fallSpeed  Current downward velocity (positive = downward)
+/// @return true if fall speed exceeds the rescue threshold
+bool KartGravity_calcFallDamage(f32 fallSpeed);
 
 } // namespace Kart

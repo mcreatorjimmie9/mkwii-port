@@ -16,7 +16,14 @@ Graphics* Graphics::sInstance = nullptr;
 // @addr 0x80170008
 Graphics::Graphics()
     : mActive(false)
-    , mDrawCount(0) {
+    , mDrawCount(0)
+    , mFrameBuffer(nullptr)
+    , mWidth(640)
+    , mHeight(480)
+    , mClearColorR(0)
+    , mClearColorG(0)
+    , mClearColorB(0)
+    , mClearColorA(0xFF) {
     mPadding[0] = 0;
     mPadding[1] = 0;
 }
@@ -141,6 +148,157 @@ Graphics* Graphics::create() {
         sInstance = new Graphics();
     }
     return sInstance;
+}
+
+// --- Instance methods ---
+
+// Initialize the GX subsystem
+void Graphics::init() {
+    // In real SDK: GXInit, GXSetViewportJitter, GXSetDispSize
+    // Set default VI (Video Interface) configuration for 480p
+    mWidth = 640;
+    mHeight = 480;
+    mClearColorR = 0;
+    mClearColorG = 0;
+    mClearColorB = 0;
+    mClearColorA = 0xFF;
+    mDrawCount = 0;
+}
+
+// Begin a new frame: set up frame buffer and clear
+void Graphics::beginFrame() {
+    if (sInstance != nullptr) {
+        sInstance->mActive = true;
+        sInstance->mDrawCount++;
+
+        // In real SDK:
+        // GXSetCopyClear(clearColor, clearDepth)
+        // GXCopyDisp(mFrameBuffer, GX_TRUE)
+        // VIFlush()
+    }
+}
+
+// End a frame: swap buffers and wait for vsync
+void Graphics::endFrame() {
+    if (sInstance != nullptr) {
+        // In real SDK:
+        // GXDrawDone()  — wait for GP to finish
+        // GXCopyDisp(mFrameBuffer, GX_TRUE)
+        // VIFlush()
+        // VIWaitForRetrace()  — vsync
+        sInstance->mActive = false;
+    }
+}
+
+// Set viewport rectangle (integer version)
+void Graphics::setViewport(s32 x, s32 y, s32 w, s32 h) {
+    if (sInstance != nullptr) {
+        sInstance->mWidth = w > 0 ? w : 1;
+        sInstance->mHeight = h > 0 ? h : 1;
+    }
+    // In real SDK: GXSetViewport((f32)x, (f32)y, (f32)w, (f32)h, 0.0f, 1.0f)
+    (void)x; (void)y;
+}
+
+// Set scissor rectangle
+void Graphics::setScissorRect(s32 x, s32 y, s32 w, s32 h) {
+    (void)x; (void)y; (void)w; (void)h;
+    // In real SDK: GXSetScissor((u32)x, (u32)y, (u32)w, (u32)h)
+}
+
+// Set clear color as separate RGBA components
+void Graphics::setClearColorRGBA(u8 r, u8 g, u8 b, u8 a) {
+    if (sInstance != nullptr) {
+        sInstance->mClearColorR = r;
+        sInstance->mClearColorG = g;
+        sInstance->mClearColorB = b;
+        sInstance->mClearColorA = a;
+    }
+    // In real SDK: GXSetCopyClear((GXColor){r, g, b, a}, GX_MAX_Z24)
+}
+
+// Set face culling mode (typed enum version)
+void Graphics::setCullModeEnum(CullMode mode) {
+    if (sInstance != nullptr) {
+        // In real SDK: GXCullMode(GXCullMode mode)
+        (void)mode;
+    }
+}
+
+// Configure depth testing
+void Graphics::setDepthTest(bool enable, CompareFunc func) {
+    // In real SDK: GXSetZMode(enable, GXCompare func, GX_TRUE)
+    (void)enable; (void)func;
+}
+
+// Set blend mode (typed enum version)
+void Graphics::setBlendModeEnum(BlendMode mode) {
+    // In real SDK: GXSetBlendMode(GX_BM_BLEND, src, dst, GX_LO_NOOP)
+    switch (mode) {
+    case BLEND_ALPHA:
+        // GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_NOOP)
+        break;
+    case BLEND_ADD:
+        // GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_NOOP)
+        break;
+    case BLEND_SUB:
+        // GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_SUB)
+        break;
+    case BLEND_MUL:
+        // GXSetBlendMode(GX_BM_BLEND, GX_BL_DSTCOLOR, GX_BL_ZERO, GX_LO_NOOP)
+        break;
+    case BLEND_NONE:
+    default:
+        // GXSetBlendMode(GX_BM_NONE, GX_BL_ONE, GX_BL_ZERO, GX_LO_NOOP)
+        break;
+    }
+}
+
+// Enable/disable Z buffer writes
+void Graphics::setZBuffer(bool enable) {
+    // In real SDK: GXSetZMode(enable, GX_LEQUAL, enable)
+    (void)enable;
+}
+
+// Get the current frame buffer pointer
+void* Graphics::getFrameBuffer() const {
+    return mFrameBuffer;
+}
+
+// Get current viewport width
+s32 Graphics::getWidth() const {
+    return mWidth;
+}
+
+// Get current viewport height
+s32 Graphics::getHeight() const {
+    return mHeight;
+}
+
+// Save current render state to a stack (GX has 2 stacks)
+void Graphics::saveState() {
+    // In real SDK: GXSetGPMetric(0) + GXSetClipMode
+    // Push current viewport, scissor, blend, Z mode
+}
+
+// Restore previously saved render state
+void Graphics::restoreState() {
+    // In real SDK: Pop viewport, scissor, blend, Z mode
+}
+
+// Invalidate the vertex cache
+void Graphics::invalidateVertexCache() {
+    // In real SDK: GXInvalidateVtxCache()
+}
+
+// Flush the texture cache
+void Graphics::flushTextureCache() {
+    // In real SDK: GXFlushTexCache() or DCFlushRange on textures
+}
+
+// Wait for all GPU commands to complete
+void Graphics::waitGpuDone() {
+    // In real SDK: GXDrawDone() + GXPeekAR
 }
 
 // ============================================================================

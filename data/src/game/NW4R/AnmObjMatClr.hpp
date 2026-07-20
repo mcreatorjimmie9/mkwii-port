@@ -114,3 +114,46 @@ u32 AnmObjMatClr_FloatToGXColor(f32 r, f32 g, f32 b, f32 a);
 
 // @addr 0x806012A0 — Parse material color animation info
 void AnmObjMatClr_GetAnimInfo(ResMatClrAnm* res, MatClrAnimInfo* out);
+
+// Class-style wrapper for material color animation object
+class AnmObjMatClr {
+public:
+    AnmObjMatClr();
+    ~AnmObjMatClr();
+
+    void init();
+    void calc(f32 dt);
+    void setFrame(f32 frame);
+    f32 getFrame() const;
+    f32 getFrameCount() const;
+    void applyToMaterial();
+    void setPlayMode(u8 mode);
+    void attach(void* mat);
+    void detach();
+
+    AnmObjMatClrData* getData() { return &m_data; }
+    const AnmObjMatClrData* getData() const { return &m_data; }
+
+private:
+    AnmObjMatClrData m_data;
+    void* m_material;
+
+    friend AnmObjMatClr* AnmObjMatClr_createFromRes(ResMatClrAnm* res);
+};
+
+// Factory: create AnmObjMatClr from a resource
+AnmObjMatClr* AnmObjMatClr_createFromRes(ResMatClrAnm* res);
+
+// Utility functions
+void AnmObjMatClr_ResetColor(AnmObjMatClrData* obj);
+BOOL AnmObjMatClr_IsKeyframeEqual(const MatClrKeyFrame* a,
+                                    const MatClrKeyFrame* b);
+void AnmObjMatClr_LerpKeyframes(const MatClrKeyFrame* a,
+                                  const MatClrKeyFrame* b,
+                                  f32 t, MatClrKeyFrame* out);
+void AnmObjMatClr_SetColor(AnmObjMatClrData* obj,
+                            f32 r, f32 g, f32 b, f32 a);
+const MatClrKeyFrame* AnmObjMatClr_GetCurrentColor(
+        const AnmObjMatClrData* obj);
+void AnmObjMatClr_GXColorToFloat(u32 packed, f32& r, f32& g,
+                                  f32& b, f32& a);

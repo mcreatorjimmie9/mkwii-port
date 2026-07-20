@@ -24,6 +24,17 @@ enum AnimState {
     ANIM_FINISHED = 3,
 };
 
+// Callback type for frame-based animation events
+typedef void (*AnimFrameCallback)(u32 animId, f32 frame, void* userData);
+
+// Keyframe interpolation data
+struct AnimKeyFrame {
+    f32 time;       // Time in seconds
+    f32 value[4];   // Interpolated values (pos/rot/scale/color)
+    u8  tangent;    // Tangent type (0=linear, 1=smooth)
+    u8  _pad[3];
+};
+
 struct AnimTrack {
     u32 animData;       // Pointer to animation data resource
     f32 currentTime;     // Current playback time in seconds
@@ -45,8 +56,12 @@ public:
     // @addr 0x8050b8f4
     void triggerPaneEvent(u32 paneId);
 
+    // Animation initialization
+    void init();
+
     // Animation playback
     void play(u32 animId, AnimPlayMode mode = ANIM_PLAY_ONCE, f32 speed = 1.0f);
+    void play(u32 animId, f32 speed, s32 loopCount);
     void pause(u32 animId);
     void resume(u32 animId);
     void stop(u32 animId);
@@ -59,12 +74,23 @@ public:
 
     // Frame control
     void setFrame(u32 animId, f32 time);
+    void setFrame(f32 frame);
     f32 getFrame(u32 animId) const;
+    f32 getFrame() const;
     f32 getDuration(u32 animId) const;
 
     // Blending
     void setBlendWeight(u32 animId, f32 weight);
     f32 getBlendWeight(u32 animId) const;
+    void blendTo(u32 animId, f32 blendTime);
+
+    // State queries
+    bool isPlaying() const;
+    const char* getAnimName() const;
+
+    // Event listeners
+    void addEventListener(u32 animId, f32 triggerFrame,
+                           AnimFrameCallback callback, void* userData);
 
     // Update all active animations
     void update(f32 deltaTime);
@@ -83,11 +109,31 @@ public:
 
 private:
     static const u32 MAX_TRACKS = 16;
+    static const u32 MAX_LISTENERS = 8;
 
     Layout* mBoundLayout;
     AnimTrack mTracks[MAX_TRACKS];
     s32 mTrackCount;
     u32 mGlobalFlags;
+    u32 mPlayingCount;     // Number of currently playing tracks
+    char mAnimName[32];    // Name of the primary animation
+    f32 mMasterSpeed;      // Global speed multiplier
+
+    // Blend state for crossfading
+    u32 mBlendSourceId;
+    f32 mBlendTime;
+    f32 mBlendElapsed;
+
+    // Frame event listeners
+    struct FrameListener {
+        u32 animId;
+        f32 triggerFrame;
+        AnimFrameCallback callback;
+        void* userData;
+        bool fired;
+    };
+    FrameListener mListeners[MAX_LISTENERS];
+    u32 mListenerCount;
 };
 
 } // namespace UI

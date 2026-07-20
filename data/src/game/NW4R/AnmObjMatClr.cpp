@@ -254,3 +254,144 @@ void AnmObjMatClr_GetAnimInfo(ResMatClrAnm* res, MatClrAnimInfo* out) {
     out->targetReg = 0;
     out->duration = 60.0f;
 }
+
+// ============================================================================
+// AnmObjMatClr class implementation
+// ============================================================================
+
+AnmObjMatClr::AnmObjMatClr()
+    : m_material(nullptr) {
+    std::memset(&m_data, 0, sizeof(m_data));
+}
+
+AnmObjMatClr::~AnmObjMatClr() {
+    detach();
+    AnmObjMatClr_Destroy(&m_data);
+}
+
+// Initialize the material color animation to default state
+void AnmObjMatClr::init() {
+    std::memset(&m_data, 0, sizeof(m_data));
+    m_data.frameRate = 1.0f;
+    m_data.playMode = ANM_PLAY_LOOP;
+    m_data.flags = ANMSCN_FLAG_PLAYING;
+    m_data.targetReg = 0;
+    m_data.current.r = 1.0f;
+    m_data.current.g = 1.0f;
+    m_data.current.b = 1.0f;
+    m_data.current.a = 1.0f;
+}
+
+// Per-frame color interpolation
+void AnmObjMatClr::calc(f32 dt) {
+    AnmObjMatClr_Calc(&m_data, dt);
+}
+
+// Set the current animation frame
+void AnmObjMatClr::setFrame(f32 frame) {
+    AnmObjMatClr_SetFrame(&m_data, frame);
+}
+
+// Get the current animation frame
+f32 AnmObjMatClr::getFrame() const {
+    return AnmObjMatClr_GetFrame(&m_data);
+}
+
+// Get the total frame count (duration)
+f32 AnmObjMatClr::getFrameCount() const {
+    return AnmObjMatClr_GetDuration(&m_data);
+}
+
+// Write interpolated color/alpha to the bound material
+void AnmObjMatClr::applyToMaterial() {
+    if (m_material == nullptr) return;
+    AnmObjMatClr_Apply(&m_data);
+}
+
+// Set play mode (loop/once/pingpong)
+void AnmObjMatClr::setPlayMode(u8 mode) {
+    AnmObjMatClr_SetPlayMode(&m_data, mode);
+}
+
+// Bind to a material for auto-apply
+void AnmObjMatClr::attach(void* mat) {
+    m_material = mat;
+}
+
+// Unbind from material
+void AnmObjMatClr::detach() {
+    m_material = nullptr;
+}
+
+// ============================================================================
+// AnmObjMatClr_createFromRes() — Factory
+// ============================================================================
+// Create an AnmObjMatClr object from a resource, allocating on heap.
+// ============================================================================
+AnmObjMatClr* AnmObjMatClr_createFromRes(ResMatClrAnm* res) {
+    if (!res) return nullptr;
+
+    AnmObjMatClr* obj = new AnmObjMatClr();
+    if (obj == nullptr) return nullptr;
+
+    AnmObjMatClr_Create(&obj->m_data, res);
+    return obj;
+}
+
+// Reset the color to white (1, 1, 1, 1)
+void AnmObjMatClr_ResetColor(AnmObjMatClrData* obj) {
+    if (!obj) return;
+    obj->current.r = 1.0f;
+    obj->current.g = 1.0f;
+    obj->current.b = 1.0f;
+    obj->current.a = 1.0f;
+}
+
+// Check if two color keyframes are equal
+BOOL AnmObjMatClr_IsKeyframeEqual(const MatClrKeyFrame* a,
+                                    const MatClrKeyFrame* b) {
+    if (!a || !b) return FALSE;
+    if (a->r != b->r) return FALSE;
+    if (a->g != b->g) return FALSE;
+    if (a->b != b->b) return FALSE;
+    if (a->a != b->a) return FALSE;
+    return TRUE;
+}
+
+// Lerp between two color keyframes
+void AnmObjMatClr_LerpKeyframes(const MatClrKeyFrame* a,
+                                  const MatClrKeyFrame* b,
+                                  f32 t, MatClrKeyFrame* out) {
+    if (!a || !b || !out) return;
+    out->r = a->r + (b->r - a->r) * t;
+    out->g = a->g + (b->g - a->g) * t;
+    out->b = a->b + (b->b - a->b) * t;
+    out->a = a->a + (b->a - a->a) * t;
+    out->_10 = 0;
+}
+
+// Set color directly (bypassing animation)
+void AnmObjMatClr_SetColor(AnmObjMatClrData* obj,
+                            f32 r, f32 g, f32 b, f32 a) {
+    if (!obj) return;
+    obj->current.r = r;
+    obj->current.g = g;
+    obj->current.b = b;
+    obj->current.a = a;
+}
+
+// Get the current color values
+const MatClrKeyFrame* AnmObjMatClr_GetCurrentColor(
+        const AnmObjMatClrData* obj) {
+    if (!obj) return nullptr;
+    return &obj->current;
+}
+
+// Convert GX color back to float RGBA
+void AnmObjMatClr_GXColorToFloat(u32 packed, f32& r, f32& g,
+                                  f32& b, f32& a) {
+    r = static_cast<f32>((packed >> 24) & 0xFF) / 255.0f;
+    g = static_cast<f32>((packed >> 16) & 0xFF) / 255.0f;
+    b = static_cast<f32>((packed >> 8) & 0xFF) / 255.0f;
+    a = static_cast<f32>(packed & 0xFF) / 255.0f;
+}

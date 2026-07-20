@@ -74,6 +74,16 @@ struct PlayerRaceState {
     u32 _reserved[4];
 };
 
+// Connected player info for lobby/room
+struct PlayerInfo {
+    u32 playerId;         // Unique player identifier
+    u8  displayName[16];  // Player display name
+    u8  isReady;          // Ready state for race start
+    u8  isHost;           // Whether this player is the room host
+    u16 rating;           // Player VR rating
+    u32 friendCode;       // Wii friend code
+};
+
 // ============================================================================
 // Session — Online Race Session
 // ============================================================================
@@ -93,6 +103,60 @@ public:
 
     // Reset for next race (in same room)
     void reset();
+
+    // --- Initialization ---
+    // Initialize a new network session
+    void init();
+
+    // --- Room Management ---
+    // Create a new room/session
+    // @return 0 on success
+    s32 create();
+
+    // Join an existing room by room code
+    // @param roomCode  4-character room code string
+    // @return 0 on success
+    s32 join(const char* roomCode);
+
+    // Leave the current session gracefully
+    // @return 0 on success
+    s32 leave();
+
+    // --- Per-frame Update ---
+    // Process incoming network messages and state transitions
+    void update();
+
+    // --- Chat ---
+    // Send a chat message to all players in the room
+    // @param message  Chat message string (max 64 chars)
+    // @return 0 on success
+    s32 sendChat(const char* message);
+
+    // --- Player Management ---
+    // Get the list of connected players
+    // @param outPlayers  Output array (at least 12 entries)
+    // @return Number of players written
+    u8 getPlayerList(PlayerInfo* outPlayers) const;
+
+    // @addr 0x805565b0
+    u8 getPlayerCount() const { return mPlayerCount; }
+
+    // Check if the local player is the host
+    bool isHost() const { return mLocalPlayerIndex == 0; }
+
+    // Get the current estimated latency to the host (in ms)
+    u32 getLatency() const { return mLatencyMs; }
+
+    // Set the local player's ready state for race start
+    void setReady(bool ready);
+
+    // Check if all connected players are ready
+    bool areAllReady() const;
+
+    // Kick a player from the room (host only)
+    // @param playerId  The player to kick
+    // @return 0 on success, -1 if not host
+    s32 kickPlayer(u32 playerId);
 
     // --- Configuration ---
     const SessionConfig& getConfig() const { return mConfig; }
@@ -177,8 +241,10 @@ public:
 
     // --- State ---
     SessionState getState() const { return mState; }
-    u8 getPlayerCount() const { return mPlayerCount; }
     bool isRacing() const { return mState == SESSION_RACING; }
+
+    // Get the local player's index in the session
+    u8 getLocalPlayerIndex() const { return mLocalPlayerIndex; }
 
     // Access per-player state
     const PlayerRaceState* getPlayerState(u8 playerIndex) const;
@@ -198,6 +264,16 @@ private:
     // Item event tracking per player
     u32 mItemFrames[12][16]; // last frame each item was used
     u8  mItemCount[12];       // count of items used by each player
+
+    // Room/lobby state
+    PlayerInfo mPlayerInfos[12]; // Per-player lobby info
+    u8  mLocalPlayerIndex;       // This player's index
+    u32 mLatencyMs;              // Estimated latency to host
+    char mRoomCode[5];           // 4-character room code + null
 };
+
+// Get the local player's unique ID in the current session
+// @return Player ID, or 0xFFFFFFFF if not in a session
+u32 Session_getLocalPlayerId();
 
 } // namespace RKNet

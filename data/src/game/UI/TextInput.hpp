@@ -22,6 +22,20 @@ enum TextInputMode {
     TEXTINPUT_MODE_GHOST = 1,
 };
 
+// Character filter types for text input validation
+typedef u8 (*TextFilter)(char c);
+
+// Standard filter functions
+inline u8 TextFilter_None(char) { return 1; }
+inline u8 TextFilter_Numeric(char c) { return (c >= '0' && c <= '9') ? 1 : 0; }
+inline u8 TextFilter_Alphanumeric(char c) {
+    return ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+            (c >= '0' && c <= '9')) ? 1 : 0;
+}
+inline u8 TextFilter_Printable(char c) {
+    return (c >= 0x20 && c <= 0x7E) ? 1 : 0;
+}
+
 // Character grid for text input
 struct CharGridEntry {
     u16 character;       // Unicode character
@@ -58,6 +72,17 @@ public:
     void setText(const char* text);
     const char* getText() const { return mTextBuffer; }
     u16 getTextLength() const { return mTextLength; }
+
+    // Extended text operations
+    void init(u8 maxLen, u16 xPos, u16 yPos);
+    void update(f32 dt);
+    void insertChar(char c);
+    void deleteChar();
+    void backspace();
+    void clear();
+    void setCursorPos(u8 pos);
+    bool isActive() const;
+    void setFilter(TextFilter filter);
 
     // Cursor position
     void moveCursor(s32 dx, s32 dy);
@@ -123,6 +148,16 @@ private:
     u8 mInitFlag;              // initialization flag
     u32 mNavigationTarget;     // navigation target ID
     u8 _pad[1];
+
+    // Extended text input state
+    u8 mMaxLen;                // Maximum text length
+    u16 mCursorTextPos;        // Cursor position within text buffer
+    u16 mTextPosX;             // Text field X position
+    u16 mTextPosY;             // Text field Y position
+    f32 mCursorBlinkPeriod;    // Blink period in seconds
+    u8 mCursorVisible;         // Whether cursor is currently visible
+    TextFilter mFilter;        // Character filter function
+    u8 _pad2[3];
 };
 
 } // namespace UI

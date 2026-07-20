@@ -4,18 +4,53 @@
 #include "AnimationController.hpp"
 #include "Layout.hpp"
 #include "ui_stubs.h"
+#include <cstring>
 
 namespace UI {
 
 AnimationController::AnimationController()
     : mBoundLayout(nullptr)
     , mTrackCount(0)
-    , mGlobalFlags(0) {
+    , mGlobalFlags(0)
+    , mPlayingCount(0)
+    , mMasterSpeed(1.0f)
+    , mBlendSourceId(0)
+    , mBlendTime(0.0f)
+    , mBlendElapsed(0.0f)
+    , mListenerCount(0) {
     memset(mTracks, 0, sizeof(mTracks));
+    memset(mAnimName, 0, sizeof(mAnimName));
+    memset(mListeners, 0, sizeof(mListeners));
 }
 
 AnimationController::~AnimationController() {
     unbindFromLayout();
+}
+
+// Initialize the animation controller, resetting all state
+void AnimationController::init() {
+    mTrackCount = 0;
+    mPlayingCount = 0;
+    mGlobalFlags = 0;
+    mMasterSpeed = 1.0f;
+    mBlendSourceId = 0;
+    mBlendTime = 0.0f;
+    mBlendElapsed = 0.0f;
+    mListenerCount = 0;
+    memset(mTracks, 0, sizeof(mTracks));
+    memset(mAnimName, 0, sizeof(mAnimName));
+    memset(mListeners, 0, sizeof(mListeners));
+}
+
+// Play animation with loop count parameter
+void AnimationController::play(u32 animId, f32 speed, s32 loopCount) {
+    AnimPlayMode mode = ANIM_PLAY_ONCE;
+    if (loopCount < 0) {
+        mode = ANIM_PLAY_LOOP;
+    } else if (loopCount > 1) {
+        mode = ANIM_PLAY_LOOP;
+    }
+    play(animId, mode, speed);
 }
 
 // @addr 0x8050b8f4
@@ -149,18 +184,51 @@ f32 AnimationController::getBlendWeight(u32 animId) const {
 }
 
 void AnimationController::update(f32 deltaTime) {
+    // Apply master speed
+    f32 scaledDt = deltaTime * mMasterSpeed;
+    mPlayingCount = 0;
+
+    // Update crossfade blend
+    if (mBlendTime > 0.0f && mBlendElapsed < mBlendTime) {
+        mBlendElapsed += deltaTime;
+        if (mBlendElapsed > mBlendTime) mBlendElapsed = mBlendTime;
+        f32 blendT = mBlendElapsed / mBlendTime;
+        // Set blend weights: source fades out, target fades in
+        setBlendWeight(mBlendSourceId, 1.0f - blendT);
+        // Target track is the last added playing track
+        for (s32 i = mTrackCount - 1; i >= 0; i--) {
+            if (mTracks[i].state == ANIM_PLAYING) {
+                setBlendWeight(mTracks[i].bindFrame, blendT);
+                break;
+            }
+        }
+    }
+
     for (s32 i = 0; i < mTrackCount; i++) {
         AnimTrack& track = mTracks[i];
 
         if (track.state != ANIM_PLAYING) continue;
 
-        track.currentTime += deltaTime * track.speed;
+        mPlayingCount++;
+        track.currentTime += scaledDt * track.speed;
+
+        // Check frame event listeners
+        for (u32 j = 0; j < mListenerCount; j++) {
+            FrameListener& listener = mListeners[j];
+            if (!listener.fired && listener.animId == track.bindFrame &&
+                track.currentTime >= listener.triggerFrame) {
+                listener.callback(track.bindFrame, track.currentTime,
+                                  listener.userData);
+                listener.fired = true;
+            }
+        }
 
         switch (track.mode) {
         case ANIM_PLAY_ONCE:
             if (track.currentTime >= track.duration) {
                 track.currentTime = track.duration;
                 track.state = ANIM_FINISHED;
+                mPlayingCount--;
             }
             break;
 
@@ -168,6 +236,12 @@ void AnimationController::update(f32 deltaTime) {
             if (track.duration > 0.0f) {
                 while (track.currentTime >= track.duration) {
                     track.currentTime -= track.duration;
+                    // Reset frame event listeners on loop
+                    for (u32 j = 0; j < mListenerCount; j++) {
+                        if (mListeners[j].animId == track.bindFrame) {
+                            mListeners[j].fired = false;
+                        }
+                    }
                 }
             }
             break;
@@ -186,6 +260,7 @@ void AnimationController::update(f32 deltaTime) {
             if (track.currentTime >= track.duration) {
                 track.currentTime = 0.0f;
                 track.state = ANIM_FINISHED;
+                mPlayingCount--;
             }
             break;
         }
@@ -260,6 +335,88 @@ void AnimationController::configureSceneAnimations(s32 sceneId) {
         // Options
         play(0x0804, ANIM_PLAY_ONCE);
     }
+}
+
+// Set frame on the primary (first) playing track
+void AnimationController::setFrame(f32 frame) {
+    for (s32 i = 0; i < mTrackCount; i++) {
+        if (mTracks[i].state == ANIM_PLAYING) {
+            mTracks[i].currentTime = frame;
+            return;
+        }
+    }
+}
+
+// Get frame of the primary (first) playing track
+f32 AnimationController::getFrame() const {
+    for (s32 i = 0; i < mTrackCount; i++) {
+        if (mTracks[i].state == ANIM_PLAYING) {
+            return mTracks[i].currentTime;
+        }
+    }
+    return 0.0f;
+}
+
+// Check if any track is currently playing
+bool AnimationController::isPlaying() const {
+    for (s32 i = 0; i < mTrackCount; i++) {
+        if (mTracks[i].state == ANIM_PLAYING) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Get the name of the primary animation
+const char* AnimationController::getAnimName() const {
+    return mAnimName;
+}
+
+// Crossfade to a new animation over blendTime seconds
+void AnimationController::blendTo(u32 animId, f32 blendTime) {
+    if (blendTime <= 0.0f) {
+        // Instant switch: stop all current and play new
+        for (s32 i = 0; i < mTrackCount; i++) {
+            if (mTracks[i].state == ANIM_PLAYING) {
+                mBlendSourceId = mTracks[i].bindFrame;
+                stop(mTracks[i].bindFrame);
+            }
+        }
+        play(animId, ANIM_PLAY_LOOP, 1.0f);
+        return;
+    }
+
+    // Find the currently playing track to use as blend source
+    mBlendTime = blendTime;
+    mBlendElapsed = 0.0f;
+    mBlendSourceId = 0;
+    for (s32 i = 0; i < mTrackCount; i++) {
+        if (mTracks[i].state == ANIM_PLAYING) {
+            mBlendSourceId = mTracks[i].bindFrame;
+            break;
+        }
+    }
+
+    // Start the target animation
+    play(animId, ANIM_PLAY_LOOP, 1.0f);
+
+    // Set initial blend weights
+    setBlendWeight(mBlendSourceId, 1.0f);
+    setBlendWeight(animId, 0.0f);
+}
+
+// Register a frame callback that fires when a specific frame is reached
+void AnimationController::addEventListener(u32 animId, f32 triggerFrame,
+                                          AnimFrameCallback callback,
+                                          void* userData) {
+    if (mListenerCount >= MAX_LISTENERS) return;
+
+    FrameListener& listener = mListeners[mListenerCount++];
+    listener.animId = animId;
+    listener.triggerFrame = triggerFrame;
+    listener.callback = callback;
+    listener.userData = userData;
+    listener.fired = false;
 }
 
 } // namespace UI

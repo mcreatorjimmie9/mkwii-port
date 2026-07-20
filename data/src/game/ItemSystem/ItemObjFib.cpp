@@ -1,14 +1,20 @@
 // ============================================================================
-// ItemObjFib implementation — Feather (FOIL) item object
+// ItemObjFib implementation — Feather (FOIL) / Fake Item Box item object
 // ============================================================================
 // Translated from PowerPC assembly stubs in StaticR.rel.
 // Manages feather items that float on the track with a bobbing animation.
 // Players within collection radius pick up the feather.
+// Also handles fake item box functionality (gives bad items to players).
 // ============================================================================
 
 #include "ItemObjFib.hpp"
 #include <cmath>
 #include <cstring>
+#include <cstdlib>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 namespace Item {
 
@@ -25,6 +31,11 @@ const u8  ItemObjFib::VARIANT_NORMAL   = 2;
 const u8  ItemObjFib::VARIANT_SPECIAL  = 3;
 const u8  ItemObjFib::VARIANT_ALT      = 4;
 
+// Fake item box constants
+const s32 ItemObjFib::FAKE_BOX_LINGER_TIME = 1200; // 20 seconds at 60fps
+const f32 ItemObjFib::FADE_DURATION = 1.0f;        // 1 second fade out
+const f32 ItemObjFib::ACTIVATION_RADIUS = 15.0f;    // Proximity activation distance
+
 // ============================================================================
 // Constructor / Destructor
 // ============================================================================
@@ -37,7 +48,12 @@ ItemObjFib::ItemObjFib()
     , mLifetime(0)
     , mTargetId(INVALID_TARGET)
     , mVariant(VARIANT_NORMAL)
-    , mAlive(false) {}
+    , mAlive(false)
+    , mOwnerId(INVALID_TARGET)
+    , mFadeAlpha(1.0f)
+    , mFading(false) {
+    memset(&mBadItemPool, 0, sizeof(BadItemPool));
+}
 
 ItemObjFib::~ItemObjFib() {}
 
@@ -125,6 +141,10 @@ s32 ItemObjFib::makeArray(ItemObjFib* array, u32 count, u32 maxCount,
         fib->mTargetId = INVALID_TARGET;
         fib->mPosition.set(0.0f, 0.0f, 0.0f);
         fib->mBasePosition.set(0.0f, 0.0f, 0.0f);
+        fib->mOwnerId = INVALID_TARGET;
+        fib->mFadeAlpha = 1.0f;
+        fib->mFading = false;
+        memset(&fib->mBadItemPool, 0, sizeof(BadItemPool));
     }
 
     return 0;
@@ -227,6 +247,36 @@ void ItemObjFib::init(const EGG::Vector3f& pos, f32 speed) {
     mLifetime = DEFAULT_LIFETIME;
     mTargetId = INVALID_TARGET;
     mAlive = true;
+    mFadeAlpha = 1.0f;
+    mFading = false;
+}
+
+// ============================================================================
+// initFakeBox — Initialize as a fake item box
+// ============================================================================
+
+void ItemObjFib::initFakeBox(const EGG::Vector3f& pos, u8 ownerId) {
+    mBasePosition = pos;
+    mPosition = pos;
+    mSpeed = 0.0f; // Fake boxes don't fall
+    mBobTimer = 0.0f;
+    mLifetime = FAKE_BOX_LINGER_TIME;
+    mTargetId = INVALID_TARGET; // Anyone can hit it
+    mAlive = true;
+    mOwnerId = ownerId;
+    mFadeAlpha = 1.0f;
+    mFading = false;
+
+    // Set default bad item pool if not already configured
+    if (mBadItemPool.count == 0) {
+        mBadItemPool.itemIds[0] = BAD_ITEM_BANANA;
+        mBadItemPool.weights[0] = 50;
+        mBadItemPool.itemIds[1] = BAD_ITEM_GREEN_SHELL;
+        mBadItemPool.weights[1] = 30;
+        mBadItemPool.itemIds[2] = BAD_ITEM_MUSHROOM_SLOW;
+        mBadItemPool.weights[2] = 20;
+        mBadItemPool.count = 3;
+    }
 }
 
 // ============================================================================
@@ -236,24 +286,152 @@ void ItemObjFib::init(const EGG::Vector3f& pos, f32 speed) {
 void ItemObjFib::update() {
     if (!mAlive) return;
 
+    // Handle fade-out animation
+    if (mFading) {
+        mFadeAlpha -= (1.0f / 60.0f) / FADE_DURATION;
+        if (mFadeAlpha <= 0.0f) {
+            mFadeAlpha = 0.0f;
+            mAlive = false;
+            return;
+        }
+    }
+
     // Advance bob timer
     mBobTimer += (1.0f / 60.0f); // Assume 60fps frame time
 
     // Compute vertical bob offset using sine wave
     f32 bobOffset = BOB_AMPLITUDE *
-        sinf(2.0f * M_PI * BOB_FREQUENCY * mBobTimer);
+        sinf(2.0f * (f32)M_PI * BOB_FREQUENCY * mBobTimer);
 
     // Update Y position with bob animation
     mPosition.y = mBasePosition.y + bobOffset;
 
-    // Apply gentle downward drift from speed
-    mBasePosition.y -= mSpeed * (1.0f / 60.0f);
+    // Apply gentle downward drift from speed (only for feathers, not fake boxes)
+    if (mOwnerId == INVALID_TARGET || mSpeed > 0.0f) {
+        mBasePosition.y -= mSpeed * (1.0f / 60.0f);
+    }
 
     // Tick down lifetime
     mLifetime--;
     if (mLifetime <= 0) {
-        mAlive = false;
+        onExpire();
     }
+}
+
+// ============================================================================
+// onHit — Give bad item to player who touched fake box
+// ============================================================================
+
+void ItemObjFib::onHit(u8 playerId, BadItemType* outItem) {
+    (void)playerId;
+
+    // Select a bad item based on the player's position
+    // We use the player ID as a rough position indicator (lower ID = further ahead)
+    // In practice, the caller would pass the actual race position
+    BadItemType item = selectBadItem(playerId + 1);
+
+    if (outItem) {
+        *outItem = item;
+    }
+
+    // The fake box is consumed on hit
+    mAlive = false;
+}
+
+// ============================================================================
+// setBadItemPool — Configure which bad items to give
+// ============================================================================
+
+void ItemObjFib::setBadItemPool(const BadItemPool& pool) {
+    mBadItemPool = pool;
+}
+
+// ============================================================================
+// selectBadItem — Random bad item selection weighted by position
+// ============================================================================
+// Players further back in the race get worse items.
+// The weight system allows position-dependent item distribution:
+//   - 1st place: mostly bananas (mild penalty)
+//   - Last place: slow mushrooms, fake boosts (severe penalty)
+// ============================================================================
+
+BadItemType ItemObjFib::selectBadItem(u8 playerPosition) const {
+    if (mBadItemPool.count == 0) {
+        return BAD_ITEM_BANANA; // Default fallback
+    }
+
+    // Calculate total weight, adjusting based on player position
+    // Players in higher positions (further back) get more weight on worse items
+    u32 totalWeight = 0;
+    u32 adjustedWeights[8];
+
+    for (u8 i = 0; i < mBadItemPool.count && i < 8; i++) {
+        // Worsen items for players further back in the race
+        u32 baseWeight = mBadItemPool.weights[i];
+
+        // Items later in the pool are "worse" — increase their weight
+        // for players in worse positions
+        f32 positionFactor = 1.0f + (f32)playerPosition * 0.1f *
+                             ((f32)i / (f32)mBadItemPool.count);
+
+        adjustedWeights[i] = (u32)(baseWeight * positionFactor);
+        totalWeight += adjustedWeights[i];
+    }
+
+    if (totalWeight == 0) {
+        return (BadItemType)mBadItemPool.itemIds[0];
+    }
+
+    // Weighted random selection
+    u32 roll = (u32)(std::rand() % totalWeight);
+    u32 cumulative = 0;
+
+    for (u8 i = 0; i < mBadItemPool.count && i < 8; i++) {
+        cumulative += adjustedWeights[i];
+        if (roll < cumulative) {
+            return (BadItemType)mBadItemPool.itemIds[i];
+        }
+    }
+
+    // Fallback to last item in pool
+    return (BadItemType)mBadItemPool.itemIds[mBadItemPool.count - 1];
+}
+
+// ============================================================================
+// getLingerTime — How long fake box stays visible
+// ============================================================================
+
+s32 ItemObjFib::getLingerTime() const {
+    return mLifetime;
+}
+
+// ============================================================================
+// checkProximity — Distance-based activation
+// ============================================================================
+// Checks if a kart is within the activation radius of this item.
+// Uses squared distance to avoid unnecessary sqrt.
+// ============================================================================
+
+bool ItemObjFib::checkProximity(const EGG::Vector3f& kartPos) const {
+    if (!mAlive || mFading) return false;
+
+    f32 dx = kartPos.x - mPosition.x;
+    f32 dy = kartPos.y - mPosition.y;
+    f32 dz = kartPos.z - mPosition.z;
+    f32 distSq = dx * dx + dy * dy + dz * dz;
+
+    f32 radiusSq = ACTIVATION_RADIUS * ACTIVATION_RADIUS;
+    return distSq < radiusSq;
+}
+
+// ============================================================================
+// onExpire — Fade out and remove
+// ============================================================================
+
+void ItemObjFib::onExpire() {
+    // Begin fade-out instead of immediately disappearing
+    mFading = true;
+    mFadeAlpha = 1.0f;
 }
 
 // ============================================================================
@@ -265,6 +443,15 @@ void ItemObjFib::removeFromField() {
     mTargetId = INVALID_TARGET;
     mLifetime = 0;
     mPosition.set(0.0f, -1000.0f, 0.0f); // Move off-screen
+}
+
+// ============================================================================
+// ItemObjFib_create — Factory function
+// ============================================================================
+
+ItemObjFib* ItemObjFib_create() {
+    ItemObjFib* fib = new ItemObjFib();
+    return fib;
 }
 
 } // namespace Item

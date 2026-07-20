@@ -5,8 +5,15 @@
 #include "Settings.hpp"
 #include <cstring>
 #include <cmath>
+#include <cstdio>
 
 namespace Save {
+
+// ============================================================================
+// Static default settings singleton
+// ============================================================================
+
+static Settings sDefaultSettings;
 
 // @addr 0x8022A7A0
 Settings::Settings() {
@@ -16,6 +23,60 @@ Settings::Settings() {
 
 // @addr 0x8022A7C0
 Settings::~Settings() {
+}
+
+// ============================================================================
+// init — Initialize settings from save data buffer
+// ============================================================================
+
+void Settings::init(const u8* buffer, u32 size) {
+    if (buffer && size >= 0x14) {
+        deserialize(buffer, size);
+    } else {
+        setDefaults();
+    }
+}
+
+// ============================================================================
+// load — Load settings from a binary buffer (parse and validate)
+// ============================================================================
+
+s32 Settings::load(const u8* buffer, u32 size) {
+    if (!buffer || size < 0x14) {
+        return -1; // Invalid buffer
+    }
+
+    // Deserialize the settings
+    u32 bytesConsumed = deserialize(buffer, size);
+    if (bytesConsumed == 0) {
+        return -2; // Deserialization failed
+    }
+
+    // Validate the loaded settings
+    if (!validate()) {
+        // Settings are invalid — reset to defaults
+        setDefaults();
+        return -3;
+    }
+
+    return 0;
+}
+
+// ============================================================================
+// save — Write settings to a binary buffer
+// ============================================================================
+
+s32 Settings::save(u8* buffer, u32 bufferSize) const {
+    if (!buffer || bufferSize < 0x14) {
+        return -1;
+    }
+
+    u32 bytesWritten = serialize(buffer, bufferSize);
+    if (bytesWritten == 0) {
+        return -2;
+    }
+
+    return (s32)bytesWritten;
 }
 
 // @addr 0x8022A7D0
@@ -34,6 +95,14 @@ void Settings::setDefaults() {
     mTractionMode = TRACTION_AUTO; // Auto traction by default
     mScreenMode = SCREEN_NORMAL;   // Normal (4:3) screen mode by default
     memset(_pad2, 0, sizeof(_pad2));
+}
+
+// ============================================================================
+// resetToDefault — Factory reset all settings
+// ============================================================================
+
+void Settings::resetToDefault() {
+    setDefaults();
 }
 
 // @addr 0x8022A840
@@ -86,6 +155,21 @@ u32 Settings::deserialize(const u8* buffer, u32 bufferSize) {
     memcpy(_pad2, buffer + offset, sizeof(_pad2));
     offset += sizeof(_pad2);
     return offset; // 0x14
+}
+
+// ============================================================================
+// setVolume — Set all three volume channels at once
+// ============================================================================
+
+void Settings::setVolume(u8 master, u8 music, u8 sfx) {
+    // Clamp all values to 0-100
+    if (master > 100) master = 100;
+    if (music > 100) music = 100;
+    if (sfx > 100) sfx = 100;
+
+    mSoundVolume = master;
+    mMusicVolume = music;
+    mSFXVolume = sfx;
 }
 
 // @addr 0x8022A9E0
@@ -270,6 +354,14 @@ const char* Settings::getLanguageName() const {
         case LANG_DUTCH:    return "Dutch";
         default:            return "Unknown";
     }
+}
+
+// ============================================================================
+// Settings_getDefault — Get default settings singleton
+// ============================================================================
+
+const Save::Settings* Settings_getDefault() {
+    return &sDefaultSettings;
 }
 
 } // namespace Save
