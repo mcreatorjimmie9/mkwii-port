@@ -47,7 +47,7 @@ static const f32 sDifficultySteeringError[3] = {
 // Size: 60 bytes, 15 instructions
 KPadAI::KPadAI() {
     // Zero out all fields including base class and AI-specific data
-    memset(&mAIInput, 0, sizeof(KPadRaceInputState));
+    memset(reinterpret_cast<u8*>(&mAIInput), 0, sizeof(KPadRaceInputState));
     mDifficulty = 1; // Default to medium difficulty
     mPlayerIdx = 0;
 
@@ -103,7 +103,7 @@ KPadRaceInputState* KPadAI::getInputState() {
 // @addr 0x80523F20
 void KPadAI::resetInput() {
     // Zero out all AI input: no stick deflection, no buttons pressed
-    memset(&mAIInput, 0, sizeof(KPadRaceInputState));
+    memset(reinterpret_cast<u8*>(&mAIInput), 0, sizeof(KPadRaceInputState));
 }
 
 // setDifficulty__Q26System6KPadAIFUc
@@ -168,8 +168,8 @@ void KPadAIController::calcAll(u32 frameCount) {
         // Create temporary input states for the calculation
         KPadRaceInputState raceInput;
         KPadUIInputState uiInput;
-        memset(&raceInput, 0, sizeof(raceInput));
-        memset(&uiInput, 0, sizeof(uiInput));
+        memset(reinterpret_cast<u8*>(&raceInput), 0, sizeof(raceInput));
+        memset(reinterpret_cast<u8*>(&uiInput), 0, sizeof(uiInput));
 
         // Apply difficulty-based reaction delay
         // Only update AI input every N frames based on difficulty

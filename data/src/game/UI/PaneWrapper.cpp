@@ -99,16 +99,22 @@ void PaneWrapper::onActivate() {
 
 // @addr 0x8050a678
 void* PaneWrapper::construct() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
     initVtable();
     mVtable = 0;
     initAnimationFrame(offsetof(PaneWrapper, mAnimationFrameCtrl));
     initLinkedList(offsetof(PaneWrapper, mGroupChain));
+#pragma GCC diagnostic pop
     return this;
 }
 
 // @addr 0x8050a6f4
 void* PaneWrapper::destroy(s32 shouldFree) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnonnull-compare"
     if (this != nullptr) {
+#pragma GCC diagnostic pop
         clearVtable();
         if (shouldFree > 0) {
             free(this);
@@ -139,7 +145,7 @@ void PaneWrapper::update(f32 deltaTime) {
     u64 networkResult = getNetworkStatus();
     s32 networkState = (s32)(networkResult >> 32);
 
-    if (networkState >= 4 && networkState <= 5 || networkState == 0 || networkState == 1) {
+    if ((networkState >= 4 && networkState <= 5) || networkState == 0 || networkState == 1) {
         SceneDirector* director = getSceneDirector();
         director->mNetworkState = networkState;
         director->mNetworkSubState = (u32)networkResult;

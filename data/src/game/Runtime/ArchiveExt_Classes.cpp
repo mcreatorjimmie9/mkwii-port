@@ -200,7 +200,7 @@ s32 Decompressor::decompressChunk(void* src, void* dst) {
     u32 chunkSize = (mChunkSize > 0) ? mChunkSize : 0x4000;
 
     u8 code = 0;
-    u8 byte;
+    u8 byte = 0;
     u32 srcIdx = 0;
     u32 destIdx = 0;
 
@@ -424,7 +424,7 @@ u32 Decompressor::lz77Expand(s32 size) {
     u32 destIdx = 0;
     u32 maxDest = static_cast<u32>(size);
     u8 code = 0;
-    u8 byte;
+    u8 byte = 0;
 
     while (destIdx < maxDest) {
         code >>= 1;

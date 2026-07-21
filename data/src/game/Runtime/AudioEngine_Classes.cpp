@@ -1006,10 +1006,13 @@ AudioSystem::AudioSystem()
     : mDSP(nullptr), mArchive(nullptr), mCategories(nullptr)
     , mCategoryCount(SoundCategory::CAT_COUNT)
     , mInitialized(0), mActiveSounds(0), mFrameCounter(0) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
     std::memset(mWavePlayers, 0, sizeof(mWavePlayers));
     std::memset(mSeqPlayers, 0, sizeof(mSeqPlayers));
     std::memset(mStreamPlayers, 0, sizeof(mStreamPlayers));
     std::memset(mHandles, 0, sizeof(mHandles));
+#pragma GCC diagnostic pop
 }
 
 // @addr 0x80593560

@@ -371,7 +371,10 @@ void TexAnim_UnlinkNode(void* node, void* child) {
         memfill(obj + 4, 0, sizeof(void*));
         memfill(obj + 0x10, 0, sizeof(void*));
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Waddress"
         if (obj + 4 != nullptr) {
+#pragma GCC diagnostic pop
             memfill(obj + 4, 0, 0xCF);
         }
 

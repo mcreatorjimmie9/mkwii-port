@@ -14,6 +14,12 @@
 #include <cstring>
 #include <cstdio>
 
+// Suppress -Wdelete-incomplete: Mii destructor is inline in decompiled header
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-incomplete"
+#include <system/Mii.hpp>
+#pragma GCC diagnostic pop
+
 // ============================================================================
 // Constructor / Destructor
 // ============================================================================
@@ -273,7 +279,11 @@ u32 License::serialize(u8* buffer, u32 bufferSize) const {
             mGhosts[i].write(rawGhost);
         }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#pragma GCC diagnostic ignored "-Wstringop-overread"
         memcpy(buffer + offset, rawGhost._00, System::GHOST_FILE_SIZE);
+#pragma GCC diagnostic pop
         offset += System::GHOST_FILE_SIZE;
     }
 
@@ -328,7 +338,11 @@ u32 License::deserialize(const u8* buffer, u32 bufferSize) {
         if (offset + System::GHOST_FILE_SIZE > bufferSize) break;
 
         System::RawGhostFile rawGhost;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#pragma GCC diagnostic ignored "-Wstringop-overflow="
         memcpy(rawGhost._00, buffer + offset, System::GHOST_FILE_SIZE);
+#pragma GCC diagnostic pop
         offset += System::GHOST_FILE_SIZE;
 
         mGhosts[i].read(rawGhost);

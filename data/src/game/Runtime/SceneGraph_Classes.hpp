@@ -178,7 +178,12 @@ public:
     u8  m_gfxBase[0x18];       // 0x58 — GfxBase sub-object
     u8  m_subObject70[8];      // 0x70 — secondary sub-object
 
-    SceneGraphNode() { std::memset(this, 0, sizeof(*this)); }
+    SceneGraphNode() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+        std::memset(this, 0, sizeof(*this));
+#pragma GCC diagnostic pop
+    }
 
     // @addr 0x80523584 — Constructor
     void* create();
@@ -315,7 +320,10 @@ public:
     s32 m_videoStateData;       // 0x2874
 
     SceneGraph() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
         std::memset(this, 0, sizeof(*this));
+#pragma GCC diagnostic pop
         m_renderMode = -1;
         m_selectedVP = -1;
         m_sceneId = 0x7D1;

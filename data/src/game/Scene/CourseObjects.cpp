@@ -29,10 +29,10 @@ void CourseObjects::init(const void* courseData, u32 dataSize) {
 
     m_maxObjects = MAX_COURSE_OBJECTS;
     m_objects = new CourseObject[m_maxObjects];
-    memset(m_objects, 0, sizeof(CourseObject) * m_maxObjects);
+    for (u32 _i = 0; _i < m_maxObjects; _i++) m_objects[_i] = {};
     m_routeCount = 64;
     m_routes = new RoutePoint[m_routeCount];
-    memset(m_routes, 0, sizeof(RoutePoint) * m_routeCount);
+    for (u32 _i = 0; _i < m_routeCount; _i++) m_routes[_i] = {};
 
     m_objectCount = 0;
     m_initialized = true;
@@ -67,10 +67,10 @@ void CourseObjects::init() {
 
     m_maxObjects = MAX_COURSE_OBJECTS;
     m_objects = new CourseObject[m_maxObjects];
-    memset(m_objects, 0, sizeof(CourseObject) * m_maxObjects);
+    for (u32 _i = 0; _i < m_maxObjects; _i++) m_objects[_i] = {};
     m_routeCount = 64;
     m_routes = new RoutePoint[m_routeCount];
-    memset(m_routes, 0, sizeof(RoutePoint) * m_routeCount);
+    for (u32 _i = 0; _i < m_routeCount; _i++) m_routes[_i] = {};
     m_initialSnapshot = nullptr;
     m_snapshotCount = 0;
     m_objectCount = 0;
@@ -84,7 +84,7 @@ void CourseObjects::load(u32 courseId) {
 
     // Clear previous state
     for (u32 i = 0; i < m_objectCount; i++) {
-        memset(&m_objects[i], 0, sizeof(CourseObject));
+        m_objects[i] = {};
     }
     m_objectCount = 0;
 
@@ -321,7 +321,7 @@ void CourseObjects::unloadResources() {
 
 void CourseObjects::destroyObjectInternal(u32 index) {
     if (index >= m_objectCount) return;
-    memset(&m_objects[index], 0, sizeof(CourseObject));
+    m_objects[index] = {};
     m_objectCount--;
 }
 
@@ -370,7 +370,7 @@ void CourseObjects::destroyObject(u32 index) {
     for (u32 i = index; i < m_objectCount - 1; i++) {
         memcpy(&m_objects[i], &m_objects[i + 1], sizeof(CourseObject));
     }
-    memset(&m_objects[m_objectCount - 1], 0, sizeof(CourseObject));
+    m_objects[m_objectCount - 1] = {};
     m_objectCount--;
 }
 

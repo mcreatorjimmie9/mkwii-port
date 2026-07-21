@@ -174,7 +174,7 @@ void SectionDirector::setPageTransitionId(MenuPage* page, s32 transitionId) {
 
 // @addr 0x8071e624
 void SectionDirector::resolveCourseAssignments() {
-    u8 startIndex, endIndex;
+    u8 startIndex = 0, endIndex = 0;
     u8 rangeCount;
     getCourseRange(&startIndex, &endIndex);
     rangeCount = (endIndex - startIndex) + startIndex;

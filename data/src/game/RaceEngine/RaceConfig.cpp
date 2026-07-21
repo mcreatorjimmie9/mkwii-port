@@ -4,6 +4,8 @@
 
 #include "RaceConfig.hpp"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma legacy_struct_alignment off
 
 namespace System {
@@ -29,7 +31,7 @@ const CourseId COURSE_ORDER[8][4] = {
     {SNES_MARIO_CIRCUIT_3, DS_PEACH_GARDENS, GCN_DK_MOUNTAIN,
      N64_BOWSERS_CASTLE}};
 
-const u8 __attribute__((force_export))
+const u8
 VS_POINT_DISTRIBUTION[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {{15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                                                              {15, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                                                              {15, 8, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -55,7 +57,7 @@ RaceConfig::Player::Player()
     : _04(0), mLocalPlayerNum(-1), mPlayerInputIdx(-1),
       mVehicleId(STANDARD_KART_M), mCharacterId(MARIO),
       mPlayerType(TYPE_REAL_LOCAL), mMii(7), mControllerId(-1), _bc(8),
-      mRating(), _ec(_ec & ~0x80), _c8(0), _cf{} {}
+      mRating(), _ec(0), _c8(0), _cf{} {}
 
 void RaceConfig::Player::appendParamFile(RaceConfig* raceConfig) {
   raceConfig->append(mVehicleId, InitScene::spInstance->mHeapCollection
@@ -129,13 +131,15 @@ const u8 RaceConfig::getRacePlayerCount() {
 }
 
 #pragma legacy_struct_alignment on
+#pragma GCC diagnostic pop
+
 inline void as_scenarios(RaceConfig::Scenario& s1, RaceConfig::Scenario& s2) {
   s1 = s2;
 }
 
 // @addr 0x80530228
 void RaceConfig::init() {
-  Player* player;
+  Player* player = nullptr;
   mMenuScenario.mSettings.mCourseId = GCN_MARIO_CIRCUIT;
   mMenuScenario.mSettings.mGameMode = Settings::GAMEMODE_GRAND_PRIX;
   mMenuScenario.mSettings.mCameraMode = Settings::CAMERA_MODE_GAMEPLAY_NO_INTRO;
@@ -256,7 +260,7 @@ bool RaceConfig::Scenario::initGhost(u8 playerIdx, s8 playerInputIdx) {
   bool ret = false;
   if (mGhost) {
     // RawGhostFile is a POD struct, check courseId field for validity
-    GhostFile ghost;
+    GhostFile ghost{};
     ghost.read(*mGhost);
 
     if (ghost.mCourseId == mSettings.mCourseId) {
@@ -304,8 +308,8 @@ void RaceConfig::Scenario::initPlayers(u8 playerCount) {
 
 // @addr 0x805319d0
 void RaceConfig::Scenario::initControllers(u8 controllerCount) {
-  Controller* controller;
-  s32 controllerId;
+  Controller* controller = nullptr;
+  s32 controllerId = 0;
   u8 localPlayerNum = 0;
   u8 playerInputIdx = 0;
 
@@ -343,6 +347,9 @@ void RaceConfig::Scenario::initControllers(u8 controllerCount) {
       break;
     case Player::TYPE_CPU:
       mPlayers[i].mControllerId = -1;
+      break;
+    default:
+      break;
     }
   }
 
@@ -419,11 +426,11 @@ void RaceConfig::Scenario::computePlayerCounts(u8& playerCount, u8& hudCount,
 
 // @addr 0x80531e0c
 void RaceConfig::Scenario::initRng() {
-  u32 seed;
-  u32 mask;
-  u32 mask1;
-  u32 mask2;
-  u32 mask3;
+  u32 seed = 0;
+  u32 mask = 0;
+  u32 mask1 = 0;
+  u32 mask2 = 0;
+  u32 mask3 = 0;
   u32 gamemode = mSettings.mGameMode;
 
   switch ((Settings::GameMode)gamemode) {
@@ -436,6 +443,8 @@ void RaceConfig::Scenario::initRng() {
     mask |= (seed >> 3) & 0x1FFF0000;
     mSettings.mSeed2 = mask;
     return;
+  default:
+    break;
   }
 
   if (mSettings.mModeFlags & Settings::MODE_FLAG_COMPETITION) {
@@ -486,9 +495,8 @@ extern void* ptr_Nwc24Manager;
 
 // @addr 0x80531ef4
 void RaceConfig::Scenario::initCompetitionSettings() {
-  CompetitionSettings settings;
-  memset(&settings, 0, sizeof(CompetitionSettings));
-  CompetitionWrapper wrapper;
+  CompetitionSettings settings{};
+  CompetitionWrapper wrapper{};
   wrapper.isValid = false;
   wrapper.fileRaw = nullptr;
   getCompetitionWrapper(ptr_Nwc24Manager, &wrapper);
@@ -573,7 +581,11 @@ void RaceConfig::Scenario::initRace(Scenario* scenario) {
   mLocalPlayerCount = localPlayerCount;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma dont_reuse_strings on
+#pragma GCC diagnostic pop
+
 // @addr 0x80532340
 RaceConfig* RaceConfig::createInstance() {
   if (!spInstance) {
@@ -607,7 +619,11 @@ RaceConfig::RaceConfig()
   } while (it < mGhosts + ARRAY_SIZE(mGhosts));
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma legacy_struct_alignment on
+#pragma GCC diagnostic pop
+
 // @addr 0x805327ac
 void RaceConfig::initRace() {
   mMenuScenario.initRace(&mRaceScenario);
@@ -639,9 +655,12 @@ RaceConfig::Scenario::copy(const RaceConfig::Scenario& other) {
 }
 
 // @addr 0x80533418
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma legacy_struct_alignment on
 void RaceConfig::Player::setMii(const Mii& mii) { mMii = mii; }
 #pragma legacy_struct_alignment off
+#pragma GCC diagnostic pop
 
 Mii& RaceConfig::Player::getMii() { return mMii; }
 

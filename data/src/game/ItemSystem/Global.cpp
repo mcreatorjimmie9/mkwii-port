@@ -239,6 +239,7 @@ bool cancelBullet(void) {
     /* 0x80590d4c() */
     /* fmr f0, f29 */
     /* f1 = *(f32*)(r3+0x4) */
+    return false;
 }
 
 #ifdef ASSEMBLY_REFERENCE

@@ -31,18 +31,24 @@ Layout::~Layout() {
 
 // @addr 0x8050b218
 void* Layout::construct() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
     initVtable();
     mVtable = 0;
     initPaneReference(mPaneTree);
     initTextCtrl(mTextBoxCtrl);
     initAnimGroup(mPicturePane);
     initLinkedList(offsetof(Layout, mGroupChain));
+#pragma GCC diagnostic pop
     return this;
 }
 
 // @addr 0x8050b2a4
 void* Layout::destroy(s32 freeMemory) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnonnull-compare"
     if (this != nullptr) {
+#pragma GCC diagnostic pop
         destroyAnimGroup(mPicturePane, -1);
         destroyTextCtrl(mTextBoxCtrl, -1);
         destroyPaneReference(mPaneTree, -1);
@@ -166,7 +172,10 @@ void* Layout::constructWithTextBox() {
     initVtable();
     mVtable = 0;
     initTextCtrl(mPaneTree);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
     initPictureCtrl((void*)mPicturePane);
+#pragma GCC diagnostic pop
     initAnimGroup(mCursorPane);
     initPaneReference(mSubPane);
     return this;

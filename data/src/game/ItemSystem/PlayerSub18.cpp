@@ -43,7 +43,10 @@ PlayerSub18::PlayerSub18()
     : mCollisionMask(0xFFFFFFFF)
     , mLastResult(COLLISION_NONE)
     , mHitboxGroupCount(0) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
     std::memset(mHitboxGroups, 0, sizeof(mHitboxGroups));
+#pragma GCC diagnostic pop
     mPlayerPos = EGG::Vector3f::zero;
 }
 

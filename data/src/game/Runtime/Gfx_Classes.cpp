@@ -285,7 +285,10 @@ void InterpCtrl::updatePosition() {
 // @addr 0x804a9020 — Constructor
 // Derived from eggScnRenderer pattern: zero everything, init sub-object at 0x11
 void* GfxBase::create() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
     std::memset(this, 0, sizeof(GfxBase));
+#pragma GCC diagnostic pop
     // FUN_804d113c() — global GfxBase init / registration
     // FUN_804c8134(this + 0x11) — init sub-object (type-specific processor)
     return this;
@@ -295,7 +298,10 @@ void* GfxBase::create() {
 // Derived from eggScnRenderer 0x8023ba18 pattern:
 // destroy sub-display-lists, unbind from global list, optionally free self.
 void* GfxBase::destroy(s32 freeSelf) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnonnull-compare"
     if (this != nullptr) {
+#pragma GCC diagnostic pop
         // FUN_804c8158(m_displayList, 0xFFFFFFFF) — destroy display list
         // FUN_804d11c4(this, 0) — unbind from global linked list
         m_displayList = nullptr;
@@ -316,7 +322,10 @@ void GfxBase::beginDraw() {
 
 // @addr 0x804a8e44 — Destroy display list content
 void GfxBase::destroyDisplayList() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnonnull-compare"
     if (this != nullptr && m_displayList != nullptr) {
+#pragma GCC diagnostic pop
         // FUN_80443430(m_displayList, 0) — GX-based display list teardown
         m_displayList = nullptr;
     }
@@ -343,7 +352,10 @@ void GfxBase::reset() {
 // Derived from ScnRenderer_createPath (0x8023bd38) which creates draw paths
 // with priority values and sub-display-lists for each rendering pass.
 void* GfxProcessor::create() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
     std::memset(this, 0, sizeof(GfxProcessor));
+#pragma GCC diagnostic pop
     // FUN_804d113c() — global init
     // FUN_804c8134(this + 0x11) — init base sub-object
     // FUN_804cd3f0(this + 0x16) — init scene geometry sub-obj
@@ -359,7 +371,10 @@ void* GfxProcessor::create() {
 //   delete[] the draw path array
 //   call base class teardown
 void* GfxProcessor::destroy(s32 freeSelf) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnonnull-compare"
     if (this != nullptr) {
+#pragma GCC diagnostic pop
         // Destroy sub-DLs in reverse order (post → alpha → scene)
         // FUN_804cd2b4(this + 0x340, 0xFFFFFFFF) — destroy post-process DL
         // FUN_804cd018(this + 0x1CC, 0xFFFFFFFF) — destroy alpha DL

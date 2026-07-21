@@ -19,8 +19,8 @@ RecordBook::RecordBook()
         mStaffGhosts[i].seconds = 0;
         mStaffGhosts[i].millis = 0;
     }
-    memset(mGPRanks, 0, sizeof(mGPRanks));
-    memset(mEngineRecords, 0, sizeof(mEngineRecords));
+    memset(reinterpret_cast<u8*>(mGPRanks), 0, sizeof(mGPRanks));
+    memset(reinterpret_cast<u8*>(mEngineRecords), 0, sizeof(mEngineRecords));
 }
 
 RecordBook::~RecordBook() {
@@ -459,8 +459,8 @@ void RecordBook::clearAll() {
     for (u32 i = 0; i < COURSE_COUNT; i++) {
         mRecords[i].reset();
     }
-    memset(mGPRanks, 0, sizeof(mGPRanks));
-    memset(mEngineRecords, 0, sizeof(mEngineRecords));
+    memset(reinterpret_cast<u8*>(mGPRanks), 0, sizeof(mGPRanks));
+    memset(reinterpret_cast<u8*>(mEngineRecords), 0, sizeof(mEngineRecords));
     mDirty = true;
 }
 

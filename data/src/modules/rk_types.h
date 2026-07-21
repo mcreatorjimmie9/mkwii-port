@@ -19,5 +19,7 @@ typedef u8 BOOL;
 #define NULL nullptr
 #endif
 typedef u32 size_t_wii;
+#ifndef BIT
 #define BIT(n) (1 << (n))
+#endif
 #define NEVER_INLINE __attribute__((noinline))

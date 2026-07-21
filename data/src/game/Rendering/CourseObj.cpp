@@ -182,8 +182,11 @@ void CourseObjActor_UpdateWithRotation(CourseObjActor* self, s32 variantIdx) {
     sub->drawFlags |= 0x4000;
 
     // Check if we need LOD processing
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
     s16 lodMin = static_cast<s16>(sRenderSettings->_000[0x360]);
     s16 lodMax = static_cast<s16>(sRenderSettings->_000[0x364]);
+#pragma GCC diagnostic pop
     bool inLodRange = true;
 
     if (self->_1B8 < sRenderSettings->defaultScale) {

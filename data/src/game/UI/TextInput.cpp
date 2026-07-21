@@ -91,7 +91,7 @@ void TextInput::onLoad() {
 
     // Group 1: Main text pane
     attachToGroup(this, 1, mMainTextPane, 0);
-    if (sceneId >= 0x68 && sceneId <= 0x69 || sceneId >= 0x6C && sceneId <= 0x6D) {
+    if ((sceneId >= 0x68 && sceneId <= 0x69) || (sceneId >= 0x6C && sceneId <= 0x6D)) {
         setTextBounds(mMainTextPane, 0xCD, 0xD4, 0xE2, 1, 0, 0);
     } else {
         setTextBounds(mMainTextPane, 0xA5, 0xAC, 0xBA, 1, 0, 0);

@@ -1461,6 +1461,7 @@ u32 ITEMHandler_getPlayerMode(void) {
     /* r21+0x354 = r0 */
     /* adde r0, r4, r3 */
     /* r21+0x350 = r0 */
+    return 0;
 }
 
 #ifdef ASSEMBLY_REFERENCE

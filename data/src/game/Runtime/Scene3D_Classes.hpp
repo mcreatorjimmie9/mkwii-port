@@ -355,7 +355,12 @@ struct Frustum {
         INSIDE    = 2,
     };
 
-    Frustum() { std::memset(this, 0, sizeof(*this)); }
+    Frustum() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+        std::memset(this, 0, sizeof(*this));
+#pragma GCC diagnostic pop
+    }
 
     // @addr 0x80514620 — Static: global frustum init (plane 0)
     static void globalInit_0();
@@ -566,7 +571,10 @@ public:
     Frustum m_frustum;     // 0x0EC
 
     NijiCamera() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
         std::memset(this, 0, sizeof(*this));
+#pragma GCC diagnostic pop
         m_fov = 60.0f;
         m_aspect = 4.0f / 3.0f;
         m_near = 1.0f;

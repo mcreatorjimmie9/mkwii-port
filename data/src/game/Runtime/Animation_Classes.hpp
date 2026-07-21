@@ -490,7 +490,12 @@ public:
     void*           m_callbackData; // 0x40 — completion callback context
     u32             m_pad44;        // 0x44
 
-    AnimPlayer() { std::memset(this, 0, sizeof(*this)); }
+    AnimPlayer() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+        std::memset(this, 0, sizeof(*this));
+#pragma GCC diagnostic pop
+    }
 
     // --- Virtual methods ---
     virtual ~AnimPlayer();
@@ -611,7 +616,12 @@ public:
     void* m_curveEvaluator;   // 0x28 — curve evaluation context
     u32   m_pad2C;            // 0x2C
 
-    AnimTransform() { std::memset(this, 0, sizeof(*this)); }
+    AnimTransform() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+        std::memset(this, 0, sizeof(*this));
+#pragma GCC diagnostic pop
+    }
 
     // --- Virtual methods ---
     virtual ~AnimTransform();
@@ -732,7 +742,12 @@ public:
     u32   m_blendMode;    // 0x1C — blend mode
     void* m_resultData;   // 0x20 — output transform data
 
-    AnimBlendNode() { std::memset(this, 0, sizeof(*this)); }
+    AnimBlendNode() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+        std::memset(this, 0, sizeof(*this));
+#pragma GCC diagnostic pop
+    }
 
     // --- Virtual methods ---
     virtual ~AnimBlendNode();
@@ -856,7 +871,12 @@ public:
     void*           m_callbackData; // 0x28 — global callback context
     u32             m_pad2C;        // 0x2C
 
-    Animator() { std::memset(this, 0, sizeof(*this)); }
+    Animator() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+        std::memset(this, 0, sizeof(*this));
+#pragma GCC diagnostic pop
+    }
 
     // --- Virtual methods ---
     virtual ~Animator();

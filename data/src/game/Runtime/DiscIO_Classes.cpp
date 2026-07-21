@@ -57,7 +57,10 @@ DVDFileInfo::~DVDFileInfo() {
 // From eggDvdFile.cpp: DvdFile::initiate() — zero all fields and
 // initialize internal state for a fresh file handle.
 void DVDFileInfo::init() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
     std::memset(this, 0, sizeof(DVDFileInfo));
+#pragma GCC diagnostic pop
     mState = STATE_IDLE;
     mPriority = 2; // default DVD priority
     mCallback = nullptr;

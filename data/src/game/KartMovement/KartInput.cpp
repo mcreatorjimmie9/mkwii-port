@@ -42,7 +42,7 @@ const u32 IDLE_BUTTON_MASK    = PAD_BUTTON_A | PAD_BUTTON_B | PAD_BUTTON_X |
 } // anonymous namespace
 
 KartInput::KartInput() {
-    memset(this, 0, sizeof(KartInput));
+    memset(reinterpret_cast<u8*>(this), 0, sizeof(KartInput));
     m_deadzone = DEFAULT_DEADZONE;
 }
 
@@ -301,7 +301,7 @@ void KartInput::setDeadzone(f32 radius) {
 // Full initialization of the input system for a player.
 // Resets all state and configures the deadzone.
 void KartInput::init() {
-    memset(this, 0, sizeof(KartInput));
+    memset(reinterpret_cast<u8*>(this), 0, sizeof(KartInput));
     m_deadzone = DEFAULT_DEADZONE;
 }
 

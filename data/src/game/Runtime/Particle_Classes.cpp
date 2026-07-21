@@ -173,7 +173,10 @@ void ParticleMgr::setGlobalTint(u8 r, u8 g, u8 b, u8 a) {
 
 void* Emitter::create() {
     // @addr 0x80541010
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
     std::memset(this, 0, sizeof(Emitter));
+#pragma GCC diagnostic pop
     // vtable set by compiler
     m_flags = FLAG_ALIVE;
     return this;

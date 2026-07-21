@@ -14,10 +14,10 @@ CourseColManager::CourseColManager()
     , mRespawnCount(0)
     , mCannonCount(0)
     , mBoostPadCount(0) {
-    memset(mRespawnPoints, 0, sizeof(mRespawnPoints));
-    memset(mCannonTargets, 0, sizeof(mCannonTargets));
-    memset(mBoostPads, 0, sizeof(mBoostPads));
-    memset(&mLastResult, 0, sizeof(mLastResult));
+    for (s32 _i = 0; _i < MAX_RESPAWN_POINTS; _i++) mRespawnPoints[_i] = {};
+    for (s32 _i = 0; _i < MAX_CANNON_TARGETS; _i++) mCannonTargets[_i] = {};
+    for (s32 _i = 0; _i < MAX_BOOST_PADS; _i++) mBoostPads[_i] = {};
+    mLastResult = {};
 }
 
 CourseColManager::~CourseColManager() {
@@ -38,9 +38,9 @@ void CourseColManager::init() {
     mRespawnCount = 0;
     mCannonCount = 0;
     mBoostPadCount = 0;
-    memset(mRespawnPoints, 0, sizeof(mRespawnPoints));
-    memset(mCannonTargets, 0, sizeof(mCannonTargets));
-    memset(mBoostPads, 0, sizeof(mBoostPads));
+    for (s32 _i = 0; _i < MAX_RESPAWN_POINTS; _i++) mRespawnPoints[_i] = {};
+    for (s32 _i = 0; _i < MAX_CANNON_TARGETS; _i++) mCannonTargets[_i] = {};
+    for (s32 _i = 0; _i < MAX_BOOST_PADS; _i++) mBoostPads[_i] = {};
 }
 
 bool CourseColManager::load(u32 courseId) {
@@ -107,9 +107,9 @@ void CourseColManager::unload() {
     mRespawnCount = 0;
     mCannonCount = 0;
     mBoostPadCount = 0;
-    memset(mRespawnPoints, 0, sizeof(mRespawnPoints));
-    memset(mCannonTargets, 0, sizeof(mCannonTargets));
-    memset(mBoostPads, 0, sizeof(mBoostPads));
+    for (s32 _i = 0; _i < MAX_RESPAWN_POINTS; _i++) mRespawnPoints[_i] = {};
+    for (s32 _i = 0; _i < MAX_CANNON_TARGETS; _i++) mCannonTargets[_i] = {};
+    for (s32 _i = 0; _i < MAX_BOOST_PADS; _i++) mBoostPads[_i] = {};
 }
 
 // ============================================================================

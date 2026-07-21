@@ -84,8 +84,8 @@ inline s32 DVDReadPrio(DVDFileInfo* fileInfo, void* addr, s32 length,
 
 // DVDRead — reads from a file (macro that calls DVDReadPrio with prio=2).
 // Defined as a macro in the SDK; we provide it as inline for safety.
-// #define DVDRead(fileInfo, addr, length, offset) \
-//     DVDReadPrio((fileInfo), (addr), (length), (offset), 2)
+/* #define DVDRead(fileInfo, addr, length, offset) \
+     DVDReadPrio((fileInfo), (addr), (length), (offset), 2) */
 inline s32 DVDRead(DVDFileInfo* fileInfo, void* addr, s32 length, s32 offset) {
     return DVDReadPrio(fileInfo, addr, length, offset, 2);
 }

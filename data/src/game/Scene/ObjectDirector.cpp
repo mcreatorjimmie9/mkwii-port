@@ -24,7 +24,7 @@ ObjectDirector::~ObjectDirector() {
 void ObjectDirector::init(u32 maxObjects) {
     m_maxObjects = maxObjects > 0 ? maxObjects : MAX_OBJECTS_DEFAULT;
     m_objects = new ObjectEntry[m_maxObjects];
-    memset(m_objects, 0, sizeof(ObjectEntry) * m_maxObjects);
+    memset(reinterpret_cast<u8*>(m_objects), 0, sizeof(ObjectEntry) * m_maxObjects);
 
     // Mark all entries as inactive
     for (u32 i = 0; i < m_maxObjects; i++) {

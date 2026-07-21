@@ -333,51 +333,72 @@ void transformBoundingBox(EGG::Vector3f& minOut, EGG::Vector3f& maxOut,
     // Corner 1: (maxIn.x, minIn.y, minIn.z)
     corner.set(maxIn.x, minIn.y, minIn.z);
     EGG::Vector3f t1 = mtx * corner;
-    if (t1.x < minX) minX = t1.x; if (t1.x > maxX) maxX = t1.x;
-    if (t1.y < minY) minY = t1.y; if (t1.y > maxY) maxY = t1.y;
-    if (t1.z < minZ) minZ = t1.z; if (t1.z > maxZ) maxZ = t1.z;
+    if (t1.x < minX) minX = t1.x;
+    if (t1.x > maxX) maxX = t1.x;
+    if (t1.y < minY) minY = t1.y;
+    if (t1.y > maxY) maxY = t1.y;
+    if (t1.z < minZ) minZ = t1.z;
+    if (t1.z > maxZ) maxZ = t1.z;
 
     // Corner 2: (minIn.x, maxIn.y, minIn.z)
     corner.set(minIn.x, maxIn.y, minIn.z);
     EGG::Vector3f t2 = mtx * corner;
-    if (t2.x < minX) minX = t2.x; if (t2.x > maxX) maxX = t2.x;
-    if (t2.y < minY) minY = t2.y; if (t2.y > maxY) maxY = t2.y;
-    if (t2.z < minZ) minZ = t2.z; if (t2.z > maxZ) maxZ = t2.z;
+    if (t2.x < minX) minX = t2.x;
+    if (t2.x > maxX) maxX = t2.x;
+    if (t2.y < minY) minY = t2.y;
+    if (t2.y > maxY) maxY = t2.y;
+    if (t2.z < minZ) minZ = t2.z;
+    if (t2.z > maxZ) maxZ = t2.z;
 
     // Corner 3: (maxIn.x, maxIn.y, minIn.z)
     corner.set(maxIn.x, maxIn.y, minIn.z);
     EGG::Vector3f t3 = mtx * corner;
-    if (t3.x < minX) minX = t3.x; if (t3.x > maxX) maxX = t3.x;
-    if (t3.y < minY) minY = t3.y; if (t3.y > maxY) maxY = t3.y;
-    if (t3.z < minZ) minZ = t3.z; if (t3.z > maxZ) maxZ = t3.z;
+    if (t3.x < minX) minX = t3.x;
+    if (t3.x > maxX) maxX = t3.x;
+    if (t3.y < minY) minY = t3.y;
+    if (t3.y > maxY) maxY = t3.y;
+    if (t3.z < minZ) minZ = t3.z;
+    if (t3.z > maxZ) maxZ = t3.z;
 
     // Corner 4: (minIn.x, minIn.y, maxIn.z)
     corner.set(minIn.x, minIn.y, maxIn.z);
     EGG::Vector3f t4 = mtx * corner;
-    if (t4.x < minX) minX = t4.x; if (t4.x > maxX) maxX = t4.x;
-    if (t4.y < minY) minY = t4.y; if (t4.y > maxY) maxY = t4.y;
-    if (t4.z < minZ) minZ = t4.z; if (t4.z > maxZ) maxZ = t4.z;
+    if (t4.x < minX) minX = t4.x;
+    if (t4.x > maxX) maxX = t4.x;
+    if (t4.y < minY) minY = t4.y;
+    if (t4.y > maxY) maxY = t4.y;
+    if (t4.z < minZ) minZ = t4.z;
+    if (t4.z > maxZ) maxZ = t4.z;
 
     // Corner 5: (maxIn.x, minIn.y, maxIn.z)
     corner.set(maxIn.x, minIn.y, maxIn.z);
     EGG::Vector3f t5 = mtx * corner;
-    if (t5.x < minX) minX = t5.x; if (t5.x > maxX) maxX = t5.x;
-    if (t5.y < minY) minY = t5.y; if (t5.y > maxY) maxY = t5.y;
-    if (t5.z < minZ) minZ = t5.z; if (t5.z > maxZ) maxZ = t5.z;
+    if (t5.x < minX) minX = t5.x;
+    if (t5.x > maxX) maxX = t5.x;
+    if (t5.y < minY) minY = t5.y;
+    if (t5.y > maxY) maxY = t5.y;
+    if (t5.z < minZ) minZ = t5.z;
+    if (t5.z > maxZ) maxZ = t5.z;
 
     // Corner 6: (minIn.x, maxIn.y, maxIn.z)
     corner.set(minIn.x, maxIn.y, maxIn.z);
     EGG::Vector3f t6 = mtx * corner;
-    if (t6.x < minX) minX = t6.x; if (t6.x > maxX) maxX = t6.x;
-    if (t6.y < minY) minY = t6.y; if (t6.y > maxY) maxY = t6.y;
-    if (t6.z < minZ) minZ = t6.z; if (t6.z > maxZ) maxZ = t6.z;
+    if (t6.x < minX) minX = t6.x;
+    if (t6.x > maxX) maxX = t6.x;
+    if (t6.y < minY) minY = t6.y;
+    if (t6.y > maxY) maxY = t6.y;
+    if (t6.z < minZ) minZ = t6.z;
+    if (t6.z > maxZ) maxZ = t6.z;
 
     // Corner 7: (maxIn.x, maxIn.y, maxIn.z)
     corner.set(maxIn.x, maxIn.y, maxIn.z);
     EGG::Vector3f t7 = mtx * corner;
-    if (t7.x < minX) minX = t7.x; if (t7.x > maxX) maxX = t7.x;
-    if (t7.y < minY) minY = t7.y; if (t7.y > maxY) maxY = t7.y;
-    if (t7.z < minZ) minZ = t7.z; if (t7.z > maxZ) maxZ = t7.z;
+    if (t7.x < minX) minX = t7.x;
+    if (t7.x > maxX) maxX = t7.x;
+    if (t7.y < minY) minY = t7.y;
+    if (t7.y > maxY) maxY = t7.y;
+    if (t7.z < minZ) minZ = t7.z;
+    if (t7.z > maxZ) maxZ = t7.z;
 
     minOut.set(minX, minY, minZ);
     maxOut.set(maxX, maxY, maxZ);

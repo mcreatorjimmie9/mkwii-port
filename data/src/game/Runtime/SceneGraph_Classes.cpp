@@ -127,7 +127,10 @@ s32 LODCalculator::compareAdvanced(LODCalculator* a, LODCalculator* b) {
 
 // @addr 0x80523584 — Constructor
 void* SceneGraphNode::create() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
     std::memset(this, 0, sizeof(SceneGraphNode));
+#pragma GCC diagnostic pop
     // FUN_segment_0__804d113c(); — init global state
     // m_listEntry44 = 0;
     m_listEntry = 0;
@@ -171,7 +174,10 @@ void SceneGraphNode::update() {
 
 // @addr 0x80522fa0 — Base constructor
 void* SceneGraph::create() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
     std::memset(this, 0, sizeof(SceneGraph));
+#pragma GCC diagnostic pop
     // FUN_segment_0__804d113c(); — init global state
     // m_vtable = nullptr (cleared by memset)
     // Setup linked list nodes for observer pattern

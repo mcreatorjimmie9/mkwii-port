@@ -99,7 +99,7 @@ bool PlayerSub10_checkWheelie() {
 // ===== PlayerSub10 class method implementations =====
 
 PlayerSub10::PlayerSub10() {
-    memset(this, 0, sizeof(PlayerSub10));
+    memset(reinterpret_cast<u8*>(this), 0, sizeof(PlayerSub10));
     this->speedMultiplier = 1.0f;
     this->hardSpeedLimit = 0.0f;
     this->speedDragMultiplier = 1.0f;

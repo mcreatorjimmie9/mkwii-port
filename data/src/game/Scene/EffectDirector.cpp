@@ -29,10 +29,10 @@ EffectDirector::~EffectDirector() {
 
 void EffectDirector::init() {
     m_emitters = new EffectEmitter[MAX_EMITTERS];
-    memset(m_emitters, 0, sizeof(EffectEmitter) * MAX_EMITTERS);
+    for (u32 _i = 0; _i < MAX_EMITTERS; _i++) m_emitters[_i] = {};
 
     m_particlePool = new Particle[MAX_PARTICLES];
-    memset(m_particlePool, 0, sizeof(Particle) * MAX_PARTICLES);
+    for (u32 _i = 0; _i < MAX_PARTICLES; _i++) m_particlePool[_i] = {};
 
     m_activeEmitterCount = 0;
     m_totalParticleCount = 0;
@@ -264,7 +264,7 @@ void EffectDirector::stopAll() {
 
     // Clear all particles
     if (m_particlePool) {
-        memset(m_particlePool, 0, sizeof(Particle) * MAX_PARTICLES);
+        for (u32 _i = 0; _i < MAX_PARTICLES; _i++) m_particlePool[_i] = {};
     }
     m_totalParticleCount = 0;
 }

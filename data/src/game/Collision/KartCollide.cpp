@@ -245,7 +245,7 @@ void KartCollide::checkNeighborhood(KartCollisionInfo& kartColInfo, const Hitbox
             } else {
                 EGG::Vector3f localRight;
                 kartDynamics()->mainRot.rotateVector(RKSystem_ex, localRight);
-                f32 offs[2];
+                f32 offs[2] = {0.0f, 0.0f};
                 f32 sign;
                 for (s32 i = 0; i < 2; i++) {
                     if (i == 1) {

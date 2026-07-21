@@ -53,12 +53,12 @@ bool Course::load(u16 courseId) {
 
     // --- Allocate sector storage (road surface mesh) ---
     m_sectors = new RoadSector[MAX_SECTORS];
-    memset(m_sectors, 0, sizeof(RoadSector) * MAX_SECTORS);
+    for (u32 _i = 0; _i < MAX_SECTORS; _i++) m_sectors[_i] = {};
     m_sectorCount = 0;
 
     // --- Allocate checkpoint storage ---
     m_checkpoints = new Checkpoint[MAX_CHECKPOINTS];
-    memset(m_checkpoints, 0, sizeof(Checkpoint) * MAX_CHECKPOINTS);
+    for (u32 _i = 0; _i < MAX_CHECKPOINTS; _i++) m_checkpoints[_i] = {};
     m_checkpointCount = 2; // Minimum: start line + halfway key checkpoint
 
     // Set up default start/finish checkpoint (index 0)
@@ -81,7 +81,7 @@ bool Course::load(u16 courseId) {
 
     // --- Allocate start positions (grid of up to 12) ---
     m_startPositions = new StartPosition[MAX_START_POSITIONS];
-    memset(m_startPositions, 0, sizeof(StartPosition) * MAX_START_POSITIONS);
+    for (u32 _i = 0; _i < MAX_START_POSITIONS; _i++) m_startPositions[_i] = {};
     m_startPositionCount = MAX_START_POSITIONS;
 
     // Lay out a 2-wide, 6-deep starting grid
@@ -101,17 +101,17 @@ bool Course::load(u16 courseId) {
 
     // --- Allocate camera route ---
     m_cameraRoute = new Vec3[MAX_CAMERA_POINTS];
-    memset(m_cameraRoute, 0, sizeof(Vec3) * MAX_CAMERA_POINTS);
+    for (u32 _i = 0; _i < MAX_CAMERA_POINTS; _i++) m_cameraRoute[_i] = {};
     m_cameraRouteCount = 0;
 
     // --- Allocate cannon points ---
     m_cannonPoints = new CannonPoint[MAX_CANNON_POINTS];
-    memset(m_cannonPoints, 0, sizeof(CannonPoint) * MAX_CANNON_POINTS);
+    for (u32 _i = 0; _i < MAX_CANNON_POINTS; _i++) m_cannonPoints[_i] = {};
     m_cannonPointCount = 0;
 
     // --- Allocate Jugem (rescue) points ---
     m_jugemPoints = new JugemPoint[MAX_JUGEM_POINTS];
-    memset(m_jugemPoints, 0, sizeof(JugemPoint) * MAX_JUGEM_POINTS);
+    for (u32 _i = 0; _i < MAX_JUGEM_POINTS; _i++) m_jugemPoints[_i] = {};
     m_jugemPointCount = 0;
 
     // --- Model / collision data ---

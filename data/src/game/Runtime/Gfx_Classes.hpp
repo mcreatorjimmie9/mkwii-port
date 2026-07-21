@@ -108,7 +108,12 @@ public:
     f32 m_scaleFactor;      // 0x94
     u32 m_state2;           // 0x98
 
-    LightManager() { std::memset(this, 0, sizeof(*this)); }
+    LightManager() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+        std::memset(this, 0, sizeof(*this));
+#pragma GCC diagnostic pop
+    }
 
     // @addr 0x804a1434 — Full constructor
     void create();

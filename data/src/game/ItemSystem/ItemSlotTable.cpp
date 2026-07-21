@@ -154,7 +154,12 @@ void ItemSlotTable::setWeight(u8 tableIdx, u8 position, u8 itemType, u8 weight) 
     if (itemType >= MAX_ITEM_TYPES) {
         return;
     }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#pragma GCC diagnostic ignored "-Waggressive-loop-optimizations"
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
     mTables[tableIdx][position * MAX_ITEM_TYPES + itemType] = weight;
+#pragma GCC diagnostic pop
 }
 
 // ============================================================================

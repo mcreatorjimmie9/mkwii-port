@@ -96,6 +96,8 @@ bool GhostFile::write(RawGhostFile& raw) const {
 
     // Compute CRC32 over input data section
     u32 crc = 0xFFFFFFFF;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
     for (u32 i = 0; i < inputSize; i++) {
         u8 byte = raw._00[GHOST_HEADER_SIZE + i];
         crc ^= byte;
@@ -106,6 +108,7 @@ bool GhostFile::write(RawGhostFile& raw) const {
                 crc = crc >> 1;
         }
     }
+#pragma GCC diagnostic pop
     crc ^= 0xFFFFFFFF;
 
     // Write checksum at offset 0x28 into the raw buffer

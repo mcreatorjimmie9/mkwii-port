@@ -31,7 +31,7 @@ void TimeAttackSplitsPage::ct() {
     // Zero out all member fields via memset
     // The original binary calls memset(this, 0, sizeof(TimeAttackSplitsPage))
     // then calls UI framework constructors for the page layout
-    memset(this, 0, sizeof(TimeAttackSplitsPage));
+    memset(reinterpret_cast<u8*>(this), 0, sizeof(TimeAttackSplitsPage));
     // Calls parent constructor via vtable (0x805bc074)
     // Initializes layout controls for split time display
     // 0x805dc968 = likely UIControl::create — creates the page pane

@@ -21,7 +21,7 @@ MapObjDirector::~MapObjDirector() {
 void MapObjDirector::init(u32 maxObjects) {
     m_maxObjects = maxObjects > 0 ? maxObjects : MAX_MAPOBJS;
     m_objects = new MapObjEntry[m_maxObjects];
-    memset(m_objects, 0, sizeof(MapObjEntry) * m_maxObjects);
+    memset(reinterpret_cast<u8*>(m_objects), 0, sizeof(MapObjEntry) * m_maxObjects);
 
     for (u32 i = 0; i < m_maxObjects; i++) {
         m_objects[i].loaded = false;

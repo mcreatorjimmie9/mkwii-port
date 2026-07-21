@@ -276,7 +276,10 @@ u32 Frustum::testSphere(const f32 center[3], f32 radius, u32 planeMask) const {
 
 void Frustum::reset() {
     // @addr 0x805150e0
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
     std::memset(this, 0, sizeof(*this));
+#pragma GCC diagnostic pop
 }
 
 void Frustum::setPlane(u32 index, f32 pnx, f32 pny, f32 pnz, f32 pd) {
@@ -489,7 +492,10 @@ void Coord3D::setRotationQuat(f32 w, f32 x, f32 y, f32 z) {
 
 void NijiCamera::init() {
     // @addr 0x8051647c
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
     std::memset(this, 0, sizeof(*this));
+#pragma GCC diagnostic pop
     m_fov = 60.0f; m_aspect = 4.0f / 3.0f;
     m_near = 1.0f; m_far = 1000.0f;
     m_flags = FLAG_PERSPECTIVE;

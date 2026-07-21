@@ -236,9 +236,11 @@ void CourseObjActor_UpdateFade(CourseObjActor* self) {
         if ((drawFlags & (1u << 27)) != 0) goto check_countdown;
         if ((sub->variantFlags & (1u << 17)) != 0 &&
             (sub->variantFlags & (1u << 18)) != 0 &&
-            (drawFlags & (1u << 28)) != 0 &&
-            ((drawFlags >> 28) & 1) == 0) {
-            goto deactivate;
+            (drawFlags & (1u << 28)) != 0) {
+            u32 shifted = drawFlags >> 28;
+            if ((shifted & 1) == 0) {
+                goto deactivate;
+            }
         }
         goto check_countdown;
     }
@@ -556,7 +558,7 @@ void CourseObjActor_InitAnimation(CourseObjActor* self, void* param, s16 frameCo
     u16 animFlags;
     void* vtbl;
     typedef void (*SetAlphaFunc)(void*, f32);
-    SetAlphaFunc setAlpha;
+    SetAlphaFunc setAlpha = nullptr;
     u8 objId;
     CourseObjManager* mgr;
     u32 idx;
