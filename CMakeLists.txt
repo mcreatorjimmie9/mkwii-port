@@ -223,7 +223,6 @@ set(SCENE_SOURCES
     data/src/game/Scene/J2DPane.cpp
     data/src/game/Scene/ResTIMG.cpp
     data/src/game/Scene/SceneCaryard.cpp
-    data/src/game/Scene/SceneRace.cpp
     data/src/game/Scene/ParticleEffect.cpp
     data/src/game/Scene/Skybox.cpp
     data/src/game/Scene/SceneCreator.cpp
@@ -495,6 +494,9 @@ set(APP_SOURCES
     src/game/AIController.cpp
     src/game/ItemBox.cpp
     src/game/RaceSession.cpp
+    # Bridge layer: Player class + SceneRace (uses platform headers)
+    data/src/game/Player/Player.cpp
+    data/src/game/Scene/SceneRace.cpp
 )
 
 add_executable(mkwii-port ${APP_SOURCES})

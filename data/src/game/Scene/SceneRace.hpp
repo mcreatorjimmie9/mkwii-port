@@ -38,6 +38,7 @@ public:
 
     // SceneBase interface
     virtual void init() override;
+    virtual void load() override;
     virtual void calc() override;
     virtual void draw() override;
     virtual u32 getSceneId() const override { return 2; } // Scene ID for race
@@ -88,6 +89,11 @@ private:
     // Lap tracking
     u32 m_totalLaps;
     u32 m_currentLap;
+
+    // Pimpl — platform-specific race data (TrackManager, Players, etc.)
+    // Defined and allocated in SceneRace.cpp to avoid heavy includes in header.
+    struct RaceData;
+    RaceData* m_raceData;
 };
 
 } // namespace Scene

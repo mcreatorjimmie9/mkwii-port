@@ -87,11 +87,13 @@ SceneBase* createCourseSelectScene(const SceneArgs& args) {
     return new StubScene(SCENE_COURSE_SELECT);
 }
 
-// RaceScene has a real concrete class — use it directly
+// RaceScene is created directly by main.cpp (not via factory) because
+// it requires platform headers (TrackManager, KartEntity, etc.) that
+// are not available in the mkwii-genesis library. Use a stub here so
+// the factory registration doesn't pull in missing symbols.
 SceneBase* createRaceScene(const SceneArgs& args) {
-    RaceScene* race = new RaceScene();
-    (void)args; // courseId etc. are passed via loadCourse() later
-    return race;
+    (void)args;
+    return new StubScene(SCENE_RACE);
 }
 
 SceneBase* createRaceResultScene(const SceneArgs& args) {

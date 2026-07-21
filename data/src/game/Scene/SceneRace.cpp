@@ -5,6 +5,9 @@
 // countdown, active racing, and race finish. It manages the
 // race timer, position tracking, and camera system during races.
 // This is the core gameplay scene that drives the main game loop.
+//
+// Bridge layer: connects decompiled Scene architecture with
+// working platform systems (TrackManager, KartEntity, RaceSession).
 
 #include "SceneRace.hpp"
 #include "SceneCamera.hpp"
@@ -12,6 +15,19 @@
 #include "Course.hpp"
 #include "EffectDirector.hpp"
 #include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
+
+// Platform and reimplemented systems (available in APP_SOURCES)
+#include "Player/Player.hpp"
+#include "loaders/track_manager.hpp"
+#include "game/RaceSession.hpp"
+#include "game/ItemBox.hpp"
+#include "game/CollisionSystem.hpp"
+#include "platform/graphics.hpp"
+#include "platform/input.hpp"
+#include "platform/window.hpp"
 
 namespace Scene {
 
@@ -19,76 +35,76 @@ namespace Scene {
 // Constants
 // =============================================================================
 
-// Race timing
-static const f32 FRAME_TIME = 1.0f / 60.0f;     // Seconds per frame at 60fps
-static const u32 COUNTDOWN_FRAMES_3 = 180;        // 3 seconds
-static const u32 COUNTDOWN_FRAMES_2 = 120;        // 2 seconds
-static const u32 COUNTDOWN_FRAMES_1 = 60;         // 1 second
-static const u32 COUNTDOWN_FRAMES_GO = 0;         // GO!
+static const f32 FRAME_TIME = 1.0f / 60.0f;
+static const u32 COUNTDOWN_FRAMES_3 = 180;
+static const u32 COUNTDOWN_FRAMES_2 = 120;
+static const u32 COUNTDOWN_FRAMES_1 = 60;
+static const u32 COUNTDOWN_FRAMES_GO = 0;
 
-// Race limits
 static const u32 DEFAULT_LAP_COUNT = 3;
-static const f32 RACE_TIME_LIMIT = 300.0f;         // 5 minutes default
-static const u32 FINISH_DELAY_FRAMES = 180;        // 3 seconds before results
+static const f32 RACE_TIME_LIMIT = 300.0f;
+static const u32 FINISH_DELAY_FRAMES = 180;
 
-// Item box placement
-static const u32 MAX_ITEM_BOXES = 64;
-
-// Player count
 static const u8 MAX_LOCAL_PLAYERS = 4;
+static const u32 NUM_AI_KARTS = 3;
+static const u32 TOTAL_RACERS = 1 + NUM_AI_KARTS;
+
+static const f32 AI_TINT_COLORS[NUM_AI_KARTS][3] = {
+    { 1.0f, 0.5f, 0.0f }, { 0.0f, 0.8f, 0.2f }, { 0.7f, 0.2f, 1.0f },
+};
+static const f32 AI_SPEEDS[NUM_AI_KARTS]     = { 2200.0f, 2500.0f, 2700.0f };
+static const f32 AI_STEER_AGGR[NUM_AI_KARTS] = { 0.9f,   1.0f,   1.2f   };
+
+static const f32 CAMERA_BACK_DIST = 500.0f;
+static const f32 CAMERA_UP_OFFSET = 300.0f;
+static const f32 CAMERA_FOV_DEG   = 60.0f;
+static const f32 CAMERA_NEAR      = 1.0f;
+static const f32 CAMERA_FAR       = 200000.0f;
+
+static const char* COURSE_URL =
+    "https://142.169.46.167:3923/mkwii/DATA/files/Race/beginner_course.szs";
+static const char* COURSE_FILE = "/tmp/mkwii_course.szs";
 
 // =============================================================================
-// Anonymous namespace — Race helper functions
+// Pimpl — RaceData (platform-specific race state)
+// =============================================================================
+
+struct RaceScene::RaceData {
+    Loaders::TrackManager* trackManager;
+    bool trackLoaded;
+
+    Game::Player players[TOTAL_RACERS];
+    u32 playerCount;
+
+    RaceSession raceSession;
+
+    Game::CollisionSystem collisionSystem;
+
+    ItemManager itemManager;
+    ItemSlot playerItem;
+
+    u32 totalLaps;
+    bool raceFinishedPrinted;
+    int frameLogCounter;
+
+    RaceData()
+        : trackManager(nullptr)
+        , trackLoaded(false)
+        , playerCount(TOTAL_RACERS)
+        , totalLaps(DEFAULT_LAP_COUNT)
+        , raceFinishedPrinted(false)
+        , frameLogCounter(0) {}
+};
+
+// =============================================================================
+// Anonymous namespace — helper functions
 // =============================================================================
 namespace {
 
-// Per-player race state tracked by the scene
-class PlayerRaceState {
-public:
-    void reset() {
-        memset(this, 0, sizeof(PlayerRaceState));
-        m_finished = false;
-        m_finishTime = 0.0f;
-        m_finishPosition = 0;
-        m_lap = 0;
-        m_raceProgress = 0.0f;
-        m_inputBlocked = true;
-    }
-
-    f32 m_raceProgress;     // 0.0-1.0 progress through course (for position calc)
-    u32 m_lap;              // Current lap number (0-indexed)
-    bool m_finished;        // Has this player finished all laps?
-    f32 m_finishTime;       // Time when they crossed the finish line
-    u32 m_finishPosition;   // Final race position (1st, 2nd, etc.)
-    bool m_inputBlocked;    // True during countdown, false during racing
-};
-
-// Player states (would be heap-allocated in real game)
-static PlayerRaceState s_playerStates[MAX_LOCAL_PLAYERS];
-static u32 s_finishedCount = 0;
-static u32 s_activePlayerCount = 1;
-
-// Sort player indices by race progress (descending) to determine positions.
-// Uses a simple insertion sort — fine for max 12 players.
-void calculatePositions(u32 playerCount, u8* outOrder) {
-    // Initialize order array
-    for (u32 i = 0; i < playerCount; i++) {
-        outOrder[i] = (u8)i;
-    }
-
-    // Sort by race progress descending (higher progress = better position)
-    for (u32 i = 1; i < playerCount; i++) {
-        u8 key = outOrder[i];
-        f32 keyProgress = s_playerStates[key].m_raceProgress;
-        s32 j = (s32)i - 1;
-
-        while (j >= 0 &&
-               s_playerStates[outOrder[j]].m_raceProgress < keyProgress) {
-            outOrder[j + 1] = outOrder[j];
-            j--;
-        }
-        outOrder[j + 1] = key;
-    }
+static const char* posSuffix(u32 pos) {
+    static const char* suffix[] = {"st", "nd", "rd", "th",
+                                   "th", "th", "th", "th", "th", "th", "th", "th"};
+    return suffix[(pos > 4) ? 4 : (pos - 1)];
 }
 
 } // anonymous namespace
@@ -108,25 +124,35 @@ RaceScene::RaceScene()
     , m_course(nullptr)
     , m_effectDirector(nullptr)
     , m_totalLaps(DEFAULT_LAP_COUNT)
-    , m_currentLap(0) {
+    , m_currentLap(0)
+    , m_raceData(nullptr) {
     setState(STATE_LOADING);
 }
 
 RaceScene::~RaceScene() {
-    // Ensure cleanup runs if scene is destroyed during active race.
-    // Normally cleanup() should be called explicitly before destruction.
+    if (m_raceData) {
+        if (m_raceData->trackManager) {
+            delete m_raceData->trackManager;
+            m_raceData->trackManager = nullptr;
+        }
+        m_raceData->itemManager.cleanupAllGL();
+        delete m_raceData;
+        m_raceData = nullptr;
+    }
 }
 
 // =============================================================================
-// init — Initialize the race scene
+// init — Initialize the race scene (idempotent)
 // =============================================================================
-// @addr 0x80530040 (estimated)
-//
-// Resets all race state and prepares for course loading.
-// Does NOT load the course itself — loadCourse() must be called separately.
 
 void RaceScene::init() {
-    // Reset phase and state
+    if (m_raceData != nullptr) {
+        // Already initialized — SceneDirector calls init() again via
+        // finalizeTransition(). Just re-activate the scene.
+        setState(STATE_ACTIVE);
+        return;
+    }
+
     m_racePhase = PHASE_LOADING;
     m_courseId = 0;
     m_countdownTimer = 0;
@@ -137,167 +163,218 @@ void RaceScene::init() {
 
     setState(STATE_LOADING);
 
-    // Nullify subsystem pointers (will be created in initSubsystems)
     m_camera = nullptr;
     m_objectDirector = nullptr;
     m_course = nullptr;
     m_effectDirector = nullptr;
-
-    // Reset per-player state
-    s_finishedCount = 0;
-    s_activePlayerCount = 1; // Default: 1 player; set by lobby
-    for (u32 i = 0; i < MAX_LOCAL_PLAYERS; i++) {
-        s_playerStates[i].reset();
-    }
 }
 
 // =============================================================================
-// loadCourse — Load a race course by ID
+// load — SceneBase virtual (no-op)
 // =============================================================================
-// @addr 0x80530100 (estimated)
-//
-// Performs the full course loading sequence:
-// 1. Load course KCL (collision data) and BMD (model)
-// 2. Load enemy/boss paths, item routes, jugem (respawn) points
-// 3. Initialize subsystems (camera, objects, effects)
-// 4. Place karts at start grid positions
-// 5. Place item boxes at predefined positions
-// 6. Setup camera for player count
+
+void RaceScene::load() {
+    // Course loading handled by loadCourse() called before changeScene().
+}
+
+// =============================================================================
+// loadCourse — Download SZS, parse KMP/KCL, create players
+// =============================================================================
 
 void RaceScene::loadCourse(u32 courseId) {
     m_courseId = courseId;
 
-    // --- Step 1-2: Load course geometry and collision ---
-    // m_course = new Course();
-    // if (!m_course->load((u16)courseId)) {
-    //     return; // Course load failed
-    // }
+    if (!m_raceData) {
+        m_raceData = new RaceData();
+    }
 
-    // --- Step 3: Initialize sub-directors ---
+    printf("[RaceScene] Loading course %u...\n", courseId);
+
+    // Download and load course
+    m_raceData->trackManager = new Loaders::TrackManager();
+    {
+        char cmd[512];
+        std::snprintf(cmd, sizeof(cmd),
+                      "curl -k -s --connect-timeout 30 -o %s '%s'",
+                      COURSE_FILE, COURSE_URL);
+        if (std::system(cmd) == 0) {
+            m_raceData->trackLoaded =
+                m_raceData->trackManager->loadFromFile(COURSE_FILE);
+        }
+    }
+
+    if (m_raceData->trackLoaded) {
+        printf("[RaceScene] Track: '%s' — %u starts, %u GOBJ, %u CPs, %u paths\n",
+               m_raceData->trackManager->getTrackName().c_str(),
+               static_cast<u32>(m_raceData->trackManager->getKmpData().startPositions.size()),
+               static_cast<u32>(m_raceData->trackManager->getKmpData().objects.size()),
+               static_cast<u32>(m_raceData->trackManager->getKmpData().checkpoints.size()),
+               static_cast<u32>(m_raceData->trackManager->getKmpData().paths.size()));
+    } else {
+        printf("[RaceScene] Track: Failed to download, using fallback\n");
+    }
+
     initSubsystems();
-
-    // --- Step 4: Create kart instances and place on grid ---
-    // for (u32 i = 0; i < s_activePlayerCount; i++) {
-    //     const StartPosition* sp = m_course->getStartPosition(i);
-    //     KartMove* kart = new KartMove(i);
-    //     kart->setPosition(sp->position);
-    //     kart->setRotation(sp->forward, sp->up);
-    //     m_karts[i] = kart;
-    // }
-
-    // --- Step 5: Place item boxes from course item route data ---
-    // for (u32 i = 0; i < itemBoxCount && i < MAX_ITEM_BOXES; i++) {
-    //     m_objectDirector->createObject(OBJ_ITEMBOX, &itemBoxData[i]);
-    // }
-
-    // --- Step 6: Setup camera ---
-    // m_camera->init(s_activePlayerCount);
 
     m_racePhase = PHASE_LOADED;
     setState(STATE_READY);
+    printf("[RaceScene] Course loaded. Ready for countdown.\n");
 }
 
 // =============================================================================
-// initSubsystems — Create the scene's sub-directors
+// initSubsystems — Create players, collision, items, race session
 // =============================================================================
-// @addr 0x80530200 (estimated)
 
 void RaceScene::initSubsystems() {
-    // Create camera system
-    // m_camera = new SceneCamera();
-    // m_camera->init(s_activePlayerCount);
+    if (!m_raceData) return;
 
-    // Create object director for all 3D scene objects
-    // m_objectDirector = new ObjectDirector();
-    // m_objectDirector->init(256);
+    RaceData& d = *m_raceData;
+    const auto& kmp = d.trackManager ? d.trackManager->getKmpData()
+                                     : Loaders::KmpEntry();
 
-    // Create effect director for particles and screen effects
-    // m_effectDirector = new EffectDirector();
-    // m_effectDirector->init();
+    // Build collision system
+    if (d.trackManager && d.trackManager->isKclLoaded()) {
+        d.collisionSystem.build(d.trackManager->getCollisionTriangles());
+        d.collisionSystem.printStats();
+    }
+
+    // Spawn player 0 (human)
+    if (d.trackLoaded && !kmp.startPositions.empty()) {
+        d.players[0].init(0, false, kmp.startPositions[0]);
+        d.players[0].setCollisionSystem(&d.collisionSystem);
+        printf("[RaceScene] Player 0 at (%.1f, %.1f, %.1f)\n",
+               kmp.startPositions[0].position.x,
+               kmp.startPositions[0].position.y,
+               kmp.startPositions[0].position.z);
+    } else {
+        Loaders::KmpEntry::StartPosition sp;
+        sp.position.x = 0.0f;
+        sp.position.y = 100.0f;
+        sp.position.z = 0.0f;
+        sp.rotation.x = 0.0f;
+        sp.rotation.y = 0.0f;
+        sp.rotation.z = 0.0f;
+        sp.playerIndex = 0;
+        d.players[0].init(0, false, sp);
+        printf("[RaceScene] Player 0 at fallback position\n");
+    }
+
+    // Spawn AI karts
+    const auto& kmpPaths = kmp.paths;
+    bool aiHasPath = (!kmpPaths.empty() && !kmpPaths[0].points.empty());
+
+    for (u32 i = 0; i < NUM_AI_KARTS; i++) {
+        u32 pidx = i + 1;
+        u32 startIdx = pidx % kmp.startPositions.size();
+
+        if (d.trackLoaded && kmp.startPositions.size() > startIdx) {
+            d.players[pidx].init(pidx, true, kmp.startPositions[startIdx]);
+        } else {
+            Loaders::KmpEntry::StartPosition sp;
+            sp.position.x = d.players[0].getPosition().x + static_cast<f32>(i + 1) * 200.0f;
+            sp.position.y = d.players[0].getPosition().y;
+            sp.position.z = d.players[0].getPosition().z - static_cast<f32>(i + 1) * 200.0f;
+            sp.rotation.x = 0.0f;
+            sp.rotation.y = 0.0f;
+            sp.rotation.z = 0.0f;
+            sp.playerIndex = static_cast<u16>(pidx);
+            d.players[pidx].init(pidx, true, sp);
+        }
+
+        d.players[pidx].setTintColor(
+            AI_TINT_COLORS[i][0], AI_TINT_COLORS[i][1], AI_TINT_COLORS[i][2]);
+        d.players[pidx].setCollisionSystem(&d.collisionSystem);
+
+        if (aiHasPath) {
+            u32 startWP = (i * static_cast<u32>(kmpPaths[0].points.size())) / NUM_AI_KARTS;
+            d.players[pidx].initAI(kmpPaths[0].points, startWP,
+                                    AI_SPEEDS[i], AI_STEER_AGGR[i]);
+        }
+    }
+    printf("[RaceScene] %u AI karts spawned (%s path-following)\n",
+           NUM_AI_KARTS, aiHasPath ? "with" : "without");
+
+    // Spawn item boxes
+    if (d.trackLoaded && !kmp.objects.empty()) {
+        d.itemManager.spawnFromKMP(kmp.objects);
+    } else {
+        std::vector<Loaders::KmpEntry::GlobalObject> fallbackBoxes;
+        for (int i = 0; i < 8; i++) {
+            Loaders::KmpEntry::GlobalObject obj;
+            obj.objectId = 0x0002;
+            obj.position.x = (i % 4) * 300.0f - 450.0f;
+            obj.position.y = d.players[0].getPosition().y + 100.0f;
+            obj.position.z = d.players[0].getPosition().z - (i / 4) * 300.0f;
+            fallbackBoxes.push_back(obj);
+        }
+        d.itemManager.spawnFromKMP(fallbackBoxes);
+    }
+    d.itemManager.initAllGL();
+    printf("[RaceScene] %u item boxes\n", d.itemManager.getBoxCount());
+
+    // Initialize race session
+    d.raceSession.init(TOTAL_RACERS, DEFAULT_LAP_COUNT, kmp.checkpoints);
+    d.raceSession.startCountdown();
 }
 
 // =============================================================================
 // startCountdown — Begin the 3-2-1-GO countdown
 // =============================================================================
-// @addr 0x80530280 (estimated)
-//
-// Transitions from PHASE_LOADED to PHASE_COUNTDOWN. All player
-// input is blocked during the countdown. At GO, input is enabled.
 
 void RaceScene::startCountdown() {
     m_racePhase = PHASE_COUNTDOWN;
-    m_countdownTimer = COUNTDOWN_FRAMES_3; // 3 seconds at 60fps
+    m_countdownTimer = COUNTDOWN_FRAMES_3;
     m_countdownNumber = 3;
     setState(STATE_ACTIVE);
 
-    // Block all player input during countdown
-    for (u32 i = 0; i < s_activePlayerCount; i++) {
-        s_playerStates[i].m_inputBlocked = true;
-    }
-
-    // Play initial countdown sound and show "3"
-    // SoundManager::playSE(SE_COUNTDOWN_BEEP);
-    // HudDirector::showCountdownNumber(3);
+    printf("[RaceScene] Countdown started (3 seconds)\n");
 }
 
 // =============================================================================
-// startRace — Begin actual racing (called after countdown reaches GO)
+// startRace — Begin actual racing
 // =============================================================================
-// @addr 0x80530300 (estimated)
 
 void RaceScene::startRace() {
     m_racePhase = PHASE_RACING;
     m_raceTime = 0.0f;
     m_currentLap = 0;
 
-    // Unblock all player input
-    for (u32 i = 0; i < s_activePlayerCount; i++) {
-        s_playerStates[i].m_inputBlocked = false;
-        s_playerStates[i].m_lap = 0;
-        s_playerStates[i].m_finished = false;
+    if (m_raceData) {
+        for (u32 i = 0; i < m_raceData->playerCount; i++) {
+            m_raceData->players[i].m_lap = 0;
+            m_raceData->players[i].m_finished = false;
+            m_raceData->players[i].m_finishTime = 0.0f;
+            m_raceData->players[i].m_finishPosition = 0;
+        }
+        m_raceData->raceFinishedPrinted = false;
+        m_raceData->frameLogCounter = 0;
     }
 
-    // Play GO sound
-    // SoundManager::playSE(SE_COUNTDOWN_GO);
-
-    // Switch camera from cinematic to follow mode
-    // if (m_camera) {
-    //     for (u32 i = 0; i < s_activePlayerCount; i++) {
-    //         m_camera->setMode(CAMERA_MODE_FOLLOW);
-    //     }
-    // }
+    printf("[RaceScene] GO! Racing started. %u racers, %u laps.\n",
+           m_raceData ? m_raceData->playerCount : 0u,
+           m_totalLaps);
 }
 
 // =============================================================================
 // calc — Per-frame main update loop
 // =============================================================================
-// @addr 0x80530360 (estimated)
 
 void RaceScene::calc() {
     switch (m_racePhase) {
     case PHASE_LOADING:
-        // Waiting for course load to complete.
-        // The loading system calls loadCourse() when done.
         break;
-
     case PHASE_LOADED:
-        // Course loaded, waiting for external trigger to start countdown.
         break;
-
     case PHASE_COUNTDOWN:
         updateCountdown();
         break;
-
     case PHASE_RACING:
         updateRacing();
         break;
-
     case PHASE_FINISH:
         updateFinish();
         break;
-
     case PHASE_UNLOADING:
-        // Cleaning up course data — transition out
         break;
     }
 
@@ -307,220 +384,197 @@ void RaceScene::calc() {
 // =============================================================================
 // draw — Render the race scene
 // =============================================================================
-// @addr 0x80530400 (estimated)
-//
-// Draw order: skybox, course model, objects, karts, effects, HUD.
-// In split-screen, each viewport is rendered sequentially.
 
 void RaceScene::draw() {
     if (m_racePhase == PHASE_LOADING || m_racePhase == PHASE_UNLOADING) {
-        return; // Nothing to draw while loading/unloading
+        return;
+    }
+    if (!m_raceData) return;
+
+    RaceData& d = *m_raceData;
+
+    // Setup camera following player 0
+    f32 aspect = static_cast<f32>(Platform::Window::getWidth()) /
+                 static_cast<f32>(Platform::Window::getHeight());
+
+    const auto& playerPos = d.players[0].getPosition();
+    auto camPos = d.players[0].getChaseCamPos(CAMERA_BACK_DIST, CAMERA_UP_OFFSET);
+
+    Platform::Graphics::setupCamera(
+        camPos.x, camPos.y, camPos.z,
+        playerPos.x, playerPos.y, playerPos.z,
+        CAMERA_FOV_DEG, aspect, CAMERA_NEAR, CAMERA_FAR);
+
+    // Render all items and karts
+    const auto& vp = Platform::Graphics::getViewProjMatrix();
+    d.itemManager.renderBoxes(vp);
+
+    for (u32 i = 1; i < d.playerCount; i++) {
+        if (d.players[i].isActive()) {
+            d.players[i].render(vp);
+        }
     }
 
-    // --- Split-screen viewport setup ---
-    // For multiplayer, divide the screen into horizontal strips.
-    // Each player gets a viewport from SceneCamera::setupViewport().
-    // m_camera->setupViewport(0, s_activePlayerCount);
-
-    // --- Render pass per viewport ---
-    // for (u32 vp = 0; vp < s_activePlayerCount; vp++) {
-    //     m_camera->setupViewport(vp, s_activePlayerCount);
-    //     if (m_course) m_course->draw();
-    //     if (m_objectDirector) m_objectDirector->draw();
-    //     // draw karts...
-    //     if (m_effectDirector) m_effectDirector->draw();
-    // }
-
-    // --- HUD overlay (drawn last, in screen space) ---
-    // Position numbers, lap counter, race timer, item slot, minimap
+    if (d.players[0].isActive()) {
+        d.players[0].render(vp);
+    }
 }
 
 // =============================================================================
-// updateCountdown — Handle the 3-2-1-GO countdown sequence
+// updateCountdown — 3-2-1-GO
 // =============================================================================
-// @addr 0x80530500 (estimated)
-//
-// Countdown runs for 180 frames (3 seconds) at 60fps:
-//   Frames 180-121: show "3"
-//   Frames 120-61:  show "2"
-//   Frames 60-1:    show "1"
-//   Frame 0:        show "GO!" and start race
 
 void RaceScene::updateCountdown() {
+    if (m_raceData) {
+        m_raceData->raceSession.updateCountdown(FRAME_TIME);
+    }
+
     if (m_countdownTimer > 0) {
         m_countdownTimer--;
 
         if (m_countdownTimer >= COUNTDOWN_FRAMES_2) {
-            // "3" phase (frames 180-121)
             if (m_countdownTimer == COUNTDOWN_FRAMES_3 - 1) {
                 m_countdownNumber = 3;
-                // SoundManager::playSE(SE_COUNTDOWN_BEEP);
-                // HudDirector::showCountdownNumber(3);
             }
         } else if (m_countdownTimer >= COUNTDOWN_FRAMES_1) {
-            // "2" phase (frames 120-61)
             if (m_countdownTimer == COUNTDOWN_FRAMES_2 - 1) {
                 m_countdownNumber = 2;
-                // SoundManager::playSE(SE_COUNTDOWN_BEEP);
-                // HudDirector::showCountdownNumber(2);
             }
         } else if (m_countdownTimer > COUNTDOWN_FRAMES_GO) {
-            // "1" phase (frames 60-1)
             if (m_countdownTimer == COUNTDOWN_FRAMES_1 - 1) {
                 m_countdownNumber = 1;
-                // SoundManager::playSE(SE_COUNTDOWN_BEEP);
-                // HudDirector::showCountdownNumber(1);
             }
         } else {
-            // Frame 0: GO!
             m_countdownNumber = 0;
             startRace();
             return;
         }
     } else {
-        // Timer already expired (safety fallback)
         startRace();
     }
-
-    // During countdown, karts are visible but cannot move.
-    // Camera shows the starting grid from a cinematic angle.
-    // if (m_camera) {
-    //     m_camera->setMode(CAMERA_MODE_CINEMATIC);
-    //     m_camera->calc(FRAME_TIME);
-    // }
 }
 
 // =============================================================================
 // updateRacing — Main racing update loop
 // =============================================================================
-// @addr 0x80530600 (estimated)
-//
-// Called every frame during active racing:
-// 1. Increment race timer
-// 2. Step kart physics (movement, collision, items)
-// 3. Update scene objects (item boxes, moving parts)
-// 4. Update effects (particles, boost flames)
-// 5. Check lap completion for all players
-// 6. Calculate race positions
-// 7. Check race end conditions
-// 8. Update camera
 
 void RaceScene::updateRacing() {
-    // --- 1. Update race timer ---
+    if (!m_raceData) return;
+    RaceData& d = *m_raceData;
+
+    // 1. Race timer
     m_raceTime += FRAME_TIME;
+    d.raceSession.update(FRAME_TIME);
 
-    // --- 2. Step kart physics for all players ---
-    // for (u32 i = 0; i < s_activePlayerCount; i++) {
-    //     if (s_playerStates[i].m_finished) continue;
-    //     const InputState& input = InputManager::getState(i);
-    //     m_karts[i]->stepMovement(input, m_course);
-    //     m_karts[i]->updateItem();
-    //     m_karts[i]->updateCollision(m_course);
-    //     // Inter-kart collision
-    //     for (u32 j = 0; j < s_activePlayerCount; j++) {
-    //         if (i == j) continue;
-    //         KartCollision::check(m_karts[i], m_karts[j]);
-    //     }
-    // }
+    // 2. Step kart physics
+    const auto& input = Platform::InputManager::getState();
 
-    // --- 3. Update scene objects (item boxes, moving course parts) ---
-    // if (m_objectDirector) m_objectDirector->calc(FRAME_TIME);
+    for (u32 i = 0; i < d.playerCount; i++) {
+        if (d.players[i].m_finished) continue;
 
-    // --- 4. Update effects ---
-    // if (m_effectDirector) m_effectDirector->calc(FRAME_TIME);
+        if (i == 0) {
+            d.players[0].update(FRAME_TIME, &input);
+        } else {
+            d.players[i].update(FRAME_TIME, nullptr);
+        }
+    }
 
-    // --- 5. Check lap completion ---
-    // for (u32 i = 0; i < s_activePlayerCount; i++) {
-    //     if (s_playerStates[i].m_finished) continue;
-    //     Vec3 pos = m_karts[i]->getPosition();
-    //     if (m_course->checkCrossedCheckpoint(
-    //             finishLineId, m_karts[i]->getPrevPosition(), pos)) {
-    //         s_playerStates[i].m_lap++;
-    //         if (s_playerStates[i].m_lap >= m_totalLaps) {
-    //             s_playerStates[i].m_finished = true;
-    //             s_playerStates[i].m_finishTime = m_raceTime;
-    //             s_finishedCount++;
-    //         }
-    //     }
-    // }
+    // 3. Update item boxes
+    d.itemManager.updateBoxes(FRAME_TIME);
 
-    // --- 6. Calculate race positions ---
-    // u8 posOrder[MAX_PLAYER_COUNT];
-    // calculatePositions(s_activePlayerCount, posOrder);
-    // for (u32 i = 0; i < s_activePlayerCount; i++) {
-    //     u8 pidx = posOrder[i];
-    //     if (!s_playerStates[pidx].m_finished) {
-    //         s_playerStates[pidx].m_finishPosition = i + 1;
-    //     }
-    // }
+    // 4. Item collection for player 0
+    if (d.players[0].isActive() && !d.players[0].m_finished) {
+        d.itemManager.tryCollect(d.players[0].getPosition(), *d.players[0].m_itemSlot);
+    }
 
-    // --- 7. Check race end ---
-    // All finished or time limit reached
-    // bool allFinished = (s_finishedCount >= s_activePlayerCount);
-    // bool timeUp = (m_raceTime >= RACE_TIME_LIMIT);
-    // if (allFinished || timeUp) {
-    //     finishRace();
-    //     return;
-    // }
+    // Item usage (edge-triggered)
+    static bool prevItemPressed = false;
+    bool itemPressed = input.item;
+    if (itemPressed && !prevItemPressed && d.players[0].m_itemSlot->type != ITEM_NONE) {
+        f32 spd = d.players[0].getSpeed();
+        f32 maxSpd = 3000.0f;
+        d.itemManager.useItem(*d.players[0].m_itemSlot, spd, maxSpd,
+                              d.players[0].getYaw(), d.players[0].getPosition());
+    }
+    prevItemPressed = itemPressed;
 
-    // --- 8. Update camera ---
-    // updateCamera();
+    // 5. Check checkpoints
+    for (u32 i = 0; i < d.playerCount; i++) {
+        if (d.players[i].m_finished) continue;
+        d.raceSession.checkCheckpoints(i, d.players[i].getPosition());
+
+        const auto& rs = d.raceSession.getRacer(i);
+        d.players[i].m_lap = rs.currentLap;
+        d.players[i].m_finished = rs.finished;
+        d.players[i].m_finishTime = rs.finishPosition > 0 ? rs.raceTime : 0.0f;
+        d.players[i].m_finishPosition = rs.finishPosition;
+
+        if (i > 0) {
+            d.raceSession.getRacer(i).distance = d.players[i].m_distance;
+        }
+    }
+
+    // Player distance
+    d.raceSession.getRacer(0).distance = d.players[0].m_distance;
+
+    // 6. Calculate positions
+    d.raceSession.calculatePositions();
+
+    // 7. Check race end
+    if (d.raceSession.allFinished() && !d.raceFinishedPrinted) {
+        d.raceFinishedPrinted = true;
+        printf("\n=== RACE FINISHED ===\n");
+        for (u32 i = 0; i < d.playerCount; i++) {
+            const auto& rs = d.raceSession.getRacer(i);
+            const char* name = (i == 0) ? "Player" : "AI";
+            printf("  %u%s %s — %s\n",
+                   rs.finishPosition, posSuffix(rs.finishPosition), name,
+                   d.raceSession.getRaceTimeString());
+        }
+        finishRace();
+        return;
+    }
+
+    if (m_raceTime >= RACE_TIME_LIMIT) {
+        finishRace();
+        return;
+    }
+
+    // 8. Status log
+    d.frameLogCounter++;
+    if (d.frameLogCounter >= 600) {
+        d.frameLogCounter = 0;
+        printf("  F:%d | %u%s | Lap %u/%u | %.0f u/s | %s\n",
+               getFrameCount(),
+               d.raceSession.getPlayerPosition(),
+               posSuffix(d.raceSession.getPlayerPosition()),
+               d.raceSession.getPlayerLap(),
+               m_totalLaps,
+               d.players[0].getSpeed(),
+               d.raceSession.getRaceTimeString());
+    }
 }
 
 // =============================================================================
-// finishRace — Mark the race as finished
+// finishRace
 // =============================================================================
-// @addr 0x80530700 (estimated)
-//
-// Transitions to PHASE_FINISH. Assigns final positions to unfinished
-// players (time-out scenario), plays finish sound, triggers effects.
 
 void RaceScene::finishRace() {
     m_racePhase = PHASE_FINISH;
-
-    // Calculate final positions for players who haven't finished
-    // (time-out scenario — rank by progress)
-    // u8 posOrder[MAX_PLAYER_COUNT];
-    // calculatePositions(s_activePlayerCount, posOrder);
-    // u32 position = 1;
-    // for (u32 i = 0; i < s_activePlayerCount; i++) {
-    //     u8 pidx = posOrder[i];
-    //     if (!s_playerStates[pidx].m_finished) {
-    //         s_playerStates[pidx].m_finishTime = m_raceTime;
-    //     }
-    //     s_playerStates[pidx].m_finishPosition = position++;
-    // }
-
-    // Play race finish fanfare
-    // SoundManager::playSE(SE_RACE_FINISH);
-
-    // Show checkered flag / screen flash
-    // if (m_effectDirector) {
-    //     m_effectDirector->startScreenEffect(
-    //         ScreenEffect::SCREENFX_FADE_WHITE, 2.0f, 0.5f);
-    // }
+    printf("[RaceScene] Race finished. Time: %s\n",
+           m_raceData ? m_raceData->raceSession.getRaceTimeString() : "N/A");
 }
 
 // =============================================================================
-// updateFinish — Post-race update
+// updateFinish — Post-race
 // =============================================================================
-// @addr 0x80530780 (estimated)
-//
-// During PHASE_FINISH, karts coast to a stop and the results
-// overlay appears. After a delay, the scene transitions to results.
 
 void RaceScene::updateFinish() {
-    // Karts continue to move with deceleration (coast to stop)
-    // for (u32 i = 0; i < s_activePlayerCount; i++) {
-    //     m_karts[i]->coastToStop(FRAME_TIME);
-    // }
-
-    // Continue updating camera and effects for visual continuity
-    // if (m_camera) m_camera->calc(FRAME_TIME);
-    // if (m_effectDirector) m_effectDirector->calc(FRAME_TIME);
-
-    // After a delay (FINISH_DELAY_FRAMES), SceneDirector will
-    // transition to the results scene.
+    // Check quit
+    const auto& input = Platform::InputManager::getState();
+    if (input.quit) {
+        // SceneDirector handles cleanup
+    }
 }
 
 } // namespace Scene
