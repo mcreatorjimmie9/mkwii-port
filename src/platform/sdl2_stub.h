@@ -24,7 +24,9 @@ typedef std::int32_t  Sint32;
 // ---------------------------------------------------------------------------
 // SDL init flags
 // ---------------------------------------------------------------------------
-#define SDL_INIT_VIDEO 0x00000020u
+#define SDL_INIT_VIDEO    0x00000020u
+#define SDL_INIT_JOYSTICK 0x00000200u
+#define SDL_INIT_GAMECONTROLLER 0x00001000u
 
 // ---------------------------------------------------------------------------
 // SDL window flags
@@ -78,15 +80,105 @@ enum SDL_GLattr {
 // ---------------------------------------------------------------------------
 // SDL event types
 // ---------------------------------------------------------------------------
-#define SDL_QUIT 0x100u
+#define SDL_QUIT             0x100u
+#define SDL_KEYDOWN          0x300u
+#define SDL_KEYUP            0x301u
+#define SDL_JOYDEVICEADDED  0x606u
+#define SDL_JOYDEVICEREMOVED 0x607u
+#define SDL_CONTROLLERDEVICEADDED    0x650u
+#define SDL_CONTROLLERDEVICEREMOVED  0x651u
 
 // ---------------------------------------------------------------------------
 // SDL_Event — padded to 56 bytes (matches SDL 2.0 ABI on 64-bit)
 // ---------------------------------------------------------------------------
+// Keyboard event layout (first 4 bytes = type, then key info)
+struct SDL_KeyboardEvent {
+    Uint32 type;        // SDL_KEYDOWN or SDL_KEYUP
+    Uint32 timestamp;
+    Uint32 windowID;
+    std::uint8_t state;  // SDL_PRESSED or SDL_RELEASED
+    std::uint8_t repeat;
+    std::uint8_t padding2[2];
+    union {
+        // SDL uses a keysym struct; we only need the scancode
+        struct {
+            std::int32_t scancode;
+            std::int32_t keycode;  // SDL virtual key code
+            std::uint16_t mod;
+            std::uint32_t unused;
+        } keysym;
+    };
+};
+
 union SDL_Event {
     Uint32 type;
+    SDL_KeyboardEvent key;
     std::uint8_t padding[56];
 };
+
+#define SDL_PRESSED  1
+#define SDL_RELEASED 0
+
+// SDL_SCANCODE — minimal set for kart controls
+#define SDL_SCANCODE_A       4
+#define SDL_SCANCODE_D       7
+#define SDL_SCANCODE_S      22
+#define SDL_SCANCODE_W      26
+#define SDL_SCANCODE_UP     82
+#define SDL_SCANCODE_DOWN   85
+#define SDL_SCANCODE_LEFT   80
+#define SDL_SCANCODE_RIGHT  79
+#define SDL_SCANCODE_SPACE  62
+#define SDL_SCANCODE_LSHIFT 42
+#define SDL_SCANCODE_RSHIFT 54
+#define SDL_SCANCODE_ESCAPE 41
+#define SDL_SCANCODE_RETURN 40
+#define SDL_SCANCODE_LCTRL  29
+#define SDL_SCANCODE_RCTRL  229
+#define SDL_SCANCODE_NUM_SCANCODES 512
+
+// SDLK codes (virtual key codes)
+#define SDLK_ESCAPE 27
+#define SDLK_RETURN 13
+#define SDLK_SPACE  32
+#define SDLK_LSHIFT 1073742049
+#define SDLK_RSHIFT 1073742053
+#define SDLK_LCTRL  1073742041
+#define SDLK_RCTRL  1073742297
+
+// SDL_Joystick axis constants
+#define SDL_JOYSTICK_AXIS_MAX  32767
+#define SDL_JOYSTICK_AXIS_MIN -32768
+#define SDL_JOYSTICK_AXIS_THRESHOLD 8000
+
+// SDL_CONTROLLER_AXIS constants
+#define SDL_CONTROLLER_AXIS_LEFTX        0
+#define SDL_CONTROLLER_AXIS_LEFTY        1
+#define SDL_CONTROLLER_AXIS_RIGHTX       2
+#define SDL_CONTROLLER_AXIS_RIGHTY       3
+#define SDL_CONTROLLER_AXIS_TRIGGERLEFT  4
+#define SDL_CONTROLLER_AXIS_TRIGGERRIGHT 5
+#define SDL_CONTROLLER_AXIS_MAX          1.0f
+#define SDL_CONTROLLER_AXIS_MIN          -1.0f
+#define SDL_CONTROLLER_AXIS_DEADZONE     0.2f
+
+// SDL_CONTROLLER_BUTTON constants
+#define SDL_CONTROLLER_BUTTON_A               0
+#define SDL_CONTROLLER_BUTTON_B               1
+#define SDL_CONTROLLER_BUTTON_X               2
+#define SDL_CONTROLLER_BUTTON_Y               3
+#define SDL_CONTROLLER_BUTTON_BACK            4
+#define SDL_CONTROLLER_BUTTON_GUIDE           5
+#define SDL_CONTROLLER_BUTTON_START           6
+#define SDL_CONTROLLER_BUTTON_LEFTSTICK       7
+#define SDL_CONTROLLER_BUTTON_RIGHTSTICK      8
+#define SDL_CONTROLLER_BUTTON_LEFTSHOULDER     9
+#define SDL_CONTROLLER_BUTTON_RIGHTSHOULDER   10
+#define SDL_CONTROLLER_BUTTON_DPAD_UP         11
+#define SDL_CONTROLLER_BUTTON_DPAD_DOWN        12
+#define SDL_CONTROLLER_BUTTON_DPAD_LEFT       13
+#define SDL_CONTROLLER_BUTTON_DPAD_RIGHT      14
+#define SDL_CONTROLLER_BUTTON_MAX             15
 
 // ---------------------------------------------------------------------------
 // Opaque types
@@ -94,6 +186,10 @@ union SDL_Event {
 struct SDL_Window {};
 typedef struct SDL_Window SDL_Window;
 typedef void* SDL_GLContext;
+struct SDL_Joystick {};
+typedef struct SDL_Joystick SDL_Joystick;
+struct SDL_GameController {};
+typedef struct SDL_GameController SDL_GameController;
 
 // ---------------------------------------------------------------------------
 // SDL function pointer types (extern "C" signatures)
@@ -118,6 +214,33 @@ extern "C" {
     typedef void (*PFN_SDL_GL_SwapWindow)(SDL_Window* window);
 
     typedef int  (*PFN_SDL_PollEvent)(SDL_Event* event);
+
+    // Keyboard state
+    typedef const std::uint8_t* (*PFN_SDL_GetKeyboardState)(int* numkeys);
+    typedef int  (*PFN_SDL_GetScancodeFromKey)(int key);
+
+    // Joystick
+    typedef int  (*PFN_SDL_NumJoysticks)(void);
+    typedef SDL_Joystick* (*PFN_SDL_JoystickOpen)(int device_index);
+    typedef void (*PFN_SDL_JoystickClose)(SDL_Joystick* joystick);
+    typedef int  (*PFN_SDL_JoystickNumAxes)(SDL_Joystick* joystick);
+    typedef int  (*PFN_SDL_JoystickNumButtons)(SDL_Joystick* joystick);
+    typedef Sint32 (*PFN_SDL_JoystickGetAxis)(SDL_Joystick* joystick, int axis);
+    typedef std::uint8_t (*PFN_SDL_JoystickGetButton)(SDL_Joystick* joystick, int button);
+    typedef const char* (*PFN_SDL_JoystickName)(int device_index);
+    typedef int  (*PFN_SDL_JoystickGetAttached)(SDL_Joystick* joystick);
+    typedef int  (*PFN_SDL_JoystickIndex)(SDL_Joystick* joystick);
+
+    // Game Controller
+    typedef int  (*PFN_SDL_GameControllerAddMappingsFromFile)(const char* rwops);
+    typedef int  (*PFN_SDL_IsGameController)(int joystick_index);
+    typedef SDL_GameController* (*PFN_SDL_GameControllerOpen)(int joystick_index);
+    typedef void (*PFN_SDL_GameControllerClose)(SDL_GameController* gamecontroller);
+    typedef int  (*PFN_SDL_GameControllerGetAttached)(SDL_GameController* gamecontroller);
+    typedef SDL_Joystick* (*PFN_SDL_GameControllerGetJoystick)(SDL_GameController* gamecontroller);
+    typedef f32 (*PFN_SDL_GameControllerGetAxis)(SDL_GameController* gamecontroller, int axis);
+    typedef std::uint8_t (*PFN_SDL_GameControllerGetButton)(SDL_GameController* gamecontroller, int button);
+    typedef const char* (*PFN_SDL_GameControllerName)(SDL_GameController* gamecontroller);
 }
 
 // ---------------------------------------------------------------------------
@@ -137,7 +260,28 @@ inline PFN_SDL_GL_DeleteContext  SDL_GL_DeleteContext  = nullptr;
 inline PFN_SDL_GL_SetAttribute   SDL_GL_SetAttribute   = nullptr;
 inline PFN_SDL_GL_SetSwapInterval SDL_GL_SetSwapInterval = nullptr;
 inline PFN_SDL_GL_SwapWindow     SDL_GL_SwapWindow     = nullptr;
-inline PFN_SDL_PollEvent         SDL_PollEvent         = nullptr;
+inline PFN_SDL_PollEvent              SDL_PollEvent              = nullptr;
+inline PFN_SDL_GetKeyboardState      SDL_GetKeyboardState      = nullptr;
+inline PFN_SDL_GetScancodeFromKey    SDL_GetScancodeFromKey    = nullptr;
+inline PFN_SDL_NumJoysticks           SDL_NumJoysticks           = nullptr;
+inline PFN_SDL_JoystickOpen           SDL_JoystickOpen           = nullptr;
+inline PFN_SDL_JoystickClose          SDL_JoystickClose          = nullptr;
+inline PFN_SDL_JoystickNumAxes         SDL_JoystickNumAxes         = nullptr;
+inline PFN_SDL_JoystickNumButtons      SDL_JoystickNumButtons      = nullptr;
+inline PFN_SDL_JoystickGetAxis         SDL_JoystickGetAxis         = nullptr;
+inline PFN_SDL_JoystickGetButton       SDL_JoystickGetButton       = nullptr;
+inline PFN_SDL_JoystickName            SDL_JoystickName            = nullptr;
+inline PFN_SDL_JoystickGetAttached     SDL_JoystickGetAttached     = nullptr;
+inline PFN_SDL_JoystickIndex           SDL_JoystickIndex           = nullptr;
+inline PFN_SDL_GameControllerAddMappingsFromFile SDL_GameControllerAddMappingsFromFile = nullptr;
+inline PFN_SDL_IsGameController        SDL_IsGameController        = nullptr;
+inline PFN_SDL_GameControllerOpen      SDL_GameControllerOpen      = nullptr;
+inline PFN_SDL_GameControllerClose     SDL_GameControllerClose     = nullptr;
+inline PFN_SDL_GameControllerGetAttached SDL_GameControllerGetAttached = nullptr;
+inline PFN_SDL_GameControllerGetJoystick SDL_GameControllerGetJoystick = nullptr;
+inline PFN_SDL_GameControllerGetAxis   SDL_GameControllerGetAxis   = nullptr;
+inline PFN_SDL_GameControllerGetButton SDL_GameControllerGetButton = nullptr;
+inline PFN_SDL_GameControllerName      SDL_GameControllerName      = nullptr;
 
 // Internal handle to the dlopen'd library
 inline void* s_handle = nullptr;
@@ -180,7 +324,28 @@ inline bool init() {
     RESOLVE_SDL(SDL_GL_SetAttribute,   SDL_GL_SetAttribute);
     RESOLVE_SDL(SDL_GL_SetSwapInterval, SDL_GL_SetSwapInterval);
     RESOLVE_SDL(SDL_GL_SwapWindow,     SDL_GL_SwapWindow);
-    RESOLVE_SDL(SDL_PollEvent,         SDL_PollEvent);
+    RESOLVE_SDL(SDL_PollEvent,              SDL_PollEvent);
+    RESOLVE_SDL(SDL_GetKeyboardState,      SDL_GetKeyboardState);
+    RESOLVE_SDL(SDL_GetScancodeFromKey,    SDL_GetScancodeFromKey);
+    RESOLVE_SDL(SDL_NumJoysticks,           SDL_NumJoysticks);
+    RESOLVE_SDL(SDL_JoystickOpen,           SDL_JoystickOpen);
+    RESOLVE_SDL(SDL_JoystickClose,          SDL_JoystickClose);
+    RESOLVE_SDL(SDL_JoystickNumAxes,         SDL_JoystickNumAxes);
+    RESOLVE_SDL(SDL_JoystickNumButtons,      SDL_JoystickNumButtons);
+    RESOLVE_SDL(SDL_JoystickGetAxis,         SDL_JoystickGetAxis);
+    RESOLVE_SDL(SDL_JoystickGetButton,       SDL_JoystickGetButton);
+    RESOLVE_SDL(SDL_JoystickName,            SDL_JoystickName);
+    RESOLVE_SDL(SDL_JoystickGetAttached,     SDL_JoystickGetAttached);
+    RESOLVE_SDL(SDL_JoystickIndex,           SDL_JoystickIndex);
+    RESOLVE_SDL(SDL_GameControllerAddMappingsFromFile, SDL_GameControllerAddMappingsFromFile);
+    RESOLVE_SDL(SDL_IsGameController,        SDL_IsGameController);
+    RESOLVE_SDL(SDL_GameControllerOpen,      SDL_GameControllerOpen);
+    RESOLVE_SDL(SDL_GameControllerClose,     SDL_GameControllerClose);
+    RESOLVE_SDL(SDL_GameControllerGetAttached, SDL_GameControllerGetAttached);
+    RESOLVE_SDL(SDL_GameControllerGetJoystick, SDL_GameControllerGetJoystick);
+    RESOLVE_SDL(SDL_GameControllerGetAxis,   SDL_GameControllerGetAxis);
+    RESOLVE_SDL(SDL_GameControllerGetButton, SDL_GameControllerGetButton);
+    RESOLVE_SDL(SDL_GameControllerName,      SDL_GameControllerName);
 
     #undef RESOLVE_SDL
 
@@ -207,7 +372,28 @@ inline void shutdown() {
     SDL_GL_SetAttribute   = nullptr;
     SDL_GL_SetSwapInterval = nullptr;
     SDL_GL_SwapWindow     = nullptr;
-    SDL_PollEvent         = nullptr;
+    SDL_PollEvent              = nullptr;
+    SDL_GetKeyboardState      = nullptr;
+    SDL_GetScancodeFromKey    = nullptr;
+    SDL_NumJoysticks           = nullptr;
+    SDL_JoystickOpen           = nullptr;
+    SDL_JoystickClose          = nullptr;
+    SDL_JoystickNumAxes         = nullptr;
+    SDL_JoystickNumButtons      = nullptr;
+    SDL_JoystickGetAxis         = nullptr;
+    SDL_JoystickGetButton       = nullptr;
+    SDL_JoystickName            = nullptr;
+    SDL_JoystickGetAttached     = nullptr;
+    SDL_JoystickIndex           = nullptr;
+    SDL_GameControllerAddMappingsFromFile = nullptr;
+    SDL_IsGameController        = nullptr;
+    SDL_GameControllerOpen      = nullptr;
+    SDL_GameControllerClose     = nullptr;
+    SDL_GameControllerGetAttached = nullptr;
+    SDL_GameControllerGetJoystick = nullptr;
+    SDL_GameControllerGetAxis   = nullptr;
+    SDL_GameControllerGetButton = nullptr;
+    SDL_GameControllerName      = nullptr;
 }
 
 } // namespace SDL2Loader

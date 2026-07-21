@@ -483,16 +483,17 @@ else()
     message(STATUS "OpenAL NOT found — audio will run in stub mode")
 endif()
 
-# M4 Application executable
-set(M4_SOURCES
+# M5 Application executable (M4 sources + input system)
+set(M5_SOURCES
     src/main.cpp
     src/platform/window.cpp
     src/platform/graphics.cpp
     src/platform/audio.cpp
+    src/platform/input.cpp
     src/game/KartEntity.cpp
 )
 
-add_executable(mkwii-port ${M4_SOURCES})
+add_executable(mkwii-port ${M5_SOURCES})
 
 # Always enable SDL2 + OpenGL (runtime loading via dlopen/dlsym)
 target_compile_definitions(mkwii-port PRIVATE HAS_SDL2 HAS_OPENGL)

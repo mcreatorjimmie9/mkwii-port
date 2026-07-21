@@ -1,9 +1,10 @@
 // =============================================================================
-// KartEntity.cpp -- Implementation of the minimal kart entity
-// MAESTRO Phase 7, Milestone M4
+// KartEntity.cpp -- Implementation of the kart entity (M4 + M5)
+// MAESTRO Phase 7, Milestones M4+M5
 // =============================================================================
 
 #include "game/KartEntity.hpp"
+#include "platform/input.hpp"  // Platform::InputState
 
 // Full KMP loader header needed for initFromKMP to access StartPosition fields
 #include "loaders/kmp_loader.hpp"
@@ -50,6 +51,15 @@ static void mat4Mul(EGG::Matrix44f& out,
 
 KartEntity::KartEntity()
     : m_scale(1.0f, 1.0f, 1.0f)
+    , m_speed(0.0f)
+    , m_yawDeg(0.0f)
+    , m_maxSpeed(3000.0f)        // ~108 km/h in MKW units
+    , m_acceleration(1500.0f)    // Reach top speed in ~2 seconds
+    , m_brakeDecel(2000.0f)      // Stop from top speed in ~1.5 seconds
+    , m_steerSpeed(120.0f)       // Full 180-degree turn in 1.5 seconds
+    , m_friction(300.0f)          // Coast deceleration
+    , m_gravity(-9800.0f)        // ~9.8 m/s^2 scaled to MKW units
+    , m_groundY(0.0f)            // Will be set from KMP start position
     , m_playerIndex(0)
     , m_isActive(false)
     , m_vao(0)
@@ -84,6 +94,15 @@ void KartEntity::initFromKMP(const Loaders::KmpEntry::StartPosition& sp) {
 
     m_playerIndex = static_cast<u32>(sp.playerIndex);
     m_isActive = true;
+
+    // Set initial yaw from KMP rotation.y (facing direction)
+    m_yawDeg = m_rotationDeg.y;
+
+    // Set ground level from the spawn Y position
+    m_groundY = m_position.y;
+
+    // Initialize speed to zero
+    m_speed = 0.0f;
 
     computeModelMatrix();
 }
@@ -407,4 +426,116 @@ void KartEntity::cleanupGL() {
     }
     m_mvpLoc = -1;
 #endif // HAS_OPENGL
+}
+
+// =============================================================================
+// update — Apply input to kart physics (M5: Basic Input)
+// =============================================================================
+// Simple arcade-style kart physics:
+//   - Acceleration / braking adjusts forward speed
+//   - Steering rotates the kart's yaw
+//   - Position moves along the facing direction based on speed
+//   - Simple gravity keeps kart on the ground plane
+//   - Friction decelerates when no input is applied
+//
+// Coordinate system (matching MKWii / OpenGL):
+//   X = right, Y = up, Z = into screen (north)
+//   Yaw 0 = facing +Z, yaw 90 = facing +X
+
+void KartEntity::update(const Platform::InputState& input, f32 dt) {
+    if (!m_isActive) return;
+
+    // Clamp dt to avoid physics explosion on frame spikes
+    if (dt < 0.001f) dt = 0.001f;
+    if (dt > 0.1f)   dt = 0.1f;
+
+    // -----------------------------------------------------------------
+    // 1. Apply acceleration / braking
+    // -----------------------------------------------------------------
+    if (input.accelerate > 0.0f) {
+        m_speed += m_acceleration * input.accelerate * dt;
+    }
+    if (input.brake > 0.0f) {
+        // Braking: if moving forward, slow down. If stopped, reverse.
+        if (m_speed > 0.0f) {
+            m_speed -= m_brakeDecel * input.brake * dt;
+            if (m_speed < 0.0f) m_speed = 0.0f;
+        } else {
+            // Reverse (half speed)
+            m_speed -= m_acceleration * 0.5f * input.brake * dt;
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // 2. Apply friction (when no throttle)
+    // -----------------------------------------------------------------
+    if (input.accelerate <= 0.0f && input.brake <= 0.0f) {
+        if (m_speed > 0.0f) {
+            m_speed -= m_friction * dt;
+            if (m_speed < 0.0f) m_speed = 0.0f;
+        } else if (m_speed < 0.0f) {
+            m_speed += m_friction * dt;
+            if (m_speed > 0.0f) m_speed = 0.0f;
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // 3. Clamp speed to maximum
+    // -----------------------------------------------------------------
+    if (m_speed > m_maxSpeed) m_speed = m_maxSpeed;
+    if (m_speed < -m_maxSpeed * 0.3f) m_speed = -m_maxSpeed * 0.3f;
+
+    // -----------------------------------------------------------------
+    // 4. Apply steering (only effective when moving)
+    // -----------------------------------------------------------------
+    // Steering effectiveness scales with speed (can't turn while stationary)
+    f32 speedFactor = std::fabs(m_speed) / m_maxSpeed;
+    if (speedFactor > 1.0f) speedFactor = 1.0f;
+
+    // At very low speed, reduce steering to prevent jittery rotation
+    if (speedFactor < 0.05f) speedFactor = 0.0f;
+
+    m_yawDeg += input.steer * m_steerSpeed * speedFactor * dt;
+
+    // Normalize yaw to [0, 360)
+    while (m_yawDeg < 0.0f)   m_yawDeg += 360.0f;
+    while (m_yawDeg >= 360.0f) m_yawDeg -= 360.0f;
+
+    // -----------------------------------------------------------------
+    // 5. Update position based on speed and facing direction
+    // -----------------------------------------------------------------
+    // Yaw 0 = +Z direction, yaw 90 = +X direction
+    const f32 yawRad = EGG::DegToRad(m_yawDeg);
+    m_position.x += std::sin(yawRad) * m_speed * dt;
+    m_position.z += std::cos(yawRad) * m_speed * dt;
+
+    // -----------------------------------------------------------------
+    // 6. Simple ground clamping (no terrain collision yet)
+    // -----------------------------------------------------------------
+    // Keep kart at ground level. In M6 (Physics Loop) this will be replaced
+    // with proper KCL collision detection.
+    m_position.y = m_groundY;
+
+    // -----------------------------------------------------------------
+    // 7. Update rotation for rendering and recompute model matrix
+    // -----------------------------------------------------------------
+    m_rotationDeg.y = m_yawDeg;
+    m_rotationDeg.x = 0.0f;  // No pitch in flat-ground mode
+    m_rotationDeg.z = 0.0f;  // No roll in flat-ground mode
+
+    computeModelMatrix();
+}
+
+// =============================================================================
+// getChaseCamPos — Compute camera position behind and above the kart
+// =============================================================================
+
+EGG::Vector3f KartEntity::getChaseCamPos(f32 backDist, f32 upOffset) const {
+    // Camera sits behind the kart along the opposite facing direction
+    const f32 yawRad = EGG::DegToRad(m_yawDeg);
+    f32 camX = m_position.x - std::sin(yawRad) * backDist;
+    f32 camZ = m_position.z - std::cos(yawRad) * backDist;
+    f32 camY = m_position.y + upOffset;
+
+    return EGG::Vector3f(camX, camY, camZ);
 }

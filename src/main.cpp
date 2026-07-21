@@ -1,21 +1,21 @@
 // main.cpp — Mario Kart Wii PC Port Application Entry Point
-// MAESTRO Phase 7: Integration Milestone M4 — Place Kart on Track
+// MAESTRO Phase 7: Integration Milestone M5 — Basic Input
 
 #include <cstdio>
 #include <cmath>
+#include <chrono>
 #include "platform/window.hpp"
 #include "platform/graphics.hpp"
 #include "platform/audio.hpp"
+#include "platform/input.hpp"
 #include "game/KartEntity.hpp"
 #include "loaders/track_manager.hpp"
 
 extern "C" void System_Init(); // Forward declaration for future system init
 
 // =============================================================================
-// Camera configuration for viewing the start grid
+// Camera configuration for chase-cam viewing
 // =============================================================================
-// MKWii tracks are large-scale (units in hundreds/thousands).
-// A typical viewing distance of ~500-800 units behind the kart works well.
 static const f32 CAMERA_BACK_DIST  = 500.0f;
 static const f32 CAMERA_UP_OFFSET  = 300.0f;
 static const f32 CAMERA_FOV_DEG    = 60.0f;
@@ -27,13 +27,13 @@ int main(int argc, char* argv[]) {
     (void)argv;
 
     printf("=== Mario Kart Wii PC Port ===\n");
-    printf("MAESTRO Phase 7 — Milestone M4: Place Kart on Track\n\n");
+    printf("MAESTRO Phase 7 — Milestone M5: Basic Input\n\n");
 
     // =========================================================================
     // Step 1: Initialize Window (SDL2 + OpenGL 3.3 Core)
     // =========================================================================
-    printf("[1/6] Initializing window system...\n");
-    if (!Platform::Window::create(1280, 720, "Mario Kart Wii PC Port — M4")) {
+    printf("[1/7] Initializing window system...\n");
+    if (!Platform::Window::create(1280, 720, "Mario Kart Wii PC Port — M5")) {
         printf("ERROR: Failed to create window\n");
         return 1;
     }
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
     // =========================================================================
     // Step 2: Initialize Graphics (load GL 3.3 function pointers)
     // =========================================================================
-    printf("[2/6] Initializing graphics subsystem...\n");
+    printf("[2/7] Initializing graphics subsystem...\n");
     if (!Platform::Graphics::initialize()) {
         printf("ERROR: Failed to initialize graphics\n");
         Platform::Window::destroy();
@@ -52,15 +52,23 @@ int main(int argc, char* argv[]) {
     // =========================================================================
     // Step 3: Initialize Audio (stub for now)
     // =========================================================================
-    printf("[3/6] Initializing audio subsystem...\n");
+    printf("[3/7] Initializing audio subsystem...\n");
     if (!Platform::Audio::initialize()) {
         printf("WARNING: Audio initialization failed (continuing without audio)\n");
     }
 
     // =========================================================================
-    // Step 4: Load track and parse KMP start positions
+    // Step 4: Initialize Input (keyboard + gamepad)
     // =========================================================================
-    printf("[4/6] Loading track data...\n");
+    printf("[4/7] Initializing input subsystem...\n");
+    if (!Platform::InputManager::initialize()) {
+        printf("WARNING: Input initialization failed (continuing without input)\n");
+    }
+
+    // =========================================================================
+    // Step 5: Load track and parse KMP start positions
+    // =========================================================================
+    printf("[5/7] Loading track data...\n");
 
     Loaders::TrackManager trackManager;
     bool trackLoaded = false;
@@ -91,9 +99,9 @@ int main(int argc, char* argv[]) {
     }
 
     // =========================================================================
-    // Step 5: Spawn kart at start position
+    // Step 6: Spawn kart at start position
     // =========================================================================
-    printf("[5/6] Spawning kart entity...\n");
+    printf("[6/7] Spawning kart entity...\n");
 
     KartEntity kart;
     bool kartReady = false;
@@ -127,48 +135,95 @@ int main(int argc, char* argv[]) {
         fallback.playerIndex = 0;
         kart.initFromKMP(fallback);
         kartReady = true;
+
+        if (kart.initGL()) {
+            printf("  Kart: GL resources created (cube 80x50x80 units)\n");
+        }
     }
 
     // =========================================================================
-    // Step 6: Set up camera and enter render loop
+    // Step 7: Set up camera and enter render loop
     // =========================================================================
-    printf("[6/6] Setting up camera and starting render loop...\n");
-
-    // Position camera behind and above the kart
-    const auto& kartPos = kart.getPosition();
-    f32 yawRad = kart.getModelMatrix().m[0][0]; // Just use position, not rotation for now
-    (void)yawRad;
-
-    // Camera: behind kart along Z axis (MKW tracks generally face -Z)
-    f32 camX = kartPos.x;
-    f32 camY = kartPos.y + CAMERA_UP_OFFSET;
-    f32 camZ = kartPos.z + CAMERA_BACK_DIST;
+    printf("[7/7] Starting game loop...\n");
 
     f32 aspect = static_cast<f32>(Platform::Window::getWidth()) /
                  static_cast<f32>(Platform::Window::getHeight());
 
+    // Set up initial camera
+    const auto& kartPos = kart.getPosition();
+    auto camPos = kart.getChaseCamPos(CAMERA_BACK_DIST, CAMERA_UP_OFFSET);
+
     Platform::Graphics::setupCamera(
-        camX, camY, camZ,           // eye
-        kartPos.x, kartPos.y, kartPos.z,  // target (look at kart)
+        camPos.x, camPos.y, camPos.z,          // eye
+        kartPos.x, kartPos.y, kartPos.z,        // target (look at kart)
         CAMERA_FOV_DEG, aspect, CAMERA_NEAR, CAMERA_FAR
     );
 
-    printf("\n=== M4 SUCCESS: Kart placed on track ===\n");
-    printf("Camera: eye=(%.0f, %.0f, %.0f) target=(%.0f, %.0f, %.0f)\n",
-           camX, camY, camZ, kartPos.x, kartPos.y, kartPos.z);
+    printf("\n=== M5 SUCCESS: Kart with Input ===\n");
+    printf("Controls:\n");
+    printf("  W / Up Arrow    = Accelerate\n");
+    printf("  S / Down Arrow  = Brake / Reverse\n");
+    printf("  A / Left Arrow  = Steer left\n");
+    printf("  D / Right Arrow = Steer right\n");
+    printf("  LShift          = Drift (future)\n");
+    printf("  Escape          = Exit\n");
+    printf("  Gamepad: Left trigger=accel, Right trigger=brake, Left stick=steer\n");
     printf("Window: %dx%d @ 60fps target\n",
            Platform::Window::getWidth(), Platform::Window::getHeight());
-    printf("Controls: Close window to exit\n");
-    printf("Next: M5 — Basic Input (gamepad → move kart)\n\n");
+    printf("Next: M6 — Physics Loop (KCL collision)\n\n");
 
     // =========================================================================
-    // Main render loop
+    // Main game loop with fixed timestep
     // =========================================================================
     bool running = true;
     int frames = 0;
+    f32 dt = 1.0f / 60.0f;  // Target 60 FPS
+
+    // Timer for frame timing
+    auto lastTime = std::chrono::high_resolution_clock::now();
 
     while (running && Platform::Window::isOpen()) {
+        // -- Frame timing ------------------------------------------------------
+        auto now = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration<float>(now - lastTime).count();
+        lastTime = now;
+
+        // Clamp dt to avoid spiral of death
+        if (elapsed > 0.1f) elapsed = 0.1f;
+        if (elapsed < 0.001f) elapsed = dt;
+        dt = elapsed;
+
+        // -- Poll events -------------------------------------------------------
         Platform::Window::pollEvents();
+
+        // -- Poll input --------------------------------------------------------
+        Platform::InputManager::poll();
+        const auto& input = Platform::InputManager::getState();
+
+        // -- Check quit --------------------------------------------------------
+        if (input.quit) {
+            running = false;
+            break;
+        }
+
+        // -- Update kart physics ----------------------------------------------
+        if (kartReady) {
+            kart.update(input, dt);
+        }
+
+        // -- Update camera to follow kart --------------------------------------
+        if (kartReady) {
+            const auto& pos = kart.getPosition();
+            auto cam = kart.getChaseCamPos(CAMERA_BACK_DIST, CAMERA_UP_OFFSET);
+
+            Platform::Graphics::setupCamera(
+                cam.x, cam.y, cam.z,       // eye
+                pos.x, pos.y, pos.z,       // target (look at kart)
+                CAMERA_FOV_DEG, aspect, CAMERA_NEAR, CAMERA_FAR
+            );
+        }
+
+        // -- Render ------------------------------------------------------------
         Platform::Graphics::beginFrame();
         Platform::Graphics::clearScreen(0.4f, 0.6f, 1.0f, 1.0f); // Sky blue
 
@@ -181,9 +236,11 @@ int main(int argc, char* argv[]) {
         Platform::Window::swapBuffers();
         frames++;
 
-        // Print frame count every 600 frames (10 seconds at 60fps)
+        // Print frame count and speed every 600 frames (10 seconds at 60fps)
         if (frames % 600 == 0) {
-            printf("  Frames: %d\n", frames);
+            printf("  Frames: %d | Speed: %.0f u/s | Pos: (%.0f, %.0f, %.0f)\n",
+                   frames, kart.getSpeed(),
+                   kart.getPosition().x, kart.getPosition().y, kart.getPosition().z);
         }
     }
 
@@ -191,6 +248,7 @@ int main(int argc, char* argv[]) {
 
     // Cleanup
     kart.cleanupGL();
+    Platform::InputManager::shutdown();
     Platform::Graphics::shutdown();
     Platform::Audio::shutdown();
     Platform::Window::destroy();
