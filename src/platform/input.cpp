@@ -112,6 +112,9 @@ void InputManager::pollKeyboard(InputState& out) {
     // Item use: Space
     out.item = isDown(SDL_SCANCODE_SPACE);
 
+    // Enter/Return: for menu navigation
+    out.enter = isDown(SDL_SCANCODE_RETURN);
+
     // Quit: Escape
     out.quit = isDown(SDL_SCANCODE_ESCAPE);
 }

@@ -51,12 +51,14 @@ constexpr GLenum GL_FALSE = 0;
 constexpr GLenum GL_FLOAT = 0x1406;
 
 // Primitives
+constexpr GLenum GL_LINES    = 0x0001;
 constexpr GLenum GL_TRIANGLES = 0x0004;
 
 // Buffer objects
 constexpr GLenum GL_ARRAY_BUFFER         = 0x8892;
 constexpr GLenum GL_ELEMENT_ARRAY_BUFFER = 0x8893;
-constexpr GLenum GL_STATIC_DRAW          = 0x88E4;
+constexpr GLenum GL_STATIC_DRAW  = 0x88E4;
+constexpr GLenum GL_DYNAMIC_DRAW = 0x88E8;
 
 // Index types
 constexpr GLenum GL_UNSIGNED_INT = 0x1405;
@@ -145,6 +147,7 @@ using PFNGLUSEPROGRAM        = void   (GLAPIENTRY *)(GLuint program);
 using PFNGLGENBUFFERS    = void (GLAPIENTRY *)(GLsizei n, GLuint* buffers);
 using PFNGLBINDBUFFER    = void (GLAPIENTRY *)(GLenum target, GLuint buffer);
 using PFNGLBUFFERDATA    = void (GLAPIENTRY *)(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage);
+using PFNGLBUFFERSUBDATA  = void (GLAPIENTRY *)(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data);
 using PFNGLDELETEBUFFERS = void (GLAPIENTRY *)(GLsizei n, const GLuint* buffers);
 
 // Vertex arrays
@@ -162,6 +165,7 @@ using PFNGLDRAWELEMENTS  = void (GLAPIENTRY *)(GLenum mode, GLsizei count, GLenu
 // Uniforms
 using PFNGLGETUNIFORMLOCATION = GLint (GLAPIENTRY *)(GLuint program, const GLchar* name);
 using PFNGLUNIFORMMATRIX4FV   = void  (GLAPIENTRY *)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+using PFNGLUNIFORM2F           = void  (GLAPIENTRY *)(GLint location, GLfloat v0, GLfloat v1);
 using PFNGLUNIFORM3F           = void  (GLAPIENTRY *)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
 using PFNGLUNIFORM4F           = void  (GLAPIENTRY *)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
 using PFNGLUNIFORM1F           = void  (GLAPIENTRY *)(GLint location, GLfloat v0);
@@ -203,6 +207,7 @@ struct GLFunctions {
     PFNGLGENBUFFERS    glGenBuffers    = nullptr;
     PFNGLBINDBUFFER    glBindBuffer    = nullptr;
     PFNGLBUFFERDATA    glBufferData    = nullptr;
+    PFNGLBUFFERSUBDATA  glBufferSubData = nullptr;
     PFNGLDELETEBUFFERS glDeleteBuffers = nullptr;
 
     // Vertex arrays
@@ -220,6 +225,7 @@ struct GLFunctions {
     // Uniforms
     PFNGLGETUNIFORMLOCATION glGetUniformLocation = nullptr;
     PFNGLUNIFORMMATRIX4FV   glUniformMatrix4fv   = nullptr;
+    PFNGLUNIFORM2F           glUniform2f           = nullptr;
     PFNGLUNIFORM3F           glUniform3f           = nullptr;
     PFNGLUNIFORM4F           glUniform4f           = nullptr;
     PFNGLUNIFORM1F           glUniform1f           = nullptr;
@@ -288,6 +294,7 @@ inline bool loadFunctions(void* (*getProcAddr)(const char*)) {
     RESOLVE(glGenBuffers,    PFNGLGENBUFFERS,    "glGenBuffers");
     RESOLVE(glBindBuffer,    PFNGLBINDBUFFER,    "glBindBuffer");
     RESOLVE(glBufferData,    PFNGLBUFFERDATA,    "glBufferData");
+    RESOLVE(glBufferSubData, PFNGLBUFFERSUBDATA, "glBufferSubData");
     RESOLVE(glDeleteBuffers, PFNGLDELETEBUFFERS, "glDeleteBuffers");
 
     // Vertex arrays
@@ -305,6 +312,7 @@ inline bool loadFunctions(void* (*getProcAddr)(const char*)) {
     // Uniforms
     RESOLVE(glGetUniformLocation, PFNGLGETUNIFORMLOCATION, "glGetUniformLocation");
     RESOLVE(glUniformMatrix4fv,   PFNGLUNIFORMMATRIX4FV,   "glUniformMatrix4fv");
+    RESOLVE(glUniform2f,           PFNGLUNIFORM2F,           "glUniform2f");
     RESOLVE(glUniform3f,           PFNGLUNIFORM3F,           "glUniform3f");
     RESOLVE(glUniform4f,           PFNGLUNIFORM4F,           "glUniform4f");
     RESOLVE(glUniform1f,           PFNGLUNIFORM1F,           "glUniform1f");

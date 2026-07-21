@@ -483,8 +483,8 @@ else()
     message(STATUS "OpenAL NOT found — audio will run in stub mode")
 endif()
 
-# M9 Application executable (M8 sources + race session + HUD)
-set(M9_SOURCES
+# M10 Application executable (M9 sources + bitmap font polish)
+set(M10_SOURCES
     src/main.cpp
     src/platform/window.cpp
     src/platform/graphics.cpp
@@ -495,10 +495,13 @@ set(M9_SOURCES
     src/game/AIController.cpp
     src/game/ItemBox.cpp
     src/game/RaceSession.cpp
+    src/game/BitmapFont.cpp
+    src/game/GameMenu.cpp
+    src/game/EffectsManager.cpp
     src/game/HUD.cpp
 )
 
-add_executable(mkwii-port ${M9_SOURCES})
+add_executable(mkwii-port ${M10_SOURCES})
 
 # Always enable SDL2 + OpenGL (runtime loading via dlopen/dlsym)
 target_compile_definitions(mkwii-port PRIVATE HAS_SDL2 HAS_OPENGL)

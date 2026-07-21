@@ -45,6 +45,7 @@ struct InputState {
     f32  brake;          // 0.0 .. 1.0  (brake pedal)
     bool drift;          // True when drift/handbrake is held
     bool item;           // True when item-use is pressed
+    bool enter;          // True when Enter/Return is pressed
     bool quit;           // True when the user wants to exit
 
     InputState()
@@ -53,6 +54,7 @@ struct InputState {
         , brake(0.0f)
         , drift(false)
         , item(false)
+        , enter(false)
         , quit(false) {}
 };
 

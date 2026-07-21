@@ -1,5 +1,5 @@
 // main.cpp — Mario Kart Wii PC Port Application Entry Point
-// MAESTRO Phase 7: Integration Milestone M9 — Full Race
+// MAESTRO Phase 7: Integration Milestone M10 — Polish
 
 #include <cstdio>
 #include <cmath>
@@ -14,6 +14,8 @@
 #include "game/ItemBox.hpp"
 #include "game/RaceSession.hpp"
 #include "game/HUD.hpp"
+#include "game/GameMenu.hpp"
+#include "game/EffectsManager.hpp"
 #include "game/CollisionSystem.hpp"
 #include "loaders/track_manager.hpp"
 
@@ -226,9 +228,21 @@ int main(int argc, char* argv[]) {
     hud.initGL();
 
     // =========================================================================
-    // Step 10: Race loop
+    // Step 10: Game menu (pre-race)
     // =========================================================================
-    printf("[7/10] Starting race...\n");
+    printf("[7/11] Showing start menu...\n");
+
+    GameMenu menu;
+    menu.initGL();
+    menu.init(trackManager.getTrackName().c_str());
+
+    EffectsManager effects;
+    effects.initGL();
+
+    // =========================================================================
+    // Step 11: Race loop
+    // =========================================================================
+    printf("[8/11] Waiting for start...\n");
 
     f32 aspect = static_cast<f32>(Platform::Window::getWidth()) /
                  static_cast<f32>(Platform::Window::getHeight());
@@ -239,8 +253,8 @@ int main(int argc, char* argv[]) {
         playerKart.getPosition().x, playerKart.getPosition().y, playerKart.getPosition().z,
         CAMERA_FOV_DEG, aspect, CAMERA_NEAR, CAMERA_FAR);
 
-    printf("\n=== M9 SUCCESS: Full Race ===\n");
-    printf("Controls: WASD=drive, Space=item, Escape=exit\n");
+    printf("\n=== M10 SUCCESS: Full Race with Polish ===\n");
+    printf("Controls: WASD=drive, Space=item, Enter=start, Escape=exit\n");
     printf("Race: %u laps, %u racers\n", TOTAL_LAPS, totalRacers);
     printf("Window: %dx%d @ 60fps\n\n",
            Platform::Window::getWidth(), Platform::Window::getHeight());
@@ -251,6 +265,49 @@ int main(int argc, char* argv[]) {
     auto lastTime = std::chrono::high_resolution_clock::now();
     bool prevItemPressed = false;
     bool raceFinishedPrinted = false;
+
+    // =========================================================================
+    // Pre-race menu loop
+    // =========================================================================
+    while (running && Platform::Window::isOpen() && !menu.isStarted()) {
+        auto now = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration<float>(now - lastTime).count();
+        lastTime = now;
+        if (elapsed > 0.1f) elapsed = 0.1f;
+        if (elapsed < 0.001f) elapsed = dt;
+        dt = elapsed;
+
+        Platform::Window::pollEvents();
+        Platform::InputManager::poll();
+        const auto& input = Platform::InputManager::getState();
+        if (input.quit) { running = false; break; }
+
+        menu.update(dt, input.enter);
+
+        Platform::Graphics::beginFrame();
+        Platform::Graphics::clearScreen(0.05f, 0.05f, 0.2f, 1.0f);
+        menu.render(Platform::Window::getWidth(), Platform::Window::getHeight());
+        Platform::Graphics::endFrame();
+        Platform::Window::swapBuffers();
+        frames++;
+    }
+
+    if (!running) {
+        // User quit during menu
+        menu.cleanupGL();
+        effects.cleanupGL();
+        hud.cleanupGL();
+        itemManager.cleanupAllGL();
+        for (u32 i = 0; i < NUM_AI_KARTS; i++) aiKarts[i].cleanupGL();
+        playerKart.cleanupGL();
+        Platform::InputManager::shutdown();
+        Platform::Graphics::shutdown();
+        Platform::Audio::shutdown();
+        Platform::Window::destroy();
+        return 0;
+    }
+
+    printf("  Menu: Start pressed! Beginning race...\n");
 
     while (running && Platform::Window::isOpen()) {
         auto now = std::chrono::high_resolution_clock::now();
@@ -325,10 +382,18 @@ int main(int argc, char* argv[]) {
             {
                 bool itemPressed = input.item;
                 if (itemPressed && !prevItemPressed && playerItem.type != ITEM_NONE) {
+                    u8 usedType = playerItem.type;
                     f32 spd = playerKart.getSpeed();
                     f32 maxSpd = 3000.0f;
                     itemManager.useItem(playerItem, spd, maxSpd,
                                         playerKart.getYaw(), playerKart.getPosition());
+                    // Trigger visual effects based on item type
+                    if (usedType == ITEM_MUSHROOM || usedType == ITEM_TRIPLE_MUSH ||
+                        usedType == ITEM_GOLDEN_MUSH) {
+                        effects.triggerBoost(1.0f);
+                    } else if (usedType == ITEM_STAR) {
+                        effects.triggerStar(8.0f);
+                    }
                 }
                 prevItemPressed = itemPressed;
             }
@@ -407,6 +472,10 @@ int main(int argc, char* argv[]) {
             hud.setFinishTime(race.getRaceTimeString());
             hud.render(Platform::Window::getWidth(), Platform::Window::getHeight());
 
+            // Visual effects overlay
+            effects.update(playerKart.getSpeed(), dt);
+            effects.render(Platform::Window::getWidth(), Platform::Window::getHeight());
+
             Platform::Graphics::endFrame();
             Platform::Window::swapBuffers();
             frames++;
@@ -454,6 +523,8 @@ int main(int argc, char* argv[]) {
     printf("Rendered %d frames total. Exiting.\n", frames);
 
     // Cleanup
+    menu.cleanupGL();
+    effects.cleanupGL();
     hud.cleanupGL();
     itemManager.cleanupAllGL();
     for (u32 i = 0; i < NUM_AI_KARTS; i++) aiKarts[i].cleanupGL();
