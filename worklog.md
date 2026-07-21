@@ -247,3 +247,39 @@ Implemented M7 milestone: AI karts that autonomously follow race lines (KMP POTI
 ### Stage Summary
 - Phase 7 M7 (AI Opponent): COMPLETE
 - Next: Phase 7 M8 (M8 Items — item box spawn + item use)
+
+---
+
+## Task: Phase 7 M8 — Items
+
+### Summary
+Implemented M8 milestone: item box spawning from KMP GOBJ data, item collection on kart proximity, item inventory system with Space/X button usage, and 12 item types with weighted random generation based on race position.
+
+### New Files Created (2 files in src/game/)
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/game/ItemBox.hpp` | 155 | ItemTypeId enum (12 types), ItemBox class (spinning cube), ItemSlot struct, ItemManager class |
+| `src/game/ItemBox.cpp` | 460 | Item box rendering (rainbow cube, spin + pulse), ItemManager spawn/collection/usage/effects |
+
+### Modified Files (2 files)
+
+| File | Changes |
+|------|---------|
+| `src/main.cpp` | 9-step init, ItemManager spawn from GOBJ, auto-collect on proximity, Space to use, status logging |
+| `CMakeLists.txt` | M7_SOURCES -> M8_SOURCES with ItemBox.cpp |
+
+### Item System Design
+- **ItemBox**: 40x40x40 cube at GOBJ positions (objectId 0x0002/0x0003), spins 90 deg/s, pulses brightness, 5-second respawn timer
+- **Collection**: Auto-collect when kart within 150 units, only if slot is empty
+- **Item generation**: Weighted random table with 12 position tiers (1st=bananas, 12th=bullet bills/stars)
+- **Item effects**: Mushroom (+2000 speed, 1s), Star (4500 max speed, 8s), Golden Mushroom (4000 speed, 5s), Bullet Bill (5000 speed, 6s), Thunder (opponent shrink TBD), Shell/Banana (projectile/obstacle system TBD)
+- **Input**: Space key / gamepad X button, edge-triggered to prevent repeat use
+
+### Build & Validation
+- Build: 0 errors, 0 warnings across 4 targets
+- Commit: 41e428a7
+
+### Stage Summary
+- Phase 7 M8 (Items): COMPLETE
+- Next: Phase 7 M9 (M9 Full Race — 3-lap race with UI)
