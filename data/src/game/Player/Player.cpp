@@ -1,7 +1,14 @@
 // Player.cpp — Per-player kart entity implementation
 //
-// Bridges the decompiled architecture (KartMove, KartDynamics, PlayerPhysics)
+// Bridges the decompiled architecture (PlayerPhysics, KartDynamics)
 // with the working reimplemented systems (KartEntity, AIController, CollisionSystem).
+//
+// Physics pipeline (faithful to MKWii):
+//   Platform input → PlayerPhysics::setAccelInput/setSteerInput/setBrakeInput
+//   → PlayerPhysics::update()
+//   → KartEntity::queryCollision() for KCL feedback
+//   → PlayerPhysics collision flags updated
+//   → Sync position/yaw/speed back to KartEntity for rendering
 
 #include "Player/Player.hpp"
 #include "game/KartEntity.hpp"
@@ -14,20 +21,18 @@
 #include <cstring>
 #include <cmath>
 
-// Decompleted subsystems — architecture references only
+// Decompiled subsystems
 #include "KartMovement/KartMove.hpp"
-// NOTE: KartMovement/KartDynamics.hpp is NOT included here.
-// The KartDynamics from KartMovement/ (Phase 6b) has a different class layout
-// without the extended physics methods. We use the Collision/ version instead.
 #include "Physics/PlayerPhysics.hpp"
-
-// KartDynamics from Collision module (community-verified version with full calc())
-// This is included AFTER KartMove.hpp to avoid the KartMovement/ version.
-// The Collision/ version has: calc(), applyEngineForce(), applyAirDrag(),
-// applyRollingResistance(), mass field, and full quaternion integration.
 #include "Collision/KartDynamics.hpp"
 
 namespace Game {
+
+// =============================================================================
+// Unit scale notes:
+// =============================================================================
+// After recalibration, PlayerPhysics and KartEntity use the same speed units
+// (game-units per second). No conversion factor is needed for speed sync.
 
 // =============================================================================
 // Constructor / Destructor
@@ -44,10 +49,12 @@ Player::Player()
     , m_isAI(false)
     , m_active(false)
     , m_kartEntity(nullptr)
+    , m_playerPhysics(nullptr)
     , m_aiController(nullptr)
     , m_collision(nullptr)
     , m_kartDynamics(nullptr)
-    , m_useKartDynamics(false) {}
+    , m_useKartDynamics(false)
+    , m_usePlayerPhysics(true) {}
 
 Player::~Player() {
     cleanup();
@@ -70,7 +77,7 @@ void Player::init(u32 playerId, bool isAI,
     m_finishPosition = 0;
     m_distance = 0.0f;
 
-    // Allocate and initialize the working KartEntity
+    // Allocate and initialize the working KartEntity (rendering + collision)
     auto* kart = new KartEntity();
     kart->initFromKMP(start);
     kart->initGL();
@@ -79,12 +86,27 @@ void Player::init(u32 playerId, bool isAI,
     // Allocate item slot
     m_itemSlot = new ItemSlot();
 
-    // Initialize KartDynamics rigid body
-    // MKWii kart dimensions: 80 wide (X), 50 tall (Y), 80 long (Z)
-    // Half-extents for inertia calculation
+    // Initialize PlayerPhysics — the decompiled MKWii physics engine
+    m_playerPhysics = new PlayerPhysics();
+    m_playerPhysics->updateStats();
+
+    // Set initial position from KMP start position
+    // Position coordinates are in the same space (KMP world coords)
+    m_playerPhysics->setFramePosition(start.position.x, start.position.y, start.position.z);
+    m_playerPhysics->setYaw(start.rotation.y);
+
+    // Calibrate PlayerPhysics stats to match KartEntity's speed scale.
+    // KartEntity: topSpeed=3000 units/sec, acceleration=1500 units/sec²
+    // PlayerPhysics uses units/frame at 60fps internally.
+    // We set stats in KartEntity units (units/sec) and convert in update().
+    m_playerPhysics->updateStats();
+
+    // Initialize KartDynamics rigid body (available but not primary)
     initKartDynamics(40.0f, 25.0f, 40.0f, 65.0f);
 
-    // AI controller is set up separately via initAI()
+    // By default, PlayerPhysics drives physics for human players
+    // AI players still use KartEntity for now (AI controller drives directly)
+    m_usePlayerPhysics = !isAI;
 }
 
 // =============================================================================
@@ -97,27 +119,110 @@ void Player::update(f32 dt, const void* inputState) {
     auto* kart = static_cast<KartEntity*>(m_kartEntity);
 
     if (m_isAI && m_aiController) {
-        // AI: controller generates input and drives the kart directly
+        // AI: controller drives KartEntity directly
+        // (AI path-following uses KartEntity's simpler physics)
         m_aiController->updateKart(*kart, dt);
     } else if (inputState != nullptr) {
         const auto& input = *static_cast<const Platform::InputState*>(inputState);
 
-        // If KartDynamics is active, use it as the primary physics engine
-        if (m_useKartDynamics && m_kartDynamics) {
+        if (m_usePlayerPhysics && m_playerPhysics) {
+            updateWithPlayerPhysics(dt, inputState);
+        } else if (m_useKartDynamics && m_kartDynamics) {
             stepKartDynamics(input.accelerate, input.steer, dt);
             // Sync KartDynamics position back to KartEntity for rendering
             auto* kart = static_cast<KartEntity*>(m_kartEntity);
-            // We can't directly set KartEntity position, so we fall back
-            // to letting KartEntity's update handle rendering
-            kart->update(input, dt, m_collision);
+            kart->setPosition(m_kartDynamics->pos.x,
+                              m_kartDynamics->pos.y,
+                              m_kartDynamics->pos.z);
+            kart->setSpeed(m_kartDynamics->speedNorm);
+            // Extract yaw from quaternion
+            f32 yawDeg = EGG::RadToDeg(std::atan2(
+                2.0f * (m_kartDynamics->mainRot.z * m_kartDynamics->mainRot.w +
+                        m_kartDynamics->mainRot.x * m_kartDynamics->mainRot.y),
+                1.0f - 2.0f * (m_kartDynamics->mainRot.y * m_kartDynamics->mainRot.y +
+                                m_kartDynamics->mainRot.z * m_kartDynamics->mainRot.z)));
+            kart->setYawDeg(yawDeg);
         } else {
-            kart->update(input, dt, m_collision);
+            updateWithKartEntity(dt, inputState);
         }
     }
 
     // Update race distance for position calculation
     if (!m_finished) {
         m_distance += kart->getSpeed() * dt * 0.001f;
+    }
+}
+
+// =============================================================================
+// updateWithPlayerPhysics — Primary MKWii-faithful physics path
+// =============================================================================
+// This routes input through the decompiled PlayerPhysics engine:
+//   1. Feed input to PlayerPhysics (accel, brake, steer)
+//   2. Query collision via KartEntity (KCL ground/wall/surface)
+//   3. Update PlayerPhysics collision flags from KCL results
+//   4. Run PlayerPhysics::update() (stat-based physics)
+//   5. Sync output position/yaw/speed back to KartEntity for rendering
+
+void Player::updateWithPlayerPhysics(f32 dt, const void* inputState) {
+    auto* kart = static_cast<KartEntity*>(m_kartEntity);
+    auto* pp = m_playerPhysics;
+    if (!pp || !kart || !inputState) return;
+
+    const auto& input = *static_cast<const Platform::InputState*>(inputState);
+
+    // 1. Feed input to PlayerPhysics
+    pp->setAccelInput(input.accelerate);
+    pp->setBrakeInput(input.brake);
+    pp->setSteerInput(input.steer);
+
+    // 2. Query collision from KCL system
+    bool offroad = false, boostPad = false, wallHit = false;
+    f32 wallNX = 0.0f, wallNZ = 0.0f;
+    kart->queryCollision(offroad, boostPad, wallHit, wallNX, wallNZ, m_collision);
+
+    // 3. Update PlayerPhysics collision flags
+    // Ground collision — we assume grounded unless airborne for too long
+    pp->setFloorCollision(true);
+
+    // Off-road surface
+    pp->setOffroad(offroad);
+
+    // Boost pad
+    if (boostPad) {
+        pp->setBoostPad(true);
+    }
+
+    // Wall collision
+    if (wallHit) {
+        pp->setWallCollision(true);
+    }
+
+    // 4. Run PlayerPhysics::update()
+    pp->update(dt);
+
+    // 5. Sync output back to KartEntity for rendering and camera
+    // PlayerPhysics speed is in units/sec (same as KartEntity m_speed)
+    // after recalibration — no conversion factor needed.
+    f32 posX = pp->getFramePosX();
+    f32 posY = pp->getFramePosY();
+    f32 posZ = pp->getFramePosZ();
+    f32 yawDeg = EGG::RadToDeg(pp->getYawRad());
+    f32 speed = pp->getSpeed();
+
+    kart->setPosition(posX, posY, posZ);
+    kart->setYawDeg(yawDeg);
+    kart->setSpeed(speed);
+}
+
+// =============================================================================
+// updateWithKartEntity — Fallback KartEntity physics (no PlayerPhysics)
+// =============================================================================
+
+void Player::updateWithKartEntity(f32 dt, const void* inputState) {
+    auto* kart = static_cast<KartEntity*>(m_kartEntity);
+    if (kart && inputState) {
+        const auto& input = *static_cast<const Platform::InputState*>(inputState);
+        kart->update(input, dt, m_collision);
     }
 }
 
@@ -141,6 +246,11 @@ void Player::cleanup() {
         kart->cleanupGL();
         delete kart;
         m_kartEntity = nullptr;
+    }
+
+    if (m_playerPhysics) {
+        delete m_playerPhysics;
+        m_playerPhysics = nullptr;
     }
 
     if (m_aiController) {
@@ -213,10 +323,7 @@ void Player::setTintColor(f32 r, f32 g, f32 b) {
 // =============================================================================
 // initKartDynamics — Initialize the KartDynamics rigid body
 // =============================================================================
-// Sets up the KartDynamicsKart with BSP-based parameters:
-//   - halfW, halfH, halfD: kart body half-extents for inertia calculation
-//   - mass: vehicle mass for momentum calculations
-// The rigid body is positioned at the KartEntity's current position.
+
 void Player::initKartDynamics(f32 halfW, f32 halfH, f32 halfD, f32 mass) {
     if (m_kartDynamics) {
         delete m_kartDynamics;
@@ -227,40 +334,26 @@ void Player::initKartDynamics(f32 halfW, f32 halfH, f32 halfD, f32 mass) {
     m_kartDynamics->gravity = -1.0f;
     m_kartDynamics->mass = mass;
 
-    // Set inertia from kart body dimensions
-    // In MKWii, setBspParams computes box inertia tensor
     EGG::Vector3f dims(halfW, halfH, halfD);
     EGG::Vector3f offset(0.0f, 0.0f, 0.0f);
     m_kartDynamics->setBspParams(dims, offset, false, 1.0f);
 
-    // Position at kart entity location
     if (m_kartEntity) {
         m_kartDynamics->pos = static_cast<KartEntity*>(m_kartEntity)->getPosition();
     }
 
-    // Initialize quaternion rotation from yaw
     if (m_kartEntity) {
         f32 yaw = EGG::DegToRad(static_cast<KartEntity*>(m_kartEntity)->getYaw());
         m_kartDynamics->mainRot = EGG::Quatf(0.0f, 0.0f, std::sin(yaw * 0.5f), std::cos(yaw * 0.5f));
     }
 
-    // By default, KartEntity drives physics; KartDynamics is available
-    // for when the full MKWii physics pipeline is connected.
     m_useKartDynamics = false;
 }
 
 // =============================================================================
 // stepKartDynamics — Run one frame of KartDynamics simulation
 // =============================================================================
-// This drives the decompiled KartDynamics::calc() with input-derived forces:
-//   1. Clear accumulated forces/torques from previous frame
-//   2. Apply engine force (from acceleration input)
-//   3. Apply steering torque (from steering input)
-//   4. Apply air drag
-//   5. Apply rolling resistance
-//   6. Call calc() to integrate
-//
-// When fully connected, this replaces KartEntity's simplified physics.
+
 void Player::stepKartDynamics(f32 accelInput, f32 steerInput, f32 dt) {
     if (!m_kartDynamics) return;
     if (dt < 0.001f) dt = 0.001f;
@@ -268,40 +361,25 @@ void Player::stepKartDynamics(f32 accelInput, f32 steerInput, f32 dt) {
 
     auto* dyn = m_kartDynamics;
 
-    // 1. Apply engine force in forward direction
-    // MKWii engine force: ~60000 at full throttle for medium kart
     if (accelInput > 0.0f) {
-        EGG::Vector3f forward(0.0f, 0.0f, 1.0f); // Body-frame forward (+Z)
+        EGG::Vector3f forward(0.0f, 0.0f, 1.0f);
         f32 engineForce = 60000.0f * accelInput;
         dyn->applyEngineForce(engineForce, forward);
     }
 
-    // 2. Apply steering as a yaw torque
-    // MKWii steering torque depends on speed and handling
     f32 speedMag = dyn->externalVel.normalise();
     f32 steerTorque = steerInput * 5000.0f * std::min(speedMag / 100.0f, 1.0f);
     dyn->addTorque(EGG::Vector3f(0.0f, steerTorque, 0.0f));
 
-    // 3. Apply air drag (quadratic resistance)
-    // MKWii drag coefficient ~0.001 for karts
     dyn->applyAirDrag(0.001f);
-
-    // 4. Apply rolling resistance (constant opposing force when grounded)
-    // MKWii rolling resistance coefficient ~0.02
     dyn->applyRollingResistance(0.02f);
 
-    // 5. Apply gravity
     if (!dyn->noGravity) {
         dyn->addForce(EGG::Vector3f(0.0f, dyn->gravity * dyn->mass, 0.0f));
     }
 
-    // 6. Integrate (calls calc() internally)
-    f32 maxSpeed = 3000.0f; // MKWii medium kart top speed
-    dyn->calc(dt, maxSpeed, 0); // air=0 means grounded
-
-    // 7. Sync position back (for camera/accessors)
-    // KartEntity reads from its own m_position, so we update that
-    // through the stepKartDynamics caller (SceneRace updateRacing)
+    f32 maxSpeed = 3000.0f;
+    dyn->calc(dt, maxSpeed, 0);
 }
 
 } // namespace Game

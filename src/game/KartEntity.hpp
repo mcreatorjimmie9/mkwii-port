@@ -67,6 +67,17 @@ public:
     /// Read-only access to the current facing yaw in degrees.
     f32 getYaw() const { return m_yawDeg; }
 
+    // -- Mutators (for external physics engines like PlayerPhysics) ------------
+
+    /// Set the world position (used by Player/KartDynamics to sync position).
+    void setPosition(f32 x, f32 y, f32 z);
+
+    /// Set the yaw angle in degrees (used by Player/PlayerPhysics to sync).
+    void setYawDeg(f32 yawDeg);
+
+    /// Set the forward speed (used by Player/PlayerPhysics to sync).
+    void setSpeed(f32 speed);
+
     // -- Physics update (M5) --------------------------------------------------
 
     /// Update kart physics for one frame.
@@ -77,6 +88,19 @@ public:
     /// @param collision  Collision system to query (nullptr = flat ground fallback)
     void update(const Platform::InputState& input, f32 dt,
                const Game::CollisionSystem* collision = nullptr);
+
+    /// Collision-only update: apply KCL ground/wall/surface queries without
+    /// running the internal physics. Used when PlayerPhysics drives movement
+    /// and KartEntity only needs collision feedback.
+    /// @param offroad  [out] Set to true if kart is on off-road surface
+    /// @param boostPad [out] Set to true if kart is on a boost pad
+    /// @param wallHit  [out] Set to true if kart hit a wall
+    /// @param wallNX   [out] Wall normal X component
+    /// @param wallNZ   [out] Wall normal Z component
+    /// @param collision  Collision system to query
+    void queryCollision(bool& offroad, bool& boostPad, bool& wallHit,
+                       f32& wallNX, f32& wallNZ,
+                       const Game::CollisionSystem* collision);
 
     // -- Camera follow (M5) ---------------------------------------------------
 

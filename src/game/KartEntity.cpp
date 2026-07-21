@@ -633,3 +633,67 @@ void KartEntity::setTintColor(f32 r, f32 g, f32 b) {
     m_tintColor[1] = g;
     m_tintColor[2] = b;
 }
+
+// =============================================================================
+// setPosition / setYawDeg / setSpeed — Mutators for external physics sync
+// =============================================================================
+
+void KartEntity::setPosition(f32 x, f32 y, f32 z) {
+    m_position.x = x;
+    m_position.y = y;
+    m_position.z = z;
+    computeModelMatrix();
+}
+
+void KartEntity::setYawDeg(f32 yawDeg) {
+    m_yawDeg = yawDeg;
+    while (m_yawDeg < 0.0f)   m_yawDeg += 360.0f;
+    while (m_yawDeg >= 360.0f) m_yawDeg -= 360.0f;
+    m_rotationDeg.y = m_yawDeg;
+    computeModelMatrix();
+}
+
+void KartEntity::setSpeed(f32 speed) {
+    m_speed = speed;
+}
+
+// =============================================================================
+// queryCollision — Collision-only query (no physics, just KCL feedback)
+// =============================================================================
+
+void KartEntity::queryCollision(bool& offroad, bool& boostPad, bool& wallHit,
+                                f32& wallNX, f32& wallNZ,
+                                const Game::CollisionSystem* collision) {
+    offroad = false;
+    boostPad = false;
+    wallHit = false;
+    wallNX = 0.0f;
+    wallNZ = 0.0f;
+
+    if (!collision || !collision->isBuilt()) return;
+
+    auto result = collision->query(m_position.x, m_position.y + 50.0f,
+                                    m_position.z, 40.0f, 5000.0f);
+
+    if (result.hitGround) {
+        m_position.y = result.groundY + 25.0f;
+
+        using namespace Loaders::KCLType;
+        if (result.surfaceType & OFF_ROAD) {
+            offroad = true;
+        }
+        if (result.surfaceType & (BOOST | BOOST_PAD)) {
+            boostPad = true;
+        }
+    }
+
+    if (result.hitWall) {
+        wallHit = true;
+        wallNX = result.wallNormalX;
+        wallNZ = result.wallNormalZ;
+        f32 pushDist = m_speed * 0.016f + 50.0f;
+        m_position.x += result.wallNormalX * pushDist;
+        m_position.z += result.wallNormalZ * pushDist;
+        computeModelMatrix();
+    }
+}

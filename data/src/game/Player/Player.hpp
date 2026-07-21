@@ -2,28 +2,30 @@
 // Player.hpp — Per-player kart entity bridging decompiled and reimplemented layers
 //
 // The Player class is the central per-racer integration point. It ties together:
-//   - KartEntity (src/game/) for working physics + OpenGL rendering
-//   - KartMove / KartDynamics (decompiled) for architecture completeness (not used for physics)
-//   - PlayerPhysics formulas for stat calculations
+//   - PlayerPhysics (decompiled, from 0x805899cc) — stat-based physics engine
+//   - KartEntity (src/game/) for OpenGL rendering + collision queries
+//   - KartDynamics (decompiled) for rigid body dynamics
 //   - AIController for CPU players
 //   - CollisionSystem for KCL collision queries
 //   - ItemSlot for item inventory
+//
+// Physics pipeline (faithful to MKWii):
+//   PlayerPhysics::update() → queryCollision() → sync to KartEntity
+// KartEntity handles rendering and collision queries only.
 
 #include "rk_types.h"
 #include "EGG/math.h"
 #include "loaders/kmp_loader.hpp"
 
-// Forward declarations — decompiled subsystems (architecture references only)
-namespace Kart { class KartMove; class KartDynamics; }
+// Forward declarations — decompiled subsystems
+namespace Kart { class KartMove; class KartDynamics; class KartDynamicsKart; }
+class PlayerPhysics;
 
 // Forward declarations — reimplemented subsystems (actual usage)
 namespace Game { class AIController; class CollisionSystem; }
 
 // Forward declare ItemSlot (from game/ItemBox.hpp)
 struct ItemSlot;
-
-// Forward declare KartDynamicsKart for physics integration
-namespace Kart { class KartDynamicsKart; }
 
 namespace Game {
 
@@ -39,13 +41,15 @@ public:
     // -- Initialization -------------------------------------------------------
 
     /// Initialize this player from a KMP start-position entry.
-    /// Sets up the internal KartEntity and allocates the item slot.
+    /// Sets up the internal KartEntity, PlayerPhysics, and allocates item slot.
     void init(u32 playerId, bool isAI,
               const Loaders::KmpEntry::StartPosition& start);
 
     // -- Per-frame update ------------------------------------------------------
 
     /// Update kart physics and AI for one frame.
+    /// Uses PlayerPhysics (decompiled MKWii physics) as the primary engine,
+    /// then syncs results to KartEntity for rendering.
     /// @param dt         Delta time in seconds
     /// @param inputState Pointer to Platform::InputState (null for AI players)
     void update(f32 dt, const void* inputState = nullptr);
@@ -88,6 +92,12 @@ public:
     /// Set the collision system reference for KCL queries.
     void setCollisionSystem(const CollisionSystem* cs) { m_collision = cs; }
 
+    // -- PlayerPhysics access --------------------------------------------------
+
+    /// Access the PlayerPhysics engine (decompiled MKWii physics).
+    /// Returns nullptr if not initialized.
+    PlayerPhysics* getPlayerPhysics() const { return m_playerPhysics; }
+
     // -- KartDynamics integration -----------------------------------------------
 
     /// Access the KartDynamics rigid body (for advanced physics).
@@ -114,13 +124,18 @@ public:
     ItemSlot* m_itemSlot;
 
 private:
+    void updateWithPlayerPhysics(f32 dt, const void* inputState);
+    void updateWithKartEntity(f32 dt, const void* inputState);
+
     u32  m_playerId;
     bool m_isAI;
     bool m_active;
 
     // KartEntity* stored as void* to avoid heavy header dependency in this header.
-    // The .cpp file includes game/KartEntity.hpp and casts appropriately.
     void* m_kartEntity;
+
+    // PlayerPhysics — decompiled MKWii stat-based physics engine (primary)
+    PlayerPhysics* m_playerPhysics;
 
     // AI controller (owned, null for human players)
     AIController* m_aiController;
@@ -131,6 +146,9 @@ private:
     // KartDynamics rigid body (owned, for advanced physics)
     Kart::KartDynamicsKart* m_kartDynamics;
     bool m_useKartDynamics;
+
+    // Physics mode: true = PlayerPhysics drives, false = KartEntity drives
+    bool m_usePlayerPhysics;
 };
 
 } // namespace Game

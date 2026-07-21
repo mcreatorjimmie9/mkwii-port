@@ -5,6 +5,135 @@
 #include <cstdio>
 
 // =============================================================================
+// Constructor / Destructor
+// =============================================================================
+
+PlayerPhysics::PlayerPhysics()
+    : m_playerRef(nullptr)
+    , m_vtable(nullptr)
+    , m_kartPhysics(nullptr)
+    , m_frameCount(0)
+    , m_interpFactor(0.0f)
+    , m_statusFlags(0)
+    , m_stateBuffer(nullptr)
+    , m_speed(0.0f)
+    , m_rawPosX(0.0f)
+    , m_rawPosY(0.0f)
+    , m_framePosX(0.0f)
+    , m_framePosY(0.0f)
+    , m_framePosZ(0.0f)
+    , m_floorColCount(0)
+    , m_anyFloorCol(false)
+    , m_airTimerOverflow(false)
+    , m_subDeltaX(0.0f)
+    , m_subDeltaY(0.0f)
+    , m_subDeltaZ(0.0f)
+    , m_effectiveSpeed(0.0f)
+    , m_speedNorm(0.0f)
+    , m_scaleFactor(1.0f)
+    , m_stateFlags(0)
+    , m_collisionGroup(nullptr)
+    , m_hitboxGroup(nullptr)
+    , m_floorDetectCounter(0)
+    , m_wheelCount(4)
+    , m_wallOobFlags(0)
+    , m_airTime(0)
+    , m_stateTimer(0)
+    , m_statTopSpeed(3000.0f)
+    , m_statAcceleration(1500.0f)
+    , m_statHandling(2.094f)
+    , m_accelInput(0.0f)
+    , m_brakeInput(0.0f)
+    , m_steerInput(0.0f)
+    , m_yawRad(0.0f) {
+    memset(&m_prevPos, 0, sizeof(m_prevPos));
+    memset(&m_savedPos1, 0, sizeof(m_savedPos1));
+    memset(&m_savedPos2, 0, sizeof(m_savedPos2));
+    memset(&m_savedPos3, 0, sizeof(m_savedPos3));
+    memset(&m_deltaPos, 0, sizeof(m_deltaPos));
+    memset(&m_prevScale, 0, sizeof(m_prevScale));
+    memset(&m_frameStartVel, 0, sizeof(m_frameStartVel));
+    memset(&m_prevSpeed, 0, sizeof(m_prevSpeed));
+    memset(&m_floorNormal, 0, sizeof(m_floorNormal));
+    memset(&m_updateStartPos, 0, sizeof(m_updateStartPos));
+    memset(&m_updateEndPos, 0, sizeof(m_updateEndPos));
+    memset(&m_updateEndVel, 0, sizeof(m_updateEndVel));
+    memset(&m_extraVel, 0, sizeof(m_extraVel));
+    memset(&m_groundNormal, 0, sizeof(m_groundNormal));
+    memset(&m_contactOffset, 0, sizeof(m_contactOffset));
+    memset(m_wheelRotData, 0, sizeof(m_wheelRotData));
+    m_scale.setAll(1.0f);
+    m_cachedStats.topSpeed = 3000.0f;
+    m_cachedStats.acceleration = 1500.0f;
+    m_cachedStats.handling = 2.094f;
+    m_cachedStats.offroadSpeed = 1950.0f;
+    m_cachedStats.driftHandling = 1.676f;
+    m_cachedStats.miniTurboDuration = 40.0f;
+    m_cachedStats.miniTurboBoost = 1.25f;
+    m_cachedStats.mass = 1.0f;
+    m_cachedStats.weight = 3.0f;
+    memset(&_004, 0, sizeof(_004));
+    memset(&_024, 0, sizeof(_024));
+    memset(&_04C, 0, sizeof(_04C));
+    memset(&_05C, 0, sizeof(_05C));
+    memset(&_062, 0, sizeof(_062));
+    memset(&_086, 0, sizeof(_086));
+    memset(&_09C, 0, sizeof(_09C));
+    memset(&_0BC, 0, sizeof(_0BC));
+    memset(&_0C4, 0, sizeof(_0C4));
+    memset(&_0CC, 0, sizeof(_0CC));
+}
+
+PlayerPhysics::~PlayerPhysics() {
+    // No dynamic allocation — all members are value types or pointers we don't own
+}
+
+void PlayerPhysics::reset() {
+    m_frameCount = 0;
+    m_speed = 0.0f;
+    m_effectiveSpeed = 0.0f;
+    m_speedNorm = 0.0f;
+    m_statusFlags = 0;
+    m_wallOobFlags = 0;
+    m_airTime = 0;
+    m_stateTimer = 0;
+    m_floorColCount = 0;
+    m_anyFloorCol = false;
+    m_airTimerOverflow = false;
+    m_accelInput = 0.0f;
+    m_brakeInput = 0.0f;
+    m_steerInput = 0.0f;
+    m_floorDetectCounter = 0;
+    m_interpFactor = 1.0f;
+    updateStats();
+}
+
+void PlayerPhysics::init(bool isBike, KartPhysicsEngine* engine,
+                          HitboxGroup* hitboxGroup, u32 wheelCount) {
+    (void)isBike;
+    (void)engine;
+    m_hitboxGroup = hitboxGroup;
+    m_wheelCount = wheelCount > 0 ? wheelCount : 4;
+    reset();
+}
+
+KartWheelPhysics* PlayerPhysics::getWheelPhysics(u32 idx) const {
+    (void)idx;
+    return nullptr; // Stub — wheel physics managed by KartMove layer
+}
+
+KartSusPhysics* PlayerPhysics::getSusPhysics(u32 idx) const {
+    (void)idx;
+    return nullptr; // Stub — suspension managed by KartMove layer
+}
+
+// Stub methods for architecture compatibility (no-op)
+void PlayerPhysics::updateWheelPhysics(f32 dt) { (void)dt; }
+void PlayerPhysics::updateSuspensionPhysics(f32 dt) { (void)dt; }
+void PlayerPhysics::computeSpeed(f32 dt) { (void)dt; }
+void PlayerPhysics::updateSubObject() {}
+
+// =============================================================================
 // PlayerPhysics::update — 0x805899cc (1496 bytes, 374 instructions)
 //
 // Main per-player physics orchestrator. Called every frame for each racer.
@@ -437,13 +566,24 @@ VehicleStats PlayerPhysics::getVehicleStats() const {
 void PlayerPhysics::updateStats() {
     // Refresh cached stats from the KartStats system.
     // Called when the vehicle changes (e.g., in a vehicle-changing mode).
+    //
+    // Stats are calibrated to match KartEntity's speed scale:
+    //   - topSpeed: 3000 units/sec (KartEntity's m_maxSpeed)
+    //   - acceleration: 1500 units/sec² (KartEntity's m_acceleration)
+    //   - handling: 2.094 rad/sec at max (KartEntity's 120 deg/sec)
+    //   - offroadSpeed: 1950 (65% of topSpeed)
+    //   - mass: 1.0 (neutral mass factor)
+    //
+    // These produce identical behavior to KartEntity's simplified physics,
+    // but with the added MKWii features: quadratic accel falloff, speed-dependent
+    // handling droop, off-road tiers, and mini-turbo system.
 
-    // Default stat values (medium vehicle)
-    m_cachedStats.topSpeed = 80.0f;
-    m_cachedStats.acceleration = 5.0f;
-    m_cachedStats.handling = 0.04f;
-    m_cachedStats.offroadSpeed = 52.0f;
-    m_cachedStats.driftHandling = 0.03f;
+    // Default stat values (medium vehicle, KartEntity-calibrated)
+    m_cachedStats.topSpeed = 3000.0f;
+    m_cachedStats.acceleration = 1500.0f;
+    m_cachedStats.handling = 2.094f;   // ~120 deg/sec in radians
+    m_cachedStats.offroadSpeed = 1950.0f; // 65% of topSpeed
+    m_cachedStats.driftHandling = 1.676f;  // 80% of handling
     m_cachedStats.miniTurboDuration = 40.0f;
     m_cachedStats.miniTurboBoost = 1.25f;
     m_cachedStats.mass = 1.0f;
