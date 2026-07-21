@@ -69,6 +69,17 @@ public:
     f32 getYaw() const;
     EGG::Vector3f getChaseCamPos(f32 backDist, f32 upOffset) const;
 
+    // -- Physics state queries (delegates to PlayerPhysics) --------------------
+
+    /// True when a speed boost is active (boost pad, mushroom, star, etc.)
+    bool isBoosting() const;
+
+    /// True when kart is on an off-road surface
+    bool isOffRoad() const;
+
+    /// True when kart collided with a wall this frame
+    bool isWallHit() const;
+
     // -- Identity --------------------------------------------------------------
 
     u32 getPlayerId() const { return m_playerId; }
@@ -125,7 +136,9 @@ public:
 
 private:
     void updateWithPlayerPhysics(f32 dt, const void* inputState);
+    void updateWithFullPipeline(f32 dt, const void* inputState);
     void updateWithKartEntity(f32 dt, const void* inputState);
+    void syncKartDynamicsToEntity();
 
     u32  m_playerId;
     bool m_isAI;

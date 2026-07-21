@@ -165,6 +165,10 @@ private:
     ScreenEffect m_screenEffect;
     f32 m_globalScale;
     bool m_initialized;
+
+    // Preloaded effect tracking (BREFF archive data)
+    // Uses a 32-bit bitmask: bit N set = effectId N has been preloaded.
+    u32 m_preloadedMask;
 };
 
 } // namespace Scene

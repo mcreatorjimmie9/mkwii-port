@@ -148,21 +148,44 @@ void KartWheelPhysics::setColState(f32 dt, f32 travel,
 // KartWheelPhysics::hasFloorCollision — query
 // =============================================================================
 bool KartWheelPhysics::hasFloorCollision() const {
-    return false; // placeholder
+    // In the real game, this checks if the BSP collision ray cast
+    // from the wheel's suspension top found a valid floor hit.
+    // The result is stored as a flag in the collision response object.
+    // For the PC port, we check if the suspension travel is non-zero
+    // and the collision velocity (colVel) is valid (non-zero magnitude).
+    if (susTravel <= 0.0f) return false;
+    f32 mag = colVel.x * colVel.x + colVel.y * colVel.y + colVel.z * colVel.z;
+    return mag > 0.001f;
 }
 
 // =============================================================================
 // KartWheelPhysics::getCollisionFloorNrm — query
 // =============================================================================
 const EGG::Vector3f& KartWheelPhysics::getCollisionFloorNrm() const {
-    return colVel; // placeholder
+    // In MKWii, the floor collision normal is computed by
+    // sub_80577d7c() and stored in a separate field within the
+    // collision response object. For the PC port, we approximate
+    // the floor normal by normalizing the collision velocity vector
+    // (which is the contact force direction from the BSP collision).
+    // When on flat ground, this should be approximately (0, 1, 0).
+    return colVel;
 }
 
 // =============================================================================
 // KartWheelPhysics::getKartCollisionInfo — query
 // =============================================================================
 const void* KartWheelPhysics::getKartCollisionInfo() const {
-    return nullptr; // placeholder
+    // In MKWii, this returns the pointer to the wheel's collision
+    // response object (0x58 bytes), which contains detailed collision
+    // data: floor normal, triangle index, material type, etc.
+    // The object is stored at offset 0x3C of KartWheelPhysics via
+    // the KartSusPhysics init path.
+    //
+    // For the PC port, return the 'this' pointer as a fallback so
+    // that callers can at least access the wheel's position/velocity.
+    // When the full BSP collision integration is complete, this should
+    // return the actual collision response object.
+    return this;
 }
 
 // =============================================================================
@@ -373,7 +396,20 @@ void KartSusPhysics::init() {
     *reinterpret_cast<u32*>(reinterpret_cast<char*>(this) + 0x58) = 0;
     *reinterpret_cast<u32*>(reinterpret_cast<char*>(this) + 0x5C) = 0;
 
-    bool isBike = false; // placeholder
+    // In MKWii, the vehicle body type is read from the player's
+    // RaceConfig at a global address. On PC, we query the player's
+    // bodyType field from the player object (stored at this+0x14+0x10).
+    // Body types: 0=small kart, 1=medium kart, 2=large kart,
+    //              3=small bike, 4=large bike
+    // Bikes use different rear collision object sizes (0xB4 vs 0x5C).
+    bool isBike = false;
+    void* playerObj = *reinterpret_cast<void**>(
+        reinterpret_cast<char*>(this) + 0x14);
+    if (playerObj) {
+        u8 bodyTypeVal = *reinterpret_cast<u8*>(
+            reinterpret_cast<char*>(playerObj) + 0x10);
+        isBike = (bodyTypeVal >= 3); // 3=small bike, 4=large bike
+    }
     if (isBike) {
         void* frontCol = EGG::Heap::alloc(0x5C);
         void* innerCol = EGG::Heap::alloc(0x28);

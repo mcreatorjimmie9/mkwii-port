@@ -283,3 +283,51 @@ Implemented M8 milestone: item box spawning from KMP GOBJ data, item collection 
 ### Stage Summary
 - Phase 7 M8 (Items): COMPLETE
 - Next: Phase 7 M9 (M9 Full Race — 3-lap race with UI)
+---
+## Task: KartDynamics + PlayerPhysics Integration Pipeline
+
+### Summary
+Implemented the MKWii-faithful physics integration pipeline connecting PlayerPhysics (stat-based coordinator) with KartDynamics (rigid body engine). In the original MKWii, PlayerSub10::update() computes vehicleSpeed and writes it to KartDynamics.internalVel before KartDynamics::calc() integrates all velocity components. The port now mirrors this architecture through a new PhysicsPipeline module.
+
+### Architecture Discovery
+Key finding from decompiled reference code:
+- **Community `PlayerPhysics` (player.h:513) = Port `KartDynamics`** — Same class, 0x1B4 bytes, identical field layout
+- **Port `PlayerPhysics`** — A new port-specific orchestrator class that doesn't exist in the original
+- **Original pipeline**: PlayerSub10::update() → vehicleSpeed → KartDynamics.internalVel → KartDynamics::calc() → pos/rot
+- **Port pipeline**: PlayerPhysics::update() → PhysicsPipeline::syncToDynamics() → KartDynamics::calc() → PhysicsPipeline::syncFromDynamics()
+
+### New Files Created (1 file)
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `data/src/game/Physics/PhysicsPipeline.hpp` | ~200 | Header-only integration module: syncToDynamics, syncFromDynamics, applyCollisionForces, fullPhysicsStep |
+
+### Files Modified (2 files)
+
+| File | Changes |
+|------|---------|
+| `data/src/game/Player/Player.hpp` | Added updateWithFullPipeline(), syncKartDynamicsToEntity() declarations |
+| `data/src/game/Player/Player.cpp` | Added PhysicsPipeline include, full pipeline path when KartDynamics available, refactored KartDynamics sync to shared helper |
+
+### PhysicsPipeline Design
+- **syncToDynamics()**: Writes PlayerPhysics speed → KartDynamics.internalVel (forward * speed), position → dynamics.pos, yaw → mainRot quaternion
+- **applyCollisionForces()**: Bridges collision results (floor normal, wall bounce, off-road drag, boost force) to KartDynamics force/torque accumulators
+- **fullPhysicsStep()**: Complete per-frame orchestrator: input → PP::update → sync → collision forces → calc → readback
+- **syncFromDynamics()**: Reads KartDynamics result position back to PlayerPhysics for rendering consistency
+
+### Player.cpp Update Path
+When both PlayerPhysics AND KartDynamics are available (default for human players):
+1. PlayerPhysics::update() — stat-based physics (acceleration curve, handling droop, offroad)
+2. PhysicsPipeline::syncToDynamics() — write to KartDynamics
+3. PhysicsPipeline::applyCollisionForces() — collision → forces
+4. KartDynamics::calc(dt, maxSpeed, air) — rigid body integration (position, rotation, speed clamping)
+5. Read back results to KartEntity for rendering
+
+### Build & Validation
+- Build: **0 errors, 0 warnings** across all targets
+- Physics tests: **56/56 passed** (no regressions)
+- All 4 targets: mkwii-port, mkwii-genesis, mkwii-linktest, physics_tests
+
+### Stage Summary
+- KartDynamics + PlayerPhysics integration: COMPLETE
+- Pending: SceneCamera/ObjectDirector/EffectDirector refinement, KartMove→PlayerSub10 alignment

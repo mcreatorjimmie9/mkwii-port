@@ -151,7 +151,20 @@ void PlayerSub10Bike::setTurnParams() {
 
     // Determine vehicle body type
     // sub_80590a50 returns: 1 = small bike, 2 = large bike
-    u32 bodyType = 0; // placeholder for getKartBodyType
+    // In MKWii, bikes have body types 3 (small bike) or 4 (large bike).
+    // On the PC port, we check the playerPointers to get the body type
+    // from the vehicle configuration. Default to medium kart (bodyType=1)
+    // if no player data is available (bike-specific params won't apply).
+    u32 bodyType = 0;
+    if (playerPointers) {
+        // Read vehicle body type from player state.
+        // In the real game, this comes from the global RaceConfig
+        // via sub_80590a50() which reads the kart body type field.
+        u8 rawBodyType = *reinterpret_cast<u8*>(
+            reinterpret_cast<char*>(playerPointers) + 0x10);
+        if (rawBodyType == 3) bodyType = 1; // small bike
+        else if (rawBodyType == 4) bodyType = 2; // large bike
+    }
 
     if (bodyType == 1) {
         // Small bike: use small bike turn params
@@ -222,7 +235,11 @@ void PlayerSub10Bike::updateSpecialFloor() {
     // Increment ghost vanish timer
     ghostVanishTimer++;
 
-    // Multiply vehicle speed by special floor factor
+    // Multiply vehicle speed by special floor factor.
+    // Boost panels multiply speed by ~1.0-1.05x, trick ramps by ~1.0-1.1x.
+    // The real value is read from the floor data attribute table (KCL).
+    // On PC, default to 1.0 (no change) since floor attributes are
+    // not yet parsed from the KCL collision data.
     vehicleSpeed *= 1.0f; // placeholder: loaded from floor data table
 
     // Clear special floor flags and set appropriate body flags

@@ -181,16 +181,6 @@ void SceneDirector::draw() {
     if (m_currentScene) {
         m_currentScene->draw();
     }
-
-    // During a fade transition, a full-screen overlay is drawn on top.
-    // The renderer reads m_fadeAlpha (0-255) and m_fadeColorR/G/B to
-    // composite the overlay.  The actual GX/OpenGL draw call is handled
-    // by the graphics backend; we only set the state here.
-    if (isTransitioning() && m_fadeAlpha > 0) {
-        (void)m_fadeColorR;
-        (void)m_fadeColorG;
-        (void)m_fadeColorB;
-    }
 }
 
 // =============================================================================
@@ -445,6 +435,19 @@ bool SceneDirector::hasScene(SceneId sceneId) const {
 f32 SceneDirector::getFadeProgress() const {
     if (m_maxFadeSteps == 0) return 0.0f;
     return static_cast<f32>(m_fadeProgress) / static_cast<f32>(m_maxFadeSteps);
+}
+
+// =============================================================================
+// renderFadeOverlay — Draw a full-screen colored quad for scene transitions
+//
+// In mkwii-genesis (static library), this is a no-op stub.
+// The PC port's main.cpp calls renderFadeOverlayGL() after SceneDirector::draw()
+// to perform the actual OpenGL rendering using m_fadeAlpha/m_fadeColorR/G/B.
+// This split is required because the static library cannot depend on
+// platform headers (gl3_core.h is only available in mkwii-port app target).
+// =============================================================================
+void SceneDirector::renderFadeOverlay() {
+    // Stub — actual GL rendering is handled by the platform layer in main.cpp
 }
 
 } // namespace Scene

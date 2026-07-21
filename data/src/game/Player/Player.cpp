@@ -24,6 +24,7 @@
 // Decompiled subsystems
 #include "KartMovement/KartMove.hpp"
 #include "Physics/PlayerPhysics.hpp"
+#include "Physics/PhysicsPipeline.hpp"
 #include "Collision/KartDynamics.hpp"
 
 namespace Game {
@@ -126,22 +127,17 @@ void Player::update(f32 dt, const void* inputState) {
         const auto& input = *static_cast<const Platform::InputState*>(inputState);
 
         if (m_usePlayerPhysics && m_playerPhysics) {
-            updateWithPlayerPhysics(dt, inputState);
+            // MKWii-faithful physics pipeline:
+            // PlayerPhysics (stats) + KartDynamics (rigid body) if available,
+            // PlayerPhysics-only fallback if KartDynamics is not initialized.
+            if (m_kartDynamics) {
+                updateWithFullPipeline(dt, inputState);
+            } else {
+                updateWithPlayerPhysics(dt, inputState);
+            }
         } else if (m_useKartDynamics && m_kartDynamics) {
             stepKartDynamics(input.accelerate, input.steer, dt);
-            // Sync KartDynamics position back to KartEntity for rendering
-            auto* kart = static_cast<KartEntity*>(m_kartEntity);
-            kart->setPosition(m_kartDynamics->pos.x,
-                              m_kartDynamics->pos.y,
-                              m_kartDynamics->pos.z);
-            kart->setSpeed(m_kartDynamics->speedNorm);
-            // Extract yaw from quaternion
-            f32 yawDeg = EGG::RadToDeg(std::atan2(
-                2.0f * (m_kartDynamics->mainRot.z * m_kartDynamics->mainRot.w +
-                        m_kartDynamics->mainRot.x * m_kartDynamics->mainRot.y),
-                1.0f - 2.0f * (m_kartDynamics->mainRot.y * m_kartDynamics->mainRot.y +
-                                m_kartDynamics->mainRot.z * m_kartDynamics->mainRot.z)));
-            kart->setYawDeg(yawDeg);
+            syncKartDynamicsToEntity();
         } else {
             updateWithKartEntity(dt, inputState);
         }
@@ -212,6 +208,66 @@ void Player::updateWithPlayerPhysics(f32 dt, const void* inputState) {
     kart->setPosition(posX, posY, posZ);
     kart->setYawDeg(yawDeg);
     kart->setSpeed(speed);
+}
+
+// =============================================================================
+// updateWithFullPipeline — MKWii-faithful physics with KartDynamics integration
+// =============================================================================
+// This mirrors the original MKWii pipeline:
+//   PlayerSub10 computes vehicleSpeed → writes to KartDynamics.internalVel
+//   Collision system writes forces/torques to KartDynamics
+//   KartDynamics::calc() integrates → final position
+//
+// In the port:
+//   PlayerPhysics computes stats-based speed → syncToDynamics
+//   Collision forces applied to KartDynamics
+//   KartDynamics::calc() handles rigid body integration
+//   Results sync back to KartEntity for rendering
+
+void Player::updateWithFullPipeline(f32 dt, const void* inputState) {
+    auto* kart = static_cast<KartEntity*>(m_kartEntity);
+    auto* pp = m_playerPhysics;
+    if (!pp || !kart || !inputState) return;
+
+    const auto& input = *static_cast<const Platform::InputState*>(inputState);
+
+    // 1. Query collision from KCL system
+    bool hasFloor = true;
+    bool offroad = false, boostPad = false, wallHit = false;
+    f32 wallNX = 0.0f, wallNZ = 0.0f;
+    kart->queryCollision(offroad, boostPad, wallHit, wallNX, wallNZ, m_collision);
+
+    // 2. Run the full physics pipeline via PhysicsPipeline
+    f32 outPosX, outPosY, outPosZ, outYawDeg, outSpeed;
+    PhysicsPipeline::fullPhysicsStep(
+        pp, m_kartDynamics,
+        input.accelerate, input.steer, input.brake,
+        hasFloor, offroad, boostPad, wallHit, wallNX, wallNZ,
+        dt,
+        outPosX, outPosY, outPosZ, outYawDeg, outSpeed);
+
+    // 3. Sync final position/speed to KartEntity for rendering
+    kart->setPosition(outPosX, outPosY, outPosZ);
+    kart->setYawDeg(outYawDeg);
+    kart->setSpeed(outSpeed);
+}
+
+// =============================================================================
+// syncKartDynamicsToEntity — Sync KartDynamics result to KartEntity
+// =============================================================================
+
+void Player::syncKartDynamicsToEntity() {
+    if (!m_kartDynamics || !m_kartEntity) return;
+    auto* kart = static_cast<KartEntity*>(m_kartEntity);
+    kart->setPosition(m_kartDynamics->pos.x,
+                      m_kartDynamics->pos.y,
+                      m_kartDynamics->pos.z);
+    kart->setSpeed(m_kartDynamics->speedNorm);
+    // Extract yaw from mainRot quaternion
+    f32 yawDeg = EGG::RadToDeg(std::atan2(
+        2.0f * (m_kartDynamics->mainRot.y * m_kartDynamics->mainRot.w),
+        1.0f - 2.0f * (m_kartDynamics->mainRot.y * m_kartDynamics->mainRot.y)));
+    kart->setYawDeg(yawDeg);
 }
 
 // =============================================================================
@@ -293,6 +349,25 @@ f32 Player::getYaw() const {
 EGG::Vector3f Player::getChaseCamPos(f32 backDist, f32 upOffset) const {
     if (!m_kartEntity) return EGG::Vector3f(0.0f, 0.0f, 0.0f);
     return static_cast<KartEntity*>(m_kartEntity)->getChaseCamPos(backDist, upOffset);
+}
+
+// =============================================================================
+// Physics state queries — delegate to PlayerPhysics
+// =============================================================================
+
+bool Player::isBoosting() const {
+    if (!m_playerPhysics) return false;
+    return m_playerPhysics->isBoosting();
+}
+
+bool Player::isOffRoad() const {
+    if (!m_playerPhysics) return false;
+    return m_playerPhysics->isOffRoad();
+}
+
+bool Player::isWallHit() const {
+    if (!m_playerPhysics) return false;
+    return m_playerPhysics->isWallHit();
 }
 
 // =============================================================================

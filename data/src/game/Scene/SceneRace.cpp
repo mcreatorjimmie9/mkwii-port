@@ -25,9 +25,13 @@
 #include "game/RaceSession.hpp"
 #include "game/ItemBox.hpp"
 #include "game/CollisionSystem.hpp"
+#include "../Field/CourseColManager.hpp"
 #include "platform/graphics.hpp"
 #include "platform/input.hpp"
 #include "platform/window.hpp"
+
+// HUD overlay
+#include "game/HUD.hpp"
 
 namespace Scene {
 
@@ -83,6 +87,10 @@ struct RaceScene::RaceData {
     ItemManager itemManager;
     ItemSlot playerItem;
 
+    // HUD overlay
+    HUD hud;
+    bool hudInitialized;
+
     u32 totalLaps;
     bool raceFinishedPrinted;
     int frameLogCounter;
@@ -91,6 +99,7 @@ struct RaceScene::RaceData {
         : trackManager(nullptr)
         , trackLoaded(false)
         , playerCount(TOTAL_RACERS)
+        , hudInitialized(false)
         , totalLaps(DEFAULT_LAP_COUNT)
         , raceFinishedPrinted(false)
         , frameLogCounter(0) {}
@@ -224,6 +233,21 @@ void RaceScene::loadCourse(u32 courseId) {
                static_cast<u32>(m_raceData->trackManager->getKmpData().objects.size()),
                static_cast<u32>(m_raceData->trackManager->getKmpData().checkpoints.size()),
                static_cast<u32>(m_raceData->trackManager->getKmpData().paths.size()));
+
+        // Wire raw KCL data into CourseColManager for KCollision queries
+        if (m_raceData->trackManager->isKclLoaded()) {
+            const auto& kclRaw = m_raceData->trackManager->getKCLRawData();
+            if (!kclRaw.empty()) {
+                if (Field::CourseColManager::instance()->load(
+                        kclRaw.data(), static_cast<u32>(kclRaw.size()))) {
+                    printf("[RaceScene] CourseColManager loaded KCL (%u bytes, %u triangles)\n",
+                           static_cast<u32>(kclRaw.size()),
+                           Field::CourseColManager::instance()->getKCollision()->getTriangleCount());
+                } else {
+                    printf("[RaceScene] CourseColManager failed to parse KCL data\n");
+                }
+            }
+        }
     } else {
         printf("[RaceScene] Track: Failed to download, using fallback\n");
     }
@@ -351,6 +375,10 @@ void RaceScene::initSubsystems() {
     // Initialize race session
     d.raceSession.init(TOTAL_RACERS, DEFAULT_LAP_COUNT, kmp.checkpoints);
     d.raceSession.startCountdown();
+
+    // Initialize HUD overlay (OpenGL 2D text rendering)
+    d.hud.initGL();
+    d.hudInitialized = true;
 }
 
 // =============================================================================
@@ -457,6 +485,11 @@ void RaceScene::draw() {
     const auto& vp = Platform::Graphics::getViewProjMatrix();
     d.itemManager.renderBoxes(vp);
 
+    // Render ObjectDirector objects
+    if (m_objectDirector) {
+        m_objectDirector->drawAll();
+    }
+
     // Render particles (EffectDirector) via OpenGL
     // On Wii, EffectDirector::draw() submits GX quads directly.
     // On PC, we bridge to OpenGL by iterating the particle pool.
@@ -494,6 +527,15 @@ void RaceScene::draw() {
     if (d.players[0].isActive()) {
         d.players[0].render(vp);
     }
+
+    // =========================================================================
+    // HUD 2D overlay — rendered after all 3D content
+    // =========================================================================
+    if (d.hudInitialized) {
+        u32 screenW = Platform::Window::getWidth();
+        u32 screenH = Platform::Window::getHeight();
+        d.hud.render(screenW, screenH);
+    }
 }
 
 // =============================================================================
@@ -503,6 +545,12 @@ void RaceScene::draw() {
 void RaceScene::updateCountdown() {
     if (m_raceData) {
         m_raceData->raceSession.updateCountdown(FRAME_TIME);
+
+        // Update HUD countdown state
+        if (m_raceData->hudInitialized) {
+            f32 countdownSec = static_cast<f32>(m_countdownTimer) / 60.0f;
+            m_raceData->hud.setCountdown(countdownSec, true);
+        }
     }
 
     if (m_countdownTimer > 0) {
@@ -546,11 +594,15 @@ void RaceScene::updateRacing() {
     const auto& input = Platform::InputManager::getState();
 
     // 2a. Update SceneCamera to follow player 0
+    // MKWii pipeline: calc() dispatches to mode update → applySmoothing →
+    // updateShake → calcView → calcProjection. We call updateFollow first
+    // (which sets position/target/FOV), then calc() to finalize matrices.
     if (m_camera && d.players[0].isActive()) {
         const auto& p0pos = d.players[0].getPosition();
         f32 yawRad = EGG::DegToRad(d.players[0].getYaw());
         Vec3 forward(std::sin(yawRad), 0.0f, std::cos(yawRad));
         m_camera->updateFollow(p0pos, forward, d.players[0].getSpeed(), FRAME_TIME);
+        m_camera->calc(FRAME_TIME); // Recompute view/proj matrices + shake
     }
 
     for (u32 i = 0; i < d.playerCount; i++) {
@@ -574,7 +626,11 @@ void RaceScene::updateRacing() {
     // Item usage (edge-triggered)
     static bool prevItemPressed = false;
     bool itemPressed = input.item;
+    bool itemJustUsed = false;
+    ItemTypeId usedItemType = ITEM_NONE;
     if (itemPressed && !prevItemPressed && d.players[0].m_itemSlot->type != ITEM_NONE) {
+        usedItemType = d.players[0].m_itemSlot->type;
+        itemJustUsed = true;
         f32 spd = d.players[0].getSpeed();
         f32 maxSpd = 3000.0f;
         d.itemManager.useItem(*d.players[0].m_itemSlot, spd, maxSpd,
@@ -624,24 +680,156 @@ void RaceScene::updateRacing() {
         return;
     }
 
-    // 8. Update EffectDirector
+    // 8. Update ObjectDirector and EffectDirector
+    if (m_objectDirector) {
+        m_objectDirector->calc(FRAME_TIME);
+    }
     if (m_effectDirector) {
         m_effectDirector->update(FRAME_TIME);
 
-        // Spawn boost flame effect for player 0 when on boost pad
-        if (d.players[0].isActive() && !d.players[0].m_finished) {
-            const auto& p0pos = d.players[0].getPosition();
-            // Spawn speed lines when going fast
-            if (d.players[0].getSpeed() > 2500.0f) {
-                // Only spawn every ~10 frames to avoid particle flood
-                if (getFrameCount() % 10 == 0) {
-                    Vec3 velDir(std::sin(EGG::DegToRad(d.players[0].getYaw())), 0.0f,
-                               std::cos(EGG::DegToRad(d.players[0].getYaw())));
+        // =====================================================================
+        // Particle effects — wired to game events with per-player per-type
+        // throttle to prevent exhausting the 8192-particle pool.
+        // =====================================================================
+
+        // Throttle timers: [playerIdx][effectType] — cooldown before next spawn
+        static f32 s_particleTimers[TOTAL_RACERS][EFFECT_COUNT];
+        static bool s_timersInitialized = false;
+        if (!s_timersInitialized) {
+            for (u32 p = 0; p < TOTAL_RACERS; p++)
+                for (u32 e = 0; e < EFFECT_COUNT; e++)
+                    s_particleTimers[p][e] = 0.0f;
+            s_timersInitialized = true;
+        }
+
+        // Decay all throttle timers
+        for (u32 p = 0; p < TOTAL_RACERS; p++)
+            for (u32 e = 0; e < EFFECT_COUNT; e++)
+                s_particleTimers[p][e] -= FRAME_TIME;
+
+        for (u32 i = 0; i < d.playerCount; i++) {
+            if (!d.players[i].isActive() || d.players[i].m_finished) continue;
+
+            const auto& pos = d.players[i].getPosition();
+            f32 yawRad = EGG::DegToRad(d.players[i].getYaw());
+            Vec3 forward(std::sin(yawRad), 0.0f, std::cos(yawRad));
+            Vec3 kartRear = pos - forward * 1.5f;
+
+            // --- Boost flame (boost pad, mushroom, star, bullet bill) ---
+            if (d.players[i].isBoosting()) {
+                if (s_particleTimers[i][EFFECT_BOOST_FLAME] <= 0.0f) {
                     m_effectDirector->emitBurst(
-                        Scene::EFFECT_SPEED_LINES,
-                        Vec3(p0pos.x, p0pos.y, p0pos.z),
-                        velDir, 3);
+                        EFFECT_BOOST_FLAME,
+                        Vec3(kartRear.x, pos.y - 0.5f, kartRear.z),
+                        Vec3(-forward.x, -forward.y, -forward.z), 2);
+                    s_particleTimers[i][EFFECT_BOOST_FLAME] = 0.05f; // ~20/sec
                 }
+            }
+
+            // --- Drift sparks (player 0 only — uses input drift flag) ---
+            if (i == 0 && input.drift) {
+                if (s_particleTimers[i][EFFECT_SPARK] <= 0.0f) {
+                    // Alternate left/right rear wheel
+                    f32 side = (getFrameCount() % 2 == 0) ? 1.0f : -1.0f;
+                    Vec3 right(std::cos(yawRad), 0.0f, -std::sin(yawRad));
+                    Vec3 wheelPos = kartRear + right * (0.8f * side);
+                    m_effectDirector->emitBurst(
+                        EFFECT_SPARK,
+                        Vec3(wheelPos.x, pos.y, wheelPos.z),
+                        Vec3(0.0f, 1.0f, 0.0f), 1);
+                    s_particleTimers[i][EFFECT_SPARK] = 0.04f; // ~25/sec
+                }
+            }
+
+            // --- Off-road dust ---
+            if (d.players[i].isOffRoad()) {
+                if (s_particleTimers[i][EFFECT_DUST] <= 0.0f) {
+                    m_effectDirector->emitBurst(
+                        EFFECT_DUST,
+                        Vec3(kartRear.x, pos.y, kartRear.z),
+                        Vec3(0.0f, 0.5f, 0.0f), 1);
+                    s_particleTimers[i][EFFECT_DUST] = 0.08f; // ~12/sec
+                }
+            }
+
+            // --- Wall hit sparks ---
+            if (d.players[i].isWallHit()) {
+                if (s_particleTimers[i][EFFECT_SHELL_HIT] <= 0.0f) {
+                    m_effectDirector->emitBurst(
+                        EFFECT_SHELL_HIT,
+                        Vec3(pos.x, pos.y, pos.z),
+                        forward, 3);
+                    s_particleTimers[i][EFFECT_SHELL_HIT] = 0.15f;
+                }
+            }
+
+            // --- Speed lines at very high speed ---
+            if (d.players[i].getSpeed() > 2500.0f) {
+                if (s_particleTimers[i][EFFECT_SPEED_LINES] <= 0.0f) {
+                    m_effectDirector->emitBurst(
+                        EFFECT_SPEED_LINES,
+                        Vec3(pos.x, pos.y, pos.z),
+                        forward, 3);
+                    s_particleTimers[i][EFFECT_SPEED_LINES] = 0.167f; // ~6/sec
+                }
+            }
+        }
+
+        // --- Item usage particle effects ---
+        if (itemJustUsed && usedItemType != ITEM_NONE) {
+            const auto& p0pos = d.players[0].getPosition();
+            Vec3 itemPos(p0pos.x, p0pos.y, p0pos.z);
+            f32 p0yaw = EGG::DegToRad(d.players[0].getYaw());
+            Vec3 p0fwd(std::sin(p0yaw), 0.0f, std::cos(p0yaw));
+
+            switch (usedItemType) {
+            case ITEM_MUSHROOM:
+            case ITEM_TRIPLE_MUSH:
+            case ITEM_GOLDEN_MUSH:
+                // Mushroom boost smoke
+                m_effectDirector->emitBurst(
+                    EFFECT_MUSHROOM_SMOKE, itemPos,
+                    Vec3(0.0f, 1.0f, 0.0f), 5);
+                break;
+
+            case ITEM_STAR:
+                // Star collection burst
+                m_effectDirector->emitBurst(
+                    EFFECT_STARS, itemPos,
+                    Vec3(0.0f, 2.0f, 0.0f), 8);
+                break;
+
+            case ITEM_BULLET_BILL:
+                // Bullet bill launch smoke
+                m_effectDirector->emitBurst(
+                    EFFECT_BULLET_BILL_SMOKE, itemPos,
+                    Vec3(0.0f, 1.5f, 0.0f), 6);
+                break;
+
+            case ITEM_BANANA:
+                // Banana slip effect at drop position
+                m_effectDirector->emitBurst(
+                    EFFECT_BANANA_SLIP, itemPos,
+                    Vec3(0.0f, 0.5f, 0.0f), 4);
+                break;
+
+            case ITEM_GREEN_SHELL:
+            case ITEM_RED_SHELL:
+                // Shell launch burst
+                m_effectDirector->emitBurst(
+                    EFFECT_SHELL_HIT, itemPos,
+                    p0fwd, 4);
+                break;
+
+            case ITEM_BOB_OMB:
+                // Explosion fire burst
+                m_effectDirector->emitBurst(
+                    EFFECT_FIRE, itemPos,
+                    Vec3(0.0f, 2.0f, 0.0f), 10);
+                break;
+
+            default:
+                break;
             }
         }
     }
@@ -659,6 +847,35 @@ void RaceScene::updateRacing() {
                d.players[0].getSpeed(),
                d.raceSession.getRaceTimeString());
     }
+
+    // 10. Update HUD state
+    if (d.hudInitialized) {
+        d.hud.setPosition(d.raceSession.getPlayerPosition());
+        d.hud.setLap(d.raceSession.getPlayerLap(), m_totalLaps);
+        d.hud.setSpeed(d.players[0].getSpeed());
+        d.hud.setRaceTime(d.raceSession.getRaceTimeString());
+        d.hud.setLapTime("0:00.000");
+        d.hud.setCountdown(0.0f, false);
+
+        // Item name from player's item slot
+        const auto* slot = d.players[0].m_itemSlot;
+        if (slot && slot->type != ITEM_NONE) {
+            static const char* itemNames[] = {
+                "Banana", "Green Shell", "Red Shell", "Mushroom",
+                "Star", "Bullet Bill", "Golden Mushroom",
+                "Blooper", "Pow Block", "Thunder Cloud",
+                "Fire Flower", "Triple Mushroom", " Mega Mushroom"
+            };
+            int idx = static_cast<int>(slot->type);
+            if (idx > 0 && idx < static_cast<int>(ITEM_COUNT)) {
+                d.hud.setItem(itemNames[idx - 1]);
+            } else {
+                d.hud.setItem("?");
+            }
+        } else {
+            d.hud.setItem("-");
+        }
+    }
 }
 
 // =============================================================================
@@ -667,6 +884,28 @@ void RaceScene::updateRacing() {
 
 void RaceScene::finishRace() {
     m_racePhase = PHASE_FINISH;
+
+    // Splash effect at finish line for player 0
+    if (m_effectDirector && m_raceData && m_raceData->players[0].isActive()) {
+        const auto& pos = m_raceData->players[0].getPosition();
+        m_effectDirector->emitBurst(
+            EFFECT_SPLASH,
+            Vec3(pos.x, pos.y + 2.0f, pos.z),
+            Vec3(0.0f, 3.0f, 0.0f), 15);
+        // Star burst celebration
+        m_effectDirector->emitBurst(
+            EFFECT_STARS,
+            Vec3(pos.x, pos.y + 3.0f, pos.z),
+            Vec3(0.0f, 4.0f, 0.0f), 12);
+    }
+
+    if (m_raceData && m_raceData->hudInitialized) {
+        u32 playerPos = m_raceData->raceSession.getPlayerPosition();
+        m_raceData->hud.setFinished(true);
+        m_raceData->hud.setFinishPosition(playerPos);
+        m_raceData->hud.setFinishTime(m_raceData->raceSession.getRaceTimeString());
+    }
+
     printf("[RaceScene] Race finished. Time: %s\n",
            m_raceData ? m_raceData->raceSession.getRaceTimeString() : "N/A");
 }

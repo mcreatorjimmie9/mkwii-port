@@ -5,6 +5,7 @@
 
 #include "SoundPlayer.hpp"
 #include "SoundArchive.hpp"
+#include "AudioSystem.hpp"
 #include <cstring>
 #include <cmath>
 #include <algorithm>
@@ -20,7 +21,7 @@ namespace snd {
 // @addr 0x8056020C (constructor area)
 // ============================================================================
 SoundPlayer::SoundPlayer()
-    : m_voiceMgr(nullptr)
+    : m_voiceMgr(AudioSystem::instance().getVoiceManager())
     , m_type(SOUND_PLAYER_TYPE_WAVE)
     , m_volume(1.0f)
     , m_targetVolume(1.0f)
@@ -439,9 +440,25 @@ bool WavePlayer::prepare(u32 soundId, void* archive) {
     if (!SoundPlayer::prepare(soundId, archive)) return false;
 
     // Look up wave data from the sound archive
-    // (Simplified — real implementation reads from BRSAR)
     m_waveData = nullptr;
     m_waveSize = 0;
+
+    if (archive != nullptr) {
+        SoundArchive* sar = (SoundArchive*)archive;
+        WaveInfo info;
+        if (sar->getWaveInfo(soundId, &info)) {
+            m_sampleRate = info.sampleRate;
+            m_channels = info.channels;
+            m_encoding = info.encoding;
+
+            u32 waveSize = 0;
+            const void* data = sar->getWaveData(soundId, &waveSize);
+            if (data != nullptr && waveSize > 0) {
+                m_waveData = (void*)data;
+                m_waveSize = waveSize;
+            }
+        }
+    }
 
     return true;
 }

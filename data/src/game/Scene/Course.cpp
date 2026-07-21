@@ -2,6 +2,7 @@
 // Reconstructed from Course_* and scene_Course_* functions (0x80690034+)
 
 #include "Course.hpp"
+#include "../Field/CourseColManager.hpp"
 #include <string.h>
 #include <math.h>
 #include <cstdio>
@@ -179,7 +180,41 @@ void Course::draw() const {
 f32 Course::getHeight(f32 x, f32 z) const {
     if (!m_loaded) return 0.0f;
     // From Course_validate_806901d8: height field lookup
-    // Simple flat height as fallback when no sectors are loaded
+    //
+    // In the real game, this walks the KCL collision octree to find
+    // the triangle directly below (x, z) and returns the interpolated
+    // height. The KCL stores a spatial octree that partitions the course
+    // into cells, each containing triangle indices.
+    //
+    // When no sectors are loaded, return a default flat height.
+    // When sectors are loaded, find the nearest sector and return
+    // its center Y (simplified version of triangle interpolation).
+    //
+    // The real implementation uses Moller-Trumbore ray-triangle
+    // intersection along the Y axis for precise height queries.
+
+    if (m_sectorCount == 0) return 0.0f;
+
+    // Find nearest road sector for approximate height
+    const RoadSector* nearest = nullptr;
+    f32 nearestDist = 1e30f;
+    for (u32 i = 0; i < m_sectorCount; i++) {
+        const RoadSector& s = m_sectors[i];
+        f32 dx = x - s.center.x;
+        f32 dz = z - s.center.z;
+        f32 dist = dx * dx + dz * dz;
+        if (dist < nearestDist) {
+            nearestDist = dist;
+            nearest = &s;
+        }
+    }
+
+    // Return sector's Y height if found and within reasonable range
+    if (nearest && nearestDist < 10000.0f) {
+        return nearest->center.y;
+    }
+
+    // No sector found - return default ground plane height
     return 0.0f;
 }
 
@@ -194,21 +229,16 @@ f32 Course::getHeight(f32 x, f32 z) const {
 f32 Course::getHeightAt(f32 x, f32 z) const {
     if (!m_loaded) return 0.0f;
 
-    // If KCL collision data is loaded, perform a downward raycast.
-    // The real implementation uses the KCL octree to narrow down triangles
-    // and tests each candidate for ray intersection.
-    if (m_collisionData && m_collisionDataSize > 0) {
-        // KCL raycast from above the course boundary
+    // Try CourseColManager first (uses KCL octree + ray-triangle intersection)
+    if (Field::CourseColManager::instance()->isLoaded()) {
         f32 rayStartY = m_boundaryMax.y + 100.0f;
-        f32 rayEndY = m_boundaryMin.y - 100.0f;
-
-        // For now, fall back to the sector-based height lookup.
-        // A full KCL raycast would walk the octree and test triangle
-        // intersections using Möller–Trumbore.
-        (void)rayStartY;
-        (void)rayEndY;
+        f32 floorY = Field::CourseColManager::instance()->getFloorAt(x, rayStartY, z);
+        if (floorY < rayStartY) {
+            return floorY;
+        }
     }
 
+    // Fallback to sector-based height
     return getHeight(x, z);
 }
 

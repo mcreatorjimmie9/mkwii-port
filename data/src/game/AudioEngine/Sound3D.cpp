@@ -5,6 +5,7 @@
 
 #include "Sound3D.hpp"
 #include "AxVoiceManager.hpp"
+#include "openal_stub.h"
 #include <cstring>
 #include <cmath>
 #include <algorithm>
@@ -291,6 +292,21 @@ void Sound3D::updateSound3D() {
         //
         // The actual voice updates are done by the SoundPlayer that
         // owns this 3D source (see SoundPlayer::update()).
+    }
+
+    // Push listener position and orientation to OpenAL
+    if (OpenALLoader::isInitialized()) {
+        if (OpenALLoader::alListener3f) {
+            OpenALLoader::alListener3f(AL_POSITION,
+                m_listener.posX, m_listener.posY, m_listener.posZ);
+        }
+        if (OpenALLoader::alListenerfv) {
+            ALfloat orientation[6] = {
+                m_listener.forwardX, m_listener.forwardY, m_listener.forwardZ,
+                m_listener.upX, m_listener.upY, m_listener.upZ
+            };
+            OpenALLoader::alListenerfv(AL_ORIENTATION, orientation);
+        }
     }
 }
 

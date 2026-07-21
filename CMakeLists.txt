@@ -197,6 +197,7 @@ set(AUDIOENGINE_SOURCES
     data/src/game/AudioEngine/DSPManager.cpp
     data/src/game/AudioEngine/Sound3D.cpp
     data/src/game/AudioEngine/AudioBus.cpp
+    data/src/game/AudioEngine/AudioSystem.cpp
 )
 
 # --- Rendering (10 files) ---
@@ -392,9 +393,9 @@ add_library(mkwii-genesis STATIC
     ${EGG_SOURCES}
 )
 
-# =============================================================================
-# Build summary
-# =============================================================================
+target_include_directories(mkwii-genesis PUBLIC
+    ${CMAKE_SOURCE_DIR}/src/platform
+)
 message(STATUS "")
 message(STATUS "=== mkwii-port Build Configuration ===")
 message(STATUS "C++ standard:      C++17")
@@ -498,6 +499,10 @@ set(APP_SOURCES
     src/game/AIController.cpp
     src/game/ItemBox.cpp
     src/game/RaceSession.cpp
+    # HUD / BitmapFont — 2D overlay rendering for race HUD
+    src/game/BitmapFont.cpp
+    src/game/HUD.cpp
+    src/game/GameMenu.cpp
     # Bridge layer: Player class + SceneRace (uses platform headers)
     data/src/game/Player/Player.cpp
     data/src/game/Scene/SceneRace.cpp

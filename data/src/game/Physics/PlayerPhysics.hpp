@@ -70,6 +70,18 @@ public:
     bool hasAnyFloorCollision() const { return m_anyFloorCol; }
     u32 getFloorCollisionCount() const { return m_floorColCount; }
 
+    /// True when a boost is active (boost pad, mushroom, star, etc.)
+    bool isBoosting() const { return m_boostMultiplier > 1.0f; }
+
+    /// True when kart is on an off-road surface (grass, sand, etc.)
+    bool isOffRoad() const { return (m_statusFlags & 0x0010) != 0; }
+
+    /// True when kart hit a wall this frame
+    bool isWallHit() const { return (m_wallOobFlags & 0x0002) != 0; }
+
+    /// Get the current boost multiplier (1.0 = none)
+    f32 getBoostMultiplier() const { return m_boostMultiplier; }
+
     // --- Input setters (called before update()) ---
 
     /// Set acceleration input (0.0 = none, 1.0 = full throttle)
@@ -218,6 +230,11 @@ private:
 
     // 0x068: Current vehicle speed (scalar)
     f32 m_speed;
+
+    // 0x06C: Active boost multiplier from PlayerBoost system.
+    // Set by PlayerSub10_boost.cpp when boost slots are activated.
+    // 1.0 = no boost, >1.0 = boost active (increases top speed).
+    f32 m_boostMultiplier;
 
     // 0x06C: Previous X position (raw)
     f32 m_rawPosX;

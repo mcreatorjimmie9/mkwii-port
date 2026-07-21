@@ -7,40 +7,54 @@
 #include <cstring>
 #include <algorithm>
 
-// OpenAL headers (via shim)
-#include <shims/ax_audio/ax_shim.h>
+// OpenAL bridge — uses runtime-loaded OpenAL via OpenALLoader.
+// When OpenALLoader is not initialized (e.g. during link tests),
+// all functions gracefully no-op. At runtime in mkwii-port, the
+// Platform::Audio::initialize() call loads libopenal.so.1.
+#include "openal_stub.h"
 
-// OpenAL stubs for PC port
-extern "C" {
-typedef unsigned int ALuint;
-typedef int ALenum;
-typedef int ALint;
-
-const int AL_GAIN = 0x100A;
-const int AL_PITCH = 0x1003;
-const int AL_POSITION = 0x1004;
-const int AL_VELOCITY = 0x1006;
-const int AL_LOOPING = 0x1007;
-const int AL_BUFFER = 0x1009;
-const int AL_SOURCE_STATE = 0x1010;
-const int AL_STOPPED = 0x1011;
-const int AL_FORMAT_MONO16 = 0x1101;
-const int AL_FORMAT_STEREO16 = 0x1103;
-const int AL_TRUE = 1;
-const int AL_FALSE = 0;
-
-inline void alDeleteSources(int n, ALuint* s) { (void)n; (void)s; }
-inline void alDeleteBuffers(int n, ALuint* b) { (void)n; (void)b; }
-inline void alGenSources(int n, ALuint* s) { (void)n; (void)s; }
-inline void alGenBuffers(int n, ALuint* b) { (void)n; (void)b; }
-inline void alSourcef(ALuint s, int p, float v) { (void)s; (void)p; (void)v; }
-inline void alSourcei(ALuint s, int p, int v) { (void)s; (void)p; (void)v; }
-inline void alSource3f(ALuint s, int p, float v1, float v2, float v3) { (void)s; (void)p; (void)v1; (void)v2; (void)v3; }
-inline void alSourcePlay(ALuint s) { (void)s; }
-inline void alSourceStop(ALuint s) { (void)s; }
-inline void alSourcePause(ALuint s) { (void)s; }
-inline void alBufferData(ALuint b, int f, void* d, int sz, int sr) { (void)b; (void)f; (void)d; (void)sz; (void)sr; }
-inline void alGetSourcei(ALuint s, int p, ALint* v) { (void)s; (void)p; *v = 0; }
+// Convenience wrappers that delegate to OpenALLoader when available,
+// or no-op when not initialized.
+namespace {
+    inline void alDeleteSources(ALsizei n, const ALuint* s) {
+        if (OpenALLoader::alDeleteSources) OpenALLoader::alDeleteSources(n, s);
+    }
+    inline void alDeleteBuffers(ALsizei n, const ALuint* b) {
+        if (OpenALLoader::alDeleteBuffers) OpenALLoader::alDeleteBuffers(n, b);
+    }
+    inline void alGenSources(ALsizei n, ALuint* s) {
+        if (OpenALLoader::alGenSources) OpenALLoader::alGenSources(n, s);
+        else { for (ALsizei i = 0; i < n; i++) s[i] = 0; }
+    }
+    inline void alGenBuffers(ALsizei n, ALuint* b) {
+        if (OpenALLoader::alGenBuffers) OpenALLoader::alGenBuffers(n, b);
+        else { for (ALsizei i = 0; i < n; i++) b[i] = 0; }
+    }
+    inline void alSourcef(ALuint s, ALenum p, ALfloat v) {
+        if (OpenALLoader::alSourcef) OpenALLoader::alSourcef(s, p, v);
+    }
+    inline void alSourcei(ALuint s, ALenum p, ALint v) {
+        if (OpenALLoader::alSourcei) OpenALLoader::alSourcei(s, p, v);
+    }
+    inline void alSource3f(ALuint s, ALenum p, ALfloat v1, ALfloat v2, ALfloat v3) {
+        if (OpenALLoader::alSource3f) OpenALLoader::alSource3f(s, p, v1, v2, v3);
+    }
+    inline void alSourcePlay(ALuint s) {
+        if (OpenALLoader::alSourcePlay) OpenALLoader::alSourcePlay(s);
+    }
+    inline void alSourceStop(ALuint s) {
+        if (OpenALLoader::alSourceStop) OpenALLoader::alSourceStop(s);
+    }
+    inline void alSourcePause(ALuint s) {
+        if (OpenALLoader::alSourcePause) OpenALLoader::alSourcePause(s);
+    }
+    inline void alBufferData(ALuint b, ALenum f, const ALvoid* d, ALsizei sz, ALsizei sr) {
+        if (OpenALLoader::alBufferData) OpenALLoader::alBufferData(b, f, d, sz, sr);
+    }
+    inline void alGetSourcei(ALuint s, ALenum p, ALint* v) {
+        if (OpenALLoader::alGetSourcei) OpenALLoader::alGetSourcei(s, p, v);
+        else { *v = AL_STOPPED; }
+    }
 }
 
 namespace nw4r {

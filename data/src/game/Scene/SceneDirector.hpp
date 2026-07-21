@@ -68,6 +68,9 @@ public:
     void updateFade();
     bool isTransitioning() const { return m_isFadingOut != 0 || m_isFadingIn != 0; }
 
+    /// Render full-screen fade overlay quad via OpenGL.
+    void renderFadeOverlay();
+
     // Scene teardown
     void destroyCurrentScene();
 

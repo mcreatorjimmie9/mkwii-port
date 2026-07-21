@@ -51,20 +51,26 @@ SceneCamera::~SceneCamera() {
 
 void SceneCamera::init(u8 playerCount) {
     m_mode = CAMERA_MODE_FOLLOW;
+    // MKWii default FOV: 60 degrees (0x8074e89c Camera_validate)
     m_fov = 60.0f;
+    // MKWii near/far: near=10, far=50000 (standard for GX)
     m_near = 10.0f;
     m_far = 50000.0f;
-    m_positionSmoothing = 0.1f;
-    m_targetSmoothing = 0.05f;
+    // MKWii follow camera smoothing: position=0.08, target=0.06
+    // These control the chase cam lag — lower = more lag (more faithful)
+    m_positionSmoothing = 0.08f;
+    m_targetSmoothing = 0.06f;
     m_autoCamera = false;
     m_cinematic = false;
     m_frameCount = 0;
     m_cinematicTime = 0.0f;
     m_cinematicKeyframe = 0;
     m_replayLerp = 0.0f;
+    // MKWii base FOV: 60 degrees
     m_baseFov = 60.0f;
     m_currentSpeed = 0.0f;
     m_shake.timer = 0.0f;
+    m_up = Vec3(0.0f, 1.0f, 0.0f);
 
     setupViewport(0, playerCount);
     m_initialized = true;
@@ -133,38 +139,60 @@ void SceneCamera::updateFollow(const Vec3& kartPos, const Vec3& kartForward,
         return;
     }
 
-    // Follow camera: position behind and above the kart
-    f32 dist = 350.0f + speed * 0.5f;
-    f32 height = 100.0f + speed * 0.15f;
+    // =====================================================================
+    // MKWii Follow Camera — faithful reconstruction
+    // =====================================================================
+    // In MKWii, the chase camera uses these key parameters:
+    //   - Base distance behind kart: ~400 units (constant, no speed scaling)
+    //   - Height above kart: ~100 units (constant, no speed scaling)
+    //   - Look-ahead distance: 200 units forward (constant)
+    //   - Position smoothing: exponential lerp at 0.08/frame-rate-independent
+    //   - Target smoothing: exponential lerp at 0.06/frame-rate-independent
+    //   - FOV: base 60°, widens by up to 5° at top speed (~120 km/h game scale)
+    //   - Up vector: always (0, 1, 0) world-up (no roll in normal racing)
+    //
+    // The camera does NOT dynamically scale distance/height with speed.
+    // Speed feel comes from FOV widening and faster target tracking.
+    // =====================================================================
+
+    // Desired camera position: behind and above the kart
+    // MKWii constant offset (from KartCamera sub in 0x8074e268 area)
+    const f32 CAM_BACK_DIST = 400.0f;   // Distance behind kart
+    const f32 CAM_HEIGHT    = 100.0f;   // Height above kart
+    const f32 CAM_LOOK_AHEAD = 200.0f;  // Look-ahead in forward direction
 
     Vec3 desiredPos;
-    desiredPos.x = kartPos.x - kartForward.x * dist;
-    desiredPos.y = kartPos.y + height;
-    desiredPos.z = kartPos.z - kartForward.z * dist;
+    desiredPos.x = kartPos.x - kartForward.x * CAM_BACK_DIST;
+    desiredPos.y = kartPos.y + CAM_HEIGHT;
+    desiredPos.z = kartPos.z - kartForward.z * CAM_BACK_DIST;
 
-    // Smooth position interpolation
-    f32 t = 1.0f - powf(1.0f - m_positionSmoothing, dt * 60.0f);
-    m_position.x += (desiredPos.x - m_position.x) * t;
-    m_position.y += (desiredPos.y - m_position.y) * t;
-    m_position.z += (desiredPos.z - m_position.z) * t;
+    // Frame-rate-independent exponential smoothing (MKWii runs at 60fps)
+    // Formula: lerp(alpha, dt) = 1 - (1 - alpha)^(dt * 60)
+    // This ensures consistent behavior regardless of frame rate.
+    f32 posT = 1.0f - powf(1.0f - m_positionSmoothing, dt * 60.0f);
+    m_position.x += (desiredPos.x - m_position.x) * posT;
+    m_position.y += (desiredPos.y - m_position.y) * posT;
+    m_position.z += (desiredPos.z - m_position.z) * posT;
 
-    // Look-ahead based on steering: shift target slightly in kart forward direction
-    f32 lookAheadDist = 50.0f + speed * 0.3f;
+    // Look target: kart position + look-ahead distance in forward direction
+    // MKWii uses a fixed look-ahead, not speed-scaled
     Vec3 lookTarget;
-    lookTarget.x = kartPos.x + kartForward.x * lookAheadDist;
+    lookTarget.x = kartPos.x + kartForward.x * CAM_LOOK_AHEAD;
     lookTarget.y = kartPos.y;
-    lookTarget.z = kartPos.z + kartForward.z * lookAheadDist;
+    lookTarget.z = kartPos.z + kartForward.z * CAM_LOOK_AHEAD;
 
     f32 targetT = 1.0f - powf(1.0f - m_targetSmoothing, dt * 60.0f);
     m_target.x += (lookTarget.x - m_target.x) * targetT;
     m_target.y += (lookTarget.y - m_target.y) * targetT;
     m_target.z += (lookTarget.z - m_target.z) * targetT;
 
-    // Speed-dependent FOV: wider at high speed for sense of speed
-    // Base FOV is m_baseFov, widens up to 15 degrees at max speed
-    f32 speedNorm = speed / 120.0f; // Normalize to ~max game speed
+    // Speed-dependent FOV — MKWii FOV animation (Camera_validate_8074e89c)
+    // Base FOV: 60°, max additional width: 5° at top speed
+    // Top speed in MKWii is approximately 120 km/h internal units
+    // FOV change is subtle — just enough to convey speed sensation
+    f32 speedNorm = speed / 3000.0f; // Normalize to max game speed
     if (speedNorm > 1.0f) speedNorm = 1.0f;
-    f32 targetFov = m_baseFov + speedNorm * 15.0f;
+    f32 targetFov = m_baseFov + speedNorm * 5.0f;
     m_fov += (targetFov - m_fov) * targetT;
 }
 

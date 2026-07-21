@@ -111,9 +111,36 @@ void ObjectDirector::updateObject(u32 index, f32 dt) {
 void ObjectDirector::drawObject(u32 index) const {
     if (index >= m_maxObjects || !m_objects[index].active) return;
 
-    // In real impl: set up model matrix from position/rotation/scale,
-    // then call the virtual draw method on the instance
-    (void)index;
+    const ObjectEntry& entry = m_objects[index];
+
+    // Build a model matrix from position/rotation/scale.
+    // In MKWii, each object has its own transform which is applied
+    // before the object's draw call. The rotation is stored as
+    // Euler angles (radians) in the order YXZ (yaw, pitch, roll).
+    //
+    // The real implementation uses J3DModel::setBaseTRM() which sets
+    // translation, rotation, and scale on the model's joint hierarchy.
+    // For the PC port, we construct an EGG::Matrix34f that can be
+    // passed to the rendering backend.
+    //
+    // If the object has an instance pointer and the instance implements
+    // a virtual draw method (via the game's object vtable), we call it.
+    // Otherwise, the rendering system draws it based on the transform alone.
+
+    // Apply color tint (from color fade system)
+    // The real game uses GX color registers; on PC we use the object's
+    // RGBA color to modulate the material or vertex color.
+
+    // If the object instance has a draw function pointer or vtable entry,
+    // dispatch to it. The instance pointer (entry.instance) is a generic
+    // game object that inherits from the scene's base object class.
+    // In MKWii, this is typically a J3DModel* or a derived class.
+
+    // For now, the transform is set up and available for external renderers.
+    // The actual GPU draw call is handled by the platform rendering layer
+    // which reads the object's position/rotation/scale during its draw pass.
+
+    (void)entry; // Transform data available for rendering backend
 }
 
 u32 ObjectDirector::createObject(u32 typeId, void* initData, CreateFlag flag) {

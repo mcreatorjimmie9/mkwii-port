@@ -63,14 +63,47 @@ public:
     void setIdentity() { x = y = z = 0.0f; w = 1.0f; }
     f32 squareNorm() const { return x*x + y*y + z*z + w*w; }
     void normalise() { f32 n = squareNorm(); if (n > 0.0f) { f32 inv = 1.0f / n; x*=inv; y*=inv; z*=inv; w*=inv; } }
-    void rotateVector(const Vector3f& src, Vector3f& dst) const { (void)src; dst = src; /* TODO */ }
-    void rotateVectorInv(const Vector3f& src, Vector3f& dst) const { (void)src; dst = src; /* TODO */ }
+    // Rotate a vector by this quaternion: v' = q * v * q^{-1}
+    // Uses the optimized form: v' = v + 2*cross(q.xyz, cross(q.xyz, v) + w*v)
+    void rotateVector(const Vector3f& src, Vector3f& dst) const {
+        Vector3f qxyz(x, y, z);
+        Vector3f cross1 = TVector3<f32>::cross(qxyz, src);
+        Vector3f tmp = cross1 + src * w;
+        Vector3f cross2 = TVector3<f32>::cross(qxyz, tmp);
+        dst = src + cross2 * 2.0f;
+    }
+    // Inverse rotation: v' = q^{-1} * v * q = conj(q) * v * q
+    void rotateVectorInv(const Vector3f& src, Vector3f& dst) const {
+        // Conjugate: (x, y, z, w) -> (-x, -y, -z, w)
+        Vector3f qxyz(-x, -y, -z);
+        Vector3f cross1 = TVector3<f32>::cross(qxyz, src);
+        Vector3f tmp = cross1 + src * w;
+        Vector3f cross2 = TVector3<f32>::cross(qxyz, tmp);
+        dst = src + cross2 * 2.0f;
+    }
     Quaternion operator+(const Quaternion& o) const { return Quaternion(x+o.x, y+o.y, z+o.z, w+o.w); }
     Quaternion operator*(f32 s) const { return Quaternion(x*s, y*s, z*s, w*s); }
     Quaternion& operator+=(const Quaternion& o) { x+=o.x; y+=o.y; z+=o.z; w+=o.w; return *this; }
     Quaternion& operator*=(f32 s) { x*=s; y*=s; z*=s; w*=s; return *this; }
-    static void quatMul(Quaternion& dst, const Quaternion& a, const Quaternion& b) { (void)a; (void)b; dst.setIdentity(); /* TODO */ }
-    static void fromRotated(Quaternion& dst, const Quaternion& q, const Vector3f& v) { (void)q; (void)v; dst.setIdentity(); /* TODO */ }
+    // Hamilton product: dst = a * b
+    static void quatMul(Quaternion& dst, const Quaternion& a, const Quaternion& b) {
+        dst.x = a.w*b.x + a.x*b.w + a.y*b.z - a.z*b.y;
+        dst.y = a.w*b.y - a.x*b.z + a.y*b.w + a.z*b.x;
+        dst.z = a.w*b.z + a.x*b.y - a.y*b.x + a.z*b.w;
+        dst.w = a.w*b.w - a.x*b.x - a.y*b.y - a.z*b.z;
+    }
+    // Rotate vector v by quaternion q and store result: dst = q * v * q^{-1}
+    // This produces a pure rotation quaternion (w=0) representing the rotated vector.
+    static void fromRotated(Quaternion& dst, const Quaternion& q, const Vector3f& v) {
+        // Construct pure quaternion from v
+        Quaternion vp(v.x, v.y, v.z, 0.0f);
+        Quaternion qc(-q.x, -q.y, -q.z, q.w); // conjugate
+        Quaternion tmp;
+        quatMul(tmp, q, vp);
+        quatMul(dst, tmp, qc);
+        // Result should have w ≈ 0, extract xyz as rotated vector
+        dst.w = 0.0f;
+    }
     void toMatrix(class Matrix34f& dst) const; // defined after Matrix34f
 };
 typedef Quaternion Quatf;
@@ -102,11 +135,41 @@ public:
     }
     EGG::Vector3f getRow(int r) const { return EGG::Vector3f(m[r][0], m[r][1], m[r][2]); }
     void makeZero() { std::memset(m, 0, sizeof(m)); }
-    void inverseToC(Matrix34f& dst) const { dst.makeIdentity(); /* TODO */ }
+    // Compute inverse of this 3x4 affine matrix, store in dst.
+    // For a 3x4 matrix [R|t], the inverse is [R^T | -R^T * t].
+    void inverseToC(Matrix34f& dst) const {
+        // Transpose the 3x3 rotation part
+        dst.m[0][0] = m[0][0]; dst.m[0][1] = m[1][0]; dst.m[0][2] = m[2][0];
+        dst.m[1][0] = m[0][1]; dst.m[1][1] = m[1][1]; dst.m[1][2] = m[2][1];
+        dst.m[2][0] = m[0][2]; dst.m[2][1] = m[1][2]; dst.m[2][2] = m[2][2];
+        // Inverse translation: -R^T * t
+        Vector3f t(m[0][3], m[1][3], m[2][3]);
+        dst.m[0][3] = -(dst.m[0][0]*t.x + dst.m[0][1]*t.y + dst.m[0][2]*t.z);
+        dst.m[1][3] = -(dst.m[1][0]*t.x + dst.m[1][1]*t.y + dst.m[1][2]*t.z);
+        dst.m[2][3] = -(dst.m[2][0]*t.x + dst.m[2][1]*t.y + dst.m[2][2]*t.z);
+    }
 };
 
 // Quaternion::toMatrix implementation (needs Matrix34f to be complete)
-inline void Quaternion::toMatrix(Matrix34f& dst) const { dst.makeIdentity(); /* TODO */ }
+inline void Quaternion::toMatrix(Matrix34f& dst) const {
+    // Convert unit quaternion to 3x3 rotation matrix (extended to 3x4 with zero translation)
+    // Standard formula from quaternion (w, x, y, z) to rotation matrix.
+    f32 xx = x*x, yy = y*y, zz = z*z;
+    f32 xy = x*y, xz = x*z, yz = y*z;
+    f32 wx = w*x, wy = w*y, wz = w*z;
+    dst.m[0][0] = 1.0f - 2.0f*(yy + zz);
+    dst.m[0][1] = 2.0f*(xy - wz);
+    dst.m[0][2] = 2.0f*(xz + wy);
+    dst.m[0][3] = 0.0f;
+    dst.m[1][0] = 2.0f*(xy + wz);
+    dst.m[1][1] = 1.0f - 2.0f*(xx + zz);
+    dst.m[1][2] = 2.0f*(yz - wx);
+    dst.m[1][3] = 0.0f;
+    dst.m[2][0] = 2.0f*(xz - wy);
+    dst.m[2][1] = 2.0f*(yz + wx);
+    dst.m[2][2] = 1.0f - 2.0f*(xx + yy);
+    dst.m[2][3] = 0.0f;
+}
 
 static const f32 PI = 3.14159265358979323846f;
 static const f32 DEG_TO_RAD = PI / 180.0f;

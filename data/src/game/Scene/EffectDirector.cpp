@@ -21,7 +21,8 @@ EffectDirector::EffectDirector()
     , m_particlePool(nullptr)
     , m_totalParticleCount(0)
     , m_initialized(false)
-    , m_globalScale(1.0f) {
+    , m_globalScale(1.0f)
+    , m_preloadedMask(0) {
     m_screenEffect.type = ScreenEffect::SCREENFX_NONE;
     m_screenEffect.duration = 0.0f;
     m_screenEffect.timer = 0.0f;
@@ -51,6 +52,7 @@ void EffectDirector::init() {
     m_totalParticleCount = 0;
     m_globalScale = 1.0f;
     m_screenEffect.active = false;
+    m_preloadedMask = 0;
     m_initialized = true;
 }
 
@@ -354,9 +356,32 @@ void EffectDirector::setGlobalScale(f32 scale) {
 }
 
 void EffectDirector::preload(u32 effectId) {
-    // Pre-load effect data for the given ID
-    // In real impl: loads the .breff/.breft particle resources from archive
-    (void)effectId;
+    // In real impl: loads .breff/.breft particle resources from the SZS archive.
+    // The BREFF format (nw4r::ef::EffectProject) contains emitter templates,
+    // animation curves, and texture references used by the Wii's particle system.
+    //
+    // The track archive (SZS) stores BREFF/BREFT files under an "effect/" directory.
+    // Each BREFF contains:
+    //   - Emitter templates (base emitter parameters per effect type)
+    //   - Particle lifecycle curves (size/alpha/color over lifetime)
+    //   - Texture references (TPL textures used by particle materials)
+    //   - Animation keyframes (rotation, scale, etc.)
+    //
+    // The BREFT companion file holds the raw texture data (TPL format)
+    // referenced by the BREFF.
+    //
+    // For now: mark the effectId as preloaded in the bitmask so the system
+    // knows the BREFF data would be available if full BREFF parsing were
+    // implemented. The hardcoded effect types (SPARK, SMOKE, BOOST_FLAME,
+    // etc.) provide visual coverage for all 12 major game events regardless.
+    //
+    // When BREFF parsing is implemented, this method should:
+    //   1. Look up effectId in the archive's file table
+    //   2. Extract the BREFF binary data from the SZS RARC archive
+    //   3. Parse the BREFF header and emitter template tables
+    //   4. Store parsed data in a per-effectId buffer for spawnParticle()
+    //   5. Optionally load the companion BREFT texture data
+    m_preloadedMask |= (1u << (effectId % 32));
 }
 
 // =============================================================================

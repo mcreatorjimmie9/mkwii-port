@@ -102,6 +102,11 @@ public:
     /// Check if KCL data was successfully loaded.
     bool isKclLoaded() const { return m_kclLoaded; }
 
+    /// Get the raw KCL binary data (for passing to KCollision/CourseColManager).
+    const std::vector<u8>& getKCLRawData() const {
+        return m_kclLoader.getRawData();
+    }
+
     /// Get the track name (derived from the SZS file path or URL).
     const std::string& getTrackName() const { return m_trackName; }
 

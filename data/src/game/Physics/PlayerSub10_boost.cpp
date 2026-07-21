@@ -126,11 +126,23 @@ void PlayerSub10::activateBoostSlot(u32 type, s16 frames) {
         // Set the type bit
         boost.types = currentTypes | typeBit;
 
-        // Set the boost multiplier from global table
-        // multiplier at offset 0x124 = globalBoostTable[type]
-        // NOTE: 'global' refers to a Wii global pointer not available on PC;
-        // use a safe default of 1.0 (no boost multiplier change)
-        f32 boostMult = 1.0f; // PA_F32(global, pTableIdx) — stub for PC port
+        // Set the boost multiplier based on boost type.
+        // In MKWii, each boost type has a different speed multiplier
+        // that increases the kart's top speed while active:
+        //   Type 0 (MT/SSMT/start):  ~1.15x — mini-turbo speed boost
+        //   Type 2 (mushroom/panel): ~1.05x — moderate speed increase
+        //   Type 4 (trick/zipper):    ~1.10x — trick/zipper speed boost
+        //   Type 5 (mega/TC):         ~1.20x — mega mushroom
+        // The multiplier is read from a global boost param table in the
+        // real game. On PC, we use known MKWii default values.
+        f32 boostMult = 1.0f;
+        switch (type) {
+        case 0: boostMult = 1.15f; break; // MT/SSMT/start boost
+        case 2: boostMult = 1.05f; break; // mushroom/boost panel
+        case 4: boostMult = 1.10f; break; // trick/zipper
+        case 5: boostMult = 1.20f; break; // mega/tc
+        default: boostMult = 1.0f; break;
+        }
         boost.multiplier = boostMult;
 
         // --- Post-activation effects ---
@@ -178,7 +190,10 @@ void PlayerSub10::activateBoostMushroomClean() {
     if (skipBoost) return;
 
     // Get default mushroom duration from global
-    s16 frames = 0; // lha r31, 0(r4) — from global constant table
+    // In MKWii, mushroom boost lasts approximately 90 frames (1.5s at 60fps).
+    // The real game reads from a global boost parameter table;
+    // on PC we use the known MKWii default.
+    s16 frames = 90;
 
     // Activate boost in mushroom slot (type 2)
     activateBoostSlot(2, frames);
@@ -233,7 +248,11 @@ void PlayerSub10::activateMushroom() {
 
     if (skipBoost) return;
 
-    s16 frames = 0; // default mushroom duration
+    // Get default mushroom duration from global
+    // In MKWii, mushroom boost lasts approximately 90 frames (1.5s at 60fps).
+    // The real game reads from a global boost parameter table;
+    // on PC we use the known MKWii default.
+    s16 frames = 90;
     activateBoostSlot(2, frames);
 
     // Clamp zipperBoostMax
@@ -298,7 +317,11 @@ void PlayerSub10::activateBoostStart() {
     WA_U32(ps, 0x04, PA_U32(ps, 0x04) | 0x8000);
 
     // Get default start boost duration
-    s16 frames = 0; // lha r4, 0(r4) — from global
+    // In MKWii, the race start boost ( Rocket Start ) lasts approximately
+    // 60 frames (1.0s at 60fps) when the player gets a good start.
+    // The real game reads from a global boost parameter table;
+    // on PC we use the known MKWii default.
+    s16 frames = 60;
 
     // Clamp zipperBoostMax
     s16 currentZipperMax = zipperBoostMax;

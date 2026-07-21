@@ -63,6 +63,7 @@ PlayerPhysics::PlayerPhysics()
     memset(&m_contactOffset, 0, sizeof(m_contactOffset));
     memset(m_wheelRotData, 0, sizeof(m_wheelRotData));
     m_scale.setAll(1.0f);
+    m_boostMultiplier = 1.0f; // No boost active by default
     m_cachedStats.topSpeed = 3000.0f;
     m_cachedStats.acceleration = 1500.0f;
     m_cachedStats.handling = 2.094f;
@@ -402,9 +403,23 @@ f32 PlayerPhysics::calcTopSpeed() const {
 
     // Apply boost multiplier from PlayerBoost system
     // In the full game, this queries the active PlayerBoost object
+    // for its multiplier field. When a boost is active (MT, mushroom,
+    // trick, zipper, start), the multiplier is > 1.0, increasing
+    // the effective top speed. Typical values:
+    //   MT/mushroom: ~1.0-1.15
+    //   Trick boost: ~1.0-1.2
+    //   Zipper:      ~1.0-1.1
+    //   Start boost: ~1.0-1.05
+    // The multiplier is read from PlayerBoost::multiplier at the
+    // boost slot corresponding to the active boost type.
     if (m_speed > 0.0f) {
-        // Boosts scale the top speed, not the current speed directly
-        effectiveTopSpeed *= 1.0f; // Placeholder — real value from PlayerBoost
+        // Query active boost multiplier from PlayerBoost.
+        // When no boost is active, multiplier is 1.0 (no change).
+        // On the PC port, boost state is managed by PlayerSub10_boost.cpp
+        // which sets boost.multiplier when activating boost slots.
+        f32 boostMult = m_boostMultiplier; // From PlayerBoost::multiplier
+        if (boostMult < 1.0f) boostMult = 1.0f;
+        effectiveTopSpeed *= boostMult;
     }
 
     // Off-road reduces top speed significantly

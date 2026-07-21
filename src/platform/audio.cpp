@@ -1,13 +1,12 @@
-// audio.cpp — OpenAL audio initialization shim
+// audio.cpp — OpenAL audio initialization via runtime loader
 // MAESTRO Phase 7, Milestone M2: Platform Abstraction Layer
+//
+// Uses OpenALLoader (dlopen/dlsym against libopenal.so.1) so no
+// compile-time OpenAL dependency is needed.
 
 #include "platform/audio.hpp"
+#include "platform/openal_stub.h"
 #include <cstdio>
-
-#ifdef HAS_OPENAL
-#include <AL/al.h>
-#include <AL/alc.h>
-#endif
 
 namespace Platform {
 
@@ -15,57 +14,67 @@ void* Audio::s_device  = nullptr;
 void* Audio::s_context = nullptr;
 
 bool Audio::initialize() {
-#ifdef HAS_OPENAL
+    // Load OpenAL via runtime dlopen
+    if (!OpenALLoader::init()) {
+        printf("  Audio: Failed to load OpenAL (libopenal.so.1 not found)\n");
+        printf("  Audio: Running in silent mode\n");
+        return true;  // Non-fatal — game runs without audio
+    }
+
     // Open default audio device
-    s_device = static_cast<void*>(alcOpenDevice(nullptr));
+    s_device = static_cast<void*>(OpenALLoader::alcOpenDevice(nullptr));
     if (s_device == nullptr) {
-        printf("  Audio: alcOpenDevice failed\n");
-        return false;
+        printf("  Audio: alcOpenDevice failed (error 0x%04X)\n",
+               (unsigned)OpenALLoader::alcGetError(static_cast<ALCdevice*>(s_device)));
+        return true;
     }
 
     // Create OpenAL context
     s_context = static_cast<void*>(
-        alcCreateContext(static_cast<ALCdevice*>(s_device), nullptr)
+        OpenALLoader::alcCreateContext(static_cast<ALCdevice*>(s_device), nullptr)
     );
     if (s_context == nullptr) {
         printf("  Audio: alcCreateContext failed\n");
-        alcCloseDevice(static_cast<ALCdevice*>(s_device));
+        OpenALLoader::alcCloseDevice(static_cast<ALCdevice*>(s_device));
         s_device = nullptr;
-        return false;
+        return true;
     }
 
     // Make context current
-    if (alcMakeContextCurrent(static_cast<ALCcontext*>(s_context)) == ALC_FALSE) {
+    if (OpenALLoader::alcMakeContextCurrent(static_cast<ALCcontext*>(s_context)) == ALC_FALSE) {
         printf("  Audio: alcMakeContextCurrent failed\n");
-        alcDestroyContext(static_cast<ALCcontext*>(s_context));
-        alcCloseDevice(static_cast<ALCdevice*>(s_device));
+        OpenALLoader::alcDestroyContext(static_cast<ALCcontext*>(s_context));
+        OpenALLoader::alcCloseDevice(static_cast<ALCdevice*>(s_device));
         s_context = nullptr;
         s_device = nullptr;
-        return false;
+        return true;
     }
 
-    printf("  Audio: OpenAL initialized (default device)\n");
+    // Configure distance model for 3D audio (matches MKWii)
+    OpenALLoader::alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
+    OpenALLoader::alDopplerFactor(1.0f);
+    OpenALLoader::alSpeedOfSound(343.3f);  // m/s at 20°C
+
+    printf("  Audio: OpenAL initialized (runtime dlopen)\n");
+    if (OpenALLoader::hasEFX()) {
+        printf("  Audio: EFX reverb extension available\n");
+    }
     return true;
-#else
-    printf("  Audio: Stub mode — OpenAL not available\n");
-    return true;
-#endif
 }
 
 void Audio::shutdown() {
-#ifdef HAS_OPENAL
     if (s_context != nullptr) {
-        alcMakeContextCurrent(nullptr);
-        alcDestroyContext(static_cast<ALCcontext*>(s_context));
+        OpenALLoader::alcMakeContextCurrent(nullptr);
+        OpenALLoader::alcDestroyContext(static_cast<ALCcontext*>(s_context));
         s_context = nullptr;
     }
     if (s_device != nullptr) {
-        alcCloseDevice(static_cast<ALCdevice*>(s_device));
+        OpenALLoader::alcCloseDevice(static_cast<ALCdevice*>(s_device));
         s_device = nullptr;
     }
-#else
-    // Stub: no cleanup needed
-#endif
+
+    // Unload the OpenAL library
+    OpenALLoader::shutdown();
     printf("  Audio: Shutdown complete\n");
 }
 
@@ -74,12 +83,9 @@ void Audio::setMasterVolume(f32 volume) {
     if (volume < 0.0f) volume = 0.0f;
     if (volume > 1.0f) volume = 1.0f;
 
-#ifdef HAS_OPENAL
-    // Stub: actual alListenerf(AL_GAIN, volume) call
-    // alListenerf(AL_GAIN, volume);
-#else
-    (void)volume; // Suppress unused warning in stub mode
-#endif
+    if (OpenALLoader::isInitialized()) {
+        OpenALLoader::alListenerf(AL_GAIN, volume);
+    }
 }
 
 } // namespace Platform

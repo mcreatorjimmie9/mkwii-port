@@ -202,8 +202,8 @@ private:
 // @param data  Pointer to KCL file data
 // @param size  Size of the data
 // @param outHeader  Output parsed header
-// @return true if header is valid (magic = 'KCOL')
+// @return true if header is valid
 bool CourseColManager_parseKCLHeader(const void* data, u32 size,
-                                     KCLHeader* outHeader);
+                                     KCLFileHeader* outHeader);
 
 } // namespace Field

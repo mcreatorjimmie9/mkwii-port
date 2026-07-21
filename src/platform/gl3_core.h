@@ -110,6 +110,23 @@ constexpr GLenum GL_OUT_OF_MEMORY     = 0x0505;
 // Pixel formats
 constexpr GLenum GL_DEPTH24_STENCIL8 = 0x88F0;
 
+// Texture
+constexpr GLenum GL_TEXTURE_2D        = 0x0DE1;
+constexpr GLenum GL_TEXTURE0          = 0x84C0;
+constexpr GLenum GL_TEXTURE_MIN_FILTER = 0x2800;
+constexpr GLenum GL_TEXTURE_MAG_FILTER = 0x2801;
+constexpr GLenum GL_TEXTURE_WRAP_S     = 0x2802;
+constexpr GLenum GL_TEXTURE_WRAP_T     = 0x2803;
+constexpr GLenum GL_NEAREST           = 0x2600;
+constexpr GLenum GL_LINEAR            = 0x2601;
+constexpr GLenum GL_NEAREST_MIPMAP_NEAREST = 0x2700;
+constexpr GLenum GL_LINEAR_MIPMAP_LINEAR   = 0x2703;
+constexpr GLenum GL_CLAMP_TO_EDGE    = 0x812F;
+constexpr GLenum GL_REPEAT            = 0x2901;
+constexpr GLenum GL_RGBA8             = 0x8058;
+constexpr GLenum GL_RGBA              = 0x1908;
+constexpr GLenum GL_RGB               = 0x1907;
+
 // ---------------------------------------------------------------------------
 // GL function pointer types
 // ---------------------------------------------------------------------------
@@ -169,6 +186,17 @@ using PFNGLUNIFORM2F           = void  (GLAPIENTRY *)(GLint location, GLfloat v0
 using PFNGLUNIFORM3F           = void  (GLAPIENTRY *)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
 using PFNGLUNIFORM4F           = void  (GLAPIENTRY *)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
 using PFNGLUNIFORM1F           = void  (GLAPIENTRY *)(GLint location, GLfloat v0);
+using PFNGLUNIFORM1I           = void  (GLAPIENTRY *)(GLint location, GLint v0);
+
+// Textures
+using PFNGLGENTEXTURES          = void  (GLAPIENTRY *)(GLsizei n, GLuint* textures);
+using PFNGLDELETETEXTURES        = void  (GLAPIENTRY *)(GLsizei n, const GLuint* textures);
+using PFNGLBINDTEXTURE           = void  (GLAPIENTRY *)(GLenum target, GLuint texture);
+using PFNGLTEXIMAGE2D            = void  (GLAPIENTRY *)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels);
+using PFNGLTEXSUBIMAGE2D         = void  (GLAPIENTRY *)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels);
+using PFNGLTEXPARAMETERI         = void  (GLAPIENTRY *)(GLenum target, GLenum pname, GLint param);
+using PFNGLACTIVETEXTURE         = void  (GLAPIENTRY *)(GLenum texture);
+using PFNGLGENERATEMIPMAP        = void  (GLAPIENTRY *)(GLenum target);
 
 // ---------------------------------------------------------------------------
 // GL function pointer storage
@@ -229,6 +257,17 @@ struct GLFunctions {
     PFNGLUNIFORM3F           glUniform3f           = nullptr;
     PFNGLUNIFORM4F           glUniform4f           = nullptr;
     PFNGLUNIFORM1F           glUniform1f           = nullptr;
+    PFNGLUNIFORM1I           glUniform1i           = nullptr;
+
+    // Textures
+    PFNGLGENTEXTURES    glGenTextures    = nullptr;
+    PFNGLDELETETEXTURES  glDeleteTextures  = nullptr;
+    PFNGLBINDTEXTURE     glBindTexture     = nullptr;
+    PFNGLTEXIMAGE2D      glTexImage2D      = nullptr;
+    PFNGLTEXSUBIMAGE2D   glTexSubImage2D   = nullptr;
+    PFNGLTEXPARAMETERI   glTexParameteri    = nullptr;
+    PFNGLACTIVETEXTURE   glActiveTexture   = nullptr;
+    PFNGLGENERATEMIPMAP  glGenerateMipmap  = nullptr;
 };
 
 // Global function pointer table (all initialized to nullptr above)
@@ -316,6 +355,17 @@ inline bool loadFunctions(void* (*getProcAddr)(const char*)) {
     RESOLVE(glUniform3f,           PFNGLUNIFORM3F,           "glUniform3f");
     RESOLVE(glUniform4f,           PFNGLUNIFORM4F,           "glUniform4f");
     RESOLVE(glUniform1f,           PFNGLUNIFORM1F,           "glUniform1f");
+    RESOLVE(glUniform1i,           PFNGLUNIFORM1I,           "glUniform1i");
+
+    // Textures
+    RESOLVE(glGenTextures,    PFNGLGENTEXTURES,    "glGenTextures");
+    RESOLVE(glDeleteTextures,  PFNGLDELETETEXTURES,  "glDeleteTextures");
+    RESOLVE(glBindTexture,     PFNGLBINDTEXTURE,     "glBindTexture");
+    RESOLVE(glTexImage2D,      PFNGLTEXIMAGE2D,      "glTexImage2D");
+    RESOLVE(glTexSubImage2D,   PFNGLTEXSUBIMAGE2D,   "glTexSubImage2D");
+    RESOLVE(glTexParameteri,   PFNGLTEXPARAMETERI,   "glTexParameteri");
+    RESOLVE(glActiveTexture,   PFNGLACTIVETEXTURE,   "glActiveTexture");
+    RESOLVE(glGenerateMipmap,  PFNGLGENERATEMIPMAP,  "glGenerateMipmap");
 
     #undef RESOLVE
 

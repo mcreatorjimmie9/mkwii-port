@@ -376,11 +376,21 @@ void KartDynamics::initInternal(const EGG::Vector3f& param, int count) {
     // Initialize per-wheel positions from global physics data table
 
     // The global table at the lis+addi address contains BSP wheel offsets
-    // that get distributed to the 16 element slots
-    static const f32 sInitY = 0.0f;  // From global data[0]
-    static const f32 sWheelOffsetX[3] = { 0.0f, 0.0f, 0.0f };  // placeholder
+    // that get distributed to the 16 element slots.
+    // In MKWii, wheel offsets depend on vehicle body type:
+    //   Karts: 4 wheels in a rectangular pattern
+    //   Bikes: 2 wheels (front/rear) centered
+    //
+    // MKWii wheel offset values (in game units):
+    //   X offset: +/-28 for karts (wider stance), 0 for bikes
+    //   Y offset: 0 (wheels at chassis bottom)
+    //   Z offset: +/-32 for karts (wheelbase), varies for bikes
+    //
+    // Index 0 = front-left/rear pair, 1 = front-right pair, 2 = center/extra
+    static const f32 sInitY = 0.0f;
+    static const f32 sWheelOffsetX[3] = { -28.0f, 28.0f, 0.0f };
     static const f32 sWheelOffsetY[3] = { 0.0f, 0.0f, 0.0f };
-    static const f32 sWheelOffsetZ[3] = { 0.0f, 0.0f, 0.0f };
+    static const f32 sWheelOffsetZ[3] = { 32.0f, 32.0f, -32.0f };
 
     // Initialize per-element vec3 positions from wheel offset table
     for (u16 i = 0; i < DYNAMICS_ELEM_COUNT; i++) {

@@ -88,9 +88,12 @@ SceneBase* createCourseSelectScene(const SceneArgs& args) {
 }
 
 // RaceScene is created directly by main.cpp (not via factory) because
-// it requires platform headers (TrackManager, KartEntity, etc.) that
-// are not available in the mkwii-genesis library. Use a stub here so
-// the factory registration doesn't pull in missing symbols.
+// SceneRace.cpp is compiled into the mkwii-port executable target (not
+// the mkwii-genesis static library). The Pimpl RaceData struct uses
+// platform-specific types (TrackManager, KartEntity, CollisionSystem)
+// that are only available in the app target.
+// Therefore, the factory must return a StubScene for SCENE_RACE.
+// The real RaceScene is instantiated directly in main.cpp.
 SceneBase* createRaceScene(const SceneArgs& args) {
     (void)args;
     return new StubScene(SCENE_RACE);
