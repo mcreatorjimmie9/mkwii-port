@@ -107,3 +107,21 @@ Result: success — 7 files created, 0 errors in stub mode
   - CMakeLists.txt: pkg_check_modules(sdl2) for reliable detection, per-target compile definitions
   - Build: mkwii-genesis + mkwii-port + mkwii-linktest + physics_tests all compile with 0 errors
 Next: M3 — Track loading (.szs parser, KMP loader, course geometry rendering)
+
+---
+Cycle: 13 | Time: 2026-07-21T03:35:00Z | Phase: 7 | Module: Loaders
+Decision: MAESTRO Phase 7 M3 — Track Loading. Build asset loaders to download and parse Wii .szs track archives from copyparty.
+Action: Created 8 source files (4 loaders + TrackManager + test) in src/loaders/
+Result: success
+  - szs_reader: YAZ0 decompressor + U8 archive parser (pure C++17, no external deps)
+  - Correctly reverse-engineered MKWii YAZ0 encoding: MSB-first flags, dist = ((b1&0xF)<<8|b2)-1, copy_src increments per byte, extended mode when high nibble==0
+  - kmp_loader: KMP course data parser (14 section types: KTPJ, KTP, KCPO, GOBJ, AREA, POTI, CAME, JGPT, KNIT, CHECK, CPHY, CNPT, MSPT, RPKT)
+  - kcl_loader: KCL collision mesh parser with heuristic triangle detection
+  - track_manager: Unified loading orchestrator
+  - test_track_load.cpp: End-to-end test downloads beginner_course.szs from copyparty
+  - Verified with beginner_course.szs (1.97MB): 26 archive entries, 12,601 collision triangles
+  - KCL surface breakdown: 48% road, 14% off-road, 21% boost, 5% wall
+  - Bounding box: X[-1,16300] Y[-1,15655] Z[-1,76000]
+  - Build: 0 errors, 0 warnings across all 5 targets
+  - Commit: 95120025, pushed to main
+Next: Phase 7 M4 — Place Kart on track

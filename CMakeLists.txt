@@ -463,64 +463,39 @@ target_include_directories(mkwii-linktest PRIVATE
 )
 
 # =============================================================================
-# Phase 7: Integration — Milestone M2 Application
+# Phase 7: Integration — Milestone M4 Application
 # =============================================================================
 find_package(Threads QUIET)
 
-# SDL2 — use pkg-config to verify SDL2 is actually installed
-find_package(PkgConfig QUIET)
-if(PkgConfig_FOUND)
-    pkg_check_modules(SDL2_PKG QUIET sdl2)
-    if(SDL2_PKG_FOUND)
-        set(SDL2_FOUND TRUE)
-        include(FindPkgConfig)
-        # Use legacy variables for linking (works without CMake SDL2 config)
-        set(SDL2_LIBRARIES ${SDL2_PKG_LIBRARIES})
-        set(SDL2_INCLUDE_DIRS ${SDL2_PKG_INCLUDE_DIRS})
-        set(SDL2_LINK_DIRS ${SDL2_PKG_LINK_DIRS})
-        message(STATUS "SDL2 found via pkg-config: ${SDL2_LIBRARIES}")
-    else()
-        set(SDL2_FOUND FALSE)
-        message(STATUS "SDL2 NOT found — platform shims will run in stub mode")
-    endif()
-else()
-    set(SDL2_FOUND FALSE)
-    message(STATUS "SDL2 NOT found — platform shims will run in stub mode")
-endif()
+# M4 uses runtime dlopen for SDL2/GL — no dev packages needed.
+# We always define HAS_SDL2 and HAS_OPENGL since the runtime libs are present.
+# The platform layer uses dlopen("libSDL2-2.0.so.0") and dlsym for GL functions.
+set(SDL2_FOUND TRUE)
+set(OPENGL_FOUND TRUE)
+message(STATUS "SDL2: runtime dlopen mode (libSDL2-2.0.so.0)")
+message(STATUS "OpenGL: runtime dlsym mode (via SDL_GL_GetProcAddress)")
 
-# OpenGL
-find_package(OpenGL QUIET)
-if(OPENGL_FOUND)
-    message(STATUS "OpenGL found")
-else()
-    message(STATUS "OpenGL NOT found — platform shims will run in stub mode")
-endif()
-
-# OpenAL
+# OpenAL — still needs proper discovery or stub mode
 find_package(OpenAL QUIET)
 if(OPENAL_FOUND)
     message(STATUS "OpenAL found")
 else()
-    message(STATUS "OpenAL NOT found — platform shims will run in stub mode")
+    message(STATUS "OpenAL NOT found — audio will run in stub mode")
 endif()
 
-# M2 Application executable
-set(M2_SOURCES
+# M4 Application executable
+set(M4_SOURCES
     src/main.cpp
     src/platform/window.cpp
     src/platform/graphics.cpp
     src/platform/audio.cpp
+    src/game/KartEntity.cpp
 )
 
-add_executable(mkwii-port ${M2_SOURCES})
+add_executable(mkwii-port ${M4_SOURCES})
 
-# Define platform shim compile flags per-target (avoid polluting global flags)
-if(SDL2_FOUND)
-    target_compile_definitions(mkwii-port PRIVATE HAS_SDL2)
-endif()
-if(OPENGL_FOUND)
-    target_compile_definitions(mkwii-port PRIVATE HAS_OPENGL)
-endif()
+# Always enable SDL2 + OpenGL (runtime loading via dlopen/dlsym)
+target_compile_definitions(mkwii-port PRIVATE HAS_SDL2 HAS_OPENGL)
 if(OPENAL_FOUND)
     target_compile_definitions(mkwii-port PRIVATE HAS_OPENAL)
 endif()
@@ -548,12 +523,10 @@ target_include_directories(mkwii-port PRIVATE
 )
 target_link_libraries(mkwii-port PRIVATE
     mkwii-genesis
+    mkwii-loaders
     Threads::Threads
+    dl
 )
-if(SDL2_FOUND)
-    target_link_libraries(mkwii-port PRIVATE ${SDL2_LIBRARIES})
-    target_link_libraries(mkwii-port PRIVATE GL GLU)
-endif()
 if(OPENAL_FOUND)
     target_link_libraries(mkwii-port PRIVATE ${OPENAL_LIBRARY})
 endif()

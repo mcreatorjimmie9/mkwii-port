@@ -1,5 +1,6 @@
 #pragma once
 #include <rk_types.h>
+#include "EGG/math.h"
 
 namespace Platform {
 
@@ -11,6 +12,16 @@ public:
     static void clearScreen(f32 r, f32 g, f32 b, f32 a);
     static void beginFrame();
     static void endFrame();
+
+    /// Set up a perspective camera and compute the view-projection matrix.
+    /// Stores the result internally for retrieval via getViewProjMatrix().
+    /// No-op when HAS_OPENGL is not defined.
+    static void setupCamera(f32 eyeX, f32 eyeY, f32 eyeZ,
+                             f32 targetX, f32 targetY, f32 targetZ,
+                             f32 fovDeg, f32 aspect, f32 nearZ, f32 farZ);
+
+    /// Get the current view-projection matrix (identity if no camera set).
+    static const EGG::Matrix44f& getViewProjMatrix();
 
 private:
     Graphics() = delete;
