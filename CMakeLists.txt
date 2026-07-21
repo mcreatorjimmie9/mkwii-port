@@ -463,6 +463,102 @@ target_include_directories(mkwii-linktest PRIVATE
 )
 
 # =============================================================================
+# Phase 7: Integration — Milestone M2 Application
+# =============================================================================
+find_package(Threads QUIET)
+
+# SDL2 — use pkg-config to verify SDL2 is actually installed
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+    pkg_check_modules(SDL2_PKG QUIET sdl2)
+    if(SDL2_PKG_FOUND)
+        set(SDL2_FOUND TRUE)
+        include(FindPkgConfig)
+        # Use legacy variables for linking (works without CMake SDL2 config)
+        set(SDL2_LIBRARIES ${SDL2_PKG_LIBRARIES})
+        set(SDL2_INCLUDE_DIRS ${SDL2_PKG_INCLUDE_DIRS})
+        set(SDL2_LINK_DIRS ${SDL2_PKG_LINK_DIRS})
+        message(STATUS "SDL2 found via pkg-config: ${SDL2_LIBRARIES}")
+    else()
+        set(SDL2_FOUND FALSE)
+        message(STATUS "SDL2 NOT found — platform shims will run in stub mode")
+    endif()
+else()
+    set(SDL2_FOUND FALSE)
+    message(STATUS "SDL2 NOT found — platform shims will run in stub mode")
+endif()
+
+# OpenGL
+find_package(OpenGL QUIET)
+if(OPENGL_FOUND)
+    message(STATUS "OpenGL found")
+else()
+    message(STATUS "OpenGL NOT found — platform shims will run in stub mode")
+endif()
+
+# OpenAL
+find_package(OpenAL QUIET)
+if(OPENAL_FOUND)
+    message(STATUS "OpenAL found")
+else()
+    message(STATUS "OpenAL NOT found — platform shims will run in stub mode")
+endif()
+
+# M2 Application executable
+set(M2_SOURCES
+    src/main.cpp
+    src/platform/window.cpp
+    src/platform/graphics.cpp
+    src/platform/audio.cpp
+)
+
+add_executable(mkwii-port ${M2_SOURCES})
+
+# Define platform shim compile flags per-target (avoid polluting global flags)
+if(SDL2_FOUND)
+    target_compile_definitions(mkwii-port PRIVATE HAS_SDL2)
+endif()
+if(OPENGL_FOUND)
+    target_compile_definitions(mkwii-port PRIVATE HAS_OPENGL)
+endif()
+if(OPENAL_FOUND)
+    target_compile_definitions(mkwii-port PRIVATE HAS_OPENAL)
+endif()
+
+target_include_directories(mkwii-port PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/src/modules
+    ${CMAKE_SOURCE_DIR}/src/platform
+    ${CMAKE_SOURCE_DIR}/data/src/game
+    ${CMAKE_SOURCE_DIR}/data/src/game/UI
+    ${CMAKE_SOURCE_DIR}/data/src/game/Scene
+    ${CMAKE_SOURCE_DIR}/data/src/game/Network
+    ${CMAKE_SOURCE_DIR}/data/src/game/SaveData
+    ${CMAKE_SOURCE_DIR}/data/src/game/Field
+    ${CMAKE_SOURCE_DIR}/data/src/game/Collision
+    ${CMAKE_SOURCE_DIR}/data/src/game/AIRace
+    ${CMAKE_SOURCE_DIR}/data/src/game/EGG
+    ${CMAKE_SOURCE_DIR}/data/src/game/Rendering
+    ${CMAKE_SOURCE_DIR}/data/src/game/KartMovement
+    ${CMAKE_SOURCE_DIR}/data/src/game/Physics
+    ${CMAKE_SOURCE_DIR}/data/src/game/ItemSystem
+    ${CMAKE_SOURCE_DIR}/data/src/game/AudioEngine
+    ${CMAKE_SOURCE_DIR}/data/src/game/RaceEngine
+    ${CMAKE_SOURCE_DIR}/data/src/game/NW4R
+)
+target_link_libraries(mkwii-port PRIVATE
+    mkwii-genesis
+    Threads::Threads
+)
+if(SDL2_FOUND)
+    target_link_libraries(mkwii-port PRIVATE ${SDL2_LIBRARIES})
+    target_link_libraries(mkwii-port PRIVATE GL GLU)
+endif()
+if(OPENAL_FOUND)
+    target_link_libraries(mkwii-port PRIVATE ${OPENAL_LIBRARY})
+endif()
+
+# =============================================================================
 # Phase 6: Physics Validation Test Suite
 # =============================================================================
 enable_testing()
