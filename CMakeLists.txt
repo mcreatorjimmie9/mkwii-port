@@ -559,6 +559,28 @@ if(OPENAL_FOUND)
 endif()
 
 # =============================================================================
+# Asset Loaders (Phase 7 M3 — Track Loading)
+# =============================================================================
+# YAZ0 decompressor + U8 archive parser — pure C++17, no external deps.
+# Used to load Mario Kart Wii .szs track archives at runtime.
+set(LOADERS_SOURCES
+    src/loaders/szs_reader.cpp
+    src/loaders/kmp_loader.cpp
+    src/loaders/kcl_loader.cpp
+    src/loaders/track_manager.cpp
+)
+add_library(mkwii-loaders STATIC ${LOADERS_SOURCES})
+target_include_directories(mkwii-loaders PUBLIC ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(mkwii-loaders PUBLIC ${CMAKE_SOURCE_DIR}/data/src/modules)
+
+# Link the loader library into the main port executable
+target_link_libraries(mkwii-port PRIVATE mkwii-loaders)
+
+# Track loader test (end-to-end: download + parse SZS/KMP/KCL)
+add_executable(track_loader_test src/loaders/test_track_load.cpp)
+target_link_libraries(track_loader_test PRIVATE mkwii-loaders)
+
+# =============================================================================
 # Phase 6: Physics Validation Test Suite
 # =============================================================================
 enable_testing()

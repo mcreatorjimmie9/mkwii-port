@@ -94,3 +94,16 @@ Result: success — 56/56 tests passed, 0 failures
   - offroad_test: KCL surface codes, weight class penalties
   - handling_test: weight class handling/acceleration bonuses, stat trade-offs
 Next: Phase 7 — Integration (main() bootstrap, SDL+OpenGL init, asset loaders)
+
+---
+Cycle: 12 | Time: 2026-07-21T01:55:00Z | Phase: 7 (Integration M2)
+Decision: All modules compiling cleanly with 0 errors, 0 warnings. Ready for Phase 7 integration.
+Action: Created application entry point (src/main.cpp) and platform abstraction layer (src/platform/)
+Result: success — 7 files created, 0 errors in stub mode
+  - main.cpp: 4-step initialization (window→graphics→audio→system), 60-frame test loop, clean shutdown
+  - Platform::Window: SDL2 singleton with HAS_SDL2 guards, stub fallback (printf messages)
+  - Platform::Graphics: OpenGL 3.3+ init with viewport/clear/begin-end frame, HAS_OPENGL guards
+  - Platform::Audio: OpenAL init with device/context management, HAS_OPENAL guards
+  - CMakeLists.txt: pkg_check_modules(sdl2) for reliable detection, per-target compile definitions
+  - Build: mkwii-genesis + mkwii-port + mkwii-linktest + physics_tests all compile with 0 errors
+Next: M3 — Track loading (.szs parser, KMP loader, course geometry rendering)
