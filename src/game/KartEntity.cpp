@@ -62,13 +62,17 @@ KartEntity::KartEntity()
     , m_groundY(0.0f)            // Will be set from KMP start position
     , m_playerIndex(0)
     , m_isActive(false)
+    , m_customColors(false)
     , m_vao(0)
     , m_vbo(0)
     , m_ebo(0)
     , m_shaderProgram(0)
-    , m_mvpLoc(-1) {
+    , m_mvpLoc(-1)
+    , m_tintLoc(-1) {
     // m_position and m_rotationDeg are default-constructed to (0,0,0)
     // m_modelMatrix is default-constructed to identity
+    // Default face colors and tint
+    m_tintColor[0] = 1.0f; m_tintColor[1] = 1.0f; m_tintColor[2] = 1.0f;
 }
 
 KartEntity::~KartEntity() {
@@ -197,9 +201,10 @@ bool KartEntity::initGL() {
     const char* fragSrc =
         "#version 330 core\n"
         "in vec3 vColor;\n"
+        "uniform vec3 u_tint;\n"
         "out vec4 fragColor;\n"
         "void main() {\n"
-        "    fragColor = vec4(vColor, 1.0);\n"
+        "    fragColor = vec4(vColor * u_tint, 1.0);\n"
         "}\n";
 
     // -----------------------------------------------------------------
@@ -254,8 +259,9 @@ bool KartEntity::initGL() {
         return false;
     }
 
-    // Cache uniform location
+    // Cache uniform locations
     m_mvpLoc = GL3::gl.glGetUniformLocation(m_shaderProgram, "u_mvp");
+    m_tintLoc = GL3::gl.glGetUniformLocation(m_shaderProgram, "u_tint");
 
     // -----------------------------------------------------------------
     // Cube vertex data  (24 vertices, 6 floats each: pos xyz + color rgb)
@@ -265,56 +271,67 @@ bool KartEntity::initGL() {
     //
     //   Dimensions: 80 x 50 x 80  (width x height x depth)
     //   Half-extents: X=40, Y=25, Z=40
-    //
-    //   Face colors:
-    //     +Y (top)    = red     (1, 0, 0)
-    //     -Y (bottom) = green   (0, 1, 0)
-    //     +Z (front)  = blue    (0, 0, 1)
-    //     -Z (back)   = yellow  (1, 1, 0)
-    //     -X (left)   = cyan    (0, 1, 1)
-    //     +X (right)  = magenta (1, 0, 1)
 
     const f32 hw = CUBE_HW;  // 40
     const f32 hh = CUBE_HH;  // 25
     const f32 hd = CUBE_HD;  // 40
 
+    // Default face colors (used if setFaceColor was not called)
+    //   +Y (top)    = red     (1, 0, 0)
+    //   -Y (bottom) = green   (0, 1, 0)
+    //   +Z (front)  = blue    (0, 0, 1)
+    //   -Z (back)   = yellow  (1, 1, 0)
+    //   +X (right)  = magenta (1, 0, 1)
+    //   -X (left)   = cyan    (0, 1, 1)
+    const f32 defaultColors[6][3] = {
+        { 1.0f, 0.0f, 0.0f },  // top    (+Y)
+        { 0.0f, 1.0f, 0.0f },  // bottom (-Y)
+        { 0.0f, 0.0f, 1.0f },  // front  (+Z)
+        { 1.0f, 1.0f, 0.0f },  // back   (-Z)
+        { 1.0f, 0.0f, 1.0f },  // right  (+X)
+        { 0.0f, 1.0f, 1.0f },  // left   (-X)
+    };
+
+    // Use custom colors if setFaceColor() was called
+    const f32 (*colors)[3] = m_customColors ? m_faceColors : defaultColors;
+
     // clang-format off
-    const f32 vertices[24][6] = {
-        // -- Front face (+Z) -- blue
-        { -hw, -hh,  hd,  0.0f, 0.0f, 1.0f },
-        { -hw,  hh,  hd,  0.0f, 0.0f, 1.0f },
-        {  hw,  hh,  hd,  0.0f, 0.0f, 1.0f },
-        {  hw, -hh,  hd,  0.0f, 0.0f, 1.0f },
+    f32 vertices[24][6] = {
+        // -- Front face (+Z) -- blue (or custom)
+        { -hw, -hh,  hd,  colors[2][0], colors[2][1], colors[2][2] },
+        { -hw,  hh,  hd,  colors[2][0], colors[2][1], colors[2][2] },
+        {  hw,  hh,  hd,  colors[2][0], colors[2][1], colors[2][2] },
+        {  hw, -hh,  hd,  colors[2][0], colors[2][1], colors[2][2] },
 
-        // -- Back face (-Z) -- yellow
-        {  hw, -hh, -hd,  1.0f, 1.0f, 0.0f },
-        {  hw,  hh, -hd,  1.0f, 1.0f, 0.0f },
-        { -hw,  hh, -hd,  1.0f, 1.0f, 0.0f },
-        { -hw, -hh, -hd,  1.0f, 1.0f, 0.0f },
+        // -- Back face (-Z) -- yellow (or custom)
+        {  hw, -hh, -hd,  colors[3][0], colors[3][1], colors[3][2] },
+        {  hw,  hh, -hd,  colors[3][0], colors[3][1], colors[3][2] },
+        { -hw,  hh, -hd,  colors[3][0], colors[3][1], colors[3][2] },
+        { -hw, -hh, -hd,  colors[3][0], colors[3][1], colors[3][2] },
 
-        // -- Top face (+Y) -- red
-        { -hw,  hh,  hd,  1.0f, 0.0f, 0.0f },
-        { -hw,  hh, -hd,  1.0f, 0.0f, 0.0f },
-        {  hw,  hh, -hd,  1.0f, 0.0f, 0.0f },
-        {  hw,  hh,  hd,  1.0f, 0.0f, 0.0f },
+        // -- Top face (+Y) -- red (or custom)
+        { -hw,  hh,  hd,  colors[0][0], colors[0][1], colors[0][2] },
+        { -hw,  hh, -hd,  colors[0][0], colors[0][1], colors[0][2] },
+        {  hw,  hh, -hd,  colors[0][0], colors[0][1], colors[0][2] },
+        {  hw,  hh,  hd,  colors[0][0], colors[0][1], colors[0][2] },
 
-        // -- Bottom face (-Y) -- green
-        { -hw, -hh, -hd,  0.0f, 1.0f, 0.0f },
-        { -hw, -hh,  hd,  0.0f, 1.0f, 0.0f },
-        {  hw, -hh,  hd,  0.0f, 1.0f, 0.0f },
-        {  hw, -hh, -hd,  0.0f, 1.0f, 0.0f },
+        // -- Bottom face (-Y) -- green (or custom)
+        { -hw, -hh, -hd,  colors[1][0], colors[1][1], colors[1][2] },
+        { -hw, -hh,  hd,  colors[1][0], colors[1][1], colors[1][2] },
+        {  hw, -hh,  hd,  colors[1][0], colors[1][1], colors[1][2] },
+        {  hw, -hh, -hd,  colors[1][0], colors[1][1], colors[1][2] },
 
-        // -- Right face (+X) -- magenta
-        {  hw, -hh,  hd,  1.0f, 0.0f, 1.0f },
-        {  hw,  hh,  hd,  1.0f, 0.0f, 1.0f },
-        {  hw,  hh, -hd,  1.0f, 0.0f, 1.0f },
-        {  hw, -hh, -hd,  1.0f, 0.0f, 1.0f },
+        // -- Right face (+X) -- magenta (or custom)
+        {  hw, -hh,  hd,  colors[4][0], colors[4][1], colors[4][2] },
+        {  hw,  hh,  hd,  colors[4][0], colors[4][1], colors[4][2] },
+        {  hw,  hh, -hd,  colors[4][0], colors[4][1], colors[4][2] },
+        {  hw, -hh, -hd,  colors[4][0], colors[4][1], colors[4][2] },
 
-        // -- Left face (-X) -- cyan
-        { -hw, -hh, -hd,  0.0f, 1.0f, 1.0f },
-        { -hw,  hh, -hd,  0.0f, 1.0f, 1.0f },
-        { -hw,  hh,  hd,  0.0f, 1.0f, 1.0f },
-        { -hw, -hh,  hd,  0.0f, 1.0f, 1.0f },
+        // -- Left face (-X) -- cyan (or custom)
+        { -hw, -hh, -hd,  colors[5][0], colors[5][1], colors[5][2] },
+        { -hw,  hh, -hd,  colors[5][0], colors[5][1], colors[5][2] },
+        { -hw,  hh,  hd,  colors[5][0], colors[5][1], colors[5][2] },
+        { -hw, -hh,  hd,  colors[5][0], colors[5][1], colors[5][2] },
     };
     // clang-format on
 
@@ -391,6 +408,9 @@ void KartEntity::render(const EGG::Matrix44f& viewProj) const {
 
     GL3::gl.glUseProgram(m_shaderProgram);
     GL3::gl.glUniformMatrix4fv(m_mvpLoc, 1, GL3::GL_FALSE, &mvp.m[0][0]);
+    if (m_tintLoc >= 0) {
+        GL3::gl.glUniform3f(m_tintLoc, m_tintColor[0], m_tintColor[1], m_tintColor[2]);
+    }
 
     GL3::gl.glBindVertexArray(m_vao);
     GL3::gl.glDrawElements(GL3::GL_TRIANGLES, 36, GL3::GL_UNSIGNED_INT, nullptr);
@@ -425,6 +445,7 @@ void KartEntity::cleanupGL() {
         m_shaderProgram = 0;
     }
     m_mvpLoc = -1;
+    m_tintLoc = -1;
 #endif // HAS_OPENGL
 }
 
@@ -581,4 +602,34 @@ EGG::Vector3f KartEntity::getChaseCamPos(f32 backDist, f32 upOffset) const {
     f32 camY = m_position.y + upOffset;
 
     return EGG::Vector3f(camX, camY, camZ);
+}
+
+// =============================================================================
+// setFaceColor — Override per-face cube colors (M7: distinguish AI karts)
+// =============================================================================
+
+void KartEntity::setFaceColor(f32 topR, f32 topG, f32 topB,
+                               f32 botR, f32 botG, f32 botB,
+                               f32 frnR, f32 frnG, f32 frnB,
+                               f32 bckR, f32 bckG, f32 bckB,
+                               f32 rgtR, f32 rgtG, f32 rgtB,
+                               f32 lftR, f32 lftG, f32 lftB) {
+    // Face order: top(+Y), bot(-Y), front(+Z), back(-Z), right(+X), left(-X)
+    m_faceColors[0][0] = topR; m_faceColors[0][1] = topG; m_faceColors[0][2] = topB;
+    m_faceColors[1][0] = botR; m_faceColors[1][1] = botG; m_faceColors[1][2] = botB;
+    m_faceColors[2][0] = frnR; m_faceColors[2][1] = frnG; m_faceColors[2][2] = frnB;
+    m_faceColors[3][0] = bckR; m_faceColors[3][1] = bckG; m_faceColors[3][2] = bckB;
+    m_faceColors[4][0] = rgtR; m_faceColors[4][1] = rgtG; m_faceColors[4][2] = rgtB;
+    m_faceColors[5][0] = lftR; m_faceColors[5][1] = lftG; m_faceColors[5][2] = lftB;
+    m_customColors = true;
+}
+
+// =============================================================================
+// setTintColor — Set uniform tint color multiplier
+// =============================================================================
+
+void KartEntity::setTintColor(f32 r, f32 g, f32 b) {
+    m_tintColor[0] = r;
+    m_tintColor[1] = g;
+    m_tintColor[2] = b;
 }

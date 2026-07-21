@@ -64,6 +64,9 @@ public:
     /// Read-only access to the forward speed (scalar, in units/frame-unit).
     f32 getSpeed() const { return m_speed; }
 
+    /// Read-only access to the current facing yaw in degrees.
+    f32 getYaw() const { return m_yawDeg; }
+
     // -- Physics update (M5) --------------------------------------------------
 
     /// Update kart physics for one frame.
@@ -81,11 +84,28 @@ public:
     /// Returns a position behind and above the kart.
     EGG::Vector3f getChaseCamPos(f32 backDist, f32 upOffset) const;
 
+    // -- Color tint (M7: distinguish AI karts) ---------------------------------
+
+    /// Set per-face colors for the cube (6 faces: +Y,-Y,+Z,-Z,+X,-X).
+    /// Each color is RGB in [0,1] range. Call before initGL() or after cleanupGL().
+    /// If never called, default colors are used (red/green/blue/yellow/cyan/magenta).
+    void setFaceColor(f32 topR, f32 topG, f32 topB,
+                      f32 botR, f32 botG, f32 botB,
+                      f32 frnR, f32 frnG, f32 frnB,
+                      f32 bckR, f32 bckG, f32 bckB,
+                      f32 rgtR, f32 rgtG, f32 rgtB,
+                      f32 lftR, f32 lftG, f32 lftB);
+
+    /// Set a uniform tint color multiplier applied in the fragment shader.
+    /// Default is white (1,1,1) = no tint. Use to distinguish AI karts.
+    void setTintColor(f32 r, f32 g, f32 b);
+
     // -- OpenGL rendering (guarded by HAS_OPENGL) ----------------------------
 
     /// Create GL resources: compile shaders, generate VAO/VBO/EBO, upload
     /// cube geometry.  Returns false immediately if HAS_OPENGL is not defined.
-    /// Must be called once before render().
+    /// Must be called once before render(). If face colors were set via
+    /// setFaceColor(), those are used; otherwise default colors apply.
     bool initGL();
 
     /// Draw the kart cube using the provided view-projection matrix.
@@ -125,10 +145,16 @@ private:
     u32  m_playerIndex;  ///< Player slot (0-11)
     bool m_isActive;     ///< True once initFromKMP has been called
 
+    // -- Color state (M7) ------------------------------------------------------
+    f32 m_faceColors[6][3];  ///< Per-face RGB colors (top,bot,frn,bck,rgt,lft)
+    f32 m_tintColor[3];     ///< Uniform tint multiplier (default 1,1,1)
+    bool m_customColors;     ///< True if setFaceColor() was called
+
     // -- OpenGL handles (0 when no GL or not yet initialized) -----------------
     u32 m_vao;            ///< Vertex Array Object
     u32 m_vbo;            ///< Vertex Buffer Object
     u32 m_ebo;            ///< Element Buffer Object (index buffer)
     u32 m_shaderProgram;  ///< Linked shader program
     s32 m_mvpLoc;         ///< Uniform location for "u_mvp" mat4
+    s32 m_tintLoc;        ///< Uniform location for "u_tint" vec3
 };
