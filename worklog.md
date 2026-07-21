@@ -65,3 +65,95 @@ Reference: libyaz0 by MasterVermilli0n (GPLv3)
 ### Stage Summary
 - Phase 7 M3 (M3 Load Track): COMPLETE
 - Next: Phase 7 M4 (M4 Place Kart on track)
+
+---
+
+## Task 14: Phase 7 M4 — Place Kart on Track
+
+### Summary
+Created KartEntity class with GL 3.3 colored cube rendering, integrated into main loop with chase camera. All files compile with 0 errors, 0 warnings.
+
+### Files Modified/Created
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/game/KartEntity.hpp` | 99 | Kart entity: position, rotation, model matrix, GL handles |
+| `src/game/KartEntity.cpp` | 410 | KartEntity: KMP init, 4x4 matrix, GL cube mesh, GLSL shaders |
+| `src/main.cpp` | 204 | Main loop: spawn kart from KMP, render, chase camera |
+| `src/platform/gl3_core.h` | — | GL 3.3 function declarations |
+| `CMakeLists.txt` | — | M4_SOURCES (5 files) |
+
+### KartEntity Details
+- Init from KMP StartPosition: copies position, rotation, player index
+- 4x4 model matrix: YXZ Euler rotation + translation (column-major)
+- GL cube: 80x50x80 units, 24 vertices (6 colors per face), 36 indices
+- GLSL 330 core shaders: vertex (u_mvp + aPos/aColor) + fragment (vColor)
+- VAO/VBO/EBO pattern for efficient rendering
+
+### Camera
+- Perspective: 60deg FOV, near=1, far=200000
+- Chase cam: 500 units behind, 300 units above kart
+- Look-at: always targets kart position
+
+### Build & Validation
+- Build: 0 errors, 0 warnings across 4 targets
+- Commit: 6c642b4b, bbae8299
+
+### Stage Summary
+- Phase 7 M4 (M4 Place Kart): COMPLETE
+- Next: Phase 7 M5 (M5 Basic Input)
+
+---
+
+## Task 15: Phase 7 M5 — Basic Input
+
+### Summary
+Implemented keyboard and gamepad input system, arcade kart physics, and chase camera following. Kart now responds to WASD/arrow keys and Xbox-style gamepad. 0 errors, 0 warnings.
+
+### New Files Created (2 files in src/platform/)
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/platform/input.hpp` | 96 | InputState struct + InputManager class declaration |
+| `src/platform/input.cpp` | 236 | Keyboard + gamepad polling, controller hot-plug |
+
+### Files Modified (5 files)
+
+| File | Changes |
+|------|---------|
+| `src/platform/sdl2_stub.h` | +28 SDL2 functions (keyboard, joystick, gamepad), scancodes, key events, controller enums |
+| `src/game/KartEntity.hpp` | +physics state (speed, yaw, maxSpeed, accel, brake, friction, gravity), update(), getChaseCamPos() |
+| `src/game/KartEntity.cpp` | +arcade physics implementation, chase camera position computation |
+| `src/main.cpp` | +input init/poll loop, real dt timing, per-frame kart.update(), chase camera follow, telemetry |
+| `CMakeLists.txt` | M5_SOURCES (6 files, added input.cpp) |
+
+### Input System Design
+- **InputState**: normalized struct (steer -1..+1, accelerate/brake 0..1, drift/item/quit bool)
+- **Keyboard mapping**: W/Up=accel, S/Down=brake, A/Left=steer left, D/Right=steer right, LShift=drift, Space=item, Escape=quit
+- **Gamepad mapping**: Left trigger=accel, Right trigger=brake, Left stick X=steer, A button=accel, B button=brake, Start=quit
+- **Deadzone**: 0.2 on analog sticks
+- **Runtime**: SDL_GetKeyboardState array polled each frame, game controller axes/buttons via SDL_GameController API
+
+### Kart Physics (Arcade Style)
+- **Max speed**: 3000 units/sec (~108 km/h in MKW scale)
+- **Acceleration**: 1500 units/sec^2 (reach top speed in ~2 sec)
+- **Brake deceleration**: 2000 units/sec^2 (stop in ~1.5 sec)
+- **Reverse**: half acceleration (max 30% of top speed)
+- **Friction**: 300 units/sec^2 coast deceleration
+- **Steering**: 120 deg/sec at full input, scaled by speed factor
+- **Ground clamping**: flat ground at spawn Y (KCL collision deferred to M6)
+- **Yaw convention**: 0 = +Z (north), 90 = +X (east), position moves along facing direction
+
+### Chase Camera
+- Camera position behind kart along negative facing direction
+- Distance: 500 units back, 300 units up
+- Updates every frame to follow kart rotation
+- Look-at always targets kart position
+
+### Build & Validation
+- Build: 0 errors, 0 warnings across 4 targets (mkwii-port, mkwii-genesis, mkwii-linktest, physics_tests)
+- Commit: 2e19b989
+
+### Stage Summary
+- Phase 7 M5 (M5 Basic Input): COMPLETE
+- Next: Phase 7 M6 (M6 Physics Loop — KCL collision, kart drives around track)

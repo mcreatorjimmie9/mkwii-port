@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-07-21T06:30:00Z",
-  "cycle": 14,
-  "phase": "Phase 7: Integration — Milestone M4 (Place Kart on Track) Complete",
+  "timestamp": "2026-07-22T00:15:00Z",
+  "cycle": 15,
+  "phase": "Phase 7: Integration — Milestone M5 (Basic Input) Complete",
   "status": "in_progress",
   "totals": {
     "functions_total": 18444,
@@ -9,7 +9,7 @@
     "symbolized": 607,
     "reconstructed": 48800,
     "compiling_clean": 88,
-    "shim_functions": 200,
+    "shim_functions": 228,
     "tested_passing": 56,
     "warnings": 0,
     "todos": 0
@@ -17,7 +17,7 @@
   "compilation_status": {
     "total": "88/88 (100%), 0 errors, 0 warnings",
     "physics_tests": "56/56 passed",
-    "mkwii_port_app": "5 files (platform + loaders + KartEntity), 0 errors (GL 3.3 Core)",
+    "mkwii_port_app": "6 files (platform + loaders + KartEntity + input), 0 errors (GL 3.3 Core)",
     "track_loader_test": "1 file, 0 errors, downloads real track from copyparty"
   },
   "modules_completed": [
@@ -33,11 +33,18 @@
   },
   "m4": {
     "gl3_core": "Self-contained GL 3.3 header, 29 functions, runtime dlsym loading",
-    "sdl2_stub": "Self-contained SDL2 header, 12 functions, runtime dlopen loading",
-    "kart_entity": "KartEntity class: KMP init, 4x4 model matrix, colored cube (80x50x80)",
+    "sdl2_stub": "SDL2 header, 40 functions (video+GL+keyboard+joystick+gamepad)",
+    "kart_entity": "KartEntity: KMP init, model matrix, colored cube, arcade physics",
     "rendering": "GLSL 330 core shaders, VAO/VBO/EBO, perspective+lookAt camera",
-    "camera": "60deg FOV, behind+above kart, near=1 far=200000"
+    "camera": "Chase cam: behind+above kart, follows rotation"
   },
-  "milestone": "M4 (Place Kart)",
-  "next_action": "Phase 7 M5: Basic Input — read gamepad → move kart"
+  "m5": {
+    "input_manager": "InputManager: keyboard (WASD/arrows) + gamepad (sticks/triggers)",
+    "input_state": "Normalized InputState: steer(-1..+1), accel(0..1), brake(0..1)",
+    "kart_physics": "Arcade: maxSpeed=3000, accel=1500, brake=2000, steer=120 deg/s",
+    "controls": "W/Up=accel, S/Down=brake, A-D/arrows=steer, Escape=quit",
+    "camera": "Chase cam follows kart facing direction, real dt timing"
+  },
+  "milestone": "M5 (Basic Input)",
+  "next_action": "Phase 7 M6: Physics Loop — run physics simulation, KCL collision"
 }
