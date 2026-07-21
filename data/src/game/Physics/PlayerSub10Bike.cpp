@@ -18,6 +18,22 @@ public:
 class PlayerZipper;
 
 // =============================================================================
+// Safe accessors for global physics parameter table
+// =============================================================================
+// Original MKWii reads from a global RaceConfig/BikeParams pointer at a fixed
+// Wii memory address. On PC, this pointer is not set up. These helpers provide
+// safe default values so bike physics code doesn't crash with null derefs.
+static f32 safeGlobalFloat(u32 offset, f32 defaultVal) {
+    (void)offset;
+    return defaultVal;
+}
+
+static s16 safeGlobalS16(u32 offset, s16 defaultVal) {
+    (void)offset;
+    return defaultVal;
+}
+
+// =============================================================================
 // PlayerSub10Bike — Bike-specific physics overrides
 // Address range: 0x80587500 - 0x805897D8
 // =============================================================================
@@ -139,7 +155,7 @@ void PlayerSub10Bike::setTurnParams() {
 
     if (bodyType == 1) {
         // Small bike: use small bike turn params
-        turnParams = reinterpret_cast<void*>(0x00000000); // loaded from global table
+        turnParams = nullptr; // loaded from global table (not set up on PC)
     } else if (bodyType == 2) {
         // Large bike: use large bike turn params
         turnParams = reinterpret_cast<void*>(0x00000030); // offset into table
@@ -224,7 +240,7 @@ void PlayerSub10Bike::activateMega() {
     // (reads from bitfield1 / bitfield2)
 
     // Store current offroad invincibility frames
-    offroadInvincibilityFrames = *reinterpret_cast<s16*>(0x00000000); // global
+    offroadInvincibilityFrames = safeGlobalS16(0, 0); // global
 
     // Check driving direction and conditions for mega
     u32 drivingDir = drivingDirection;
@@ -306,9 +322,9 @@ void PlayerSub10Bike::getWheelieSoftSpeedLimitBonusHelper() {
     // Reset wheelie timer and set state
     wheelieTimer = 0;
     isInWheelie = true;
-    maxWheelieRot = *reinterpret_cast<f32*>(0x00000000); // global table
-    wheelieCounter = *reinterpret_cast<s16*>(0x00000000); // global max
-    wheelieCooldown = *reinterpret_cast<s16*>(0x00000000); // global cooldown
+    maxWheelieRot = safeGlobalFloat(0, 1.047f); // global table (~60 deg)
+    wheelieCounter = safeGlobalS16(0, 0); // global max
+    wheelieCooldown = safeGlobalS16(0, 0); // global cooldown
     wheelieRotSpeed = 0.0f;
 
     sub_805907e0();  // getBodyCollInfo
@@ -352,13 +368,13 @@ void PlayerSub10Bike::updateWheelie() {
 
             // Check if speed is above threshold
             f32 absSpeed = fabsf(speedRatio); // kclWheelSpeedFactor
-            if (absSpeed < *reinterpret_cast<f32*>(0x00000000 + 0x04)) {
+            if (absSpeed < safeGlobalFloat(0x04, 3000.0f)) {
                 // Speed below wheelie threshold
             }
 
             // Increment wheelie counter
             wheelieCounter++;
-            s16 maxCounter = *reinterpret_cast<s16*>(0x00000000 + 0x100);
+            s16 maxCounter = safeGlobalS16(0x100, 30);
             if (wheelieCounter > maxCounter) {
                 wheelieCounter = 0;
             }
@@ -369,7 +385,7 @@ void PlayerSub10Bike::updateWheelie() {
     if (wheelieTimer > 0) {
         // vtable call to get soft speed limit
         // (vtable[0x70/4] indirect call)
-        s16 someMax = *reinterpret_cast<s16*>(0x00000000 + 0x1F4);
+        s16 someMax = safeGlobalS16(0x1F4, 20);
         if (wheelieTimer > someMax) {
             // vtable call to cancel
         }
@@ -380,18 +396,18 @@ void PlayerSub10Bike::updateWheelie() {
     u32 bf3 = *reinterpret_cast<u32*>(reinterpret_cast<char*>(playerPointers) + 0x0C);
     if ((bf3 & 0x000C0000) != 0) {
         // On ground — apply wheelie rotation increment
-        f32 rotInc = wheelieRot + *reinterpret_cast<f32*>(0x00000000 + 0x1D0);
+        f32 rotInc = wheelieRot + safeGlobalFloat(0x1D0, 0.035f);
         wheelieRot = rotInc;
     } else {
         // In air or off ground
-        f32 rotDec = wheelieRot - *reinterpret_cast<f32*>(0x00000000 + 0x1D4);
+        f32 rotDec = wheelieRot - safeGlobalFloat(0x1D4, 0.05f);
         wheelieRot = rotDec;
     }
 
     // Decay wheelie rotation speed
-    wheelieRotSpeed -= *reinterpret_cast<f32*>(0x00000000 + 0x1DC);
-    if (wheelieRotSpeed < -*reinterpret_cast<f32*>(0x00000000 + 0x1E0)) {
-        wheelieRotSpeed = -*reinterpret_cast<f32*>(0x00000000 + 0x1E0);
+    wheelieRotSpeed -= safeGlobalFloat(0x1DC, 0.01f);
+    if (wheelieRotSpeed < -safeGlobalFloat(0x1E0, 2.0f)) {
+        wheelieRotSpeed = safeGlobalFloat(0x1E0, 2.0f);
     }
 
     // Apply wheelie rot to wheelieRot
@@ -411,7 +427,7 @@ void PlayerSub10Bike::updateWheelie() {
     f32 torqueFactor = maxWheelieRot - fabsf(wheelieRot);
     f32 torqueScale = 0.0f;
 
-    if (crossMag > *reinterpret_cast<f32*>(0x00000000 + 0x1F8)) {
+    if (crossMag > safeGlobalFloat(0x1F8, 0.5f)) {
         // Apply normal torque
         f32 dot = /* direction dot up */ 0.0f;
         if (dot < 0.0f) {
@@ -426,7 +442,7 @@ void PlayerSub10Bike::updateWheelie() {
     // Check if wheelie should end
     if (isInWheelie) {
         wheelieCounter++;
-        s16 wheelieMax = *reinterpret_cast<s16*>(0x00000000 + 0x1E4);
+        s16 wheelieMax = safeGlobalS16(0x1E4, 120);
         if (wheelieCounter >= wheelieMax) {
             // End wheelie
             isInWheelie = false;
@@ -476,7 +492,7 @@ void PlayerSub10Bike::updateMtCharge() {
         }
 
         // Load MT charge frames from global table
-        wheelieCooldown = *reinterpret_cast<s16*>(0x00000000); // global max
+        wheelieCooldown = safeGlobalS16(0, 30); // global max (frames)
         // Reset counter
     }
 
@@ -490,15 +506,15 @@ void PlayerSub10Bike::updateMtCharge() {
     s16 direction = *reinterpret_cast<s16*>(playerPointers);
     f32 lateralSpeed = *reinterpret_cast<f32*>(reinterpret_cast<char*>(playerPointers) + 4 + 0x88);
 
-    f32 speedThreshold = *reinterpret_cast<f32*>(0x00000000 + 0x3DC);
+    f32 speedThreshold = safeGlobalFloat(0x3DC, 0.5f);
     bool isForward = lateralSpeed >= 0.0f;
 
     s16 chargeIncrement = isForward ? 1 : -1;
     mtCharge += chargeIncrement;
 
     // Clamp MT charge
-    s16 mtMax = *reinterpret_cast<s16*>(0x00000000 + 0x3D2);
-    s16 mtMin = *reinterpret_cast<s16*>(0x00000000 + 0x3D0);
+    s16 mtMax = safeGlobalS16(0x3D2, 100);
+    s16 mtMin = safeGlobalS16(0x3D0, 20);
     if (mtCharge > mtMax) {
         mtCharge = mtMax;
     }
@@ -716,9 +732,9 @@ f32 PlayerSub10Bike::getWheelieSoftSpeedLimitBonus() {
     // Reset wheelie state
     wheelieTimer = 0;
     isInWheelie = true;
-    maxWheelieRot = *reinterpret_cast<f32*>(0x00000000); // global table
+    maxWheelieRot = safeGlobalFloat(0, 1.047f); // global table
     wheelieCounter = 0;
-    wheelieCooldown = *reinterpret_cast<s16*>(0x00000000); // global
+    wheelieCooldown = safeGlobalS16(0, 30); // global
     wheelieRotSpeed = 0.0f;
 
     sub_805907e0();  // getBodyCollInfo

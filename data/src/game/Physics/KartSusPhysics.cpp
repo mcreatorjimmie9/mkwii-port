@@ -112,13 +112,15 @@ void KartSusPhysics::init() {
     // Get player BSP data from the player object
     void* playerObj = *reinterpret_cast<void**>(
         reinterpret_cast<char*>(this) + 0x14);
+    if (!playerObj) return; // Safety: no player object, skip init
+
     u8 bodyType = *reinterpret_cast<u8*>(
         reinterpret_cast<char*>(playerObj) + 0x10);
 
     // Compute wheel count and BSP base index
-    void* globalRaceInfo = *reinterpret_cast<void**>(0x00000000);
-    u32 bspBaseEntry = *reinterpret_cast<u32*>(
-        reinterpret_cast<char*>(globalRaceInfo) + 0xB70);
+    // NOTE: Original MKWii reads from a global RaceConfig pointer at a fixed
+    // Wii memory address. On PC this global is not set up, so we use defaults.
+    u32 bspBaseEntry = 0; // Default: no BSP override
     u32 bspBaseIdx = *reinterpret_cast<u32*>(
         reinterpret_cast<u8*>(playerObj) + bodyType * 0xF0 + 0x38);
     u32 wheelCategory = bspBaseIdx - 3;
@@ -272,7 +274,9 @@ void KartSusPhysics::init() {
     *reinterpret_cast<u32*>(reinterpret_cast<char*>(this) + 0x5C) = 0;
 
     // Determine vehicle type for collision object creation
-    bool isBikeVehicle = (*reinterpret_cast<u8*>(0x00000000) != 0);
+    // NOTE: Original MKWii reads from a global vehicle config pointer.
+    // On PC, default to kart (not bike).
+    bool isBikeVehicle = false;
 
     if (isBikeVehicle) {
         // Bike: front collision (0x5C bytes)
@@ -377,9 +381,9 @@ void KartSusPhysics::calcCollision(const EGG::Vector3f& gravity,
     *reinterpret_cast<u32*>(reinterpret_cast<char*>(this) + 0x6C) =
         reinterpret_cast<uintptr_t>(colResult);
 
-    // Store global collision result
-    *reinterpret_cast<u32*>(0x00000000) =
-        reinterpret_cast<uintptr_t>(colResult);
+    // Store global collision result (skip on PC — global not set up)
+    // Original MKWii writes to a global BSP collision state at a fixed address.
+    // On PC this global does not exist, so we skip the write.
 
     // Virtual collision handler via vtable[0x10]
     // This processes the BSP collision result and updates wheel state

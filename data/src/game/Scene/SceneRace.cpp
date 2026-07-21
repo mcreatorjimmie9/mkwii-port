@@ -139,6 +139,11 @@ RaceScene::~RaceScene() {
         delete m_objectDirector;
         m_objectDirector = nullptr;
     }
+    if (m_effectDirector) {
+        m_effectDirector->shutdown();
+        delete m_effectDirector;
+        m_effectDirector = nullptr;
+    }
     if (m_raceData) {
         if (m_raceData->trackManager) {
             delete m_raceData->trackManager;
@@ -337,6 +342,12 @@ void RaceScene::initSubsystems() {
         m_objectDirector->init(256);
     }
 
+    // Initialize EffectDirector — decompiled particle system
+    if (!m_effectDirector) {
+        m_effectDirector = new EffectDirector();
+        m_effectDirector->init();
+    }
+
     // Initialize race session
     d.raceSession.init(TOTAL_RACERS, DEFAULT_LAP_COUNT, kmp.checkpoints);
     d.raceSession.startCountdown();
@@ -445,6 +456,34 @@ void RaceScene::draw() {
     // Render all items and karts
     const auto& vp = Platform::Graphics::getViewProjMatrix();
     d.itemManager.renderBoxes(vp);
+
+    // Render particles (EffectDirector) via OpenGL
+    // On Wii, EffectDirector::draw() submits GX quads directly.
+    // On PC, we bridge to OpenGL by iterating the particle pool.
+    if (m_effectDirector) {
+        m_effectDirector->draw(); // No-op on PC (architecture fidelity)
+        // PC rendering: iterate particle pool and draw billboards
+        const Scene::Particle* pool = m_effectDirector->getParticlePool();
+        u32 maxParticles = m_effectDirector->getMaxParticles();
+        if (pool) {
+            for (u32 i = 0; i < maxParticles; i++) {
+                const Scene::Particle& p = pool[i];
+                if (!p.active || p.life <= 0.0f) continue;
+
+                f32 lifeRatio = p.life / (p.maxLife > 0.001f ? p.maxLife : 0.001f);
+                f32 r = (p.r + (p.rEnd - p.r) * (1.0f - lifeRatio)) / 255.0f;
+                f32 g = (p.g + (p.gEnd - p.g) * (1.0f - lifeRatio)) / 255.0f;
+                f32 b = (p.b + (p.bEnd - p.b) * (1.0f - lifeRatio)) / 255.0f;
+                f32 a = ((p.a + (p.aEnd - p.a) * (1.0f - lifeRatio)) * lifeRatio) / 255.0f;
+                f32 size = (p.size + (p.sizeEnd - p.size) * (1.0f - lifeRatio))
+                           * m_effectDirector->getGlobalScale();
+
+                Platform::Graphics::drawParticle(
+                    p.position.x, p.position.y, p.position.z,
+                    size, r, g, b, a);
+            }
+        }
+    }
 
     for (u32 i = 1; i < d.playerCount; i++) {
         if (d.players[i].isActive()) {
@@ -585,7 +624,29 @@ void RaceScene::updateRacing() {
         return;
     }
 
-    // 8. Status log
+    // 8. Update EffectDirector
+    if (m_effectDirector) {
+        m_effectDirector->update(FRAME_TIME);
+
+        // Spawn boost flame effect for player 0 when on boost pad
+        if (d.players[0].isActive() && !d.players[0].m_finished) {
+            const auto& p0pos = d.players[0].getPosition();
+            // Spawn speed lines when going fast
+            if (d.players[0].getSpeed() > 2500.0f) {
+                // Only spawn every ~10 frames to avoid particle flood
+                if (getFrameCount() % 10 == 0) {
+                    Vec3 velDir(std::sin(EGG::DegToRad(d.players[0].getYaw())), 0.0f,
+                               std::cos(EGG::DegToRad(d.players[0].getYaw())));
+                    m_effectDirector->emitBurst(
+                        Scene::EFFECT_SPEED_LINES,
+                        Vec3(p0pos.x, p0pos.y, p0pos.z),
+                        velDir, 3);
+                }
+            }
+        }
+    }
+
+    // 9. Status log
     d.frameLogCounter++;
     if (d.frameLogCounter >= 600) {
         d.frameLogCounter = 0;

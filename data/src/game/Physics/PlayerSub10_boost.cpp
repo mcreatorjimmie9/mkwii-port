@@ -95,10 +95,10 @@ void PlayerSub10::activateBoostSlot(u32 type, s16 frames) {
     u32 pTableIdx = playerIdx << 2;
 
     // Look up boost duration from global parameter table
-    // @addr 0x8057f090 — global boost parameter table pointer
-    void* global = *reinterpret_cast<void**>(0x00000000);
-    void* pTable = PA_PTR(global, 0x68);
-    s16 paramFrames = PA_S16(pTable, pTableIdx); // via lwzx
+    // NOTE: Original MKWii reads from a global boost param table pointer
+    // at a fixed Wii memory address. On PC this global is not set up,
+    // so we use the passed-in frames directly.
+    s16 paramFrames = frames; // Default: use passed frames
 
     // Compute boost type bit and slot offset
     u16 typeBit = 1u << type;
@@ -128,7 +128,9 @@ void PlayerSub10::activateBoostSlot(u32 type, s16 frames) {
 
         // Set the boost multiplier from global table
         // multiplier at offset 0x124 = globalBoostTable[type]
-        f32 boostMult = PA_F32(global, pTableIdx);
+        // NOTE: 'global' refers to a Wii global pointer not available on PC;
+        // use a safe default of 1.0 (no boost multiplier change)
+        f32 boostMult = 1.0f; // PA_F32(global, pTableIdx) — stub for PC port
         boost.multiplier = boostMult;
 
         // --- Post-activation effects ---

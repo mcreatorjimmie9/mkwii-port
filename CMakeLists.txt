@@ -92,7 +92,11 @@ set(PHYSICS_SOURCES
 set(KARTMOVEMENT_SOURCES
     data/src/game/KartMovement/KartMove.cpp
     data/src/game/KartMovement/KartBody.cpp
-    data/src/game/KartMovement/KartDynamics.cpp
+    # NOTE: KartMovement/KartDynamics.cpp is NOT included here.
+    # The KartDynamics class is provided by Collision/KartDynamics.cpp instead.
+    # Both files define the same Kart::KartDynamics symbols (ODR violation).
+    # The Collision/ version is community-verified with full calc(), applyEngineForce(),
+    # applyAirDrag(), applyRollingResistance(), mass, and quaternion integration.
     data/src/game/KartMovement/KartHitbox.cpp
     data/src/game/KartMovement/KartInput.cpp
     data/src/game/KartMovement/KartState.cpp

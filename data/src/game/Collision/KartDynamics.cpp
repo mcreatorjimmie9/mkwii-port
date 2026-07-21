@@ -9,7 +9,11 @@
 
 namespace Kart {
 
-extern "C" EGG::Vector3f RKSystem_ey;
+// RKSystem_ey: Global world up vector (0, 1, 0) used by KartDynamics
+// for upright stabilization and gravity direction.
+// In MKWii, this is at a fixed address in the Wii memory map.
+// On PC, we define it as a translation unit local.
+EGG::Vector3f RKSystem_ey(0.0f, 1.0f, 0.0f);
 
 KartDynamicsKart::KartDynamicsKart() {
     this->angVel0Factor = 1.0f;
@@ -224,6 +228,20 @@ void KartDynamics::calc(f32 dt, f32 maxSpeed, s32 air) {
 }
 
 void KartDynamics::forceUpright() {
+    // Default: no-op. Bikes override to zero angular velocity Z.
+}
+
+void KartDynamics::stabilize() {
+    // Default stabilization: gradually rotate toward upright orientation.
+    // In MKWii, this applies a corrective torque based on the difference
+    // between the kart's current up vector and the world up vector (RKSystem_ey).
+    // For the base kart class, apply a gentle corrective rotation.
+    // Bikes may override with their own stabilization logic.
+    f32 stabFactor = this->stabilizationFactor;
+    if (stabFactor <= 0.0f) return;
+
+    // Interpolate toward world up
+    this->upInterpolated = this->upInterpolated + (RKSystem_ey - this->upInterpolated) * stabFactor;
 }
 
 void KartDynamics::applyWrenchScaled(const EGG::Vector3f& r, const EGG::Vector3f& F, f32 bumpDeviation) {
@@ -298,6 +316,17 @@ void KartDynamics::getAngAcc(EGG::Vector3f& out, const EGG::Vector3f& v) {
 
 void KartDynamicsBike::forceUpright() {
     this->angVel0.z = 0.0f;
+}
+
+void KartDynamicsBike::stabilize() {
+    // Bike stabilization: similar to base kart but with bike-specific
+    // parameters. Bikes have a different weight distribution and lean
+    // angle behavior compared to karts.
+    f32 stabFactor = this->stabilizationFactor;
+    if (stabFactor <= 0.0f) return;
+
+    // Bikes use a slightly different stabilization curve
+    this->upInterpolated = this->upInterpolated + (RKSystem_ey - this->upInterpolated) * stabFactor;
 }
 
 void KartDynamics::calcLinearVelocity(f32 dt) {

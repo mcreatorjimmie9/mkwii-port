@@ -23,6 +23,12 @@ public:
     /// Get the current view-projection matrix (identity if no camera set).
     static const EGG::Matrix44f& getViewProjMatrix();
 
+    /// Draw a single particle as a camera-facing billboard quad.
+    /// Used by EffectDirector for particle rendering.
+    /// No-op when HAS_OPENGL is not defined.
+    static void drawParticle(f32 x, f32 y, f32 z, f32 size,
+                              f32 r, f32 g, f32 b, f32 a);
+
 private:
     Graphics() = delete;
     ~Graphics() = delete;

@@ -22,6 +22,9 @@ namespace Game { class AIController; class CollisionSystem; }
 // Forward declare ItemSlot (from game/ItemBox.hpp)
 struct ItemSlot;
 
+// Forward declare KartDynamicsKart for physics integration
+namespace Kart { class KartDynamicsKart; }
+
 namespace Game {
 
 class Player {
@@ -85,6 +88,21 @@ public:
     /// Set the collision system reference for KCL queries.
     void setCollisionSystem(const CollisionSystem* cs) { m_collision = cs; }
 
+    // -- KartDynamics integration -----------------------------------------------
+
+    /// Access the KartDynamics rigid body (for advanced physics).
+    /// Returns nullptr if not initialized.
+    Kart::KartDynamicsKart* getKartDynamics() const { return m_kartDynamics; }
+
+    /// Initialize KartDynamics from BSP parameters.
+    void initKartDynamics(f32 halfW, f32 halfH, f32 halfD, f32 mass);
+
+    /// Step KartDynamics simulation for one frame.
+    /// @param accelInput   Acceleration input (0..1)
+    /// @param steerInput   Steering input (-1..1)
+    /// @param dt           Delta time in seconds
+    void stepKartDynamics(f32 accelInput, f32 steerInput, f32 dt);
+
     // -- Race state (written by SceneRace, read by position calculation) --------
     u32  m_lap;
     bool m_finished;
@@ -109,6 +127,10 @@ private:
 
     // Collision system reference (not owned)
     const CollisionSystem* m_collision;
+
+    // KartDynamics rigid body (owned, for advanced physics)
+    Kart::KartDynamicsKart* m_kartDynamics;
+    bool m_useKartDynamics;
 };
 
 } // namespace Game

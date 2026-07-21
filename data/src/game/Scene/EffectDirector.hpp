@@ -24,6 +24,8 @@ struct Particle {
     u8 r, g, b, a;
     u8 rEnd, gEnd, bEnd, aEnd;
     u16 flags;
+    u32 emitterId;     // Index of the emitter that owns this particle
+    bool active;         // True when particle is alive in the pool
 };
 
 // =============================================================================
@@ -118,7 +120,19 @@ public:
 
     // Status queries
     u32 getActiveEmitterCount() const { return m_activeEmitterCount; }
+    /// Get total particle count.
     u32 getTotalParticleCount() const { return m_totalParticleCount; }
+
+    /// Get the particle pool for external rendering (e.g., OpenGL in SceneRace).
+    /// Returns nullptr if not initialized.
+    const Particle* getParticlePool() const { return m_particlePool; }
+
+    /// Get the maximum number of particles in the pool.
+    u32 getMaxParticles() const { return MAX_PARTICLES; }
+
+    /// Render all active particles. On Wii this submits GX quads.
+    /// On PC, this is a no-op — use getParticlePool() + getParticleCount()
+    /// to render via Platform::Graphics::drawParticle() in SceneRace::draw().
 
     // Effect management
     u32 spawnEffect(u32 effectId, const Vec3& pos, const Vec3& dir);
@@ -134,8 +148,8 @@ private:
     static const u32 MAX_PARTICLES = 8192;
 
     void updateEmitter(EffectEmitter& emitter, f32 dt);
-    void updateParticles(EffectEmitter& emitter, f32 dt);
-    void spawnParticle(EffectEmitter& emitter);
+    void updateParticles(f32 dt);
+    void spawnParticle(EffectEmitter& emitter, u32 emitterId);
     void updateScreenEffect(f32 dt);
     void updateSingleParticle(Particle& p, f32 dt);
     void emitParticle(EffectEmitter& emitter, const Vec3& dir);
@@ -144,6 +158,7 @@ private:
     void applyParticleColor(EffectType type, Particle& p) const;
 
     EffectEmitter* m_emitters;
+    u32 m_emitterCount;   // Total allocated emitter slots
     u32 m_activeEmitterCount;
     Particle* m_particlePool;
     u32 m_totalParticleCount;
