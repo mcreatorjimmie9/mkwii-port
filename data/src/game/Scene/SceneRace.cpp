@@ -130,6 +130,15 @@ RaceScene::RaceScene()
 }
 
 RaceScene::~RaceScene() {
+    if (m_camera) {
+        m_camera->shutdown();
+        delete m_camera;
+        m_camera = nullptr;
+    }
+    if (m_objectDirector) {
+        delete m_objectDirector;
+        m_objectDirector = nullptr;
+    }
     if (m_raceData) {
         if (m_raceData->trackManager) {
             delete m_raceData->trackManager;
@@ -312,6 +321,22 @@ void RaceScene::initSubsystems() {
     d.itemManager.initAllGL();
     printf("[RaceScene] %u item boxes\n", d.itemManager.getBoxCount());
 
+    // Initialize SceneCamera — decompiled camera system
+    if (!m_camera) {
+        m_camera = new SceneCamera();
+        m_camera->init(TOTAL_RACERS);
+        // Set camera defaults matching MKWii
+        m_camera->setFOV(CAMERA_FOV_DEG);
+        m_camera->setNearFar(CAMERA_NEAR, CAMERA_FAR);
+        m_camera->setSmoothing(0.1f, 0.05f);
+    }
+
+    // Initialize ObjectDirector — decompiled object management
+    if (!m_objectDirector) {
+        m_objectDirector = new ObjectDirector();
+        m_objectDirector->init(256);
+    }
+
     // Initialize race session
     d.raceSession.init(TOTAL_RACERS, DEFAULT_LAP_COUNT, kmp.checkpoints);
     d.raceSession.startCountdown();
@@ -393,17 +418,29 @@ void RaceScene::draw() {
 
     RaceData& d = *m_raceData;
 
-    // Setup camera following player 0
+    // Setup camera — use decompiled SceneCamera if available
     f32 aspect = static_cast<f32>(Platform::Window::getWidth()) /
                  static_cast<f32>(Platform::Window::getHeight());
 
-    const auto& playerPos = d.players[0].getPosition();
-    auto camPos = d.players[0].getChaseCamPos(CAMERA_BACK_DIST, CAMERA_UP_OFFSET);
-
-    Platform::Graphics::setupCamera(
-        camPos.x, camPos.y, camPos.z,
-        playerPos.x, playerPos.y, playerPos.z,
-        CAMERA_FOV_DEG, aspect, CAMERA_NEAR, CAMERA_FAR);
+    if (m_camera) {
+        // Use SceneCamera's computed position and target
+        const auto& camPos = m_camera->getPosition();
+        const auto& camTarget = m_camera->getTarget();
+        Platform::Graphics::setupCamera(
+            camPos.x, camPos.y, camPos.z,
+            camTarget.x, camTarget.y, camTarget.z,
+            m_camera->getFOV(), aspect,
+            m_camera->getViewport().nearPlane,
+            m_camera->getViewport().farPlane);
+    } else {
+        // Fallback: direct chase cam (no SceneCamera)
+        const auto& playerPos = d.players[0].getPosition();
+        auto camPos = d.players[0].getChaseCamPos(CAMERA_BACK_DIST, CAMERA_UP_OFFSET);
+        Platform::Graphics::setupCamera(
+            camPos.x, camPos.y, camPos.z,
+            playerPos.x, playerPos.y, playerPos.z,
+            CAMERA_FOV_DEG, aspect, CAMERA_NEAR, CAMERA_FAR);
+    }
 
     // Render all items and karts
     const auto& vp = Platform::Graphics::getViewProjMatrix();
@@ -468,6 +505,14 @@ void RaceScene::updateRacing() {
 
     // 2. Step kart physics
     const auto& input = Platform::InputManager::getState();
+
+    // 2a. Update SceneCamera to follow player 0
+    if (m_camera && d.players[0].isActive()) {
+        const auto& p0pos = d.players[0].getPosition();
+        f32 yawRad = EGG::DegToRad(d.players[0].getYaw());
+        Vec3 forward(std::sin(yawRad), 0.0f, std::cos(yawRad));
+        m_camera->updateFollow(p0pos, forward, d.players[0].getSpeed(), FRAME_TIME);
+    }
 
     for (u32 i = 0; i < d.playerCount; i++) {
         if (d.players[i].m_finished) continue;
