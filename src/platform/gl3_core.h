@@ -79,6 +79,7 @@ constexpr GLbitfield GL_DEPTH_BUFFER_BIT = 0x00000100;
 // Enable / disable
 constexpr GLenum GL_DEPTH_TEST = 0x0B71;
 constexpr GLenum GL_CULL_FACE  = 0x0B44;
+constexpr GLenum GL_BLEND      = 0x0BE2;
 
 // Face culling
 constexpr GLenum GL_BACK = 0x0405;
@@ -86,6 +87,10 @@ constexpr GLenum GL_CCW  = 0x0901;
 
 // Depth comparison
 constexpr GLenum GL_LESS = 0x0201;
+
+// Blending
+constexpr GLenum GL_SRC_ALPHA            = 0x0302;
+constexpr GLenum GL_ONE_MINUS_SRC_ALPHA  = 0x0303;
 
 // Context profile
 constexpr GLenum GL_MAJOR_VERSION        = 0x821B;
@@ -113,10 +118,11 @@ using PFNGLCLEARCOLOR = void   (GLAPIENTRY *)(GLfloat r, GLfloat g, GLfloat b, G
 using PFNGLVIEWPORT   = void   (GLAPIENTRY *)(GLint x, GLint y, GLsizei w, GLsizei h);
 
 // Enable / Disable
-using PFNGLENABLE    = void   (GLAPIENTRY *)(GLenum cap);
-using PFNGLDISABLE   = void   (GLAPIENTRY *)(GLenum cap);
-using PFNGLDEPTHFUNC = void   (GLAPIENTRY *)(GLenum func);
-using PFNGLGETERROR  = GLenum (GLAPIENTRY *)(void);
+using PFNGLENABLE      = void   (GLAPIENTRY *)(GLenum cap);
+using PFNGLDISABLE     = void   (GLAPIENTRY *)(GLenum cap);
+using PFNGLDEPTHFUNC   = void   (GLAPIENTRY *)(GLenum func);
+using PFNGLBLENDFUNC   = void   (GLAPIENTRY *)(GLenum sfactor, GLenum dfactor);
+using PFNGLGETERROR    = GLenum (GLAPIENTRY *)(void);
 
 // Shaders
 using PFNGLCREATESHADER     = GLuint (GLAPIENTRY *)(GLenum type);
@@ -157,6 +163,7 @@ using PFNGLDRAWELEMENTS  = void (GLAPIENTRY *)(GLenum mode, GLsizei count, GLenu
 using PFNGLGETUNIFORMLOCATION = GLint (GLAPIENTRY *)(GLuint program, const GLchar* name);
 using PFNGLUNIFORMMATRIX4FV   = void  (GLAPIENTRY *)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
 using PFNGLUNIFORM3F           = void  (GLAPIENTRY *)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
+using PFNGLUNIFORM4F           = void  (GLAPIENTRY *)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
 using PFNGLUNIFORM1F           = void  (GLAPIENTRY *)(GLint location, GLfloat v0);
 
 // ---------------------------------------------------------------------------
@@ -169,10 +176,11 @@ struct GLFunctions {
     PFNGLVIEWPORT   glViewport   = nullptr;
 
     // Enable / Disable
-    PFNGLENABLE    glEnable    = nullptr;
-    PFNGLDISABLE   glDisable   = nullptr;
-    PFNGLDEPTHFUNC glDepthFunc = nullptr;
-    PFNGLGETERROR  glGetError  = nullptr;
+    PFNGLENABLE      glEnable      = nullptr;
+    PFNGLDISABLE     glDisable     = nullptr;
+    PFNGLDEPTHFUNC   glDepthFunc   = nullptr;
+    PFNGLBLENDFUNC   glBlendFunc   = nullptr;
+    PFNGLGETERROR    glGetError    = nullptr;
 
     // Shaders
     PFNGLCREATESHADER     glCreateShader     = nullptr;
@@ -213,6 +221,7 @@ struct GLFunctions {
     PFNGLGETUNIFORMLOCATION glGetUniformLocation = nullptr;
     PFNGLUNIFORMMATRIX4FV   glUniformMatrix4fv   = nullptr;
     PFNGLUNIFORM3F           glUniform3f           = nullptr;
+    PFNGLUNIFORM4F           glUniform4f           = nullptr;
     PFNGLUNIFORM1F           glUniform1f           = nullptr;
 };
 
@@ -255,6 +264,7 @@ inline bool loadFunctions(void* (*getProcAddr)(const char*)) {
     RESOLVE(glEnable,     PFNGLENABLE,     "glEnable");
     RESOLVE(glDisable,    PFNGLDISABLE,    "glDisable");
     RESOLVE(glDepthFunc,  PFNGLDEPTHFUNC, "glDepthFunc");
+    RESOLVE(glBlendFunc,  PFNGLBLENDFUNC, "glBlendFunc");
     RESOLVE(glGetError,   PFNGLGETERROR,  "glGetError");
 
     // Shaders
@@ -296,6 +306,7 @@ inline bool loadFunctions(void* (*getProcAddr)(const char*)) {
     RESOLVE(glGetUniformLocation, PFNGLGETUNIFORMLOCATION, "glGetUniformLocation");
     RESOLVE(glUniformMatrix4fv,   PFNGLUNIFORMMATRIX4FV,   "glUniformMatrix4fv");
     RESOLVE(glUniform3f,           PFNGLUNIFORM3F,           "glUniform3f");
+    RESOLVE(glUniform4f,           PFNGLUNIFORM4F,           "glUniform4f");
     RESOLVE(glUniform1f,           PFNGLUNIFORM1F,           "glUniform1f");
 
     #undef RESOLVE
