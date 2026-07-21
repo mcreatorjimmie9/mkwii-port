@@ -2,7 +2,7 @@
 // pad.hpp — Wii GameCube controller (PAD) and Wii Remote (KPAD/WPAD) shims
 // MKWii uses KPAD (the Wii Remote library built on top of WPAD) as its
 // primary input, with PAD (GameCube controller) as a secondary/legacy input.
-// On PC, all input functions return safe defaults (no buttons pressed, centered sticks).
+// On PC, these bridge to Platform::InputManager for actual keyboard/gamepad input.
 
 #include "../rk_types.h"
 #include <cstring>
@@ -50,7 +50,6 @@ typedef struct PADClampRegion {
 } PADClampRegion;
 
 // PAD button bitmasks (standard GameCube controller)
-// Some of these are in rk_types.h already; we add the rest here.
 #ifndef PAD_BUTTON_A
 #define PAD_BUTTON_A      0x0100
 #endif
@@ -162,25 +161,74 @@ typedef struct KPADStatus {
 } KPADStatus;
 
 // ============================================================================
-// PAD function stubs
+// PAD function stubs — bridged to Platform::InputManager
 // ============================================================================
+//
+// In the original MKWii, PADRead reads from GameCube controllers and
+// KPADRead reads from Wii Remotes. On PC, both bridge to the same
+// Platform::InputManager::getState() which reads keyboard + gamepad.
+//
+// MKWii input mapping (Wii Remote → PC keyboard):
+//   Accelerate (A button / +Y stick) → W / Up arrow
+//   Brake (B button / -Y stick)     → S / Down arrow
+//   Steer left (left on stick)       → A / Left arrow
+//   Steer right (right on stick)     → D / Right arrow
+//   Item use (1 or 2 button)        → Space
+//   Drift (trigger/Z)               → Left Shift
 
 extern "C" {
+
+// Forward declaration — defined in platform/input.hpp
+namespace Platform { struct InputState; }
+const Platform::InputState* PAD_getInputState();
 
 // PADInit — initializes the GameCube controller subsystem.
 inline int PADInit(void) { return 0; }
 
 // PADRead — reads the current status of all 4 controllers.
+// Bridges channel 0 to Platform::InputManager keyboard/gamepad state.
 // Status array must have room for 4 PADStatus entries.
 // Returns a bitmask of connected controllers.
 inline u32 PADRead(PADStatus* status) {
     if (status) {
         std::memset(status, 0, sizeof(PADStatus) * 4);
+
+        // Channel 0: bridge to Platform::InputManager
+        const Platform::InputState* input = PAD_getInputState();
+        if (input) {
+            // Stick X: map steer (-1..+1) to s8 (-128..127)
+            status[0].stickX = static_cast<s8>(input->steer * 127.0f);
+
+            // Stick Y: positive = accelerate, negative = brake
+            f32 stickY = 0.0f;
+            if (input->accelerate > 0.0f) stickY += input->accelerate;
+            if (input->brake > 0.0f)      stickY -= input->brake;
+            status[0].stickY = static_cast<s8>(stickY * 127.0f);
+
+            // Buttons
+            if (input->accelerate > 0.0f) status[0].button |= PAD_BUTTON_A;
+            if (input->brake > 0.0f)      status[0].button |= PAD_BUTTON_B;
+            if (input->item)              status[0].button |= PAD_BUTTON_X;
+            if (input->drift)             status[0].button |= PAD_TRIGGER_R;
+
+            if (input->steer < -0.5f)     status[0].button |= PAD_BUTTON_LEFT;
+            if (input->steer >  0.5f)     status[0].button |= PAD_BUTTON_RIGHT;
+
+            if (input->quit)              status[0].button |= PAD_BUTTON_START;
+
+            // Trigger analog values
+            status[0].triggerL = static_cast<u8>(input->drift ? 255 : 0);
+            status[0].triggerR = static_cast<u8>(input->drift ? 255 : 0);
+
+            status[0].err = PAD_ERR_NONE;
+            return 1; // 1 controller connected
+        }
+
         for (int i = 0; i < 4; i++) {
             status[i].err = PAD_ERR_NO_CONTROLLER;
         }
     }
-    return 0; // no controllers connected
+    return 0;
 }
 
 // PADReset — resets the controller subsystem. mask selects which channels.
@@ -203,7 +251,6 @@ inline u32 PADGetSpec(void) { return PAD_SPEC_2; }
 
 // PADClampCircle — clamps stick values to the calibrated range.
 inline void PADClampCircle(PADStatus* status) {
-    // No-op: sticks are already at 0 on PC
     (void)status;
 }
 
@@ -221,33 +268,84 @@ inline PADSamplingCallback PADSetSamplingCallback(PADSamplingCallback cb) {
 // PADOnReset — called on system reset to reinitialize controllers.
 inline int PAD_OnReset(int param) { (void)param; return 0; }
 
-// PAD_SamplingHandler — called during VBlank to sample controllers.
-// Declared as extern in the decompiled code.
-// (This is an internal function, not normally called by game code directly.)
-// extern void PAD_SamplingHandler(s32 chan, struct OSContext* ctx);
-
 // ============================================================================
-// WPAD / KPAD function stubs
+// WPAD / KPAD function stubs — bridged to Platform::InputManager
 // ============================================================================
 
 // WPADInit — initializes the Wii Remote subsystem.
 inline void WPADInit(void) {}
 
 // WPADRead — reads data from a Wii Remote.
+// Bridges channel 0 to Platform::InputManager keyboard/gamepad state.
 // Returns the number of valid data entries.
 inline s32 WPADRead(s32 chan, WPADStatus* data, u32 count) {
-    (void)chan; (void)data; (void)count;
+    if (chan != 0 || !data || count < 1) return 0;
+
+    std::memset(data, 0, sizeof(WPADStatus));
+
+    const Platform::InputState* input = PAD_getInputState();
+    if (input) {
+        // Buttons — map PC input to Wii Remote buttons
+        if (input->accelerate > 0.0f) data->button |= WPAD_BUTTON_A;
+        if (input->brake > 0.0f)      data->button |= WPAD_BUTTON_B;
+        if (input->item)              data->button |= WPAD_BUTTON_1;
+        if (input->drift)             data->button |= WPAD_BUTTON_2;
+
+        if (input->steer < -0.5f)     data->button |= WPAD_BUTTON_LEFT;
+        if (input->steer >  0.5f)     data->button |= WPAD_BUTTON_RIGHT;
+        if (input->accelerate > 0.0f) data->button |= WPAD_BUTTON_UP;
+        if (input->brake > 0.0f)      data->button |= WPAD_BUTTON_DOWN;
+
+        if (input->enter)             data->button |= WPAD_BUTTON_PLUS;
+        if (input->quit)              data->button |= WPAD_BUTTON_HOME;
+
+        data->err = 0;
+        return 1;
+    }
     return 0;
 }
 
 // KPADRead — high-level read of KPAD status (used by game code).
+// Bridges channel 0 to Platform::InputManager keyboard/gamepad state.
 // Returns the number of valid status entries.
 inline s32 KPADRead(s32 chan, KPADStatus* status, u32 count) {
-    (void)chan;
-    if (status && count > 0) {
-        std::memset(status, 0, sizeof(KPADStatus) * count);
+    if (chan != 0 || !status || count < 1) return 0;
+
+    std::memset(status, 0, sizeof(KPADStatus));
+
+    const Platform::InputState* input = PAD_getInputState();
+    if (input) {
+        // Fill core WPAD data
+        WPADStatus& core = status->core;
+
+        if (input->accelerate > 0.0f) core.button |= WPAD_BUTTON_A;
+        if (input->brake > 0.0f)      core.button |= WPAD_BUTTON_B;
+        if (input->item)              core.button |= WPAD_BUTTON_1;
+        if (input->drift)             core.button |= WPAD_BUTTON_2;
+
+        if (input->steer < -0.5f)     core.button |= WPAD_BUTTON_LEFT;
+        if (input->steer >  0.5f)     core.button |= WPAD_BUTTON_RIGHT;
+        if (input->accelerate > 0.0f) core.button |= WPAD_BUTTON_UP;
+        if (input->brake > 0.0f)      core.button |= WPAD_BUTTON_DOWN;
+
+        if (input->enter)             core.button |= WPAD_BUTTON_PLUS;
+        if (input->quit)              core.button |= WPAD_BUTTON_HOME;
+
+        // Nunchuk stick mapped to same inputs (MKWii uses nunchuk for steering)
+        core.nunchukStickX = static_cast<u8>((input->steer + 1.0f) * 0.5f * 255.0f);
+        f32 accelY = 0.0f;
+        if (input->accelerate > 0.0f) accelY += input->accelerate;
+        if (input->brake > 0.0f)      accelY -= input->brake;
+        core.nunchukStickY = static_cast<u8>((accelY + 1.0f) * 0.5f * 255.0f);
+
+        // Nunchuk buttons
+        if (input->item)  core.nunchukBtnC = 1;
+        if (input->drift) core.nunchukBtnZ = 1;
+
+        core.err = 0;
+        return 1;
     }
-    return 0; // no remotes connected
+    return 0;
 }
 
 } // extern "C"

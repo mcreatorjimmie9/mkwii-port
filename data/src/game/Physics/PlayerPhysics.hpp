@@ -36,6 +36,10 @@ struct VehicleStats {
 // This class wraps the lower-level KartPhysics and coordinates all per-player
 // physics updates every frame. It is NOT the same as Kart::KartPhysics; it is
 // the player-specific layer that drives the kart physics engine.
+//
+// The update() method has been reconstructed from decompiled assembly (0x805899cc,
+// 1496 bytes) into proper C++ using the real helper formulas in this file:
+//   calcTopSpeed, calcAcceleration, calcHandling, calcOffroadSpeed, calcDriftStats.
 // =============================================================================
 class PlayerPhysics {
 public:
@@ -45,13 +49,11 @@ public:
     // Main update — 0x805899cc, 1496 bytes
     // Called every frame to update all physics subsystems:
     // 1. Check race state / game mode
-    // 2. Update KartDynamics (gravity, collision response, integration)
-    // 3. Update KartWheelPhysics for each wheel (contact, suspension)
-    // 4. Update KartSusPhysics (suspension travel, bounce)
-    // 5. Update collision response forces
-    // 6. Apply moving road/water velocities
-    // 7. Compute final speed and position
-    // 8. Update sub-object (wheel matrices, effects)
+    // 2. Save previous frame positions
+    // 3. If grounded: acceleration, braking, steering, collision response
+    // 4. If airborne: gravity, reduced steering, OOB check
+    // 5. Compute speed, interpolate position
+    // 6. Update floor/air state flags
     void update(f32 dt);
 
     void reset();
@@ -67,6 +69,58 @@ public:
     // State query
     bool hasAnyFloorCollision() const { return m_anyFloorCol; }
     u32 getFloorCollisionCount() const { return m_floorColCount; }
+
+    // --- Input setters (called before update()) ---
+
+    /// Set acceleration input (0.0 = none, 1.0 = full throttle)
+    void setAccelInput(f32 v) { m_accelInput = v; }
+
+    /// Set brake input (0.0 = none, 1.0 = full brake)
+    void setBrakeInput(f32 v) { m_brakeInput = v; }
+
+    /// Set steering input (-1.0 = full left, +1.0 = full right)
+    void setSteerInput(f32 v) { m_steerInput = v; }
+
+    /// Set floor collision flag (from BSP/KCL collision system)
+    void setFloorCollision(bool v) {
+        if (v) m_statusFlags |= 0x4000;
+        else   m_statusFlags &= ~0x4000;
+    }
+
+    /// Set off-road flag (from KCL surface type)
+    void setOffroad(bool v) {
+        if (v) m_statusFlags |= 0x0010;
+        else   m_statusFlags &= ~0x0010;
+    }
+
+    /// Set boost pad flag (from KCL boost panel)
+    void setBoostPad(bool v) {
+        if (v) m_statusFlags |= 0x0004;
+    }
+
+    /// Set wall collision flag
+    void setWallCollision(bool v) {
+        if (v) m_wallOobFlags |= 0x0002;
+    }
+
+    // --- Position accessors ---
+
+    f32 getFramePosX() const { return m_framePosX; }
+    f32 getFramePosY() const { return m_framePosY; }
+    f32 getFramePosZ() const { return m_framePosZ; }
+    f32 getYawRad() const { return m_yawRad; }
+    f32 getEffectiveSpeed() const { return m_effectiveSpeed; }
+    f32 getSpeed() const { return m_speed; }
+
+    /// Set position (e.g., from KCL ground following)
+    void setFramePosition(f32 x, f32 y, f32 z) {
+        m_framePosX = x;
+        m_framePosY = y;
+        m_framePosZ = z;
+    }
+
+    /// Set initial yaw (e.g., from KMP start position)
+    void setYaw(f32 yawDeg) { m_yawRad = EGG::DegToRad(yawDeg); }
 
     // --- Stat calculation methods ---
 
@@ -98,12 +152,17 @@ public:
     void updateStats();
 
 private:
+    // Internal physics update paths
+    void updateGroundedPhysics(f32 dt);
+    void updateAirbornePhysics(f32 dt);
+    void updateCollisionState();
+    void integratePosition(f32 dt);
+
+    // Legacy private methods (stubs for architecture compatibility)
     void updateWheelPhysics(f32 dt);
     void updateSuspensionPhysics(f32 dt);
-    void updateCollisionState();
     void computeSpeed(f32 dt);
     void updateSubObject();
-    void integratePosition(f32 dt);
 
 private:
     // 0x000: Pointer to player sub-object (PlayerPointers or similar)
@@ -282,6 +341,15 @@ private:
     f32 m_statTopSpeed;
     f32 m_statAcceleration;
     f32 m_statHandling;
+
+    // --- Input state (set each frame before update()) ---
+    f32 m_accelInput;      // 0.0..1.0 accelerator
+    f32 m_brakeInput;      // 0.0..1.0 brake
+    f32 m_steerInput;      // -1.0..+1.0 steering
+
+    // --- Facing direction (radians) ---
+    f32 m_yawRad;
+
     // 0x17C: End of class
 };
 // static_assert(sizeof(PlayerPhysics) == 0x160);

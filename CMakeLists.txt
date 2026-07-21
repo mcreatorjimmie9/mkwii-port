@@ -497,6 +497,8 @@ set(APP_SOURCES
     # Bridge layer: Player class + SceneRace (uses platform headers)
     data/src/game/Player/Player.cpp
     data/src/game/Scene/SceneRace.cpp
+    # PAD/KPAD shim bridge to Platform::InputManager
+    src/modules/shims/pad_bridge.cpp
 )
 
 add_executable(mkwii-port ${APP_SOURCES})
