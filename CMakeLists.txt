@@ -461,3 +461,16 @@ target_include_directories(mkwii-linktest PRIVATE
     ${CMAKE_SOURCE_DIR}/data/src/game/AIRace
     ${CMAKE_SOURCE_DIR}/data/src/game/EGG
 )
+
+# =============================================================================
+# Phase 6: Physics Validation Test Suite
+# =============================================================================
+enable_testing()
+file(GLOB PHYSICS_TESTS data/tests/unit/*.cpp)
+add_executable(physics_tests ${PHYSICS_TESTS})
+target_include_directories(physics_tests PRIVATE
+    ${CMAKE_SOURCE_DIR}/src/modules
+    ${CMAKE_SOURCE_DIR}/data/src/game
+)
+target_link_libraries(physics_tests PRIVATE mkwii-genesis)
+add_test(NAME physics_validation COMMAND physics_tests)
