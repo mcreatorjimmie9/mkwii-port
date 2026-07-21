@@ -157,3 +157,48 @@ Implemented keyboard and gamepad input system, arcade kart physics, and chase ca
 ### Stage Summary
 - Phase 7 M5 (M5 Basic Input): COMPLETE
 - Next: Phase 7 M6 (M6 Physics Loop — KCL collision, kart drives around track)
+
+---
+
+## Task 16: Phase 7 M6 — Physics Loop
+
+### Summary
+Implemented KCL collision system with grid-based spatial index, ground raycast for terrain following, wall collision detection, and surface type speed modifiers. Kart now properly follows track terrain and bounces off walls. 0 errors, 0 warnings.
+
+### New Files Created (2 files in src/game/)
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/game/CollisionSystem.hpp` | 112 | CollisionQueryResult struct, CollisionSystem class with grid index |
+| `src/game/CollisionSystem.cpp` | 310 | Grid spatial index build, Moller-Trumbore raycast, wall AABB check, surface detection |
+
+### Files Modified (3 files)
+
+| File | Changes |
+|------|---------|
+| `src/game/KartEntity.hpp` | Added CollisionSystem include, update() accepts collision param |
+| `src/game/KartEntity.cpp` | Extended update() with ground raycast, wall push, surface speed mods, gravity |
+| `src/main.cpp` | Builds CollisionSystem from KCL data, passes to kart.update() |
+| `CMakeLists.txt` | M6_SOURCES (7 files, added CollisionSystem.cpp) |
+
+### CollisionSystem Design
+- **Spatial index**: Uniform grid (500-unit cells), each cell stores triangle indices whose bounding box overlaps
+- **Ground raycast**: Moller-Trumbore ray-triangle intersection, downward ray from kart Y+50, searches 3x3 cell neighborhood
+- **Wall detection**: Point-in-triangle XZ projection test at 4 cardinal points around kart (radius=40), checks wall/invisible_wall/slow_wall types
+- **Surface types**: ROAD (normal), OFF_ROAD (40% max speed), BOOST/BOOST_PAD (150% max speed), WALL (push + speed kill), DEAD_ZONE (gravity)
+
+### Physics Changes
+- **Ground following**: kart.position.y = raycast ground Y + 25 (half kart height)
+- **No ground**: gravity (-9800 units/sec^2) pulls kart down
+- **Off-road**: speed *= (1 - 0.5*dt), capped at 40% max speed
+- **Boost**: +2000 units/sec^2 acceleration, capped at 150% max speed
+- **Wall**: push kart along wall normal by (speed*dt + 50), speed *= 0.3
+- **Fallback**: If no CollisionSystem, uses flat ground (M5 behavior)
+
+### Build & Validation
+- Build: 0 errors, 0 warnings across 4 targets
+- Commit: c741a305
+
+### Stage Summary
+- Phase 7 M6 (M6 Physics Loop): COMPLETE
+- Next: Phase 7 M7 (M7 AI Opponent — spawn AI karts that follow race line)

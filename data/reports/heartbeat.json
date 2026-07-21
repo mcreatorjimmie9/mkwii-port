@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-07-22T00:15:00Z",
-  "cycle": 15,
-  "phase": "Phase 7: Integration — Milestone M5 (Basic Input) Complete",
+  "timestamp": "2026-07-22T00:40:00Z",
+  "cycle": 16,
+  "phase": "Phase 7: Integration — Milestone M6 (Physics Loop) Complete",
   "status": "in_progress",
   "totals": {
     "functions_total": 18444,
@@ -17,8 +17,8 @@
   "compilation_status": {
     "total": "88/88 (100%), 0 errors, 0 warnings",
     "physics_tests": "56/56 passed",
-    "mkwii_port_app": "6 files (platform + loaders + KartEntity + input), 0 errors (GL 3.3 Core)",
-    "track_loader_test": "1 file, 0 errors, downloads real track from copyparty"
+    "mkwii_port_app": "7 files (platform + loaders + KartEntity + input + collision), 0 errors",
+    "track_loader_test": "1 file, 0 errors"
   },
   "modules_completed": [
     "Physics", "KartMovement", "RaceEngine", "AIRace",
@@ -31,20 +31,13 @@
     "kcl_loader": "12,601 triangles parsed, surface type flags",
     "track_manager": "Unified loader, 26 entries from beginner_course.szs"
   },
-  "m4": {
-    "gl3_core": "Self-contained GL 3.3 header, 29 functions, runtime dlsym loading",
-    "sdl2_stub": "SDL2 header, 40 functions (video+GL+keyboard+joystick+gamepad)",
-    "kart_entity": "KartEntity: KMP init, model matrix, colored cube, arcade physics",
-    "rendering": "GLSL 330 core shaders, VAO/VBO/EBO, perspective+lookAt camera",
-    "camera": "Chase cam: behind+above kart, follows rotation"
+  "m6": {
+    "collision_system": "Grid spatial index (500-unit cells), raycast ground, wall detection",
+    "ground_follow": "KCL raycast finds ground Y, kart snaps to terrain height",
+    "wall_collision": "Point-in-triangle XZ, push along wall normal, speed kill",
+    "surface_effects": "Off-road=40% speed, boost=150% speed, gravity on no-ground",
+    "build": "0 errors, 0 warnings, 7 source files in mkwii-port target"
   },
-  "m5": {
-    "input_manager": "InputManager: keyboard (WASD/arrows) + gamepad (sticks/triggers)",
-    "input_state": "Normalized InputState: steer(-1..+1), accel(0..1), brake(0..1)",
-    "kart_physics": "Arcade: maxSpeed=3000, accel=1500, brake=2000, steer=120 deg/s",
-    "controls": "W/Up=accel, S/Down=brake, A-D/arrows=steer, Escape=quit",
-    "camera": "Chase cam follows kart facing direction, real dt timing"
-  },
-  "milestone": "M5 (Basic Input)",
-  "next_action": "Phase 7 M6: Physics Loop — run physics simulation, KCL collision"
+  "milestone": "M6 (Physics Loop)",
+  "next_action": "Phase 7 M7: AI Opponent — spawn AI karts that follow race line"
 }
