@@ -1,21 +1,17 @@
 #pragma once
 // =============================================================================
-// KartEntity.hpp -- Kart entity for M4 (Place Kart) and M5 (Basic Input)
-// MAESTRO Phase 7, Milestones M4+M5
+// KartEntity.hpp -- Kart entity for M4+M5+M6
+// MAESTRO Phase 7, Milestones M4+M5+M6
 // =============================================================================
 //
 // Represents a single kart on the race track. Stores position, rotation,
 // velocity, and scale. Provides a computed 4x4 model matrix for rendering
 // and a per-frame update() method that applies input to movement.
 //
-// The entity can be initialized from a KMP start position (Loaders::KmpEntry::
-// StartPosition) and rendered as a colored axis-aligned box via OpenGL 3.3
-// core profile when HAS_OPENGL is defined.
-//
-// M5 additions:
-//   - update(input, dt) applies acceleration, braking, steering, and gravity
-//   - Simple arcade physics: speed-based forward movement, yaw rotation
-//   - Camera follow: getChaseCamPos() returns the behind-and-above position
+// M6 additions:
+//   - KCL collision: ground raycast for terrain following
+//   - Wall collision: prevents kart from passing through walls
+//   - Surface types: off-road slows, boost accelerates
 //
 // Dependencies: rk_types.h, EGG/math.h
 // Optional:     platform/gl3_core.h (only when HAS_OPENGL is defined)
@@ -23,8 +19,9 @@
 
 #include "rk_types.h"
 #include "EGG/math.h"  // EGG::Vector3f, EGG::Matrix44f, EGG::DegToRad, EGG::PI
-#include "loaders/kmp_loader.hpp"  // Loaders::KmpEntry::StartPosition (lightweight, only rk_types.h + stdlib)
+#include "loaders/kmp_loader.hpp"  // Loaders::KmpEntry::StartPosition
 #include "platform/input.hpp"      // Platform::InputState (for update() parameter)
+#include "game/CollisionSystem.hpp"  // Game::CollisionSystem (for update() collision)
 
 // =============================================================================
 // KartEntity -- A single kart's transform and renderable representation
@@ -70,11 +67,13 @@ public:
     // -- Physics update (M5) --------------------------------------------------
 
     /// Update kart physics for one frame.
-    /// Applies acceleration, braking, steering, and simple gravity.
+    /// Applies acceleration, braking, steering, collision, and surface effects.
     /// Recomputes model matrix after updating position/rotation.
     /// @param input  Current frame's normalized input state
     /// @param dt     Delta time in seconds (e.g. 1/60.0)
-    void update(const Platform::InputState& input, f32 dt);
+    /// @param collision  Collision system to query (nullptr = flat ground fallback)
+    void update(const Platform::InputState& input, f32 dt,
+               const Game::CollisionSystem* collision = nullptr);
 
     // -- Camera follow (M5) ---------------------------------------------------
 

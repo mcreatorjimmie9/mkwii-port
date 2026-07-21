@@ -1,5 +1,5 @@
 // main.cpp — Mario Kart Wii PC Port Application Entry Point
-// MAESTRO Phase 7: Integration Milestone M5 — Basic Input
+// MAESTRO Phase 7: Integration Milestone M6 — Physics Loop
 
 #include <cstdio>
 #include <cmath>
@@ -9,6 +9,7 @@
 #include "platform/audio.hpp"
 #include "platform/input.hpp"
 #include "game/KartEntity.hpp"
+#include "game/CollisionSystem.hpp"
 #include "loaders/track_manager.hpp"
 
 extern "C" void System_Init(); // Forward declaration for future system init
@@ -27,13 +28,13 @@ int main(int argc, char* argv[]) {
     (void)argv;
 
     printf("=== Mario Kart Wii PC Port ===\n");
-    printf("MAESTRO Phase 7 — Milestone M5: Basic Input\n\n");
+    printf("MAESTRO Phase 7 — Milestone M6: Physics Loop\n\n");
 
     // =========================================================================
     // Step 1: Initialize Window (SDL2 + OpenGL 3.3 Core)
     // =========================================================================
     printf("[1/7] Initializing window system...\n");
-    if (!Platform::Window::create(1280, 720, "Mario Kart Wii PC Port — M5")) {
+    if (!Platform::Window::create(1280, 720, "Mario Kart Wii PC Port — M6")) {
         printf("ERROR: Failed to create window\n");
         return 1;
     }
@@ -104,6 +105,7 @@ int main(int argc, char* argv[]) {
     printf("[6/7] Spawning kart entity...\n");
 
     KartEntity kart;
+    Game::CollisionSystem collisionSystem;
     bool kartReady = false;
 
     if (trackLoaded && !trackManager.getKmpData().startPositions.empty()) {
@@ -115,6 +117,12 @@ int main(int argc, char* argv[]) {
 
         kart.initFromKMP(sp);
         kartReady = true;
+
+        // Build collision system from KCL data
+        if (trackManager.isKclLoaded()) {
+            collisionSystem.build(trackManager.getCollisionTriangles());
+            collisionSystem.printStats();
+        }
 
         // Initialize GL resources for the kart (shader, VAO, VBO, EBO)
         if (kart.initGL()) {
@@ -170,7 +178,7 @@ int main(int argc, char* argv[]) {
     printf("  Gamepad: Left trigger=accel, Right trigger=brake, Left stick=steer\n");
     printf("Window: %dx%d @ 60fps target\n",
            Platform::Window::getWidth(), Platform::Window::getHeight());
-    printf("Next: M6 — Physics Loop (KCL collision)\n\n");
+    printf("Next: M7 — AI Opponent\n\n");
 
     // =========================================================================
     // Main game loop with fixed timestep
@@ -208,7 +216,7 @@ int main(int argc, char* argv[]) {
 
         // -- Update kart physics ----------------------------------------------
         if (kartReady) {
-            kart.update(input, dt);
+            kart.update(input, dt, &collisionSystem);
         }
 
         // -- Update camera to follow kart --------------------------------------

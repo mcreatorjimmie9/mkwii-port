@@ -429,20 +429,22 @@ void KartEntity::cleanupGL() {
 }
 
 // =============================================================================
-// update — Apply input to kart physics (M5: Basic Input)
+// update — Apply input to kart physics (M5 + M6: Collision)
 // =============================================================================
-// Simple arcade-style kart physics:
+// Arcade-style kart physics with KCL collision:
 //   - Acceleration / braking adjusts forward speed
 //   - Steering rotates the kart's yaw
 //   - Position moves along the facing direction based on speed
-//   - Simple gravity keeps kart on the ground plane
-//   - Friction decelerates when no input is applied
+//   - KCL ground raycast follows terrain height
+//   - KCL wall collision prevents going through walls
+//   - Surface types modify speed (off-road slows, boost accelerates)
 //
 // Coordinate system (matching MKWii / OpenGL):
 //   X = right, Y = up, Z = into screen (north)
 //   Yaw 0 = facing +Z, yaw 90 = facing +X
 
-void KartEntity::update(const Platform::InputState& input, f32 dt) {
+void KartEntity::update(const Platform::InputState& input, f32 dt,
+                         const Game::CollisionSystem* collision) {
     if (!m_isActive) return;
 
     // Clamp dt to avoid physics explosion on frame spikes
@@ -510,11 +512,52 @@ void KartEntity::update(const Platform::InputState& input, f32 dt) {
     m_position.z += std::cos(yawRad) * m_speed * dt;
 
     // -----------------------------------------------------------------
-    // 6. Simple ground clamping (no terrain collision yet)
+    // 6. Collision detection (M6)
     // -----------------------------------------------------------------
-    // Keep kart at ground level. In M6 (Physics Loop) this will be replaced
-    // with proper KCL collision detection.
-    m_position.y = m_groundY;
+    if (collision && collision->isBuilt()) {
+        // Perform collision query at kart position
+        auto result = collision->query(m_position.x, m_position.y + 50.0f,
+                                         m_position.z, 40.0f, 5000.0f);
+
+        // Ground following: snap kart Y to ground height + kart half-height
+        if (result.hitGround) {
+            m_position.y = result.groundY + 25.0f;  // 25 = half-height of kart cube
+
+            // Surface type effects on speed
+            using namespace Loaders::KCLType;
+
+            if (result.surfaceType & OFF_ROAD) {
+                // Off-road: reduce max speed significantly
+                m_speed *= (1.0f - 0.5f * dt);  // Lose speed gradually
+                if (std::fabs(m_speed) > m_maxSpeed * 0.4f) {
+                    m_speed = m_maxSpeed * 0.4f * (m_speed > 0 ? 1.0f : -1.0f);
+                }
+            }
+
+            if (result.surfaceType & (BOOST | BOOST_PAD)) {
+                // Boost pad: accelerate beyond normal max speed
+                m_speed += 2000.0f * dt;
+                if (m_speed > m_maxSpeed * 1.5f) {
+                    m_speed = m_maxSpeed * 1.5f;
+                }
+            }
+        } else {
+            // No ground found: apply gravity (fall down)
+            m_position.y += m_gravity * dt;
+        }
+
+        // Wall collision: push kart out of walls
+        if (result.hitWall) {
+            f32 pushDist = m_speed * dt + 50.0f;  // Push back by movement + margin
+            m_position.x += result.wallNormalX * pushDist;
+            m_position.z += result.wallNormalZ * pushDist;
+            // Kill forward speed on wall hit
+            m_speed *= 0.3f;
+        }
+    } else {
+        // No collision data: flat ground fallback (M5 behavior)
+        m_position.y = m_groundY;
+    }
 
     // -----------------------------------------------------------------
     // 7. Update rotation for rendering and recompute model matrix
