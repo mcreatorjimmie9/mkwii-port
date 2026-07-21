@@ -62,7 +62,7 @@ public:
     KartPhysics* getKartPhysics() const { return m_kartPhysics; }
     KartWheelPhysics* getWheelPhysics(u32 idx) const;
     KartSusPhysics* getSusPhysics(u32 idx) const;
-    HitboxGroup* getHitboxGroup() const { return nullptr; /* TODO: m_hitboxGroup */ }
+    HitboxGroup* getHitboxGroup() const { return m_hitboxGroup; }
 
     // State query
     bool hasAnyFloorCollision() const { return m_anyFloorCol; }
@@ -226,7 +226,10 @@ private:
     // 0x0C8: Collision group reference
     CollisionGroup* m_collisionGroup;
 
-    // 0x0CC: Additional physics state flags
+    // 0x0CC: Hitbox group (set during init, used for collision queries)
+    HitboxGroup* m_hitboxGroup;
+
+    // 0x0CC: Additional physics state flags (offsets approximate on 64-bit)
     u8 _0CC[0x004];
 
     // 0x0D0: Floor collision detection counter

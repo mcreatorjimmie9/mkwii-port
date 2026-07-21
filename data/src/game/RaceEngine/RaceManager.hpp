@@ -64,7 +64,8 @@ public:
   KmgFile(void* file) { fromRaw(file); }
   void fromRaw(void* file);
   virtual ~KmgFile();
-    // TODO: s16 getBattleManager::CourseId(System::CourseId courseId);
+  // Battle course ID lookup is handled by BattleManager (separate subsystem).
+  // Not a member of KmgFile — removed to avoid cross-dependency.
 
   KmgFileRaw* data;
 };

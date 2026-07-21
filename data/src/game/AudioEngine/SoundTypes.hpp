@@ -304,10 +304,8 @@ struct PlayerAudioState {
     u8  field_0x0EA;           // 0x0EA: Off-road state
     u8  field_0x0EB;           // 0x0EB: Trick state
     u32 field_0x0EC;           // 0x0EC: Engine sound counter
-    u32 field_0x0F0;           // 0x0F0: Reserved
 };
-// TODO: Fix PlayerAudioState size mismatch (244 != 0xF0)
-// static_assert(sizeof(PlayerAudioState) == 0xF0);
+static_assert(sizeof(PlayerAudioState) == 0xF0, "PlayerAudioState must be 0xF0 bytes");
 
 // ============================================================================
 // Global Audio Manager State (singleton, ~0x1790 bytes)
@@ -375,8 +373,7 @@ class StrmPlayer;
 class SeqSound;
 class WaveSound;
 class StrmSound;
-// TODO: SoundCategory is declared as enum above, not class
-// class SoundCategory;
+// SoundCategory is an enum (defined above), not a class — no forward declaration needed.
 class AxVoiceManager;
 class Sound3DListener;
 class SoundExternalSoundPlayer;

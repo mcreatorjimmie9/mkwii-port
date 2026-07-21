@@ -215,8 +215,9 @@ private:
     u32  m_flags;                 // 0x18: Flags (looping, paused, 3D, etc.)
 };
 
-// TODO: Fix SoundHandle size mismatch (32 != 0x1C)
-// static_assert(sizeof(SoundHandle) == 0x1C);
+// Wii (32-bit) size was 0x1C (28 bytes). On 64-bit hosts, the SoundStartable*
+// pointer expands from 4→8 bytes, adding 4 bytes (0x20 = 32 bytes total).
+static_assert(sizeof(SoundHandle) == 0x20, "SoundHandle size changed on 64-bit");
 
 } // namespace snd
 } // namespace nw4r

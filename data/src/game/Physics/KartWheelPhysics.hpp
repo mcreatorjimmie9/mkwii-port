@@ -59,7 +59,11 @@ public:
     // Accessors
     f32 getSusTravel() const { return susTravel; }
     void setWheelPos(const EGG::Vector3f& wheelPos) { this->wheelPos = wheelPos; }
-    inline f32 getYScale() { return 1.0f; /* TODO: kartPhysicsEngine()->getYScale() */ }
+    // Stub: returns 1.0f on PC port. On Wii, this queried the kart physics engine's
+    // Y-scale (used for model squish on hard landings). The KartPhysicsEngine
+    // accessor is not available from this class without adding a back-pointer,
+    // and the scale is always 1.0f during normal gameplay.
+    inline f32 getYScale() { return 1.0f; }
     inline const HitboxGroup* getHitbox() const { return hitboxGroup; }
     inline HitboxGroup* getHitbox() { return hitboxGroup; }
 

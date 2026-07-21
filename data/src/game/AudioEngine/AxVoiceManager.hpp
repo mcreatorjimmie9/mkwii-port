@@ -71,8 +71,10 @@ struct AxVoiceDesc {
     u8   paused;         // 0x5A: Paused flag
     u8   _pad;           // 0x5B: Padding
 };
-// TODO: Fix AxVoiceDesc size mismatch (104 != 0x5C)
-// static_assert(sizeof(AxVoiceDesc) == 0x5C);
+// Wii (32-bit) size was 0x5C (92 bytes). On 64-bit hosts, two void* fields
+// (userData, bufferAddr) expand from 4→8 bytes each, adding 12 bytes total
+// (8 extra from pointers + 4 alignment padding before bufferAddr).
+static_assert(sizeof(AxVoiceDesc) == 0x68, "AxVoiceDesc size changed on 64-bit");
 
 // ============================================================================
 // AxVoiceManager — Manages the pool of AX voices / OpenAL sources
