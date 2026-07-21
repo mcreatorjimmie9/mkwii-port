@@ -125,3 +125,18 @@ Result: success
   - Build: 0 errors, 0 warnings across all 5 targets
   - Commit: 95120025, pushed to main
 Next: Phase 7 M4 — Place Kart on track
+
+---
+Cycle: 14 | Time: 2026-07-21T06:30:00Z | Phase: 7 | Module: Integration
+Decision: MAESTRO Phase 7 M4 — Place Kart on Track. Spawn a kart entity at the KMP start position and render it with OpenGL 3.3 Core Profile.
+Action: Created 3 new files (gl3_core.h, sdl2_stub.h, KartEntity.hpp/.cpp), rewrote platform layer for real GL rendering.
+Result: success
+  - gl3_core.h: Self-contained GL 3.3 header with 29 function pointer types, loaded at runtime via dlsym (no dev packages needed)
+  - sdl2_stub.h: Self-contained SDL2 header with 12 function pointer types, loaded at runtime via dlopen('libSDL2-2.0.so.0') (no dev packages needed)
+  - KartEntity: Class that initializes from KMP StartPosition, computes 4x4 model matrix (YXZ Euler, column-major), renders as colored cube (80x50x80 MKW units) with GLSL 330 core shaders, VAO/VBO/EBO
+  - graphics.cpp: Real GL 3.3 implementation with perspective() and lookAt() matrix builders, setupCamera() stores view-projection matrix for renderers
+  - main.cpp: Downloads beginner_course.szs from copyparty, parses KMP, spawns KartEntity at startPositions[0], sets camera behind+above kart (60deg FOV, near=1, far=200000), renders sky-blue clear + colored cube
+  - CMake: Links libdl for dlopen, always defines HAS_SDL2/HAS_OPENGL (runtime loading)
+  - Build: 0 errors, 0 warnings across all 5 targets. 56/56 physics tests pass.
+  - Commit: bbae8299, pushed to main
+Next: Phase 7 M5 — Basic Input (gamepad → move kart)

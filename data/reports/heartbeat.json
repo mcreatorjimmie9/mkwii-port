@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-07-21T03:35:00Z",
-  "cycle": 13,
-  "phase": "Phase 7: Integration — Milestone M3 (Track Loading) Complete",
+  "timestamp": "2026-07-21T06:30:00Z",
+  "cycle": 14,
+  "phase": "Phase 7: Integration — Milestone M4 (Place Kart on Track) Complete",
   "status": "in_progress",
   "totals": {
     "functions_total": 18444,
@@ -17,7 +17,7 @@
   "compilation_status": {
     "total": "88/88 (100%), 0 errors, 0 warnings",
     "physics_tests": "56/56 passed",
-    "mkwii_port_app": "11 files (platform + loaders), 0 errors (stub mode)",
+    "mkwii_port_app": "5 files (platform + loaders + KartEntity), 0 errors (GL 3.3 Core)",
     "track_loader_test": "1 file, 0 errors, downloads real track from copyparty"
   },
   "modules_completed": [
@@ -31,6 +31,13 @@
     "kcl_loader": "12,601 triangles parsed, surface type flags",
     "track_manager": "Unified loader, 26 entries from beginner_course.szs"
   },
-  "milestone": "M3 (Load Track)",
-  "next_action": "Phase 7 M4: Place Kart on track"
+  "m4": {
+    "gl3_core": "Self-contained GL 3.3 header, 29 functions, runtime dlsym loading",
+    "sdl2_stub": "Self-contained SDL2 header, 12 functions, runtime dlopen loading",
+    "kart_entity": "KartEntity class: KMP init, 4x4 model matrix, colored cube (80x50x80)",
+    "rendering": "GLSL 330 core shaders, VAO/VBO/EBO, perspective+lookAt camera",
+    "camera": "60deg FOV, behind+above kart, near=1 far=200000"
+  },
+  "milestone": "M4 (Place Kart)",
+  "next_action": "Phase 7 M5: Basic Input — read gamepad → move kart"
 }
