@@ -202,3 +202,48 @@ Implemented KCL collision system with grid-based spatial index, ground raycast f
 ### Stage Summary
 - Phase 7 M6 (M6 Physics Loop): COMPLETE
 - Next: Phase 7 M7 (M7 AI Opponent — spawn AI karts that follow race line)
+
+---
+
+## Task: Phase 7 M7 — AI Opponent
+
+### Summary
+Implemented M7 milestone: AI karts that autonomously follow race lines (KMP POTI waypoints). 3 AI opponents spawn at separate grid positions with distinct colors and driving styles, continuously loop the track path.
+
+### New Files Created (2 files in src/game/)
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/game/AIController.hpp` | 112 | AI controller class declaration: waypoint path following, input generation |
+| `src/game/AIController.cpp` | 228 | AI controller implementation: angle-to-target steering, speed control, waypoint advancement |
+
+### Modified Files (4 files)
+
+| File | Changes |
+|------|---------|
+| `src/game/KartEntity.hpp` | Added `getYaw()`, `setFaceColor()`, `setTintColor()`, color state members, `m_tintLoc` |
+| `src/game/KartEntity.cpp` | Updated shader (u_tint uniform), dynamic face colors in initGL(), setFaceColor/setTintColor impls |
+| `src/main.cpp` | 8-step init loop, spawns 3 AI karts with tint colors (orange/green/purple), AI update+render in game loop |
+| `CMakeLists.txt` | M6_SOURCES -> M7_SOURCES, added AIController.cpp |
+
+### AIController Design
+- **Path following**: Uses KMP POTI (Point Paths) waypoints as the race line
+- **Steering**: Computes angle-to-target in world space, maps to steer magnitude with deadzone
+- **Speed control**: Slows for sharp turns (>30 deg), proximity braking near waypoints
+- **Waypoint advancement**: Auto-advances when within arrival distance (15% of avg segment length)
+- **Per-AI personality**: Configurable base speed (2200-2700 u/s) and steer aggressiveness (0.9-1.2)
+- **Looping**: Wraps waypoint index for continuous racing
+
+### KartEntity Extensions
+- **getYaw()**: Exposes current facing yaw for AI steering calculations
+- **setTintColor(r,g,b)**: Shader uniform multiplier for visual distinction
+- **setFaceColor()**: Override per-face vertex colors
+- **Fragment shader**: `fragColor = vec4(vColor * u_tint, 1.0)` — tint multiplies vertex colors
+
+### Build & Validation
+- Build: 0 errors, 0 warnings across 4 targets (mkwii-port, mkwii-linktest, physics_tests, track_loader_test)
+- Commit: c36928c6
+
+### Stage Summary
+- Phase 7 M7 (AI Opponent): COMPLETE
+- Next: Phase 7 M8 (M8 Items — item box spawn + item use)
