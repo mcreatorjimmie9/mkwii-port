@@ -519,6 +519,10 @@ set(APP_SOURCES
     src/modules/shims/race_bridge.cpp
     # PAD/KPAD shim bridge to Platform::InputManager
     src/modules/shims/pad_bridge.cpp
+    # Phase 23: Sound bridge (AudioSystem ↔ PlayerSub10 SFX functions)
+    src/modules/shims/sound_bridge.cpp
+    # Phase 23: Effect/scale/KCL/status bridge
+    src/modules/shims/effect_bridge.cpp
 )
 
 add_executable(mkwii-port ${APP_SOURCES})
