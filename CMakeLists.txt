@@ -533,6 +533,7 @@ target_include_directories(mkwii-port PRIVATE
     ${CMAKE_SOURCE_DIR}/data/src/game/Collision
     ${CMAKE_SOURCE_DIR}/data/src/game/AIRace
     ${CMAKE_SOURCE_DIR}/data/src/game/EGG
+    ${CMAKE_SOURCE_DIR}/data/src/game/Runtime
     ${CMAKE_SOURCE_DIR}/data/src/game/Rendering
     ${CMAKE_SOURCE_DIR}/data/src/game/KartMovement
     ${CMAKE_SOURCE_DIR}/data/src/game/Physics

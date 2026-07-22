@@ -331,3 +331,51 @@ When both PlayerPhysics AND KartDynamics are available (default for human player
 ### Stage Summary
 - KartDynamics + PlayerPhysics integration: COMPLETE
 - Pending: SceneCamera/ObjectDirector/EffectDirector refinement, KartMove→PlayerSub10 alignment
+
+---
+
+## Task: Phase 11 — Fix BREFF/BREFT/BRLYT Integration Gaps
+
+### Summary
+Fixed critical integration gaps from Phase 9 (BREFF/BREFT) and Phase 10 (BRLYT). The main issues were: parseBreffEffect() only printed values without storing them, storeBreftTexture() didn't retain pixel data, parsePaneRecursive() only parsed one child, and EffectsManager was compiled but not linked. All gaps are now closed.
+
+### Files Modified (6 files)
+
+| File | Changes |
+|------|---------|
+| `data/src/game/Scene/EffectDirector.hpp` | +BreffParsedTemplate struct, +TexUploadFn callback, +bindTemplateToEmitter(), +BREFT RGBA data arrays |
+| `data/src/game/Scene/EffectDirector.cpp` | parseBreffEffect() stores to template, +bindTemplateToEmitter(), storeBreftTexture() retains data + upload callback, shutdown() frees new members |
+| `src/loaders/brlyt_parser.cpp` | +computePaneEntrySize(), parsePaneRecursive() parses ALL children via size-based advancement |
+| `data/src/game/UI/Layout.cpp` | parse() uses header section count instead of byte scan, +setParsedPaneCount() |
+| `data/src/game/UI/Layout.hpp` | +setParsedPaneCount() declaration |
+| `CMakeLists.txt` | +EffectsManager.cpp in APP_SOURCES |
+
+### BreffParsedTemplate Design
+New struct stores all BREFF emitter parameters per effect slot:
+- EFRD: emitRate, emitLife, maxParticles
+- PTRP: life/speed/size ranges, gravity, airResistance
+- DRAW: drawMethod, blendMode, billboardSize, textureIndex
+- SHAP: shapeType + 6 shape params
+- ANIM: 8 RGBA color keys, 8 size keys, 8 alpha keys + counts
+
+### bindTemplateToEmitter() Bridge
+Copies BreffParsedTemplate → EffectEmitter.breff* fields on createEmitter().
+This closes the gap: parseBreffEffect() → m_parsedTemplates → bindTemplateToEmitter() → spawnParticleFromBreff().
+
+### Pane Tree Parsing Fix
+computePaneEntrySize() returns exact byte size per pane type:
+- Base pane: 37 bytes (type + flags + alpha + nameIdx + userData + pad + 7*f32)
+- Picture: +20 (4 UV + 2 u16)
+- TextBox: +16 (2 u16 + 2 f32 + 2 u16)
+- Window: +48 (4 f32 + 16 u8 + u16)
+
+parsePaneRecursive() advances by child entry size after each child, enabling full tree extraction.
+
+### Build & Validation
+- Build: **0 errors, 0 warnings** across all 4 targets
+- Physics tests: **56/56 passed**
+- Commit: d99ce0f4
+
+### Stage Summary
+- Phase 11 (Integration Gap Fixes): COMPLETE
+- Next: Runtime EGG subsystem (threads, memory allocators, display lists)

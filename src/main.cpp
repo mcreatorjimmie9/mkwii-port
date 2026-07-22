@@ -21,6 +21,10 @@
 // Audio system
 #include "AudioSystem.hpp"
 
+// EGG heap subsystem
+#include "Heap_Classes.hpp"
+#include "FrameTimer.hpp"
+
 extern "C" void System_Init();
 
 int main(int argc, char* argv[]) {
@@ -52,8 +56,15 @@ int main(int argc, char* argv[]) {
         printf("  WARNING: Input initialization failed\n");
 
     // =========================================================================
-    // Step 1.5: Initialize audio engine (voice manager, 3D, categories)
+    // Step 1.5: Initialize EGG system and audio engine
     // =========================================================================
+    printf("  System_Init...");
+    System_Init();
+    printf("OK\n");
+
+    // Initialize global FrameTimer with 60 Hz target
+    static EGG::FrameTimer gFrameTimer;
+    gFrameTimer.init(60);
     printf("  Audio engine...");
     nw4r::snd::AudioSystem::instance().initialize();
     printf("OK\n");
@@ -98,6 +109,9 @@ int main(int argc, char* argv[]) {
         Platform::InputManager::poll();
         const auto& input = Platform::InputManager::getState();
 
+        // Phase 12: Frame timer with real delta time
+        gFrameTimer.beginFrame();
+
         if (input.quit) {
             running = false;
             break;
@@ -107,6 +121,8 @@ int main(int argc, char* argv[]) {
         nw4r::snd::AudioSystem::instance().update();
 
         // Update scene state (countdown, racing, finish)
+        // NOTE: SceneDirector::update() doesn't take dt; RaceScene internally
+        // uses its own FRAME_TIME constant. Future: propagate dt through Scene.
         Scene::SceneDirector::getInstance()->update();
 
         // Render frame
@@ -191,6 +207,9 @@ int main(int argc, char* argv[]) {
 
         Platform::Graphics::endFrame();
         Platform::Window::swapBuffers();
+
+        // Phase 12: End frame timing
+        gFrameTimer.endFrame();
     }
 
     // =========================================================================
@@ -209,6 +228,51 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
+// ============================================================================
+// System_Init — EGG system initialization (root heaps, heap subsystem)
+//
+// In the original MKWii, EGG::TSystem::initializeMemory() creates root heaps
+// from MEM1/MEM2 arenas (24MB + 56MB on Wii). The PC port uses a single
+// 32MB root heap allocated from the OS, with child ExpHeaps for scenes.
+//
+// Phase 12: Implemented with real EGG::ExpHeap creation.
+// ============================================================================
+
+// Global root heap — accessible from anywhere in the game code
+// via EGG::Heap::sCurrentHeap or direct global access.
+static EGG::Heap* sRootHeap = nullptr;
+
 extern "C" void System_Init() {
-    printf("  System_Init: stub\n");
+    printf("  System_Init: creating root EGG heap (32MB)...\n");
+
+    // In the original MKWii:
+    //   MEM1: 24MB arena (OS heap, stack, game allocations)
+    //   MEM2: 56MB arena (scene data, textures, audio)
+    // For PC port: single 32MB root heap from malloc.
+    const u32 ROOT_HEAP_SIZE = 32 * 1024 * 1024; // 32 MB
+    u8* rootMem = static_cast<u8*>(malloc(ROOT_HEAP_SIZE));
+    if (!rootMem) {
+        printf("  System_Init: FATAL — failed to allocate root heap memory\n");
+        return;
+    }
+
+    // Initialize the EGG heap subsystem (sets sCurrentHeap = nullptr)
+    EGG::Heap::initialize();
+
+    // Create the root ExpHeap in the allocated memory region
+    EGG::ExpHeap* rootHeap = EGG::ExpHeap::create(rootMem, ROOT_HEAP_SIZE, nullptr);
+    if (!rootHeap) {
+        printf("  System_Init: FATAL — failed to create root ExpHeap\n");
+        free(rootMem);
+        return;
+    }
+    // Root heap is ready — no name set (mName is protected)
+
+    // Make it the current heap for new/delete allocations
+    EGG::Heap::setCurrentHeap(rootHeap);
+    sRootHeap = rootHeap;
+
+    printf("  System_Init: root heap %p (%u MB, %u bytes free)\n",
+           rootHeap, ROOT_HEAP_SIZE / (1024 * 1024),
+           rootHeap->getAllocatableSize(4));
 }

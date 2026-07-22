@@ -10,6 +10,24 @@
 
 #include "FrameTimer.hpp"
 #include <cstring>
+#include <chrono>
+
+// Phase 12: Use std::chrono for real tick acquisition on PC.
+// Original MKWii uses OSGetTick() which returns Broadway timer ticks
+// at OS_TIMER_CLOCK (approx 937.5 MHz). We use nanoseconds and
+// convert to the same tick scale for compatibility.
+static const u64 OS_TIMER_CLOCK_HZ = 937500000ULL;
+
+static inline s32 pcGetTick() {
+    auto now = std::chrono::steady_clock::now();
+    auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        now.time_since_epoch()).count();
+    return static_cast<s32>((u64(ns) * OS_TIMER_CLOCK_HZ + 999999999ULL) / 1000000000ULL);
+}
+
+static inline f32 ticksToSeconds(s32 ticks) {
+    return static_cast<f32>(ticks) / static_cast<f32>(OS_TIMER_CLOCK_HZ);
+}
 
 namespace EGG {
 
@@ -40,15 +58,15 @@ FrameTimer::~FrameTimer() {}
 // @addr 0x801740A0 — Initialize timer with target refresh rate
 void FrameTimer::init(u32 refreshRate) {
     mFrameRate = (f32)refreshRate;
-    mVSyncInterval = 0; // OSTicksPerFrame in real SDK
-    mStartTick = 0;
-    mEndTick = 0;
+    mVSyncInterval = static_cast<u32>(OS_TIMER_CLOCK_HZ / refreshRate);
+    mStartTick = pcGetTick();
+    mEndTick = mStartTick;
     mDeltaTime = 0.0f;
     mFrameCount = 0;
     mFpsFrameCount = 0;
-    mFpsStartTick = 0;
-    mCurrentFps = 0.0f;
-    mAverageFps = 0.0f;
+    mFpsStartTick = mStartTick;
+    mCurrentFps = (f32)refreshRate;
+    mAverageFps = (f32)refreshRate;
     mAccumulatedTime = 0.0f;
     mbPaused = false;
 }
@@ -59,14 +77,15 @@ void FrameTimer::init(u32 refreshRate) {
 
 // @addr 0x80174120 — Mark frame start, record tick
 void FrameTimer::beginFrame() {
-    mStartTick = 0; // OSGetTick() in real SDK
+    mStartTick = pcGetTick(); // Phase 12: real tick
 }
 
 // @addr 0x801741A0 — Mark frame end, compute delta
 void FrameTimer::endFrame() {
-    mEndTick = 0; // OSGetTick() in real SDK
-    // Delta in seconds: OSDiffTick / OS_TIMER_CLOCK
-    mDeltaTime = 1.0f / mFrameRate; // simplified
+    mEndTick = pcGetTick(); // Phase 12: real tick
+    s32 diff = mEndTick - mStartTick;
+    if (diff <= 0) diff = static_cast<s32>(OS_TIMER_CLOCK_HZ / mFrameRate);
+    mDeltaTime = ticksToSeconds(diff);
 
     if (!mbPaused) {
         mFrameCount++;
@@ -74,10 +93,9 @@ void FrameTimer::endFrame() {
         mAccumulatedTime += mDeltaTime;
 
         // Update FPS measurement periodically.
-        // In the original binary, FPS is recalculated every FPS_UPDATE_INTERVAL
-        // frames using OSTicksToSeconds(OSGetTick() - mFpsStartTick).
         if (mFpsFrameCount >= FPS_UPDATE_INTERVAL) {
-            f32 elapsed = mFpsFrameCount / mFrameRate;
+            s32 elapsedTicks = pcGetTick() - mFpsStartTick;
+            f32 elapsed = ticksToSeconds(elapsedTicks);
             if (elapsed > 0.0f) {
                 mCurrentFps = (f32)mFpsFrameCount / elapsed;
             }
@@ -88,7 +106,7 @@ void FrameTimer::endFrame() {
                 mAverageFps = mCurrentFps;
             }
             mFpsFrameCount = 0;
-            mFpsStartTick = 0; // OSGetTick()
+            mFpsStartTick = pcGetTick();
         }
     }
 }
