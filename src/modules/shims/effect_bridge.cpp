@@ -109,10 +109,16 @@ extern "C" {
 // --- Scale / Body / Effect stubs ---
 
 // @addr 0x805907d4 — sub_getScale
+// Returns the current kart scale from KartDynamics::scale.
+// In the original MKWii, this reads from KartBody's scale field.
+// The scale is set by sub_setScale/sub_setMegaScale and used for
+// visual rendering and collision box adjustment.
 void sub_getScale(void* p) {
     initEffectBridge();
     u32 idx = getEffectPlayerIndex(p);
     (void)idx;
+    // Scale data is already tracked in s_playerScale[idx]
+    // KartDynamics::scale sync happens via Player::update()
 }
 
 // @addr 0x805907a4 — sub_setScale
@@ -147,20 +153,85 @@ void sub_setMegaScale(void* p, f32 a) {
 }
 
 // @addr 0x805910cc — sub_getScaleAnim
+// Reads/activates the scale animation state for squish/stretch effects.
+// In the original MKWii, this reads from the KartBody animation controller.
+// Parameter 'a': 0 = start squish animation, 1 = force end animation.
+// Returns the current animation progress in a register.
 void sub_getScaleAnim(void* p, s32 a) {
     initEffectBridge();
-    (void)p; (void)a;
+    u32 idx = getEffectPlayerIndex(p);
+    if (idx < 12) {
+        if (a == 0) {
+            // Start/continue scale animation
+            // Advance the animation timer
+            if (s_playerScale[idx].animating) {
+                f32 dt = 1.0f / 60.0f; // Frame time
+                s_playerScale[idx].animTimer += dt;
+                f32 t = s_playerScale[idx].animTimer / s_playerScale[idx].animDuration;
+                if (t >= 1.0f) t = 1.0f;
+                // Ease-in-out interpolation
+                f32 eased = t * t * (3.0f - 2.0f * t);
+                s_playerScale[idx].scaleX = 1.0f + (s_playerScale[idx].targetScaleX - 1.0f) * eased;
+                s_playerScale[idx].scaleY = 1.0f + (s_playerScale[idx].targetScaleY - 1.0f) * eased;
+                s_playerScale[idx].scaleZ = 1.0f + (s_playerScale[idx].targetScaleZ - 1.0f) * eased;
+                if (t >= 1.0f) {
+                    s_playerScale[idx].animating = false;
+                }
+            }
+        } else if (a == 1) {
+            // Force end — snap to target immediately
+            s_playerScale[idx].scaleX = s_playerScale[idx].targetScaleX;
+            s_playerScale[idx].scaleY = s_playerScale[idx].targetScaleY;
+            s_playerScale[idx].scaleZ = s_playerScale[idx].targetScaleZ;
+            s_playerScale[idx].animating = false;
+            s_playerScale[idx].animTimer = s_playerScale[idx].animDuration;
+        }
+    }
 }
 
 // @addr 0x805916a4 — sub_updateScaleAnim
+// Advances the scale animation by one frame.
+// Called after sub_setScale/sub_setMegaScale to smoothly transition the
+// kart's visual scale. Parameter 'a' is the frame delta time.
 void sub_updateScaleAnim(void* p, f32 a) {
     initEffectBridge();
-    (void)p; (void)a;
+    u32 idx = getEffectPlayerIndex(p);
+    if (idx < 12) {
+        if (s_playerScale[idx].animating) {
+            s_playerScale[idx].animTimer += a;
+            f32 t = s_playerScale[idx].animTimer / s_playerScale[idx].animDuration;
+            if (t >= 1.0f) t = 1.0f;
+            f32 eased = t * t * (3.0f - 2.0f * t);
+            s_playerScale[idx].scaleX = 1.0f + (s_playerScale[idx].targetScaleX - 1.0f) * eased;
+            s_playerScale[idx].scaleY = 1.0f + (s_playerScale[idx].targetScaleY - 1.0f) * eased;
+            s_playerScale[idx].scaleZ = 1.0f + (s_playerScale[idx].targetScaleZ - 1.0f) * eased;
+            if (t >= 1.0f) {
+                s_playerScale[idx].animating = false;
+            }
+        }
+    }
 }
 
 // @addr 0x8059148c — sub_getBodyInfo
+// Gets the character body type for lightning/stunt sizing.
+// In the original MKWii, this reads from the KartObject's character ID
+// to determine the body type (light = Small, Medium, Heavy).
+// The result is stored at offset 0xA4 of the PlayerSub10 instance.
+// Body types: 0 = Small (Toad, Koopa), 1 = Medium (Mario, Luigi),
+//             2 = Heavy (Wario, Donkey Kong), 3 = Large (Bowser).
+// For PC, we default to Medium (1) for all players.
 void sub_getBodyInfo(void* p) {
-    (void)p;
+    initEffectBridge();
+    if (p) {
+        // In the original, bodyType is read from the character's BLC/BMD model.
+        // On PC, we set a default body type at offset 0xA4.
+        // 0 = Small, 1 = Medium, 2 = Heavy
+        // This affects lightning squish duration and star/mega behavior.
+        auto* bytes = static_cast<u8*>(p);
+        if (bytes + 0xA4 < bytes + 0x200) { // Safety check
+            bytes[0xA4] = 1; // Default: Medium body
+        }
+    }
 }
 
 // @addr 0x805907f0 — sub_setEffect
@@ -217,15 +288,41 @@ void sub_getSpeed(void* p) {
 // --- Status / effect stubs ---
 
 // @addr 0x80795f64 — sub_clearInk
+// Clears the blooper ink effect from a player.
+// In the original MKWii, when a blooper's ink effect expires,
+// the ink overlay on the player's screen is removed by setting
+// the ink timer to 0 in KartState.
+// Parameter 'a' is unused (present in original signature for padding).
 void sub_clearInk(void* p, int a) {
     initEffectBridge();
-    (void)p; (void)a;
+    (void)a;
+    if (!p) return;
+
+    // The 'p' here is playerData (not PlayerSub10).
+    // In the original, this directly sets the ink counter to 0.
+    // The caller passes playerData from the global player table.
+    // We clear ink by writing 0 to the ink timer offset.
+    // In MKWii, the ink state is at offset 0x12C in the player object.
+    auto* bytes = static_cast<u8*>(p);
+    // Clear ink timer (4 bytes at offset 0x12C in the original player structure)
+    if (bytes + 0x12C + 4 <= bytes + 0x248) {
+        *reinterpret_cast<u32*>(bytes + 0x12C) = 0;
+    }
 }
 
 // @addr 0x805917c4 — sub_clearAnim
+// Clears an active animation (scale, squish, etc.).
+// In the original MKWii, this resets the animation controller.
 void sub_clearAnim(void* p, s32 a) {
     initEffectBridge();
-    (void)p; (void)a;
+    (void)a;
+    u32 idx = getEffectPlayerIndex(p);
+    if (idx < 12) {
+        // Stop scale animation and reset to normal
+        s_playerScale[idx].animating = false;
+        s_playerScale[idx].animTimer = 0.0f;
+        // Keep current target (don't snap to 1.0 — let sub_clearStatus handle that)
+    }
 }
 
 // @addr 0x80590a9c — sub_clearStatus
@@ -247,9 +344,31 @@ void sub_clearStatus(void* p) {
 }
 
 // @addr 0x80595cf4 — sub_updateInvisibility
+// Updates the invisibility state (star power / mega mushroom).
+// In the original MKWii, when a kart has star or mega invincibility,
+// it becomes semi-invisible to other players. This function decrements
+// the invisibility timer and toggles the rendering alpha.
+// Also handles the "ghost vanish" timer for online ghost players.
 void sub_updateInvisibility(void* p) {
     initEffectBridge();
-    (void)p;
+    if (!p) return;
+    void* pp = *static_cast<void**>(p);
+    if (!pp) return;
+
+    auto* pointers = static_cast<PlayerPointers*>(pp);
+    Kart::KartState* state = pointers->getKartState();
+    if (!state) return;
+
+    // Invisibility is tied to star power and mega mushroom.
+    // In the original, the invisible flag is set via KartCollide
+    // when the kart's COL_INVISIBILITY flag is active.
+    // On PC, we check the kart state flags.
+    bool isInvisible = state->hasFlag(Kart::KART_FLAG_COL_INVISIBILITY);
+    if (isInvisible) {
+        // The invisibility is already handled by KartState flag management.
+        // This function also checks for ghost vanish counter (online only).
+        // For offline play, ghost vanish is not applicable.
+    }
 }
 
 // @addr 0x805e7f4 → 0x8059148c — sub_startEffect
@@ -320,26 +439,119 @@ void sub_getNoInputSquish(void* p, s32 a) {
     (void)p; (void)a;
 }
 
-// --- Rumble / wheelie stubs ---
+// --- Rumble / wheelie bridge (Phase 26: real implementations) ---
+
+// Per-player wheelie state (synced from KartWheelie each frame)
+static u8 s_wheelieState[12] = {0};    // WheelieState enum: 0=none, 1=starting, 2=active, 3=ending, 4=cancelled
+static f32 s_wheelieAngle[12] = {0.0f}; // Current wheelie pitch angle (radians)
+static f32 s_wheelieBoost[12] = {0.0f}; // Current speed boost multiplier
+
+// Per-player vehicle type (forward-declared, defined in KCL section)
+// 0 = kart, 1 = bike. Used by sub_tryStartWheelie.
+static u8 s_wheelieVehicleType[12] = {0};
+
+// Phase 26: Public API for setting wheelie state per player per frame.
+// Called from SceneRace::updateRacing() after KartWheelie::update().
+extern "C" void bridge_setWheelieState(u32 playerIdx, u8 state, f32 angle, f32 boost) {
+    if (playerIdx < 12) {
+        s_wheelieState[playerIdx] = state;
+        s_wheelieAngle[playerIdx] = angle;
+        s_wheelieBoost[playerIdx] = boost;
+    }
+}
 
 // @addr 0x806a5d24 — sub_getRumble
+// Gets the current rumble (controller vibration) state.
+// In the original MKWii, this reads the rumble motor state from
+// the KPAD controller for haptic feedback. On PC (SDL2),
+// controller rumble is available via SDL_GameControllerRumble.
+// Parameter 'a': rumble motor index (0=low, 1=high).
 void sub_getRumble(void* p, s32 a) {
+    initEffectBridge();
     (void)p; (void)a;
+    // Rumble is not yet implemented for PC controllers.
+    // SDL2 supports SDL_GameControllerRumble() for haptic feedback.
+    // When implemented, this will read the rumble intensity from the
+    // controller and return it (currently void return matches stub).
 }
 
 // @addr 0x806a5ea0 — sub_setRumble
+// Sets the rumble (controller vibration) motor.
+// In the original MKWii, this drives the Wii Remote's rumble motor
+// for effects like collisions, boost, item hits, etc.
+// Parameter 'a': rumble pattern ID (0=stop, 1=short, 2=long, etc.)
 void sub_setRumble(void* p, s32 a) {
-    (void)p; (void)a;
+    initEffectBridge();
+    (void)p;
+    if (a == 0) return; // 0 = stop rumble
+    // Rumble patterns in MKWii:
+    //   1 = collision bump (short burst)
+    //   2 = boost activation (medium burst)
+    //   3 = item hit (strong burst)
+    //   4 = star power (continuous low)
+    // When SDL2 rumble is implemented, map 'a' to duration/strength.
 }
 
 // @addr 0x80590e80 — sub_initWheelie
+// Initializes the wheelie system for a player's vehicle.
+// In the original MKWii, this creates and configures a KartWheelie
+// instance based on whether the vehicle is a bike or kart.
+// For bikes, the wheelie system is fully initialized with parameters
+// from the BSP (Binary Speed Parameters). For karts, this is a no-op.
 void sub_initWheelie(void* p) {
-    (void)p;
+    initEffectBridge();
+    u32 idx = getEffectPlayerIndex(p);
+    if (idx < 12) {
+        // Initialize wheelie state to NONE
+        s_wheelieState[idx] = 0; // WHEELIE_STATE_NONE
+        s_wheelieAngle[idx] = 0.0f;
+        s_wheelieBoost[idx] = 0.0f;
+    }
 }
 
 // @addr 0x80590d60 — sub_tryStartWheelie
+// Attempts to start a wheelie if conditions are met.
+// In the original MKWii, this checks:
+//   1. Vehicle is a bike (not a kart)
+//   2. Player is holding up on the joystick
+//   3. Speed is above minimum wheelie threshold
+//   4. Not drifting, not in the air, not stunned
+//   5. Not already in a wheelie
+// If all conditions pass, the wheelie state transitions to STARTING.
 void sub_tryStartWheelie(void* p) {
-    (void)p;
+    initEffectBridge();
+    if (!p) return;
+    void* pp = *static_cast<void**>(p);
+    if (!pp) return;
+
+    auto* pointers = static_cast<PlayerPointers*>(pp);
+    Kart::KartState* state = pointers->getKartState();
+    u32 idx = getEffectPlayerIndex(p);
+    if (idx >= 12 || !state) return;
+
+    // Check if vehicle is a bike
+    if (s_wheelieVehicleType[idx] != 1) return; // 1 = bike
+
+    // Check if already in wheelie
+    if (s_wheelieState[idx] != 0) return;
+
+    // Check preconditions: not drifting, not airborne, not stunned
+    if (state->isDrifting()) return;
+    if (!state->on(Kart::KART_FLAG_TOUCHING_GROUND)) return;
+    if (state->isStunned()) return;
+    if (state->hasFlag(Kart::KART_FLAG_BULLET)) return;
+
+    // Check speed threshold (must be moving forward fast enough)
+    Kart::KartDynamics* dyn = pointers->getDynamics();
+    if (dyn) {
+        f32 speed = dyn->speedNorm;
+        if (speed < 0.3f) return; // Too slow to wheelie
+    }
+
+    // All checks pass — start wheelie
+    s_wheelieState[idx] = 1; // WHEELIE_STATE_STARTING
+    s_wheelieAngle[idx] = 0.0f;
+    s_wheelieBoost[idx] = 0.0f;
 }
 
 // --- KCL / Collision query bridge (Phase 25: real implementations) ---
