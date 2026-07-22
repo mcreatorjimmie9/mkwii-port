@@ -402,35 +402,99 @@ void Player::updateWithDecompiledPhysics(f32 dt, const void* inputState) {
     // Run the full MKWii physics tick
     sub10->update();
 
-    // Sync PlayerSub10 output back to KartEntity for rendering
-    // PlayerSub10 stores speed in vehicleSpeed and direction in dir
+    // =========================================================================
+    // KartDynamics integration (faithful to original MKWii pipeline)
+    // =========================================================================
+    // In the original game, PlayerSub10 computes vehicleSpeed and dir, then
+    // KartDynamics::calc() integrates the final position using:
+    //   speed = externalVel * dt + internalVel + movingRoadVel + movingWaterVel
+    //   pos += speed
+    // The internalVel is the main driving velocity (dir * vehicleSpeed).
+    // externalVel handles gravity, collision forces, item hits, etc.
+    // mainRot quaternion is updated from angular velocity each frame.
+    // =========================================================================
+
     f32 speed = sub10->vehicleSpeed;
     const auto& dir = sub10->dir;
 
-    // Compute yaw from direction vector (XZ plane)
-    f32 yawRad = std::atan2(dir.x, dir.z);
-    f32 yawDeg = EGG::RadToDeg(yawRad);
-
-    // Position: use KartDynamics if available, else KartEntity's current pos
-    f32 posX, posY, posZ;
     if (m_kartDynamics) {
-        posX = m_kartDynamics->pos.x;
-        posY = m_kartDynamics->pos.y;
-        posZ = m_kartDynamics->pos.z;
-    } else {
-        auto pos = kart->getPosition();
-        posX = pos.x;
-        posY = pos.y;
-        posZ = pos.z;
-        // Advance position along direction vector at current speed
-        posX += dir.x * speed * dt;
-        posY += dir.y * speed * dt;
-        posZ += dir.z * speed * dt;
-    }
+        auto* dyn = m_kartDynamics;
 
-    kart->setPosition(posX, posY, posZ);
-    kart->setYawDeg(yawDeg);
-    kart->setSpeed(speed);
+        // 1. Set internal velocity from PlayerSub10 output
+        //    PlayerSub10 uses per-frame-at-60fps units. KartDynamics uses
+        //    continuous-time (units/second). Conversion: multiply by 60.
+        //    internalVel is the displacement per frame in the original game,
+        //    so in continuous time it represents velocity (units/second).
+        f32 speedPerSec = speed * 60.0f;
+        dyn->internalVel.x = dir.x * speedPerSec;
+        dyn->internalVel.y = dir.y * speedPerSec;
+        dyn->internalVel.z = dir.z * speedPerSec;
+
+        // 2. Set gravity state from KCL collision
+        //    In MKWii, noGravity=true means gravity IS applied (confusing name).
+        //    Grounded: noGravity=false → calc() skips gravity (KCL floor holds kart)
+        //    Airborne: noGravity=true → calc() applies gravity (kart falls)
+        bool isAirborne = (sub10->hopFrame > 0);
+        dyn->noGravity = isAirborne;
+
+        // When grounded, apply a downward gravity force manually.
+        // calc() won't add it since noGravity=false, but the downward force
+        // is needed for KCL floor collision response to work correctly.
+        if (!isAirborne) {
+            // gravity is a pre-scaled force (already incorporates mass in MKWii)
+            dyn->totalForce.y += dyn->gravity;
+        }
+
+        // 3. Set mainRot quaternion from PlayerSub10's direction vector
+        //    In the original, this comes from KartMove's rotation matrix.
+        //    We compute yaw from the XZ direction vector.
+        f32 yawRad = std::atan2(dir.x, dir.z);
+        f32 halfYaw = yawRad * 0.5f;
+        f32 cosY = std::cos(halfYaw);
+        f32 sinY = std::sin(halfYaw);
+        dyn->mainRot = EGG::Quatf(0.0f, sinY, 0.0f, cosY);
+        dyn->fullRot = dyn->mainRot;
+
+        // 4. Compute max speed from PlayerSub10's hard speed limit
+        //    Convert from per-frame (60fps) to continuous units/sec
+        f32 maxSpeed = sub10->hardSpeedLimit * 60.0f;
+        if (maxSpeed < 6000.0f) maxSpeed = 7200.0f; // Fallback (120 * 60)
+
+        // 5. Clamp dt to prevent physics explosion on frame drops
+        if (dt < 0.001f) dt = 0.001f;
+        if (dt > 0.1f)   dt = 0.1f;
+
+        // 6. Run KartDynamics integration
+        //    air=1 when airborne (allows vertical velocity), air=0 when grounded
+        dyn->calc(dt, maxSpeed, isAirborne ? 1 : 0);
+
+        // 7. Read final position from KartDynamics
+        f32 posX = dyn->pos.x;
+        f32 posY = dyn->pos.y;
+        f32 posZ = dyn->pos.z;
+
+        // 8. Compute yaw from KartDynamics mainRot quaternion
+        f32 yawDeg = EGG::RadToDeg(std::atan2(
+            2.0f * (dyn->mainRot.y * dyn->mainRot.w),
+            1.0f - 2.0f * (dyn->mainRot.y * dyn->mainRot.y)));
+
+        kart->setPosition(posX, posY, posZ);
+        kart->setYawDeg(yawDeg);
+        kart->setSpeed(dyn->speedNorm);
+    } else {
+        // Fallback: no KartDynamics — simple position integration
+        f32 yawRad = std::atan2(dir.x, dir.z);
+        f32 yawDeg = EGG::RadToDeg(yawRad);
+
+        auto pos = kart->getPosition();
+        f32 posX = pos.x + dir.x * speed * dt;
+        f32 posY = pos.y + dir.y * speed * dt;
+        f32 posZ = pos.z + dir.z * speed * dt;
+
+        kart->setPosition(posX, posY, posZ);
+        kart->setYawDeg(yawDeg);
+        kart->setSpeed(speed);
+    }
 
     // Also sync to KartMove for subsystem consistency
     if (m_kartMove) {
@@ -580,7 +644,10 @@ void Player::initKartDynamics(f32 halfW, f32 halfH, f32 halfD, f32 mass) {
 
     m_kartDynamics = new Kart::KartDynamicsKart();
     m_kartDynamics->setDefault();
-    m_kartDynamics->gravity = -1.0f;
+    // MKWii gravity: ~0.42 units/frame² at 60fps.
+    // Continuous-time conversion: a = 0.42 * 60² = 1512 units/s²
+    // This matches the original hop arc height (~120 units) and fall speed.
+    m_kartDynamics->gravity = -1512.0f;
     m_kartDynamics->mass = mass;
 
     EGG::Vector3f dims(halfW, halfH, halfD);
@@ -593,7 +660,10 @@ void Player::initKartDynamics(f32 halfW, f32 halfH, f32 halfD, f32 mass) {
 
     if (m_kartEntity) {
         f32 yaw = EGG::DegToRad(static_cast<KartEntity*>(m_kartEntity)->getYaw());
-        m_kartDynamics->mainRot = EGG::Quatf(0.0f, 0.0f, std::sin(yaw * 0.5f), std::cos(yaw * 0.5f));
+        f32 halfYaw = yaw * 0.5f;
+        // Y-axis rotation quaternion: w=cos(θ/2), x=0, y=sin(θ/2), z=0
+        // Field order: x, y, z, w
+        m_kartDynamics->mainRot = EGG::Quatf(0.0f, std::sin(halfYaw), 0.0f, std::cos(halfYaw));
     }
 
     m_useKartDynamics = false;
