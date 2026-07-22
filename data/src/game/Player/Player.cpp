@@ -59,6 +59,7 @@ Player::Player()
     , m_finishTime(0.0f)
     , m_finishPosition(0)
     , m_distance(0.0f)
+    , m_startBoostSpeedBonus(0.0f)
     , m_itemSlot(nullptr)
     , m_playerId(0)
     , m_isAI(false)
@@ -96,6 +97,7 @@ void Player::init(u32 playerId, bool isAI,
     m_finishTime = 0.0f;
     m_finishPosition = 0;
     m_distance = 0.0f;
+    m_startBoostSpeedBonus = 0.0f;
 
     // Allocate and initialize the working KartEntity (rendering + collision)
     auto* kart = new KartEntity();

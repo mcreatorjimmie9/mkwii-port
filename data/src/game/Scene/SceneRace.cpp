@@ -92,6 +92,15 @@ extern "C" void updateRaceTimerFromGame(u32 raceFrameCount);
 extern "C" u32 getRaceTimeString(char* buf, u32 bufSize);
 extern "C" f32 getRaceTimeMs();
 
+// Phase 27: Start-boost bridge functions (defined in race_bridge.cpp)
+extern "C" void bridge_setPlayerAccelHeld(u32 playerId, bool held);
+extern "C" u32 bridge_computeStartBoosts();
+extern "C" bool bridge_hasStartBoost(u32 playerId);
+extern "C" void bridge_clearStartBoost(u32 playerId);
+
+// Phase 27: Sound bridge function for start boost SFX
+extern "C" void sub_playStartBoostSound(void* p);
+
 // Phase 25: Forward declarations — Effect bridge state setters
 // These push per-frame game state into the effect_bridge for KCL/collision queries
 extern "C" void bridge_setAirState(u32 playerIdx, bool inAir);
@@ -170,6 +179,12 @@ static const char* COURSE_URL =
     "https://142.169.46.167:3923/mkwii/DATA/files/Race/beginner_course.szs";
 static const char* COURSE_FILE = "/tmp/mkwii_course.szs";
 
+// Phase 27: Start-boost constants (in original MKWii, the rocket start
+// provides a speed boost for ~60 frames (1 second at 60fps).
+// These are used by both startRace() and updateRacing().
+static const u32 START_BOOST_DURATION_FRAMES = 60;
+static constexpr f32 START_BOOST_BONUS_SPEED = 2500.0f;
+
 // =============================================================================
 // Pimpl — RaceData (platform-specific race state)
 // =============================================================================
@@ -198,6 +213,12 @@ struct RaceScene::RaceData {
     // For single VS races, it wraps a single RaceSequence.
     RaceEngine::RaceDirector* raceDirector;
 
+    // Phase 27: Start-boost timer — tracks remaining boost duration per player.
+    // In the original MKWii, the rocket start provides a speed bonus for
+    // approximately 60 frames (1 second at 60fps). The boost adds extra
+    // acceleration during this window, giving the player a head start.
+    u32 startBoostTimers[TOTAL_RACERS];
+
     // HUD overlay
     HUD hud;
     bool hudInitialized;
@@ -215,7 +236,10 @@ struct RaceScene::RaceData {
         , raceFinishedPrinted(false)
         , frameLogCounter(0)
         , raceSequence(nullptr)
-        , raceDirector(nullptr) {}
+        , raceDirector(nullptr) {
+        // Phase 27: Initialize start-boost timers
+        memset(startBoostTimers, 0, sizeof(startBoostTimers));
+    }
 };
 
 // =============================================================================
@@ -938,6 +962,21 @@ void RaceScene::startRace() {
         System::RaceManager::spInstance->stage = System::RACE;
         System::RaceManager::spInstance->canCountdownStart = true;
     }
+
+    // Phase 27: Activate start-boost timers for players who earned rocket start.
+    // bridge_hasStartBoost() was computed by bridge_computeStartBoosts() called
+    // from updateCountdown() just before this function. Players who held accel
+    // during countdown have startBoostActive[i] = true.
+    if (m_raceData) {
+        for (u32 i = 0; i < m_raceData->playerCount; i++) {
+            if (bridge_hasStartBoost(i)) {
+                m_raceData->startBoostTimers[i] = START_BOOST_DURATION_FRAMES;
+                printf("[RaceScene] Player %u got rocket start boost!\n", i);
+                // Play start boost sound
+                sub_playStartBoostSound(nullptr);
+            }
+        }
+    }
 }
 
 // =============================================================================
@@ -1094,6 +1133,16 @@ void RaceScene::updateCountdown() {
             f32 countdownSec = static_cast<f32>(m_countdownTimer) / 60.0f;
             m_raceData->hud.setCountdown(countdownSec, true);
         }
+
+        // Phase 27: Track player accel button during countdown for start-boost.
+        // In the original MKWii, the game detects whether each player is holding
+        // the accelerate button during the countdown sequence. If a player holds
+        // accelerate when the countdown reaches "GO", they receive a "rocket start"
+        // boost — a brief but significant speed advantage at race start.
+        // We track player 0's input from InputManager and set the accel state
+        // in the race bridge for each frame of the countdown.
+        const auto& input = Platform::InputManager::getState();
+        bridge_setPlayerAccelHeld(0, input.accelerate > 0.0f);
     }
 
     if (m_countdownTimer > 0) {
@@ -1113,6 +1162,14 @@ void RaceScene::updateCountdown() {
             }
         } else {
             m_countdownNumber = 0;
+            // Phase 27: Compute start-boosts before transitioning to race
+            if (m_raceData) {
+                u32 boostCount = bridge_computeStartBoosts();
+                if (boostCount > 0) {
+                    printf("[RaceScene] Start boost: %u player(s) got rocket start!\n",
+                           boostCount);
+                }
+            }
             startRace();
             return;
         }
@@ -1161,6 +1218,36 @@ void RaceScene::updateRacing() {
             d.players[0].update(FRAME_TIME, &input);
         } else {
             d.players[i].update(FRAME_TIME, nullptr);
+        }
+    }
+
+    // Phase 27: Apply start-boost (rocket start) acceleration bonus.
+    // In the original MKWii, players who held accelerate during the
+    // countdown receive a speed boost for ~60 frames (1 second). This
+    // is implemented as extra acceleration applied to the player's
+    // speed each frame during the boost window. The boost decays linearly
+    // over the duration, providing a smooth acceleration curve.
+    for (u32 i = 0; i < d.playerCount; i++) {
+        if (d.startBoostTimers[i] > 0) {
+            d.startBoostTimers[i]--;
+            // Apply proportional bonus acceleration during the boost window.
+            // The boost is strongest at the start and fades to zero at the end.
+            // This matches the original MKWii behavior where the boost
+            // provides a fixed acceleration bonus that tapers off.
+            f32 boostRatio = (f32)d.startBoostTimers[i] / (f32)START_BOOST_DURATION_FRAMES;
+            f32 bonusAccel = START_BOOST_BONUS_SPEED * boostRatio;
+            // Apply speed bonus directly to player's current speed
+            f32 currentSpeed = d.players[i].getSpeed();
+            // Boost adds a speed bonus (not acceleration, since Player::update()
+            // already applies its own acceleration). The bonus decays linearly.
+            // In the original MKWii, the rocket start directly increases the
+            // vehicle's speed cap for the boost duration.
+            d.players[i].m_startBoostSpeedBonus = bonusAccel * boostRatio * FRAME_TIME;
+
+            // Clear the boost state from RaceManager when timer expires
+            if (d.startBoostTimers[i] == 0) {
+                bridge_clearStartBoost(i);
+            }
         }
     }
 

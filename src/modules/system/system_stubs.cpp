@@ -56,48 +56,9 @@ System::KmgFile::~KmgFile() {}
 // RaceMode subclasses — their destructors are inherited from RaceMode
 // (defined inline in Competition.hpp). No additional stubs needed.
 
-// RaceConfig::Scenario missing method stubs
-// copyPrevPositions — copies previous race finish positions for GP continuity
-void System::RaceConfig::Scenario::copyPrevPositions() {
-    // No-op: position continuity handled by platform RaceSession
-}
-
-// postInitControllers — assigns controller indices after mode-specific setup
-void System::RaceConfig::Scenario::postInitControllers(System::RaceConfig::Scenario* scenario) {
-    (void)scenario;
-}
-
-// isTeamMode — checks if team mode is active
-bool System::RaceConfig::Scenario::isTeamMode() {
-    return (mSettings.mModeFlags & Settings::MODE_FLAG_TEAMS) != 0;
-}
-
-// reset — clears scenario state for new race
-void System::RaceConfig::Scenario::reset() {
-    // Delegated to clear()
-    clear();
-}
-
-// RaceConfig::Scenario extended getters
-const System::RaceConfig::Settings& System::RaceConfig::Scenario::getSetting() const {
-    return mSettings;
-}
-void System::RaceConfig::Scenario::setSetting(const Settings& settings) {
-    mSettings = settings;
-}
-u8 System::RaceConfig::Scenario::getPlayerCount() const {
-    return mPlayerCount;
-}
-bool System::RaceConfig::Scenario::isMultiplayer() const {
-    return mLocalPlayerCount > 1;
-}
-bool System::RaceConfig::Scenario::validateSettings() const {
-    return mPlayerCount > 0;
-}
-s32 System::RaceConfig::Scenario::getControllerForPlayer(u8 playerIdx) const {
-    if (playerIdx >= MAX_PLAYER_COUNT) return -1;
-    return mPlayers[playerIdx].mControllerId;
-}
+// RaceConfig::Scenario methods now have real implementations in
+// data/src/game/RaceEngine/Scenario.cpp (compiled into mkwii-genesis).
+// Stubs removed to allow linker to pull real implementations from static lib.
 
 // RaceConfig::Player missing getter stubs
 System::CharacterId System::RaceConfig::Player::getCharacter() { return mCharacterId; }

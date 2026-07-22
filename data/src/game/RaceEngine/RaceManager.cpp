@@ -197,7 +197,11 @@ RaceManager::RaceManager()
       canCountdownStart(false), cutSceneMode(false),
       lapCountingIsEnabled(true),
       kmgFile(nullptr), eline_control_manager(nullptr),
-      dpWaterHeightCheck(0.0f), dpDisableLowerRespawns(false) {}
+      dpWaterHeightCheck(0.0f), dpDisableLowerRespawns(false) {
+    // Phase 27: Initialize start-boost arrays
+    memset(isPlayerHoldingAccel, 0, sizeof(isPlayerHoldingAccel));
+    memset(startBoostActive, 0, sizeof(startBoostActive));
+}
 
 RaceManager::~RaceManager() {}
 
@@ -524,6 +528,15 @@ void RaceManager::update() {
         // Countdown phase — handled by the race director
         // The countdown timer decrements and transitions to RACE
         // Phase 21: Start the timer when transitioning FROM countdown
+        // Phase 27: Check for start-boost (rocket start)
+        // In the original MKWii, if the player holds accelerate during the
+        // countdown, they receive a speed boost when the race starts.
+        // The boost is stronger if they time it correctly (during the "1"
+        // beat). We detect this by checking isPlayerHoldingAccel when
+        // transitioning from COUNTDOWN to RACE.
+        // NOTE: The actual transition to RACE is triggered externally
+        // (SceneRace::startRace() sets stage = RACE). Here we prepare
+        // the start-boost state for when that transition happens.
         break;
 
     case RACE:

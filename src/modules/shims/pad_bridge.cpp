@@ -126,4 +126,21 @@ void sub_getInputState(void* obj, s32 playerIdx) {
     (void)playerIdx;
 }
 
+// bridge_hasPlayerInput — checks if a player has any active input this frame.
+// Used by sub_getNoInputSquish in effect_bridge.cpp to detect idle state.
+// Returns true if any stick movement or button press is detected.
+extern "C" bool bridge_hasPlayerInput(u32 playerIdx) {
+    if (playerIdx == 0) {
+        // Human player — check platform input
+        const auto& state = Platform::InputManager::getState();
+        return (state.steer != 0.0f) ||
+               state.accelerate ||
+               state.brake ||
+               state.drift ||
+               state.item;
+    }
+    // AI players always have "input" (they're always driving)
+    return true;
+}
+
 } // extern "C"

@@ -112,6 +112,37 @@ public:
     bool checkWalls(f32 x, f32 y, f32 z, f32 radius,
                     f32& pushX, f32& pushZ) const;
 
+    /// Sphere-based collision query for kart-kart and kart-object detection.
+    /// Finds the nearest surface point within the sphere radius and returns
+    /// the push direction and penetration depth.
+    /// @param cx, cy, cz  Sphere center (kart position)
+    /// @param radius       Sphere radius (kart hitbox radius)
+    /// @param outPushX     Receives X push direction to resolve collision
+    /// @param outPushY     Receives Y push direction (for floor/ceiling)
+    /// @param outPushZ     Receives Z push direction to resolve collision
+    /// @param outDepth     Receives penetration depth (0 if no collision)
+    /// @param outSurfaceType Receives surface type of hit triangle
+    /// @return true if collision detected
+    bool querySphere(f32 cx, f32 cy, f32 cz, f32 radius,
+                     f32& outPushX, f32& outPushY, f32& outPushZ,
+                     f32& outDepth, u16& outSurfaceType) const;
+
+    /// Sphere-vs-triangle overlap test (from the original MKWii KCollision).
+    /// Tests a sphere against a single triangle and computes push-out vector.
+    /// @param tri       The triangle to test against
+    /// @param cx,cy,cz  Sphere center
+    /// @param radius    Sphere radius
+    /// @param outPushX/Y/Z  Receives the push-out direction
+    /// @param outDepth       Receives penetration depth
+    /// @return true if the sphere overlaps the triangle
+    static bool sphereTriangleTest(const Loaders::KclTriangle& tri,
+                                    f32 cx, f32 cy, f32 cz, f32 radius,
+                                    f32& outPushX, f32& outPushY, f32& outPushZ,
+                                    f32& outDepth);
+
+    /// Get the triangle normal for a given triangle index.
+    void getTriangleNormal(u32 triIdx, f32& nx, f32& ny, f32& nz) const;
+
     // -----------------------------------------------------------------
     // Diagnostics
     // -----------------------------------------------------------------

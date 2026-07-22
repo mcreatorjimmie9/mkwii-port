@@ -128,8 +128,26 @@ void CtrlRaceTime::calcSelf() {
 
     RaceStage stage = RaceManager::spInstance->stage;
     if (stage == COUNTDOWN) {
-        // During countdown, show negative time or zero
-        currentMs = 0.0f;
+        // Phase 27: During countdown, show negative time counting down.
+        // In the original MKWii, the timer displays -3.000, -2.xxx, -1.xxx
+        // during the countdown sequence. The introTimer counts from 0 to 180
+        // (3 seconds at 60fps), and the countdown time is the remainder.
+        // The displayed value is negative: -(3.0 - introTimer/60.0).
+        // After the countdown transitions to RACE, timer resets to 0.
+        if (RaceManager::spInstance->timerManager) {
+            // Use introTimer to compute countdown display
+            s32 introRemaining = 180 - RaceManager::spInstance->introTimer;
+            if (introRemaining > 0) {
+                currentMs = -(f32)(introRemaining) * (1000.0f / 60.0f);
+            } else {
+                currentMs = 0.0f;
+            }
+        } else {
+            currentMs = 0.0f;
+        }
+    } else if (stage == INTRO_CAMERA) {
+        // During intro camera, show -3.000 (race hasn't started yet)
+        currentMs = -3000.0f;
     } else if (stage == RACE) {
         // During the race, compute elapsed time from frame counter
         // MKWii runs at 60 FPS exactly → 1000/60 = 16.666...ms per frame

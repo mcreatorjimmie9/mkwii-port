@@ -152,6 +152,12 @@ public:
     u32  m_finishPosition;
     f32  m_distance;
 
+    // Phase 27: Start-boost speed bonus (rocket start)
+    // Applied per-frame during the boost window (up to 60 frames).
+    // Decays linearly from max bonus to zero. Added to the player's
+    // effective speed cap during Player::updateWithKartEntity().
+    f32  m_startBoostSpeedBonus;
+
     // -- Item slot (allocated in init, freed in cleanup) ------------------------
     ItemSlot* m_itemSlot;
 

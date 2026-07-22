@@ -234,6 +234,15 @@ public:
   ElineControlManager* eline_control_manager;
   float dpWaterHeightCheck;
   bool dpDisableLowerRespawns;
+
+  // Phase 27: Start-boost detection state
+  // In the original MKWii, holding accelerate during the final countdown beat
+  // gives a "rocket start" boost (increased speed for ~1 second at race start).
+  // isPlayerHoldingAccel[] is set per-frame from pad_bridge during countdown.
+  // startBoostActive[] is computed at the COUNTDOWN→RACE transition.
+  static const u8 MAX_PLAYER_COUNT_STATIC = 12;
+  bool isPlayerHoldingAccel[MAX_PLAYER_COUNT_STATIC];
+  bool startBoostActive[MAX_PLAYER_COUNT_STATIC];
 };
 // static_assert(sizeof(RaceManager) == 0x4c); // disabled for now
 }

@@ -673,4 +673,90 @@ u32 bridge_getCheckpointCount() {
     return s_checkpointCount;
 }
 
+// ============================================================================
+// Phase 27: Start-boost (rocket start) bridge functions
+//
+// In the original MKWii, if a player holds the accelerate button during
+// the countdown sequence (specifically when "1" transitions to "GO"),
+// they receive a "rocket start" boost. The boost provides increased
+// acceleration for a short duration at race start, giving them an early
+// speed advantage. This is a key competitive mechanic in MKWii.
+//
+// The detection works as follows:
+//   1. During COUNTDOWN, pad_bridge sets isPlayerHoldingAccel[] each frame
+//   2. When transitioning to RACE, RaceManager checks the accel state
+//   3. If player was holding accel, startBoostActive[i] = true
+//   4. SceneRace reads startBoostActive to apply the speed bonus
+// ============================================================================
+
+// ============================================================================
+// bridge_setPlayerAccelHeld — Set accel button state for a player
+//
+// Called from pad_bridge each frame during countdown to track which
+// players are holding the accelerate button.
+//
+// @param playerId  Player index (0-11)
+// @param held      Whether accelerate is being held
+// ============================================================================
+void bridge_setPlayerAccelHeld(u32 playerId, bool held) {
+    using namespace System;
+    if (!RaceManager::spInstance) return;
+    if (playerId >= MAX_PLAYER_COUNT) return;
+    RaceManager::spInstance->isPlayerHoldingAccel[playerId] = held;
+}
+
+// ============================================================================
+// bridge_computeStartBoosts — Compute start-boost state at race start
+//
+// Called when the race transitions from COUNTDOWN to RACE phase.
+// Reads the accel holding state and computes which players get
+// the rocket start boost. In the original MKWii, the timing window
+// is the final beat of the countdown (~1 second before GO).
+//
+// @return Number of players who received a start boost
+// ============================================================================
+u32 bridge_computeStartBoosts() {
+    using namespace System;
+    if (!RaceManager::spInstance) return 0;
+
+    RaceManager& rm = *RaceManager::spInstance;
+    u8 boostCount = 0;
+
+    for (u8 i = 0; i < MAX_PLAYER_COUNT; i++) {
+        rm.startBoostActive[i] = rm.isPlayerHoldingAccel[i];
+        if (rm.startBoostActive[i]) {
+            boostCount++;
+        }
+        // Reset accel state (no longer needed during race)
+        rm.isPlayerHoldingAccel[i] = false;
+    }
+
+    return boostCount;
+}
+
+// ============================================================================
+// bridge_hasStartBoost — Check if a player has an active start boost
+//
+// @param playerId  Player index (0-11)
+// @return true if the player has a start boost active
+// ============================================================================
+bool bridge_hasStartBoost(u32 playerId) {
+    using namespace System;
+    if (!RaceManager::spInstance) return false;
+    if (playerId >= MAX_PLAYER_COUNT) return false;
+    return RaceManager::spInstance->startBoostActive[playerId];
+}
+
+// ============================================================================
+// bridge_clearStartBoost — Clear a player's start boost after it expires
+//
+// @param playerId  Player index (0-11)
+// ============================================================================
+void bridge_clearStartBoost(u32 playerId) {
+    using namespace System;
+    if (!RaceManager::spInstance) return;
+    if (playerId >= MAX_PLAYER_COUNT) return;
+    RaceManager::spInstance->startBoostActive[playerId] = false;
+}
+
 } // extern "C"
