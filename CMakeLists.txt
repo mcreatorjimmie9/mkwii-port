@@ -515,6 +515,8 @@ set(APP_SOURCES
     src/modules/system/system_stubs.cpp
     # Phase 22: AI bridge (AIManager → Player, KartObjectProxyPC)
     src/modules/shims/ai_bridge.cpp
+    # Phase 21: Race bridge (Game ↔ RaceManager per-frame sync)
+    src/modules/shims/race_bridge.cpp
     # PAD/KPAD shim bridge to Platform::InputManager
     src/modules/shims/pad_bridge.cpp
 )

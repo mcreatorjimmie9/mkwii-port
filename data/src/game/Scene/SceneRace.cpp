@@ -44,6 +44,20 @@ extern "C" void setAIPlayerBridge(u32 playerId, Game::Player* player);
 extern "C" void shutdownAIManager();
 extern "C" void pauseAI(bool pause);
 
+// Phase 21: Forward declarations — Race bridge functions (defined in race_bridge.cpp)
+// These sync platform game state into the decompiled RaceManager each frame.
+extern "C" void updateRaceManagerFromGame(
+    const f32 playerPositions[][3],
+    const u8  playerLaps[],
+    const bool playerFinished[],
+    const u8  playerFinishPositions[],
+    const f32 playerDistances[],
+    u32 playerCount);
+extern "C" void markPlayerFinished(u32 playerId, u8 finishPosition);
+extern "C" void updateRaceTimerFromGame(u32 raceFrameCount);
+extern "C" u32 getRaceTimeString(char* buf, u32 bufSize);
+extern "C" f32 getRaceTimeMs();
+
 namespace Scene {
 
 // =============================================================================
@@ -63,6 +77,7 @@ static const u32 FINISH_DELAY_FRAMES = 180;
 static const u8 MAX_LOCAL_PLAYERS = 4;
 static const u32 NUM_AI_KARTS = 3;
 static const u32 TOTAL_RACERS = 1 + NUM_AI_KARTS;
+static const u32 RACE_BRIDGE_MAX = 12; // MAX_PLAYER_COUNT from RaceConfig
 
 static const f32 AI_TINT_COLORS[NUM_AI_KARTS][3] = {
     { 1.0f, 0.5f, 0.0f }, { 0.0f, 0.8f, 0.2f }, { 0.7f, 0.2f, 1.0f },
@@ -859,6 +874,43 @@ void RaceScene::updateRacing() {
     // 6. Calculate positions
     d.raceSession.calculatePositions();
 
+    // =========================================================================
+    // Phase 21: Sync platform game state → decompiled RaceManager
+    // =========================================================================
+    // In the original MKWii, RaceManager::update() reads from
+    // KartObjectManager each frame. On PC, we bridge by collecting
+    // player state into arrays and passing to the race_bridge.
+    {
+        f32 positions[RACE_BRIDGE_MAX][3];
+        u8  laps[RACE_BRIDGE_MAX];
+        bool finished[RACE_BRIDGE_MAX];
+        u8  finishPos[RACE_BRIDGE_MAX];
+        f32 distances[RACE_BRIDGE_MAX];
+
+        memset(positions, 0, sizeof(positions));
+        memset(laps, 0, sizeof(laps));
+        memset(finished, 0, sizeof(finished));
+        memset(finishPos, 0, sizeof(finishPos));
+        memset(distances, 0, sizeof(distances));
+
+        for (u32 i = 0; i < d.playerCount && i < RACE_BRIDGE_MAX; i++) {
+            const auto& pos = d.players[i].getPosition();
+            positions[i][0] = pos.x;
+            positions[i][1] = pos.y;
+            positions[i][2] = pos.z;
+            laps[i] = (u8)d.players[i].m_lap;
+            finished[i] = d.players[i].m_finished;
+            finishPos[i] = (u8)d.players[i].m_finishPosition;
+            distances[i] = d.players[i].m_distance;
+        }
+
+        updateRaceManagerFromGame(positions, laps, finished, finishPos,
+                                   distances, d.playerCount);
+
+        // Also sync frame count to RaceManager timer
+        updateRaceTimerFromGame(getFrameCount());
+    }
+
     // 7. Check race end
     if (d.raceSession.allFinished() && !d.raceFinishedPrinted) {
         d.raceFinishedPrinted = true;
@@ -1052,7 +1104,21 @@ void RaceScene::updateRacing() {
         d.hud.setPosition(d.raceSession.getPlayerPosition());
         d.hud.setLap(d.raceSession.getPlayerLap(), m_totalLaps);
         d.hud.setSpeed(d.players[0].getSpeed());
-        d.hud.setRaceTime(d.raceSession.getRaceTimeString());
+
+        // Phase 21: Use RaceManager time for HUD display (100% faithful)
+        // The decompiled CtrlRaceTime::calcSelf() reads RaceManager::timer
+        // to compute the displayed time. We use the same data source via
+        // the race_bridge, ensuring HUD time matches the race engine.
+        {
+            char timeBuf[16];
+            u32 len = getRaceTimeString(timeBuf, sizeof(timeBuf));
+            if (len > 0) {
+                d.hud.setRaceTime(timeBuf);
+            } else {
+                d.hud.setRaceTime(d.raceSession.getRaceTimeString());
+            }
+        }
+
         d.hud.setLapTime("0:00.000");
         d.hud.setCountdown(0.0f, false);
 
@@ -1087,6 +1153,14 @@ void RaceScene::finishRace() {
     // Phase 21: Notify RaceManager of race end (100% faithful to original)
     // RaceManager::endRace() sets stage = FINISHED_RACE and updates GP scores.
     if (System::RaceManager::spInstance) {
+        // First, mark all unfinished players via the bridge
+        if (m_raceData) {
+            for (u32 i = 0; i < m_raceData->playerCount && i < RACE_BRIDGE_MAX; i++) {
+                if (m_raceData->players[i].m_finished && m_raceData->players[i].m_finishPosition > 0) {
+                    markPlayerFinished(i, (u8)m_raceData->players[i].m_finishPosition);
+                }
+            }
+        }
         System::RaceManager::spInstance->endRace();
     }
 

@@ -42,36 +42,15 @@ extern "C" void getCompetitionWrapper(void* manager, System::CompetitionWrapper*
 // RaceManagerPlayer::~RaceManagerPlayer — virtual destructor (vtable needs it)
 System::RaceManagerPlayer::~RaceManagerPlayer() {}
 
-// TimerManagerBase — virtual method implementations (vtable needs these)
-// In the original, TimerManagerBase::reset() zeros timers and TimerManagerBase::update()
-// increments the race timer. We provide no-op stubs since the PC port manages
-// time through SceneRace's own timer.
+// TimerManagerBase — virtual destructor (vtable needs it)
+// Phase 21: Implementation moved to RaceManager.cpp, but destructor stays here.
 System::TimerManagerBase::~TimerManagerBase() {}
-void System::TimerManagerBase::reset() {
-    raceHasStarted = false;
-    timerIsReversed = false;
-    raceDurationMillis = 0;
-    field26_0x40 = 0;
-}
-void System::TimerManagerBase::update() {
-    // No-op: timer updates are handled by SceneRace::updateRacing()
-    // which advances m_raceTime each frame.
-}
 
-// TimerManager — override virtuals
+// TimerManager — virtual destructor (vtable needs it)
 System::TimerManager::~TimerManager() {}
-void System::TimerManager::reset() { TimerManagerBase::reset(); }
-void System::TimerManager::update() { TimerManagerBase::update(); }
 
-// KmgFile::fromRaw — parse KMG (battle settings) file data
-// In the original, this maps the raw file data to the KmgFileRaw struct.
-// On PC, just zero the pointer (no KMG file loading).
-void System::KmgFile::fromRaw(void* file) {
-    (void)file;
-    data = nullptr;
-}
-
-// KmgFile::~KmgFile — virtual destructor
+// KmgFile — virtual destructor (vtable needs it)
+// Phase 21: Implementation moved to RaceManager.cpp, but destructor stays here.
 System::KmgFile::~KmgFile() {}
 
 // RaceMode subclasses — their destructors are inherited from RaceMode

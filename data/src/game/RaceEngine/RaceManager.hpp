@@ -2,6 +2,8 @@
 
 // RaceManager.hpp - Adapted from community decomp with address annotations
 // Original: data/decompiled/existing/src/system/RaceManager.hpp
+// Phase 21: Implemented TimerManager virtual functions, KmgFile::fromRaw(),
+// wired race_bridge per-frame sync.
 
 #include <rk_types.h>
 #include <decomp.h>
@@ -13,7 +15,13 @@
 #include "system/ResourceManager.hpp"
 #include "system/RaceMode.hpp"
 
+// Time class is already defined in rk_common.h (struct System::Time)
+// with set2(), toMilliseconds(), and comparison operators.
+// Phase 21 extends it with additional helpers via non-member functions
+// in RaceManager.cpp to avoid modifying the shared header.
+
 namespace System {
+
 enum RaceStage {
   INTRO_CAMERA=0,
   COUNTDOWN=1,
@@ -77,6 +85,9 @@ public:
   virtual ~TimerManagerBase();
   virtual void reset();
   virtual void update();
+
+  // Phase 21: Allow RaceManager to access timer state directly
+  friend class RaceManager;
 
 protected:
   Time timer1;

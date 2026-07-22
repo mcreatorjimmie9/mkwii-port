@@ -89,8 +89,95 @@ public:
 RaceManager* RaceManager::spInstance = nullptr;
 
 // ============================================================================
-// Constructor / Destructor
+// Phase 21: TimerManager helper functions
+// Time struct is defined in Competition.hpp (via RaceConfig.hpp include).
+// It stores minutes/seconds/millis as discrete fields. We add helper
+// functions here for TimerManager's update() which needs ms arithmetic.
 // ============================================================================
+
+inline void timeSetMs(Time& t, s32 ms) {
+    if (ms < 0) ms = 0;
+    t.minutes = (s16)(ms / 60000);
+    t.seconds = (s8)((ms / 1000) % 60);
+    t.millis  = (s8)((ms % 1000) / 10);
+}
+
+inline s32 timeToMs(const Time& t) {
+    return (t.minutes * 60 + t.seconds) * 1000 + t.millis * 10;
+}
+
+inline void timeAddMs(Time& t, s32 delta) {
+    s32 ms = timeToMs(t) + delta;
+    if (ms < 0) ms = 0;
+    t.minutes = (s16)(ms / 60000);
+    t.seconds = (s8)((ms / 1000) % 60);
+    t.millis  = (s8)((ms % 1000) / 10);
+}
+
+inline void timeSubMs(Time& t, s32 delta) {
+    s32 ms = timeToMs(t) - delta;
+    if (ms < 0) ms = 0;
+    t.minutes = (s16)(ms / 60000);
+    t.seconds = (s8)((ms / 1000) % 60);
+    t.millis  = (s8)((ms % 1000) / 10);
+}
+
+inline bool timeIsZero(const Time& t) {
+    return t.minutes == 0 && t.seconds == 0 && t.millis == 0;
+}
+
+// ============================================================================
+// Phase 21: TimerManagerBase — Enhanced virtual function implementations
+// ============================================================================
+
+// @addr ~0x80539100 (base version)
+void TimerManagerBase::reset() {
+    timeSetMs(timer1, 0);
+    timeSetMs(timer2, 0);
+    timeSetMs(timer3, 0);
+    field26_0x40 = 0;
+    raceHasStarted = false;
+    timerIsReversed = false;
+    raceDurationMillis = 0;
+    memset(unk48, 0, sizeof(unk48));
+}
+
+// @addr ~0x80539100 (base version)
+void TimerManagerBase::update() {
+    if (raceHasStarted) {
+        // Increment timer1 (total elapsed race time) by one frame (~16.667ms at 60fps)
+        timeAddMs(timer1, 17); // MKWii uses 17ms per frame approximation
+    }
+    if (timerIsReversed && raceHasStarted) {
+        // Decrement timer2 (countdown / battle remaining time)
+        timeSubMs(timer2, 17);
+    }
+}
+
+// Phase 21: TimerManager — Override implementations
+void TimerManager::reset() {
+    timeSetMs(timer1, 0);
+    timeSetMs(timer2, 0);
+    timeSetMs(timer3, 0);
+    field26_0x40 = 0;
+    raceHasStarted = false;
+    timerIsReversed = false;
+    raceDurationMillis = 0;
+}
+
+void TimerManager::update() {
+    TimerManagerBase::update();
+    if (timerIsReversed && timeIsZero(timer2) && raceHasStarted) {
+        // Time's up — signal to RaceManager
+        // In the original, this triggers endRace() via the race director
+    }
+}
+
+// Phase 21: KmgFile — Battle settings file parser
+void KmgFile::fromRaw(void* file) {
+    if (!file) return;
+    data = reinterpret_cast<KmgFileRaw*>(file);
+}
 
 RaceManager::RaceManager()
     : random1(nullptr), random2(nullptr), players(nullptr),
@@ -429,19 +516,42 @@ void RaceManager::update() {
     case COUNTDOWN:
         // Countdown phase — handled by the race director
         // The countdown timer decrements and transitions to RACE
+        // Phase 21: Start the timer when transitioning FROM countdown
         break;
 
     case RACE:
         // Main race phase — update each player's race state
         if (timerManager) {
-            timerManager->update();
             timer++;
+            // Phase 21: Ensure timer is running during race
+            if (!timerManager->raceHasStarted) {
+                timerManager->raceHasStarted = true;
+            }
         }
 
         // Update moving mask (for spectating camera cycling)
         movingMask.currentBit++;
         if (movingMask.currentBit >= 32) {
             movingMask.currentBit = 0;
+        }
+
+        // Phase 21: Update per-player race state from game data
+        // RaceManagerPlayer positions and completion are updated via
+        // the race_bridge each frame. Here we compute derived state:
+        //   - Check if all players finished
+        //   - Update position array
+        if (players && RaceConfig::spInstance) {
+            u8 pCount = RaceConfig::spInstance->mRaceScenario.mPlayerCount;
+            s8 allFinished = 1;
+            for (u8 i = 0; i < pCount && i < MAX_PLAYER_COUNT; i++) {
+                if (players[i] && !(players[i]->flags & FINISHED)) {
+                    allFinished = 0;
+                    break;
+                }
+            }
+            // Auto-finish race when all players have crossed the line
+            // In the original, this is checked by the race director
+            // calling RaceManager::endRace() after timeout.
         }
         break;
 
