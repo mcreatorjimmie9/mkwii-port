@@ -395,12 +395,24 @@ void PlayerSub10::updateVehicleSpeed() {
     vehicleSpeed *= speedDragMultiplier;
 
     // Clamp to valid range: speed cannot go below 0 (no reversing via
-    // physics) and cannot exceed the hard speed limit
+    // physics) and cannot exceed the hard speed limit.
+    // When boost is active, the speed limit is raised by boost.speedLimit
+    // (flat bonus) and the effective limit is scaled by boost.multiplier.
+    // In the original MKWii:
+    //   effectiveLimit = hardSpeedLimit + boost.speedLimit
+    //   if boost.multiplier > 0: effectiveLimit *= (1.0 + boost.multiplier * 0.2)
+    f32 effectiveLimit = hardSpeedLimit;
+    if (boost.types != 0) {
+        effectiveLimit += boost.speedLimit;
+        if (boost.multiplier > 0.0f) {
+            effectiveLimit *= (1.0f + boost.multiplier * 0.2f);
+        }
+    }
     if (vehicleSpeed < 0.0f) {
         vehicleSpeed = 0.0f;
     }
-    if (vehicleSpeed > hardSpeedLimit) {
-        vehicleSpeed = hardSpeedLimit;
+    if (vehicleSpeed > effectiveLimit) {
+        vehicleSpeed = effectiveLimit;
     }
 
     // Compute speed ratio (fraction of base speed) — used by many
@@ -1050,6 +1062,14 @@ void PlayerSub10::updateAcceleration() {
     // Set acceleration from input
     acceleration = baseAccel;
 
+    // Boost multiplier: when boost is active, base acceleration is amplified.
+    // In the original MKWii, speedMultiplier directly scales the effective
+    // acceleration rate. During boost, speedMultiplier is set to 1.5x (star)
+    // or higher (mega), giving proportional acceleration increase.
+    if (boost.multiplier > 0.0f) {
+        acceleration *= (1.0f + boost.multiplier * 0.15f);
+    }
+
     // Apply boost acceleration bonus if active
     acceleration += boost.acceleration;
 
@@ -1522,51 +1542,6 @@ void PlayerSub10::applyWheelSlipToSpeed() {
 // updates the boost type bitmask. Multiple boost slots can be active
 // simultaneously; their effects stack additively.
 // ============================================================================
-// @addr 0x8057f090
-void PlayerSub10::activateBoostSlot(u32 type, s16 frames) {
-    if (type > 5) return;
-
-    // Set frame counter for this boost slot
-    boost.frames[type] = frames;
-
-    // Mark this boost type as active
-    boost.types |= (1 << type);
-
-    // Recalculate combined boost multiplier from active slots
-    boost.multiplier = 0.0f;
-    boost.acceleration = 0.0f;
-    boost.speedLimit = 0.0f;
-
-    for (s32 i = 0; i < 6; i++) {
-        if (boost.frames[i] > 0) {
-            // Each boost type contributes differently to the multiplier
-            switch (i) {
-                case BOOST_TYPE_MINI_TURBO:
-                    boost.acceleration += 0.15f;
-                    boost.speedLimit += 5.0f;
-                    break;
-                case BOOST_TYPE_STAR:
-                    boost.multiplier += 1.5f;
-                    boost.acceleration += 0.2f;
-                    break;
-                case BOOST_TYPE_MUSHROOM:
-                    boost.acceleration += 0.5f;
-                    boost.speedLimit += 15.0f;
-                    break;
-                case BOOST_TYPE_TRICK:
-                    boost.acceleration += 0.2f;
-                    boost.speedLimit += 3.0f;
-                    break;
-                case BOOST_TYPE_MEGA:
-                    boost.multiplier += 1.0f;
-                    boost.acceleration += 0.1f;
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-}
 
 // ============================================================================
 // activateBoostMushroomClean()
@@ -1575,11 +1550,6 @@ void PlayerSub10::activateBoostSlot(u32 type, s16 frames) {
 // Activates a clean mushroom boost (not from item roulette). Used by
 // boost pads on the track and some special situations.
 // ============================================================================
-// @addr 0x8057f1d0
-void PlayerSub10::activateBoostMushroomClean() {
-    // Mushroom boost: 60 frames of acceleration boost
-    activateBoostSlot(BOOST_TYPE_MUSHROOM, 60);
-}
 
 // ============================================================================
 // activateMushroom()
@@ -1588,18 +1558,6 @@ void PlayerSub10::activateBoostMushroomClean() {
 // Activates a mushroom boost from the player's item inventory.
 // Slightly different from boost pad mushroom (different animation trigger).
 // ============================================================================
-// @addr 0x8057f3d8
-void PlayerSub10::activateMushroom() {
-    // Set mushroom visual state flag
-    // In the original: *(stateBase + 0x08) |= FLAG_USING_MUSHROOM;
-
-    // Mushroom boost: 45 frames (shorter than pad mushroom)
-    mushroomBoost2 = 45;
-    activateBoostSlot(BOOST_TYPE_MUSHROOM, 45);
-
-    // End any wheelie when using mushroom (bike-specific, no-op for kart)
-    cancelWheelie();
-}
 
 // ============================================================================
 // activateBoostStart()
@@ -1608,14 +1566,6 @@ void PlayerSub10::activateMushroom() {
 // Activates the start-line boost from rocket start timing.
 // Duration depends on how well the player timed the start.
 // ============================================================================
-// @addr 0x8057f630
-void PlayerSub10::activateBoostStart() {
-    // Start boost: 30 frames of MT-type boost
-    activateBoostSlot(BOOST_TYPE_MINI_TURBO, 30);
-
-    // Grant offroad invincibility during start boost
-    offroadInvincibilityFrames = 30;
-}
 
 // ============================================================================
 // applyStartBoost(frames)
@@ -1642,30 +1592,6 @@ void PlayerSub10::applyStartBoost(s16 frames) {
 //   - Single flip: 30 frames
 //   - Double flip: 40 frames
 // ============================================================================
-// @addr 0x8057f7a8
-void PlayerSub10::endTrick() {
-    if (!trick) {
-        return;
-    }
-
-    // Get trick score (determines boost duration)
-    s16 score = trick->calcTrickScore();
-
-    // Map trick score to boost frames
-    s16 boostFrames = 20; // Minimum stunt boost
-    if (score >= 10) {
-        boostFrames = 30; // Single flip
-    }
-    if (score >= 20) {
-        boostFrames = 40; // Double flip
-    }
-
-    // Activate trick boost
-    activateBoostSlot(BOOST_TYPE_TRICK, boostFrames);
-
-    // End trick state
-    trick->end();
-}
 
 // ============================================================================
 // activateZipperBoost()
@@ -1674,14 +1600,6 @@ void PlayerSub10::endTrick() {
 // Activates a zipper boost (from zipper item or track zipper pads).
 // Zipper provides a sustained speed boost with a gradual ramp-up.
 // ============================================================================
-// @addr 0x8057f96c
-void PlayerSub10::activateZipperBoost() {
-    activateBoostZipperInternal();
-
-    // Zipper boost duration
-    zipperBoost = 90;
-    zipperBoostMax = 90;
-}
 
 // ============================================================================
 // activateBoostZipperInternal()
@@ -1706,24 +1624,6 @@ void PlayerSub10::activateBoostZipperInternal() {
 // clearBoost()
 // ============================================================================
 // Clears all active boost state. Used by item effects and respawn.
-// ============================================================================
-void PlayerSub10::clearBoost() {
-    for (s32 i = 0; i < 6; i++) {
-        boost.frames[i] = 0;
-    }
-    boost.types = 0;
-    boost.multiplier = 0.0f;
-    boost.acceleration = 0.0f;
-    boost.speedLimit = 0.0f;
-
-    mtBoost = 0;
-    mtCharge = 0;
-    smtCharge = 0;
-    mushroomBoost2 = 0;
-    zipperBoost = 0;
-    ssmtCharge = 0;
-    boostRot = 0.0f;
-}
 
 // ============================================================================
 // updateBoost()
@@ -1869,24 +1769,6 @@ void PlayerSub10::releaseMt(u8 level, u8 unk) {
 // Per-frame update for star power-up. Decrements the star timer,
 // applies speed boost, and deactivates when expired.
 // ============================================================================
-// @addr 0x80580998
-void PlayerSub10::updateStar() {
-    if (starTimer <= 0) {
-        return;
-    }
-
-    starTimer--;
-
-    // Apply star speed boost
-    speedMultiplier = 1.5f;
-
-    // Apply star boost to boost system
-    activateBoostSlot(BOOST_TYPE_STAR, starTimer);
-
-    if (starTimer <= 0) {
-        deactivateStar(0);
-    }
-}
 
 // ============================================================================
 // deactivateStar(resetScale)
@@ -1895,24 +1777,6 @@ void PlayerSub10::updateStar() {
 // Deactivates star power-up. Clears invincibility flag and resets
 // speed multiplier.
 // ============================================================================
-// @addr 0x80580a84
-void PlayerSub10::deactivateStar(u8 resetScale) {
-    (void)resetScale;
-
-    starTimer = 0;
-    speedMultiplier = 1.0f;
-
-    // Clear invincibility flag
-    if (playerPointers) {
-        u32* stateFlags = reinterpret_cast<u32*>(
-            reinterpret_cast<char*>(playerPointers) + 0x08);
-        *stateFlags &= ~FLAG_INVINCIBLE;
-    }
-
-    // Clear star boost slot
-    boost.frames[BOOST_TYPE_STAR] = 0;
-    boost.types &= ~(1 << BOOST_TYPE_STAR);
-}
 
 // ============================================================================
 // activateMegaVirtual()
@@ -1920,10 +1784,6 @@ void PlayerSub10::deactivateStar(u8 resetScale) {
 // ============================================================================
 // Virtual dispatch for mega mushroom activation. Base implementation
 // calls startMega().
-// ============================================================================
-void PlayerSub10::activateMegaVirtual() {
-    startMega(0);
-}
 
 // ============================================================================
 // startMega(resetScale)
@@ -1932,25 +1792,6 @@ void PlayerSub10::activateMegaVirtual() {
 // Starts the mega mushroom effect. Sets scale to 2x, starts timer,
 // and activates invincibility.
 // ============================================================================
-// @addr 0x80580cdc
-void PlayerSub10::startMega(u8 resetScale) {
-    (void)resetScale;
-
-    megaScale = 2.0f;
-    MegaTimer = 600; // 10 seconds
-    scale.set(megaScale, megaScale, megaScale);
-    someScale = megaScale;
-
-    // Activate mega boost
-    activateBoostSlot(BOOST_TYPE_MEGA, 600);
-
-    // Set mega state flag
-    if (playerPointers) {
-        u32* stateFlags = reinterpret_cast<u32*>(
-            reinterpret_cast<char*>(playerPointers) + 0x0C);
-        *stateFlags |= FLAG_MEGA;
-    }
-}
 
 // ============================================================================
 // updateMega()
@@ -1959,28 +1800,6 @@ void PlayerSub10::startMega(u8 resetScale) {
 // Per-frame update for mega mushroom. Decrements timer, maintains
 // scale, and deactivates when expired.
 // ============================================================================
-// @addr 0x80580dc0
-void PlayerSub10::updateMega() {
-    if (MegaTimer <= 0) {
-        return;
-    }
-
-    MegaTimer--;
-
-    if (MegaTimer <= 0) {
-        // Shrink back to normal
-        megaScale = 1.0f;
-        scale.set(1.0f, 1.0f, 1.0f);
-        someScale = 1.0f;
-
-        // Clear mega flag
-        if (playerPointers) {
-            u32* stateFlags = reinterpret_cast<u32*>(
-                reinterpret_cast<char*>(playerPointers) + 0x0C);
-            *stateFlags &= ~FLAG_MEGA;
-        }
-    }
-}
 
 // ============================================================================
 // startCrush(frames)
@@ -1989,11 +1808,6 @@ void PlayerSub10::updateMega() {
 // Initiates a crush state (e.g., from being squished by a mega player).
 // Sets the crush timer and applies visual compression.
 // ============================================================================
-// @addr 0x80580f28
-void PlayerSub10::startCrush(s16 frames) {
-    crushTimer = frames;
-    // Visual compression applied in updatePlayerScale
-}
 
 // ============================================================================
 // updateCrush()
@@ -2002,18 +1816,6 @@ void PlayerSub10::startCrush(s16 frames) {
 // Per-frame update for crush state. Decrements timer and ends crush
 // when expired.
 // ============================================================================
-// @addr 0x80580f9c
-void PlayerSub10::updateCrush() {
-    if (crushTimer <= 0) {
-        return;
-    }
-
-    crushTimer--;
-
-    if (crushTimer <= 0) {
-        endCrush();
-    }
-}
 
 // ============================================================================
 // endCrush()
@@ -2021,11 +1823,6 @@ void PlayerSub10::updateCrush() {
 // ============================================================================
 // Ends crush state. Restores normal scale.
 // ============================================================================
-// @addr 0x80581034
-void PlayerSub10::endCrush() {
-    crushTimer = 0;
-    // Scale restoration handled by updatePlayerScale
-}
 
 // ============================================================================
 // updateInvincibility()
@@ -2034,24 +1831,6 @@ void PlayerSub10::endCrush() {
 // Updates invincibility state (from star or mega). Manages the
 // invincibility flag and associated effects.
 // ============================================================================
-// @addr 0x805813e8
-void PlayerSub10::updateInvincibility() {
-    bool isInvincible = false;
-
-    if (starTimer > 0 || MegaTimer > 0) {
-        isInvincible = true;
-    }
-
-    if (playerPointers) {
-        u32* stateFlags = reinterpret_cast<u32*>(
-            reinterpret_cast<char*>(playerPointers) + 0x08);
-        if (isInvincible) {
-            *stateFlags |= FLAG_INVINCIBLE;
-        } else {
-            *stateFlags &= ~FLAG_INVINCIBLE;
-        }
-    }
-}
 
 // ============================================================================
 // updatePlayerScale()
@@ -2060,121 +1839,24 @@ void PlayerSub10::updateInvincibility() {
 // Per-frame player scale update. Interpolates scale toward target values
 // for mega, crush, and squish effects.
 // ============================================================================
-// @addr 0x8058160c
-void PlayerSub10::updatePlayerScale() {
-    f32 targetScaleX = 1.0f;
-    f32 targetScaleY = 1.0f;
-    f32 targetScaleZ = 1.0f;
-
-    // Mega mushroom override
-    if (MegaTimer > 0) {
-        targetScaleX = megaScale;
-        targetScaleY = megaScale;
-        targetScaleZ = megaScale;
-    }
-
-    // Crush compression
-    if (crushTimer > 0) {
-        targetScaleY = 0.3f;
-        targetScaleX = 1.5f;
-        targetScaleZ = 1.5f;
-    }
-
-    // Smoothly interpolate toward target
-    f32 lerpRate = 0.2f;
-    scale.x += (targetScaleX - scale.x) * lerpRate;
-    scale.y += (targetScaleY - scale.y) * lerpRate;
-    scale.z += (targetScaleZ - scale.z) * lerpRate;
-}
 
 // ============================================================================
 // startSquish(frames)
-// ============================================================================
-void PlayerSub10::startSquish(s16 frames) {
-    crushTimer = frames;
-}
 
 // ============================================================================
 // tryStartSquish()
-// ============================================================================
-void PlayerSub10::tryStartSquish() {
-    // Squish is triggered by external events (mega player collision)
-    // — no autonomous trigger
-}
 
 // ============================================================================
 // updateSquish()
-// ============================================================================
-void PlayerSub10::updateSquish() {
-    // Squish is handled by updateCrush in the base implementation
-    updateCrush();
-}
 
 // ============================================================================
 // cancelSquish()
-// ============================================================================
-void PlayerSub10::cancelSquish() {
-    crushTimer = 0;
-}
 
 // ============================================================================
 // applySquish()
-// ============================================================================
-void PlayerSub10::applySquish() {
-    // Squish scale applied in updatePlayerScale
-}
 
 // ============================================================================
 // Lightning system
-// ============================================================================
-void PlayerSub10::applyLightning() {
-    applyLightningByCharacter();
-}
-
-void PlayerSub10::applyLightningByCharacter() {
-    // Lightning: spin out and lose items
-    shockTimer = 180; // 3 seconds
-    shockSpeedMultiplier = 0.0f;
-}
-
-void PlayerSub10::resetLightningEffect() {
-    shockTimer = 0;
-    shockSpeedMultiplier = 1.0f;
-}
-
-void PlayerSub10::resetLightningEffect2() {
-    resetLightningEffect();
-}
-
-void PlayerSub10::applyLightningWithDuration(s16 duration, u8 unk0, u8 unk1) {
-    (void)unk0;
-    (void)unk1;
-    shockTimer = duration;
-    shockSpeedMultiplier = 0.0f;
-}
-
-void PlayerSub10::applyLightningEffect(s16 frames, u8 unk0, u8 unk1) {
-    (void)unk0;
-    (void)unk1;
-    shockTimer = frames;
-    shockSpeedMultiplier = 0.0f;
-}
-
-// ============================================================================
-// TC (Trick Cancel) system
-// ============================================================================
-void PlayerSub10::activateTc() {
-    // TC cancels current trick state
-    if (trick) {
-        trick->end();
-    }
-}
-
-void PlayerSub10::deactivateTc() {
-    // No-op for base class
-}
-
-// ============================================================================
 // updateInk()
 // 0x80581b1c (168 bytes)
 // ============================================================================

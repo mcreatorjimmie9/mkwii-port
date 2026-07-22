@@ -80,7 +80,9 @@ set(PHYSICS_SOURCES
     data/src/game/Physics/PlayerTrick.cpp
     data/src/game/Physics/PlayerSub10.cpp
     data/src/game/Physics/PlayerSub10Bike.cpp
-    # NOTE: PlayerSub10_boost.cpp, _update.cpp, _status.cpp removed.
+    # NOTE: PlayerSub10_update.cpp still disabled (needs further bridge work).
+    data/src/game/Physics/PlayerSub10_boost.cpp
+    data/src/game/Physics/PlayerSub10_status.cpp
     # All functions from these sub-files are now unified in PlayerSub10.cpp.
     data/src/game/Physics/KartWheelPhysics.cpp
     data/src/game/Physics/KartSusPhysics.cpp

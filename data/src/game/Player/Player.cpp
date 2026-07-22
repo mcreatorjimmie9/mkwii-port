@@ -385,9 +385,14 @@ void Player::updateWithDecompiledPhysics(f32 dt, const void* inputState) {
             m_kartState->set(Kart::KART_FLAG_STH_WALL_COL);
         }
 
-        // Boost pad
-        if (boostPad && m_kartMove) {
-            m_kartMove->setPadType(Kart::PAD_TYPE_BOOST_PANEL);
+        // Boost pad — activate boost in PlayerSub10's boost system
+        // In the original MKWii, boost pad detection triggers
+        // activateBoostSlot(BOOST_TYPE_MUSHROOM, 60) via the race system.
+        if (boostPad) {
+            sub10->activateBoostMushroomClean();
+            if (m_kartMove) {
+                m_kartMove->setPadType(Kart::PAD_TYPE_BOOST_PANEL);
+            }
         }
     }
 
