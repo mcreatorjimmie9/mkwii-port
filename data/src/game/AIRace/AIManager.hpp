@@ -18,6 +18,10 @@ public:
     void init(s32 playerCount, s32 engineClass, bool isTimeTrials);
     void update();
     AIEngine* getAIForPlayer(u8 playerId);
+    /// Check if a specific player has an active AI instance
+    bool hasAIForPlayer(u8 playerId) const {
+        return playerId < MAX_PLAYER_COUNT && mpCpuPlayers[playerId] != nullptr;
+    }
     void create(Enemy::AI* ai, bool isBike);
     void destroy();
     void setDifficulty(u8 difficulty);

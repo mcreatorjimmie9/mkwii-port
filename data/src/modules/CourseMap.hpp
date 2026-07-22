@@ -9,9 +9,7 @@ public:
     static CourseMap* instance() { return spInstance; }
     MapdataEnemyPathAccessor* getEnemyPathAccessor() { return nullptr; }
 
-    static CourseMap* spInstance;
+    inline static CourseMap* spInstance = nullptr;
 };
-
-CourseMap* CourseMap::spInstance = nullptr;
 
 } // namespace System

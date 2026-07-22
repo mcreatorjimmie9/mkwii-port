@@ -486,3 +486,17 @@ void AIControlBase::setLookaheadDist(f32 dist) {
 }
 
 } // namespace Enemy
+
+// AIControlBase::update() — StateSequencer calls this virtual each frame.
+// In the original MKWii, this dispatches to the current state's exec() method,
+// then calls updateInternal() for per-frame physics/control updates.
+namespace Enemy {
+void AIControlBase::update() {
+    // Run state machine (if any active state)
+    if (mCurrState) {
+        mCurrState->exec(*this);
+    }
+    // Run per-frame control updates
+    updateInternal();
+}
+} // namespace Enemy

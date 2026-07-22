@@ -21,7 +21,9 @@
 #include <cstring>
 #include <cmath>
 
-// Decompiled subsystems
+// Decompiled subsystems — MUST be included BEFORE AIRace headers so that
+// GENESIS_KART_STATE_DEFINED / GENESIS_KART_MOVE_DEFINED / GENESIS_KART_DYNAMICS_DEFINED
+// guards in KartObjectProxy.hpp don't define stub classes that conflict.
 #include "KartMovement/KartMove.hpp"
 #include "KartMovement/KartState.hpp"
 #include "Physics/PlayerPhysics.hpp"
@@ -30,8 +32,14 @@
 #include "Collision/KartDynamics.hpp"
 #include "PlayerPointers.hpp"
 
-// Forward declaration of bridge function (defined in pad_bridge.cpp)
+// Forward declaration of bridge functions (defined in pad_bridge.cpp / ai_bridge.cpp)
 extern "C" void sub_setAIPlayerInput(u32 playerIdx, f32 steer, f32 accel, f32 brake, bool drift);
+extern "C" void updateAIForPlayer(u32 playerId);
+
+// Decompiled AI subsystems (included after GENESIS headers to avoid ODR)
+#include "AIRace/AIManager.hpp"
+#include "AIRace/AI.hpp"
+#include "AIRace/AIInfo.hpp"
 
 namespace Game {
 
@@ -174,24 +182,42 @@ void Player::update(f32 dt, const void* inputState) {
     auto* kart = static_cast<KartEntity*>(m_kartEntity);
 
     if (m_isAI && m_aiController) {
-        // AI player: compute input from AI controller, then feed into
-        // the decompiled PlayerSub10 physics pipeline (faithful to MKWii).
-        // In the original game, CPU players use the EXACT same physics
+        // AI player: Phase 22 — Try decompiled AI first, fallback to simple AI.
+        // In the original MKWii, CPU players use the EXACT same physics
         // as human players — the only difference is the input source
-        // (KPadAI vs KPadHuman).
-        EGG::Vector3f pos = kart->getPosition();
-        f32 yaw = kart->getYaw();
-        Platform::InputState aiInput = m_aiController->computeInput(pos, yaw, dt);
+        // (KPadAI vs KPadHuman). The decompiled AIRace module provides
+        // the full AI brain (path-following, PD steering, drift decisions,
+        // trick handling, item usage, rubber-banding).
+        //
+        // Flow: AIEngine::update() → AIInfo::mStickX/mActions
+        //       → updateAIForPlayer() → AIInputStore → pad_bridge → PlayerSub10
+        //
+        // If the decompiled AI manager is available, use it.
+        // Otherwise fall back to the simple AIController path-follower.
+        bool usedDecompiledAI = false;
 
-        // Store AI input in the AIInputStore so the bridge functions
-        // (sub_getTurnInput, etc.) return AI-generated values.
-        // sub_setAIPlayerInput is defined in pad_bridge.cpp.
-        sub_setAIPlayerInput(m_playerId, aiInput.steer, aiInput.accelerate,
-                             aiInput.brake, aiInput.drift);
+        if (Enemy::AIManager::getInstance() &&
+            Enemy::AIManager::getInstance()->hasAIForPlayer(m_playerId)) {
+            // Use decompiled AI brain
+            updateAIForPlayer(m_playerId);
+            usedDecompiledAI = true;
+        }
+
+        if (!usedDecompiledAI) {
+            // Fallback: simple AIController path-follower
+            EGG::Vector3f pos = kart->getPosition();
+            f32 yaw = kart->getYaw();
+            Platform::InputState aiInput = m_aiController->computeInput(pos, yaw, dt);
+
+            // Store AI input in the AIInputStore so the bridge functions
+            // (sub_getTurnInput, etc.) return AI-generated values.
+            sub_setAIPlayerInput(m_playerId, aiInput.steer, aiInput.accelerate,
+                                 aiInput.brake, aiInput.drift);
+        }
 
         // Run the same decompiled physics as human players
         if (m_useDecompiledPhysics && m_playerSub10) {
-            updateWithDecompiledPhysics(dt, &aiInput);
+            updateWithDecompiledPhysics(dt, nullptr); // AI input already in AIInputStore
         } else {
             // Fallback: AI drives KartEntity directly (simpler physics)
             m_aiController->updateKart(*kart, dt);

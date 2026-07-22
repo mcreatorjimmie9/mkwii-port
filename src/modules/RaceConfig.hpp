@@ -10,7 +10,7 @@ struct RaceScenario {
 
 class RaceConfig {
 public:
-    static RaceConfig* spInstance;
+    inline static RaceConfig* spInstance = nullptr;
 
     RaceScenario mRaceScenario;
 
@@ -22,8 +22,6 @@ public:
         };
     };
 };
-
-RaceConfig* RaceConfig::spInstance = nullptr;
 
 enum {
     BATTLE_TEAM_RED = 0,

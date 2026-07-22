@@ -38,6 +38,12 @@
 // HUD overlay
 #include "game/HUD.hpp"
 
+// Forward declarations — AI bridge functions (defined in ai_bridge.cpp)
+extern "C" void initAIManager();
+extern "C" void setAIPlayerBridge(u32 playerId, Game::Player* player);
+extern "C" void shutdownAIManager();
+extern "C" void pauseAI(bool pause);
+
 namespace Scene {
 
 // =============================================================================
@@ -345,6 +351,33 @@ void RaceScene::initSubsystems() {
     }
     printf("[RaceScene] %u AI karts spawned (%s path-following)\n",
            NUM_AI_KARTS, aiHasPath ? "with" : "without");
+
+    // =====================================================================
+    // Phase 22: Initialize decompiled AI system (Enemy::AIManager)
+    // =====================================================================
+    // In the original MKWii, the AI system is initialized when the race scene
+    // is set up. The AIManager creates AIEngine instances for each CPU player
+    // and coordinates rubber-banding, ranking, and item usage decisions.
+    //
+    // This replaces the simple AIController with the full decompiled AI brain:
+    //   - Path-following with PD steering controller
+    //   - Drift decisions (timing, angle thresholds)
+    //   - Trick handling (ramp tricks, stunts)
+    //   - Item usage logic (when to use/hold items)
+    //   - Rubber-banding via AIRankManager
+    //   - AI-AI collision avoidance
+    initAIManager();
+
+    // Link each AI player to its Game::Player for state queries
+    // The KartObjectProxyPC needs live position/yaw data from Player
+    // so the AI can make informed steering decisions.
+    for (u32 i = 0; i < d.playerCount; i++) {
+        if (d.players[i].isAI()) {
+            setAIPlayerBridge(i, &d.players[i]);
+        }
+    }
+    printf("[RaceScene] Decompiled AI system active (%u CPU players)\n",
+           NUM_AI_KARTS);
 
     // Spawn item boxes
     if (d.trackLoaded && !kmp.objects.empty()) {

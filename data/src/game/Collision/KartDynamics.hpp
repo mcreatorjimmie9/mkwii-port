@@ -1,5 +1,7 @@
 #pragma once
 
+#define GENESIS_KART_DYNAMICS_DEFINED
+
 #include <rk_types.h>
 
 #include <egg/math/eggVector.hpp>
