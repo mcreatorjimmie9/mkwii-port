@@ -18,6 +18,10 @@
 #include "Scene/SceneCreator.hpp"
 #include "Scene/SceneRace.hpp"
 
+// Phase 21: RaceManager for logging
+#include "RaceEngine/RaceManager.hpp"
+#include "RaceEngine/RaceConfig.hpp"
+
 // Audio system
 #include "AudioSystem.hpp"
 
@@ -26,6 +30,8 @@
 #include "FrameTimer.hpp"
 
 extern "C" void System_Init();
+extern "C" void initSystemSingletons();
+extern "C" void shutdownSystemSingletons();
 
 int main(int argc, char* argv[]) {
     (void)argc;
@@ -70,6 +76,15 @@ int main(int argc, char* argv[]) {
     printf("OK\n");
 
     // =========================================================================
+    // Step 1.75: Initialize Wii system singletons
+    // =========================================================================
+    // In the original MKWii, these are created during the boot sequence
+    // before any scene loading. Order: InitScene → KPadDirector → RaceConfig.
+    printf("  System singletons (InitScene, KPadDirector)...");
+    initSystemSingletons();
+    printf("OK\n");
+
+    // =========================================================================
     // Step 2: Initialize scene system and create race scene
     // =========================================================================
     printf("[2/3] Initializing scene system...\n");
@@ -92,7 +107,9 @@ int main(int argc, char* argv[]) {
     Scene::SceneDirector::getInstance()->changeScene(
         raceScene, Scene::SceneDirector::TRANS_IMMEDIATE);
 
-    printf("  Race: %u laps, %u racers\n", 3u, 4u);
+    printf("  Race: %u laps, %u racers\n",
+           System::RaceManager::getLapCount(),
+           System::RaceConfig::getRacePlayerCount());
     printf("  Controls: WASD=drive, Space=item, Escape=exit\n");
     printf("\n");
 
@@ -216,6 +233,7 @@ int main(int argc, char* argv[]) {
     // Cleanup
     // =========================================================================
     printf("\nShutting down...\n");
+    shutdownSystemSingletons();
     Scene::SceneDirector::getInstance()->shutdown();
     nw4r::snd::AudioSystem::instance().shutdown();
 

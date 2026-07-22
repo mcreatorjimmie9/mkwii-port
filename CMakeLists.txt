@@ -511,6 +511,8 @@ set(APP_SOURCES
     data/src/game/Scene/SceneRace.cpp
     # Phase 11: EffectsManager (screen-space vignette/flash effects)
     src/game/EffectsManager.cpp
+    # Phase 21: System singleton stubs (InitScene, KPadDirector)
+    src/modules/system/system_stubs.cpp
     # PAD/KPAD shim bridge to Platform::InputManager
     src/modules/shims/pad_bridge.cpp
 )

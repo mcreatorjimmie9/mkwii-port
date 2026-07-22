@@ -14,6 +14,10 @@
 #include "ObjectDirector.hpp"
 #include "Course.hpp"
 #include "EffectDirector.hpp"
+
+// Phase 21: RaceManager/RaceConfig — original MKWii race engine wiring
+#include "RaceEngine/RaceManager.hpp"
+#include "RaceEngine/RaceConfig.hpp"
 #include <string.h>
 #include <cstdlib>
 #include <cstdio>
@@ -163,6 +167,15 @@ RaceScene::~RaceScene() {
         delete m_raceData;
         m_raceData = nullptr;
     }
+
+    // Phase 21: Destroy RaceManager and RaceConfig on scene teardown.
+    // In the original MKWii, RaceManager is destroyed when leaving the race scene
+    // (SceneDirector::changeScene). RaceConfig persists across races within a
+    // cup but is destroyed when returning to the menu.
+    System::RaceManager::destroyInstance();
+    // NOTE: RaceConfig is intentionally NOT destroyed here. In the original,
+    // it persists across multiple races in a Grand Prix. It will be cleaned up
+    // by shutdownSystemSingletons() or on next application launch.
 }
 
 // =============================================================================
@@ -439,7 +452,60 @@ void RaceScene::initSubsystems() {
         }
     }
 
-    // Initialize race session
+    // =========================================================================
+    // Phase 21: Initialize RaceConfig + RaceManager (original MKWii race engine)
+    // =========================================================================
+    // In the original MKWii, the initialization order is:
+    //   1. RaceConfig::createInstance() + RaceConfig::init()  (menu → race setup)
+    //   2. RaceManager::createInstance() + RaceManager::init()  (race scene entry)
+    //   3. RaceConfig::initRace()  (copy menu scenario → race scenario)
+    //   4. RaceManager::initRace()  (create player array, timer, RNG)
+    // RaceConfig::init() reads player count, course, lap count, and
+    // initializes the scenario with controller bindings. RaceManager::initRace()
+    // creates the RaceManagerPlayer array and TimerManager.
+    {
+        using namespace System;
+
+        // Create RaceConfig if not already created
+        RaceConfig::createInstance();
+        RaceConfig::spInstance->init();
+
+        // Override scenario settings to match our actual race setup.
+        // The original reads from menu save data; we set directly.
+        RaceConfig::spInstance->mMenuScenario.mSettings.mLapCount = DEFAULT_LAP_COUNT;
+        RaceConfig::spInstance->mMenuScenario.mSettings.mGameMode =
+            RaceConfig::Settings::GAMEMODE_VS_RACE;
+        RaceConfig::spInstance->mMenuScenario.mSettings.mCpuMode = 1;
+        RaceConfig::spInstance->mMenuScenario.mSettings.mEngineClass = 2;
+        RaceConfig::spInstance->mMenuScenario.mPlayerCount = TOTAL_RACERS;
+        // Set player types: player 0 = local, rest = CPU
+        for (u32 i = 0; i < MAX_PLAYER_COUNT; i++) {
+            auto& player = RaceConfig::spInstance->mMenuScenario.getPlayer(i);
+            if (i < TOTAL_RACERS) {
+                player.mPlayerType = (i == 0)
+                    ? RaceConfig::Player::TYPE_REAL_LOCAL
+                    : RaceConfig::Player::TYPE_CPU;
+            } else {
+                player.mPlayerType = RaceConfig::Player::TYPE_NONE;
+            }
+        }
+
+        // initRace() copies menu scenario to race scenario and sets up
+        // controller bindings, RNG seeds, player counts.
+        RaceConfig::spInstance->initRace();
+
+        // Create RaceManager
+        RaceManager::createInstance();
+        RaceManager::spInstance->init();
+        RaceManager::spInstance->initRace();
+
+        printf("[RaceScene] RaceConfig + RaceManager initialized\n");
+        printf("[RaceScene]   Players: %u, Laps: %u, Mode: VS Race\n",
+               RaceConfig::getRacePlayerCount(),
+               RaceManager::getLapCount());
+    }
+
+    // Initialize race session (platform layer checkpoint tracking)
     d.raceSession.init(TOTAL_RACERS, DEFAULT_LAP_COUNT, kmp.checkpoints);
     d.raceSession.startCountdown();
 
@@ -468,6 +534,10 @@ void RaceScene::startCountdown() {
 void RaceScene::startRace() {
     m_racePhase = PHASE_RACING;
     m_raceTime = 0.0f;
+    // Phase 21: Read lap count from RaceManager (100% faithful to original)
+    // In the original MKWii, SceneRace reads lap count from
+    // RaceConfig::spInstance->mRaceScenario.mSettings.mLapCount.
+    m_totalLaps = System::RaceManager::getLapCount();
     m_currentLap = 0;
 
     if (m_raceData) {
@@ -491,6 +561,14 @@ void RaceScene::startRace() {
 // =============================================================================
 
 void RaceScene::calc() {
+    // Phase 21: Tick RaceManager each frame (original MKWii race engine)
+    // RaceManager::update() advances the stage state machine
+    // (INTRO_CAMERA → COUNTDOWN → RACE → FINISHED_RACE) and updates
+    // the timer manager. In the original, this is called by the scene's calc().
+    if (System::RaceManager::spInstance) {
+        System::RaceManager::spInstance->update();
+    }
+
     switch (m_racePhase) {
     case PHASE_LOADING:
         break;
@@ -972,6 +1050,12 @@ void RaceScene::updateRacing() {
 
 void RaceScene::finishRace() {
     m_racePhase = PHASE_FINISH;
+
+    // Phase 21: Notify RaceManager of race end (100% faithful to original)
+    // RaceManager::endRace() sets stage = FINISHED_RACE and updates GP scores.
+    if (System::RaceManager::spInstance) {
+        System::RaceManager::spInstance->endRace();
+    }
 
     // Splash effect at finish line for player 0
     if (m_effectDirector && m_raceData && m_raceData->players[0].isActive()) {
