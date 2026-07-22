@@ -26,6 +26,12 @@
 #include <cstdio>
 #include <cstring>
 
+// Phase 25: Include KartState AFTER RaceEngine headers.
+// KartState.hpp transitively includes system/RaceManager.hpp (stub), which
+// is guarded by GENESIS_RACE_MANAGER_DEFINED (set by RaceEngine/RaceManager.hpp).
+// This way the stub is skipped and only the full RaceManager definition is used.
+#include "KartMovement/KartState.hpp"
+
 // Platform and reimplemented systems (available in APP_SOURCES)
 #include "Player/Player.hpp"
 #include "loaders/track_manager.hpp"
@@ -85,6 +91,13 @@ extern "C" void markPlayerFinished(u32 playerId, u8 finishPosition);
 extern "C" void updateRaceTimerFromGame(u32 raceFrameCount);
 extern "C" u32 getRaceTimeString(char* buf, u32 bufSize);
 extern "C" f32 getRaceTimeMs();
+
+// Phase 25: Forward declarations — Effect bridge state setters
+// These push per-frame game state into the effect_bridge for KCL/collision queries
+extern "C" void bridge_setAirState(u32 playerIdx, bool inAir);
+extern "C" void bridge_setDriftDir(u32 playerIdx, u8 dir);
+extern "C" void bridge_setVehicleType(u32 playerIdx, u8 type);
+extern "C" void bridge_setRacerInfo(u32 playerIdx, void* info);
 
 // Phase 24: Forward declarations — Course bridge functions (defined in course_bridge.cpp)
 // These push platform TrackManager KMP data into the decompiled Course/RaceSequence.
@@ -680,6 +693,26 @@ void RaceScene::initSubsystems() {
     }
 
     // =========================================================================
+    // Phase 25: Wire racer info + vehicle type into effect_bridge
+    // =========================================================================
+    // Set racer info pointers from RaceManager into effect_bridge
+    // so sub_getRacerInfo() can return them for GP scoring.
+    {
+        using namespace System;
+        if (RaceManager::spInstance && RaceManager::spInstance->players) {
+            for (u32 i = 0; i < TOTAL_RACERS && i < MAX_PLAYER_COUNT; i++) {
+                bridge_setRacerInfo(i, static_cast<void*>(
+                    RaceManager::spInstance->players[i]));
+            }
+        }
+    }
+    // Set vehicle type for all players (default = kart = 0)
+    // When BSP loading is implemented, this will read from BSP data.
+    for (u32 i = 0; i < TOTAL_RACERS; i++) {
+        bridge_setVehicleType(i, 0); // 0 = kart, 1 = bike
+    }
+
+    // =========================================================================
     // Phase 24: Push KMP data into decompiled Course + RaceSequence
     // =========================================================================
     // After TrackManager parses the KMP, we push checkpoint/start position/
@@ -1200,6 +1233,34 @@ void RaceScene::updateRacing() {
 
         // Also sync frame count to RaceManager timer
         updateRaceTimerFromGame(getFrameCount());
+    }
+
+    // =========================================================================
+    // Phase 25: Sync per-frame air state + drift dir into effect_bridge
+    // =========================================================================
+    // In the original MKWii, KartCollide::testFloor() sets air state and
+    // KartMove::calcDrift() sets drift direction each frame. These values
+    // are read by PlayerSub10's sub_getAirState/sub_getDriftDir stubs.
+    // On PC, we compute these from the platform collision and KartState.
+    {
+        for (u32 i = 0; i < d.playerCount; i++) {
+            // Air state: use CourseColManager floor query
+            const auto& pos = d.players[i].getPosition();
+            Field::CourseColManager* ccm = Field::CourseColManager::instance();
+            bool inAir = false;
+            if (ccm && ccm->isLoaded()) {
+                f32 floorY = ccm->getFloorAt(pos.x, pos.y + 50.0f, pos.z);
+                inAir = (pos.y - floorY > 20.0f);
+            }
+            bridge_setAirState(i, inAir);
+
+            // Drift direction: read from KartState if available
+            u8 driftDir = 0;
+            if (d.players[i].getKartState()) {
+                driftDir = d.players[i].getKartState()->getDriftState();
+            }
+            bridge_setDriftDir(i, driftDir);
+        }
     }
 
     // 7. Check race end

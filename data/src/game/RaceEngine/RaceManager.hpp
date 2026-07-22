@@ -5,6 +5,10 @@
 // Phase 21: Implemented TimerManager virtual functions, KmgFile::fromRaw(),
 // wired race_bridge per-frame sync.
 
+// Mark that the full RaceManager is available, so the stub in
+// system/RaceManager.hpp will be skipped when both are included.
+#define GENESIS_RACE_MANAGER_DEFINED
+
 #include <rk_types.h>
 #include <decomp.h>
 #include "system/KPadDirector.hpp"
