@@ -4,6 +4,11 @@
 // provides bridge functions that PlayerSub10 and other decompiled subsystems
 // call to read input state from Platform::InputManager.
 //
+// For human players, input comes from Platform::InputManager (keyboard/gamepad).
+// For AI (CPU) players, input comes from AIInputStore, which is populated by
+// Player::update() before calling PlayerSub10::update(). This matches the
+// original MKWii where KPadAI writes to the player's KPad slot.
+//
 // Implemented bridges:
 //   PAD_getInputState()     — raw input state pointer (for pad.hpp)
 //   sub_getTurnInput()      — analog stick X (turn) [-1, +1]
@@ -13,6 +18,7 @@
 //   sub_getItemInput()      — item-use button edge trigger (bool)
 //   sub_getPhysicsInput()   — player index (for status effects)
 //   sub_getInputState()     — KPad button mask for input state query
+//   sub_setAIPlayerInput()  — sets per-player AI input (called before update)
 //
 // No-op stubs (sound/effect/scale — safe to leave as no-ops for now):
 //   sub_playBoostSound, sub_playStartBoostSound, sub_triggerSound,
@@ -31,6 +37,22 @@
 //   sub_endSquishEffect
 
 #include "platform/input.hpp"
+#include "ai_input_store.hpp"
+
+// ==========================================================================
+// Helper: resolve the player index from a PlayerSub10 pointer.
+// PlayerSub10 has a playerPointers back-reference at offset 0x000.
+// PlayerPointers stores the player index at offset 0x38 (64-bit).
+// ==========================================================================
+static u32 getPlayerIndex(void* obj) {
+    if (!obj) return 0;
+    // PlayerSub10::playerPointers is at offset 0x000 (first member)
+    void* pp = *static_cast<void**>(obj);
+    if (!pp) return 0;
+    // PlayerPointers::mPlayerIdx is at offset 0x38 (7 pointers × 8 bytes)
+    auto ppBytes = static_cast<u8*>(pp);
+    return *reinterpret_cast<u32*>(ppBytes + 0x38);
+}
 
 // Bridge function called by PADRead/KPADRead/WPADRead in pad.hpp
 extern "C" {
@@ -39,13 +61,29 @@ const Platform::InputState* PAD_getInputState() {
     return &Platform::InputManager::getState();
 }
 
+// @addr 0x80590aac — sub_setAIPlayerInput
+// Called by Player::update() before PlayerSub10::update() to set the
+// AI-generated input for a specific player slot.
+void sub_setAIPlayerInput(u32 playerIdx, f32 steer, f32 accel, f32 brake, bool drift) {
+    Platform::InputState aiInput;
+    aiInput.steer = steer;
+    aiInput.accelerate = accel;
+    aiInput.brake = brake;
+    aiInput.drift = drift;
+    aiInput.item = false;
+    AIInputStore::setPlayerInput(playerIdx, aiInput);
+}
+
 // @addr 0x8057e900 — sub_getTurnInput
 // Reads the analog stick X input for PlayerSub10's turn calculations.
 // Returns a value in [-1.0, +1.0] where negative = left, positive = right.
 // The 'obj' parameter is the PlayerSub10 pointer (unused in this bridge;
 // in the original game it indexes per-player input channels).
 f32 sub_getTurnInput(void* obj) {
-    (void)obj;
+    u32 idx = getPlayerIndex(obj);
+    if (AIInputStore::hasAIInput(idx)) {
+        return AIInputStore::getPlayerInput(idx).steer;
+    }
     return Platform::InputManager::getState().steer;
 }
 
@@ -55,7 +93,10 @@ f32 sub_getTurnInput(void* obj) {
 // Used by PlayerSub10::updateAcceleration() to determine if the player
 // is actively accelerating. If not pressing gas, the kart coasts/drags.
 f32 sub_getAccelInput(void* obj) {
-    (void)obj;
+    u32 idx = getPlayerIndex(obj);
+    if (AIInputStore::hasAIInput(idx)) {
+        return AIInputStore::getPlayerInput(idx).accelerate;
+    }
     return Platform::InputManager::getState().accelerate;
 }
 
@@ -64,7 +105,10 @@ f32 sub_getAccelInput(void* obj) {
 // In MKWii this is the B button or L trigger.
 // Used by PlayerSub10::updateAcceleration() for braking deceleration.
 f32 sub_getBrakeInput(void* obj) {
-    (void)obj;
+    u32 idx = getPlayerIndex(obj);
+    if (AIInputStore::hasAIInput(idx)) {
+        return AIInputStore::getPlayerInput(idx).brake;
+    }
     return Platform::InputManager::getState().brake;
 }
 
@@ -73,7 +117,10 @@ f32 sub_getBrakeInput(void* obj) {
 // In MKWii this is the R trigger (auto-drift) or R + direction.
 // Used by PlayerSub10::updateHopAndSlipdrift() for drift initiation.
 bool sub_getDriftInput(void* obj) {
-    (void)obj;
+    u32 idx = getPlayerIndex(obj);
+    if (AIInputStore::hasAIInput(idx)) {
+        return AIInputStore::getPlayerInput(idx).drift;
+    }
     return Platform::InputManager::getState().drift;
 }
 

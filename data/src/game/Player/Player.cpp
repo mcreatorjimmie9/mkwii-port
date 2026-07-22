@@ -30,6 +30,9 @@
 #include "Collision/KartDynamics.hpp"
 #include "PlayerPointers.hpp"
 
+// Forward declaration of bridge function (defined in pad_bridge.cpp)
+extern "C" void sub_setAIPlayerInput(u32 playerIdx, f32 steer, f32 accel, f32 brake, bool drift);
+
 namespace Game {
 
 // =============================================================================
@@ -155,9 +158,10 @@ void Player::init(u32 playerId, bool isAI,
     // AI players still use KartEntity for now (AI controller drives directly)
     m_usePlayerPhysics = !isAI;
 
-    // Enable decompiled physics pipeline for human player 0
-    // (PlayerSub10::update() is the faithful MKWii main tick)
-    m_useDecompiledPhysics = !isAI;
+    // Enable decompiled physics pipeline for ALL players (human and AI).
+    // In the original MKWii, both human and CPU players use the exact same
+    // PlayerSub10 physics engine — the only difference is input source.
+    m_useDecompiledPhysics = true;
 }
 
 // =============================================================================
@@ -170,9 +174,28 @@ void Player::update(f32 dt, const void* inputState) {
     auto* kart = static_cast<KartEntity*>(m_kartEntity);
 
     if (m_isAI && m_aiController) {
-        // AI: controller drives KartEntity directly
-        // (AI path-following uses KartEntity's simpler physics)
-        m_aiController->updateKart(*kart, dt);
+        // AI player: compute input from AI controller, then feed into
+        // the decompiled PlayerSub10 physics pipeline (faithful to MKWii).
+        // In the original game, CPU players use the EXACT same physics
+        // as human players — the only difference is the input source
+        // (KPadAI vs KPadHuman).
+        EGG::Vector3f pos = kart->getPosition();
+        f32 yaw = kart->getYaw();
+        Platform::InputState aiInput = m_aiController->computeInput(pos, yaw, dt);
+
+        // Store AI input in the AIInputStore so the bridge functions
+        // (sub_getTurnInput, etc.) return AI-generated values.
+        // sub_setAIPlayerInput is defined in pad_bridge.cpp.
+        sub_setAIPlayerInput(m_playerId, aiInput.steer, aiInput.accelerate,
+                             aiInput.brake, aiInput.drift);
+
+        // Run the same decompiled physics as human players
+        if (m_useDecompiledPhysics && m_playerSub10) {
+            updateWithDecompiledPhysics(dt, &aiInput);
+        } else {
+            // Fallback: AI drives KartEntity directly (simpler physics)
+            m_aiController->updateKart(*kart, dt);
+        }
     } else if (inputState != nullptr) {
         const auto& input = *static_cast<const Platform::InputState*>(inputState);
 

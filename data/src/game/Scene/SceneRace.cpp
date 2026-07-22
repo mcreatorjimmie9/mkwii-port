@@ -29,6 +29,7 @@
 #include "platform/graphics.hpp"
 #include "platform/input.hpp"
 #include "platform/window.hpp"
+#include "ai_input_store.hpp"
 
 // HUD overlay
 #include "game/HUD.hpp"
@@ -658,6 +659,12 @@ void RaceScene::updateRacing() {
 
     // 2. Step kart physics
     const auto& input = Platform::InputManager::getState();
+
+    // Reset AI input store at the start of each frame.
+    // Each AI player will set its input before PlayerSub10::update().
+    // This matches the original MKWii where KPadAIController::calcAll()
+    // resets and re-populates all AI input slots each frame.
+    AIInputStore::resetFrame();
 
     // 2a. Update SceneCamera to follow player 0
     // MKWii pipeline: calc() dispatches to mode update → applySmoothing →
