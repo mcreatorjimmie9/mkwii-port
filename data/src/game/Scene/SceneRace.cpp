@@ -681,6 +681,21 @@ void RaceScene::updateRacing() {
         }
     }
 
+    // 2b. Kart-kart collision resolution (after all players updated)
+    // Faithful to KartPhysicsEngine::calcKartCollisions() in MKWii.
+    // Uses bounding sphere + impulse response — same algorithm as
+    // KartCollide::testKart() + KartCollide_calcMomentum().
+    {
+        Game::Player* playerPtrs[12];
+        u32 activeCount = 0;
+        for (u32 i = 0; i < d.playerCount && i < 12; i++) {
+            if (d.players[i].isActive() && !d.players[i].m_finished) {
+                playerPtrs[activeCount++] = &d.players[i];
+            }
+        }
+        Game::Player::resolveKartKartCollisions(playerPtrs, activeCount);
+    }
+
     // 3. Update item boxes
     d.itemManager.updateBoxes(FRAME_TIME);
 

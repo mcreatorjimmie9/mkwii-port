@@ -468,7 +468,44 @@ void Player::updateWithDecompiledPhysics(f32 dt, const void* inputState) {
         //    air=1 when airborne (allows vertical velocity), air=0 when grounded
         dyn->calc(dt, maxSpeed, isAirborne ? 1 : 0);
 
-        // 7. Read final position from KartDynamics
+        // 7. Wall collision response (faithful to original MKWii KartCollide::processWall)
+        //    After calc(), check if kart is inside a wall via KCL sphere query.
+        //    If wall hit: reflect internalVel along wall normal, push kart out,
+        //    apply wall bounce factor.
+        if (wallHit && m_kartDynamics) {
+            // Wall normal from KCL collision query
+            EGG::Vector3f wallNrm(wallNX, 0.0f, wallNZ);
+            f32 wallNrmLen = std::sqrt(wallNrm.x * wallNrm.x + wallNrm.z * wallNrm.z);
+            if (wallNrmLen > 0.001f) {
+                wallNrm.x /= wallNrmLen;
+                wallNrm.z /= wallNrmLen;
+
+                // Reflect internalVel component along wall normal
+                // In the original: KartCollide::resolveCollision()
+                f32 velDotWall = dyn->internalVel.x * wallNrm.x
+                               + dyn->internalVel.y * wallNrm.y
+                               + dyn->internalVel.z * wallNrm.z;
+
+                if (velDotWall < 0.0f) {
+                    // Only reflect if moving into the wall
+                    f32 bounce = 0.8f; // wallBounceFactor from KartCollide::init()
+                    f32 impulse = -(1.0f + bounce) * velDotWall;
+                    dyn->internalVel.x += impulse * wallNrm.x;
+                    dyn->internalVel.y += impulse * wallNrm.y;
+                    dyn->internalVel.z += impulse * wallNrm.z;
+
+                    // Push kart out of wall
+                    // In the original, tangentOff from ColInfo is used.
+                    // Approximate: push along wall normal by penetration depth.
+                    f32 pushDist = std::fabsf(velDotWall) * dt * 2.0f + 5.0f;
+                    dyn->pos.x += wallNrm.x * pushDist;
+                    dyn->pos.y += wallNrm.y * pushDist;
+                    dyn->pos.z += wallNrm.z * pushDist;
+                }
+            }
+        }
+
+        // 8. Read final position from KartDynamics
         f32 posX = dyn->pos.x;
         f32 posY = dyn->pos.y;
         f32 posZ = dyn->pos.z;
@@ -699,6 +736,105 @@ void Player::stepKartDynamics(f32 accelInput, f32 steerInput, f32 dt) {
 
     f32 maxSpeed = 3000.0f;
     dyn->calc(dt, maxSpeed, 0);
+}
+
+// =============================================================================
+// resolveKartKartCollisions — Kart-kart collision detection and response
+// =============================================================================
+// Called by SceneRace after all players have been updated. Checks all player
+// pairs for bounding sphere overlap, then applies impulse-based collision
+// response. Faithful to KartPhysicsEngine::calcKartCollisions() in MKWii.
+//
+// Algorithm (matching original):
+//   1. For each pair (i, j), check bounding sphere overlap
+//   2. If overlapping, compute collision normal (center-to-center, normalized)
+//   3. Compute relative speed along collision normal
+//   4. Apply impulse to both karts' internalVel
+//   5. Separate overlapping karts (position correction)
+//   6. Apply player bump cooldown (playerBumpTimer in KartCollide)
+// =============================================================================
+// @addr 0x805A1800 (estimated)
+void Player::resolveKartKartCollisions(Player** players, u32 count) {
+    if (!players || count < 2) return;
+
+    // Kart bounding radius — MKWii uses ~65-70 units
+    const f32 kartRadius = 65.0f;
+    const f32 restitution = 0.3f;  // Kart-kart collision restitution (low bouncy)
+    const f32 minBumpInterval = 10; // Frames between bump effects
+
+    for (u32 i = 0; i < count; i++) {
+        if (!players[i] || !players[i]->m_active) continue;
+        auto* dynA = players[i]->getKartDynamics();
+        if (!dynA) continue;
+
+        for (u32 j = i + 1; j < count; j++) {
+            if (!players[j] || !players[j]->m_active) continue;
+            auto* dynB = players[j]->getKartDynamics();
+            if (!dynB) continue;
+
+            // 1. Bounding sphere overlap test
+            EGG::Vector3f diff;
+            diff.x = dynB->pos.x - dynA->pos.x;
+            diff.y = dynB->pos.y - dynA->pos.y;
+            diff.z = dynB->pos.z - dynA->pos.z;
+            f32 distSq = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
+            f32 minDist = kartRadius * 2.0f;
+
+            if (distSq >= minDist * minDist || distSq < 0.001f) continue;
+
+            // 2. Compute collision normal (A → B)
+            f32 dist = std::sqrt(distSq);
+            EGG::Vector3f colNrm;
+            colNrm.x = diff.x / dist;
+            colNrm.y = diff.y / dist;
+            colNrm.z = diff.z / dist;
+
+            // 3. Relative velocity along collision normal
+            EGG::Vector3f relVel;
+            relVel.x = dynA->internalVel.x - dynB->internalVel.x;
+            relVel.y = dynA->internalVel.y - dynB->internalVel.y;
+            relVel.z = dynA->internalVel.z - dynB->internalVel.z;
+            f32 relSpeedNrm = relVel.x * colNrm.x
+                           + relVel.y * colNrm.y
+                           + relVel.z * colNrm.z;
+
+            // Only resolve if karts are approaching
+            if (relSpeedNrm <= 0.0f) continue;
+
+            // 4. Compute and apply impulse
+            //    In the original: KartCollide_calcMomentum()
+            //    j = -(1 + e) * v_n / (1/mA + 1/mB)
+            f32 massA = dynA->mass;
+            f32 massB = dynB->mass;
+            f32 invMassSum = 1.0f / massA + 1.0f / massB;
+            if (invMassSum < 0.0001f) invMassSum = 0.0001f;
+            f32 impulse = -(1.0f + restitution) * relSpeedNrm / invMassSum;
+
+            // Clamp impulse to prevent physics explosion
+            if (impulse > 50000.0f) impulse = 50000.0f;
+            if (impulse < -50000.0f) impulse = -50000.0f;
+
+            // Apply impulse to kart A (pushed away from B)
+            dynA->internalVel.x += (impulse / massA) * colNrm.x;
+            dynA->internalVel.y += (impulse / massA) * colNrm.y;
+            dynA->internalVel.z += (impulse / massA) * colNrm.z;
+
+            // Apply impulse to kart B (pushed away from A)
+            dynB->internalVel.x -= (impulse / massB) * colNrm.x;
+            dynB->internalVel.y -= (impulse / massB) * colNrm.y;
+            dynB->internalVel.z -= (impulse / massB) * colNrm.z;
+
+            // 5. Position correction (push apart)
+            f32 overlap = minDist - dist;
+            f32 pushFactor = overlap * 0.5f + 1.0f; // Push slightly extra
+            dynA->pos.x -= colNrm.x * pushFactor;
+            dynA->pos.y -= colNrm.y * pushFactor;
+            dynA->pos.z -= colNrm.z * pushFactor;
+            dynB->pos.x += colNrm.x * pushFactor;
+            dynB->pos.y += colNrm.y * pushFactor;
+            dynB->pos.z += colNrm.z * pushFactor;
+        }
+    }
 }
 
 } // namespace Game

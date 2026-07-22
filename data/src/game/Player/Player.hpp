@@ -138,6 +138,13 @@ public:
     /// @param dt           Delta time in seconds
     void stepKartDynamics(f32 accelInput, f32 steerInput, f32 dt);
 
+    // -- Kart-kart collision (static, called by SceneRace) --------------------
+    /// Resolve kart-kart collisions between all players.
+    /// Uses bounding sphere test + impulse-based response.
+    /// @param players  Array of player pointers
+    /// @param count    Number of players
+    static void resolveKartKartCollisions(Player** players, u32 count);
+
     // -- Race state (written by SceneRace, read by position calculation) --------
     u32  m_lap;
     bool m_finished;
