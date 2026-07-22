@@ -15,8 +15,10 @@ class KartBody;
 class KartState;
 class KartDynamics;
 class KartCollide;
-class PlayerSub10;
 } // namespace Kart
+
+// Forward declaration — full definition in Physics/PlayerSub10.hpp
+class PlayerSub10;
 
 class PlayerPointers {
 public:
@@ -36,7 +38,7 @@ public:
     Kart::KartState*      getKartState()   const { return reinterpret_cast<Kart::KartState*>(kartState); }
     Kart::KartDynamics*   getDynamics()   const { return reinterpret_cast<Kart::KartDynamics*>(mDynamics); }
     Kart::KartCollide*     getKartCollide() const { return reinterpret_cast<Kart::KartCollide*>(mCollide); }
-    Kart::PlayerSub10*    getPlayerSub10() const { return reinterpret_cast<Kart::PlayerSub10*>(playerSub10); }
+    PlayerSub10*           getPlayerSub10() const { return reinterpret_cast<PlayerSub10*>(playerSub10); }
 
     // Raw void* fields (layout matches binary)
     void* raceData;        // 0x00: RaceData or similar top-level context
@@ -50,7 +52,7 @@ public:
 
     // Helper: populate all pointers from a created set of subsystems
     void wire(Kart::KartMove* move, Kart::KartState* state,
-              Kart::KartDynamics* dynamics, Kart::PlayerSub10* sub10,
+              Kart::KartDynamics* dynamics, PlayerSub10* sub10,
               u32 playerIdx) {
         kartMovement = move;
         kartState = state;

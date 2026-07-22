@@ -18,8 +18,10 @@
 #include "loaders/kmp_loader.hpp"
 
 // Forward declarations — decompiled subsystems
-namespace Kart { class KartMove; class KartDynamics; class KartDynamicsKart; }
+namespace Kart { class KartMove; class KartDynamics; class KartDynamicsKart; class KartState; }
+class PlayerSub10;
 class PlayerPhysics;
+class PlayerPointers;
 
 // Forward declarations — reimplemented subsystems (actual usage)
 namespace Game { class AIController; class CollisionSystem; }
@@ -109,6 +111,18 @@ public:
     /// Returns nullptr if not initialized.
     PlayerPhysics* getPlayerPhysics() const { return m_playerPhysics; }
 
+    /// Access the decompiled PlayerSub10 (full MKWii physics pipeline).
+    PlayerSub10* getPlayerSub10() const { return m_playerSub10; }
+
+    /// Access the decompiled KartMove (vehicle movement state).
+    Kart::KartMove* getKartMove() const { return m_kartMove; }
+
+    /// Access the decompiled KartState (driving state flags + timers).
+    Kart::KartState* getKartState() const { return m_kartState; }
+
+    /// Access the PlayerPointers bridge (wires decompiled subsystems).
+    PlayerPointers* getPlayerPointers() const { return m_playerPointers; }
+
     // -- KartDynamics integration -----------------------------------------------
 
     /// Access the KartDynamics rigid body (for advanced physics).
@@ -138,6 +152,7 @@ private:
     void updateWithPlayerPhysics(f32 dt, const void* inputState);
     void updateWithFullPipeline(f32 dt, const void* inputState);
     void updateWithKartEntity(f32 dt, const void* inputState);
+    void updateWithDecompiledPhysics(f32 dt, const void* inputState);
     void syncKartDynamicsToEntity();
 
     u32  m_playerId;
@@ -162,6 +177,13 @@ private:
 
     // Physics mode: true = PlayerPhysics drives, false = KartEntity drives
     bool m_usePlayerPhysics;
+
+    // Decompiled MKWii subsystems (full physics pipeline)
+    PlayerPointers* m_playerPointers;
+    class PlayerSub10* m_playerSub10;
+    Kart::KartMove* m_kartMove;
+    Kart::KartState* m_kartState;
+    bool m_useDecompiledPhysics;
 };
 
 } // namespace Game

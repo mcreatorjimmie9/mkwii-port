@@ -5,6 +5,7 @@
 #include <rk_types.h>
 #include <decomp.h>
 #include <egg/math/eggVector.hpp>
+#include <cmath>
 #include <string.h>
 
 namespace Kart {

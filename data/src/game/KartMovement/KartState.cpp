@@ -7,8 +7,16 @@ namespace Kart {
 // @addr 0x80590b30
 extern "C" u32 getPlayerType(u8 playerIdx);
 
-extern bool isPlayerOnlineLocal;
-extern bool isPlayerOnlineRemote;
+// Stubs for online player type checks (always false in local/offline mode)
+bool isPlayerOnlineLocal = false;
+bool isPlayerOnlineRemote = false;
+
+// Stub: getPlayerType — returns LOCAL for all players in offline mode
+// In the real game, this reads from System::RaceConfig::Scenario::getPlayer(index)
+extern "C" u32 getPlayerType(u8 playerIdx) {
+    (void)playerIdx;
+    return 0; // 0 = LOCAL player (not online remote)
+}
 
 // 0x8059689c - __ct__Q24Kart9KartStateFPQ24Kart12KartSettings
 // Size: 424 bytes

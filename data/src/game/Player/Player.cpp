@@ -23,9 +23,12 @@
 
 // Decompiled subsystems
 #include "KartMovement/KartMove.hpp"
+#include "KartMovement/KartState.hpp"
 #include "Physics/PlayerPhysics.hpp"
+#include <Physics/PlayerSub10.hpp>
 #include "Physics/PhysicsPipeline.hpp"
 #include "Collision/KartDynamics.hpp"
+#include "PlayerPointers.hpp"
 
 namespace Game {
 
@@ -55,7 +58,12 @@ Player::Player()
     , m_collision(nullptr)
     , m_kartDynamics(nullptr)
     , m_useKartDynamics(false)
-    , m_usePlayerPhysics(true) {}
+    , m_usePlayerPhysics(true)
+    , m_playerPointers(nullptr)
+    , m_playerSub10(nullptr)
+    , m_kartMove(nullptr)
+    , m_kartState(nullptr)
+    , m_useDecompiledPhysics(false) {}
 
 Player::~Player() {
     cleanup();
@@ -105,9 +113,51 @@ void Player::init(u32 playerId, bool isAI,
     // Initialize KartDynamics rigid body (available but not primary)
     initKartDynamics(40.0f, 25.0f, 40.0f, 65.0f);
 
+    // --- Decompiled MKWii subsystems (full physics pipeline) ---
+    // Create KartState (driving state flags + effect timers)
+    m_kartState = new Kart::KartState(nullptr);
+    m_kartState->init();
+
+    // Create KartMove (vehicle movement state: speed, dir, drift)
+    m_kartMove = new Kart::KartMove();
+    m_kartMove->init();
+
+    // Create PlayerSub10 (main physics controller — 92 methods, full MKWii pipeline)
+    m_playerSub10 = new PlayerSub10();
+    m_playerSub10->init(false, isAI); // isBike=false, isRemote=isAI
+
+    // Set initial position/direction on PlayerSub10
+    {
+        EGG::Vector3f pos;
+        pos.x = start.position.x;
+        pos.y = start.position.y;
+        pos.z = start.position.z;
+        EGG::Vector3f angles;
+        angles.x = start.rotation.x;
+        angles.y = start.rotation.y;
+        angles.z = start.rotation.z;
+        m_playerSub10->setInitialPhysicsValues(&pos, &angles);
+    }
+
+    // Create PlayerPointers and wire all subsystems together
+    m_playerPointers = new PlayerPointers();
+    m_playerPointers->wire(
+        m_kartMove,
+        m_kartState,
+        m_kartDynamics,
+        m_playerSub10,
+        playerId
+    );
+    // Set the playerPointers back-reference on PlayerSub10
+    m_playerSub10->playerPointers = m_playerPointers;
+
     // By default, PlayerPhysics drives physics for human players
     // AI players still use KartEntity for now (AI controller drives directly)
     m_usePlayerPhysics = !isAI;
+
+    // Enable decompiled physics pipeline for human player 0
+    // (PlayerSub10::update() is the faithful MKWii main tick)
+    m_useDecompiledPhysics = !isAI;
 }
 
 // =============================================================================
@@ -126,7 +176,12 @@ void Player::update(f32 dt, const void* inputState) {
     } else if (inputState != nullptr) {
         const auto& input = *static_cast<const Platform::InputState*>(inputState);
 
-        if (m_usePlayerPhysics && m_playerPhysics) {
+        if (m_useDecompiledPhysics && m_playerSub10) {
+            // Full decompiled MKWii physics pipeline:
+            // PlayerSub10::update() reads input via sub_getTurnInput()
+            // and drives the entire kart physics chain (turn, accel, drift, boost, etc.)
+            updateWithDecompiledPhysics(dt, inputState);
+        } else if (m_usePlayerPhysics && m_playerPhysics) {
             // MKWii-faithful physics pipeline:
             // PlayerPhysics (stats) + KartDynamics (rigid body) if available,
             // PlayerPhysics-only fallback if KartDynamics is not initialized.
@@ -283,6 +338,96 @@ void Player::updateWithKartEntity(f32 dt, const void* inputState) {
 }
 
 // =============================================================================
+// updateWithDecompiledPhysics — Full MKWii decompiled physics pipeline
+// =============================================================================
+// Calls PlayerSub10::update() (zero-param, reads everything through
+// playerPointers). Input is fed via sub_getTurnInput() bridge in pad_bridge.cpp.
+// After update, syncs PlayerSub10 state back to KartEntity for rendering.
+//
+// Physics flow:
+//   Platform::InputManager → sub_getTurnInput() → PlayerSub10::update()
+//   → turn, accel, drift, boost, status effects all computed internally
+//   → sync vehicleSpeed/dir/scale back to KartEntity
+
+void Player::updateWithDecompiledPhysics(f32 dt, const void* inputState) {
+    auto* kart = static_cast<KartEntity*>(m_kartEntity);
+    auto* sub10 = m_playerSub10;
+    if (!sub10 || !kart || !inputState) return;
+
+    const auto& input = *static_cast<const Platform::InputState*>(inputState);
+
+    // Query collision from KCL system for KartState flags
+    bool offroad = false, boostPad = false, wallHit = false;
+    f32 wallNX = 0.0f, wallNZ = 0.0f;
+    kart->queryCollision(offroad, boostPad, wallHit, wallNX, wallNZ, m_collision);
+
+    // Feed collision state into KartState flags
+    if (m_kartState) {
+        // Ground collision
+        m_kartState->set(Kart::KART_FLAG_TOUCHING_GROUND);
+
+        // Off-road
+        if (offroad) {
+            // Set offroad via effect system (KartState bitfield)
+        }
+
+        // Wall hit
+        if (wallHit) {
+            m_kartState->set(Kart::KART_FLAG_STH_WALL_COL);
+        }
+
+        // Boost pad
+        if (boostPad && m_kartMove) {
+            m_kartMove->setPadType(Kart::PAD_TYPE_BOOST_PANEL);
+        }
+    }
+
+    // Feed acceleration/brake input into KartState stick data
+    // (PlayerSub10 reads input through sub_getTurnInput for steer,
+    // and through playerPointers for accel/brake flags)
+    (void)input; // input is read via sub_getTurnInput (steer) and
+                 // could be extended to accel/brake via future extern bridges
+
+    // Run the full MKWii physics tick
+    sub10->update();
+
+    // Sync PlayerSub10 output back to KartEntity for rendering
+    // PlayerSub10 stores speed in vehicleSpeed and direction in dir
+    f32 speed = sub10->vehicleSpeed;
+    const auto& dir = sub10->dir;
+
+    // Compute yaw from direction vector (XZ plane)
+    f32 yawRad = std::atan2(dir.x, dir.z);
+    f32 yawDeg = EGG::RadToDeg(yawRad);
+
+    // Position: use KartDynamics if available, else KartEntity's current pos
+    f32 posX, posY, posZ;
+    if (m_kartDynamics) {
+        posX = m_kartDynamics->pos.x;
+        posY = m_kartDynamics->pos.y;
+        posZ = m_kartDynamics->pos.z;
+    } else {
+        auto pos = kart->getPosition();
+        posX = pos.x;
+        posY = pos.y;
+        posZ = pos.z;
+        // Advance position along direction vector at current speed
+        posX += dir.x * speed * dt;
+        posY += dir.y * speed * dt;
+        posZ += dir.z * speed * dt;
+    }
+
+    kart->setPosition(posX, posY, posZ);
+    kart->setYawDeg(yawDeg);
+    kart->setSpeed(speed);
+
+    // Also sync to KartMove for subsystem consistency
+    if (m_kartMove) {
+        m_kartMove->setSpeed(speed);
+    }
+}
+
+// =============================================================================
 // render — Draw the kart
 // =============================================================================
 
@@ -322,6 +467,24 @@ void Player::cleanup() {
     if (m_itemSlot) {
         delete m_itemSlot;
         m_itemSlot = nullptr;
+    }
+
+    // Decompiled MKWii subsystems
+    if (m_playerSub10) {
+        delete m_playerSub10;
+        m_playerSub10 = nullptr;
+    }
+    if (m_kartMove) {
+        delete m_kartMove;
+        m_kartMove = nullptr;
+    }
+    if (m_kartState) {
+        delete m_kartState;
+        m_kartState = nullptr;
+    }
+    if (m_playerPointers) {
+        delete m_playerPointers;
+        m_playerPointers = nullptr;
     }
 
     m_active = false;
