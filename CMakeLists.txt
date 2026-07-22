@@ -80,9 +80,8 @@ set(PHYSICS_SOURCES
     data/src/game/Physics/PlayerTrick.cpp
     data/src/game/Physics/PlayerSub10.cpp
     data/src/game/Physics/PlayerSub10Bike.cpp
-    data/src/game/Physics/PlayerSub10_boost.cpp
-    data/src/game/Physics/PlayerSub10_update.cpp
-    data/src/game/Physics/PlayerSub10_status.cpp
+    # NOTE: PlayerSub10_boost.cpp, _update.cpp, _status.cpp removed.
+    # All functions from these sub-files are now unified in PlayerSub10.cpp.
     data/src/game/Physics/KartWheelPhysics.cpp
     data/src/game/Physics/KartSusPhysics.cpp
     data/src/game/Physics/EffectGroup.cpp
@@ -105,7 +104,8 @@ set(KARTMOVEMENT_SOURCES
     data/src/game/KartMovement/KartTire.cpp
     data/src/game/KartMovement/KartWheelPhysics.cpp
     data/src/game/KartMovement/KartPhysicsSub.cpp
-    data/src/game/KartMovement/PlayerSub10.cpp
+    # NOTE: KartMovement/PlayerSub10.cpp removed — ODR violation.
+    # All PlayerSub10 implementations unified in Physics/PlayerSub10.cpp.
     data/src/game/KartMovement/KartWheelie.cpp
     data/src/game/KartMovement/KartDrift.cpp
     data/src/game/KartMovement/KartAir.cpp
@@ -154,7 +154,8 @@ set(COLLISION_SOURCES
     data/src/game/Collision/KartDynamics.cpp
     data/src/game/Collision/KartHitbox.cpp
     data/src/game/Collision/KartWheelPhysics.cpp
-    data/src/game/Collision/PlayerSub10.cpp
+    # NOTE: Collision/PlayerSub10.cpp removed — ODR violation.
+    # Collision helpers merged into Physics/PlayerSub10.cpp.
     data/src/game/Collision/PlayerSub18.cpp
     data/src/game/Collision/KartSuspension.cpp
     data/src/game/Collision/KartBoost.cpp
@@ -181,7 +182,7 @@ set(ITEMSYSTEM_SOURCES
     data/src/game/ItemSystem/ItemSlotTable.cpp
     data/src/game/ItemSystem/ITEMHandler.cpp
     data/src/game/ItemSystem/Global.cpp
-    data/src/game/ItemSystem/PlayerSub10.cpp
+    # NOTE: ItemSystem/PlayerSub10.cpp removed — ODR violation.
     data/src/game/ItemSystem/PlayerSub18.cpp
 )
 

@@ -14,8 +14,8 @@
 
 // Module 1:  Physics      — PlayerBoost::reset()
 extern "C" void _ZN11PlayerBoost5resetEv();
-// Module 2:  KartMovement — PlayerSub10_activateMega()
-extern "C" void _Z24PlayerSub10_activateMegav();
+// Module 2:  KartMovement — Kart::KartMove::clearBoost()
+extern "C" void _ZN4Kart8KartMove10clearBoostEv();
 // Module 3:  RaceEngine   — System::RaceConfig::getRacePlayerCount()
 extern "C" unsigned char _ZN6System10RaceConfig18getRacePlayerCountEv();
 // Module 4:  AIRace       — Enemy::AIDrift::startDrift(float)
@@ -51,7 +51,7 @@ int main() {
     // Taking the address forces the linker to resolve the symbol.
     // We don't call the functions (they'd crash without proper setup).
     volatile auto p1  = (void*)&_ZN11PlayerBoost5resetEv;
-    volatile auto p2  = (void*)&_Z24PlayerSub10_activateMegav;
+    volatile auto p2  = (void*)&_ZN4Kart8KartMove10clearBoostEv;
     volatile auto p3  = (void*)&_ZN6System10RaceConfig18getRacePlayerCountEv;
     volatile auto p4  = (void*)&_ZN5Enemy7AIDrift10startDriftEf;
     volatile auto p5  = (void*)&_Z30PlayerSub18_checkItemCollisionv;

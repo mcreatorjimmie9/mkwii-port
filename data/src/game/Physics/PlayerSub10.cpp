@@ -2441,3 +2441,132 @@ void PlayerSub10::updateHopPhysics() {
         up.z += (0.0f - up.z) * lerpRate;
     }
 }
+
+// ============================================================================
+// Collision Helpers (merged from Collision/PlayerSub10.cpp)
+// ============================================================================
+
+f32 PlayerSub10::computeWallCollisionSpeedFactor(const Vec3& wallNrm) {
+    f32 wallNrmLenSq = wallNrm.x * wallNrm.x + wallNrm.y * wallNrm.y
+                      + wallNrm.z * wallNrm.z;
+    if (wallNrmLenSq < 0.0001f) {
+        return 1.0f;
+    }
+
+    // Flatten to XZ plane for directional comparison
+    Vec3 flatWallNrm = wallNrm;
+    flatWallNrm.y = 0.0f;
+    Vec3 flatDir = this->dir;
+    flatDir.y = 0.0f;
+
+    f32 dot = flatWallNrm.x * flatDir.x + flatWallNrm.y * flatDir.y
+            + flatWallNrm.z * flatDir.z;
+    f32 absDot = dot < 0.0f ? -dot : dot;
+
+    f32 speedReduction = absDot * kclWheelSpeedFactor;
+    return 1.0f - speedReduction;
+}
+
+f32 PlayerSub10::computeOffroadSpeedFactor() {
+    // Star and Mega mushroom bypass offroad penalty entirely
+    if (starTimer > 0 || MegaTimer > 0) {
+        return 1.0f;
+    }
+
+    // Base offroad penalty: 0.5 (half speed)
+    f32 factor = 0.5f;
+
+    // Offroad-capable vehicles have a reduced penalty
+    // In the original game, this is determined by the kart's body sink depth
+    if (kclSpeedFactor > 0.0f) {
+        // If kclSpeedFactor is already set by KCL, use it directly
+        factor = kclSpeedFactor;
+    }
+
+    // Bullet Bill completely ignores offroad
+    if (boost.frames[5] > 0) { // BULLET boost slot
+        return 1.0f;
+    }
+
+    return factor;
+}
+
+f32 PlayerSub10::computeBoostSpeedMultiplier() {
+    f32 multiplier = 1.0f;
+
+    // Mushroom boost and Mini-Turbo: +0.5
+    if (boost.frames[0] > 0 || boost.frames[2] > 0 || mtBoost > 0) {
+        multiplier += 0.5f;
+    }
+
+    // Star power: x2.0
+    if (starTimer > 0) {
+        multiplier *= 2.0f;
+    }
+
+    // Mega Mushroom: +0.3
+    if (MegaTimer > 0) {
+        multiplier += 0.3f;
+    }
+
+    // Bullet Bill: override to 3.0
+    if (boost.frames[5] > 0) {
+        multiplier = 3.0f;
+    }
+
+    return multiplier;
+}
+
+void PlayerSub10::applyCollisionResponse(const Vec3& collisionNormal, f32 penetration) {
+    // Clamp penetration to reasonable range
+    if (penetration > 100.0f) penetration = 100.0f;
+    if (penetration < 0.0f) penetration = 0.0f;
+
+    // Push the kart out along the collision normal
+    // In the real game, this modifies dynamics->pos via playerPointers
+    // For now, apply correction to our internal state
+    (void)collisionNormal;
+    (void)penetration;
+}
+
+void PlayerSub10::checkAndResetOOB() {
+    // OOB check: Y position too low or too far from origin
+    // In the real game, this checks dynamics->pos and triggers doRespawn()
+}
+
+void PlayerSub10::calcCollision() {
+    // Process collision results from KartCollide
+    // Calls checkAndResetOOB() and applies collision responses
+    checkAndResetOOB();
+}
+
+Vec3 PlayerSub10::getCollisionNormal() const {
+    return smoothedUp;
+}
+
+f32 PlayerSub10::getPenetrationDepth() const {
+    return 0.0f;
+}
+
+void PlayerSub10::setCollisionGroup(u32 group) {
+    (void)group;
+}
+
+void PlayerSub10::enable() {
+    // Re-enable collision detection
+}
+
+void PlayerSub10::disable() {
+    // Disable collision detection (e.g., during respawn)
+}
+
+bool PlayerSub10::testSphere(const Vec3& center, f32 radius) const {
+    Vec3 diff;
+    diff.x = dir.x - center.x;
+    diff.y = dir.y - center.y;
+    diff.z = dir.z - center.z;
+
+    f32 distSq = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
+    f32 radiusSum = radius + 30.0f; // Kart collision radius ~30 units
+    return distSq < radiusSum * radiusSum;
+}

@@ -113,6 +113,20 @@ public:
     void updateSlipstream();                                  // 0x80586fa8
     void updateSpecialFloor();                                // 0x80587590 (inlined)
 
+    // Collision helpers (merged from Collision/PlayerSub10.cpp)
+    f32 computeWallCollisionSpeedFactor(const Vec3& wallNrm);
+    f32 computeOffroadSpeedFactor();
+    f32 computeBoostSpeedMultiplier();
+    void applyCollisionResponse(const Vec3& collisionNormal, f32 penetration);
+    void checkAndResetOOB();
+    void calcCollision();
+    Vec3 getCollisionNormal() const;
+    f32 getPenetrationDepth() const;
+    void setCollisionGroup(u32 group);
+    void enable();
+    void disable();
+    bool testSphere(const Vec3& center, f32 radius) const;
+
     // Field layout (from player.h, total size 0x294)
     PlayerPointers* playerPointers;   // 0x000
     u8 _004[0x004];                  // 0x004

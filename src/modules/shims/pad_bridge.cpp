@@ -13,4 +13,14 @@ const Platform::InputState* PAD_getInputState() {
     return &Platform::InputManager::getState();
 }
 
+// @addr 0x8057e900 — sub_getTurnInput
+// Reads the analog stick X input for PlayerSub10's turn calculations.
+// Returns a value in [-1.0, +1.0] where negative = left, positive = right.
+// The 'obj' parameter is the PlayerSub10 pointer (unused in this bridge;
+// in the original game it indexes per-player input channels).
+f32 sub_getTurnInput(void* obj) {
+    (void)obj;
+    return Platform::InputManager::getState().steer;
+}
+
 } // extern "C"
