@@ -1,6 +1,7 @@
 // RaceSequence.cpp - Full race lifecycle controller implementation
 // Address range: 0x80460000 - 0x80465000
 
+#include <cstdio>
 #include <cstring>
 #include "RaceSequence.hpp"
 
@@ -8,7 +9,7 @@ namespace RaceEngine {
 
 RaceSequence::RaceSequence()
     : mConfig(nullptr), mCheckpointCount(0), mGhostResult(nullptr),
-      mFrameCount(0), mLastTimingUpdate(0) {
+      mFrameCount(0), mLastTimingUpdate(0), mCheckpointsLoadedFromKMP(false) {
     memset(&mState, 0, sizeof(RaceState));
     memset(mResults, 0, sizeof(mResults));
     memset(mCheckpoints, 0, sizeof(mCheckpoints));
@@ -297,6 +298,30 @@ void RaceSequence::setupCheckpoints(u16 courseId) {
         mCheckpoints[i].radius = 50.0f;
     }
     mCheckpointCount = 5;
+}
+
+// Phase 24: setupCheckpointsFromKMP — Load real checkpoint data from platform KMP
+//
+// Called via course_bridge from SceneRace::initSubsystems() after the
+// platform TrackManager has parsed the KMP file. This replaces the stub
+// checkpoint positions (all at origin) with the actual checkpoint volumes
+// from the course data, enabling proper lap validation in RaceSequence.
+void RaceSequence::setupCheckpointsFromKMP(u32 count, const LapCheckpoint* checkpoints) {
+    memset(mCheckpoints, 0, sizeof(mCheckpoints));
+    mCheckpointCount = 0;
+
+    if (checkpoints == nullptr || count == 0) {
+        return;
+    }
+
+    u32 maxCount = (count < MAX_CHECKPOINTS) ? count : MAX_CHECKPOINTS;
+    for (u32 i = 0; i < maxCount; i++) {
+        mCheckpoints[i] = checkpoints[i];
+    }
+    mCheckpointCount = maxCount;
+    mCheckpointsLoadedFromKMP = true;
+
+    printf("[RaceSequence] Loaded %u checkpoints from KMP data\n", mCheckpointCount);
 }
 
 // @addr 0x80461840

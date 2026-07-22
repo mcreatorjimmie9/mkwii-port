@@ -58,6 +58,32 @@ extern "C" void updateRaceTimerFromGame(u32 raceFrameCount);
 extern "C" u32 getRaceTimeString(char* buf, u32 bufSize);
 extern "C" f32 getRaceTimeMs();
 
+// Phase 24: Forward declarations — Course bridge functions (defined in course_bridge.cpp)
+// These push platform TrackManager KMP data into the decompiled Course/RaceSequence.
+extern "C" void pushCourseDataToDecompiled(
+    u32 checkpointCount,
+    const f32 checkpointPositions[][3],
+    const f32 checkpointRotations[][3],
+    const f32 checkpointScalesX[],
+    const f32 checkpointScalesZ[],
+    const u16 checkpointIds[],
+    u32 startPosCount,
+    const f32 startPosPositions[][3],
+    const f32 startPosRotations[][3],
+    const u16 startPosPlayerIds[],
+    u32 cannonCount,
+    const f32 cannonPositions[][3],
+    const f32 cannonRotations[][3],
+    const f32 cannonSpeeds[],
+    const f32 boundaryMin[3],
+    const f32 boundaryMax[3]);
+extern "C" void pushCheckpointDataToRaceSequence(
+    u32 count,
+    const u32 checkpointIds[],
+    const u32 sectorIndices[],
+    const f32 positions[][3],
+    const f32 radii[]);
+
 namespace Scene {
 
 // =============================================================================
@@ -551,6 +577,115 @@ void RaceScene::initSubsystems() {
         printf("[RaceScene]   Players: %u, Laps: %u, Mode: VS Race\n",
                RaceConfig::getRacePlayerCount(),
                RaceManager::getLapCount());
+    }
+
+    // =========================================================================
+    // Phase 24: Push KMP data into decompiled Course + RaceSequence
+    // =========================================================================
+    // After TrackManager parses the KMP, we push checkpoint/start position/
+    // cannon point data into the decompiled Course and RaceSequence classes
+    // via the course_bridge. This makes the decompiled layer's queries
+    // (Course::getHeightAt, RaceSequence::validateLap) return real data
+    // instead of stub defaults (all checkpoints at origin).
+    if (d.trackLoaded && !kmp.checkpoints.empty()) {
+        // --- Push to decompiled Course ---
+        {
+            // Convert KMP checkpoint data to bridge format
+            const auto& cpGroups = kmp.checkpoints;
+            u32 cpCount = static_cast<u32>(cpGroups.size());
+            if (cpCount > 64) cpCount = 64;
+
+            f32 cpPositions[64][3] = {};
+            f32 cpRotations[64][3] = {};
+            f32 cpScalesX[64] = {};
+            f32 cpScalesZ[64] = {};
+            u16 cpIds[64] = {};
+
+            for (u32 i = 0; i < cpCount; i++) {
+                cpPositions[i][0] = cpGroups[i].position.x;
+                cpPositions[i][1] = cpGroups[i].position.y;
+                cpPositions[i][2] = cpGroups[i].position.z;
+                cpRotations[i][0] = cpGroups[i].rotation.x;
+                cpRotations[i][1] = cpGroups[i].rotation.y;
+                cpRotations[i][2] = cpGroups[i].rotation.z;
+                cpScalesX[i] = cpGroups[i].scaleX;
+                cpScalesZ[i] = cpGroups[i].scaleZ;
+                cpIds[i] = cpGroups[i].checkpointId;
+            }
+
+            // Convert start positions
+            const auto& starts = kmp.startPositions;
+            u32 spCount = static_cast<u32>(starts.size());
+            if (spCount > 12) spCount = 12;
+
+            f32 spPositions[12][3] = {};
+            f32 spRotations[12][3] = {};
+            u16 spIds[12] = {};
+
+            for (u32 i = 0; i < spCount; i++) {
+                spPositions[i][0] = starts[i].position.x;
+                spPositions[i][1] = starts[i].position.y;
+                spPositions[i][2] = starts[i].position.z;
+                spRotations[i][0] = starts[i].rotation.x;
+                spRotations[i][1] = starts[i].rotation.y;
+                spRotations[i][2] = starts[i].rotation.z;
+                spIds[i] = starts[i].playerIndex;
+            }
+
+            // Convert cannon points
+            const auto& cannons = kmp.cannonPoints;
+            u32 cnCount = static_cast<u32>(cannons.size());
+            if (cnCount > 16) cnCount = 16;
+
+            f32 cnPositions[16][3] = {};
+            f32 cnRotations[16][3] = {};
+            f32 cnSpeeds[16] = {};
+
+            for (u32 i = 0; i < cnCount; i++) {
+                cnPositions[i][0] = cannons[i].position.x;
+                cnPositions[i][1] = cannons[i].position.y;
+                cnPositions[i][2] = cannons[i].position.z;
+                cnRotations[i][0] = cannons[i].rotation.x;
+                cnRotations[i][1] = cannons[i].rotation.y;
+                cnRotations[i][2] = cannons[i].rotation.z;
+                cnSpeeds[i] = cannons[i].speed;
+            }
+
+            f32 bMin[3] = {-500.0f, -50.0f, -500.0f};
+            f32 bMax[3] = {500.0f, 100.0f, 500.0f};
+
+            pushCourseDataToDecompiled(
+                cpCount, cpPositions, cpRotations, cpScalesX, cpScalesZ, cpIds,
+                spCount, spPositions, spRotations, spIds,
+                cnCount, cnPositions, cnRotations, cnSpeeds,
+                bMin, bMax);
+        }
+
+        // --- Push to decompiled RaceSequence ---
+        {
+            const auto& cpGroups = kmp.checkpoints;
+            u32 cpCount = static_cast<u32>(cpGroups.size());
+            if (cpCount > 32) cpCount = 32;
+
+            u32 cpIds[32] = {};
+            u32 cpSectors[32] = {};
+            f32 cpPos[32][3] = {};
+            f32 cpRad[32] = {};
+
+            for (u32 i = 0; i < cpCount; i++) {
+                cpIds[i] = cpGroups[i].checkpointId;
+                cpSectors[i] = i; // Sector = checkpoint index
+                cpPos[i][0] = cpGroups[i].position.x;
+                cpPos[i][1] = cpGroups[i].position.y;
+                cpPos[i][2] = cpGroups[i].position.z;
+                // Radius from checkpoint scale (half the average scale)
+                cpRad[i] = (cpGroups[i].scaleX + cpGroups[i].scaleZ) * 0.25f;
+            }
+
+            pushCheckpointDataToRaceSequence(cpCount, cpIds, cpSectors, cpPos, cpRad);
+        }
+
+        printf("[RaceScene] Phase 24: KMP data pushed to decompiled Course + RaceSequence\n");
     }
 
     // Initialize race session (platform layer checkpoint tracking)

@@ -32,7 +32,8 @@ Course::Course()
     , m_cannonPointCount(0)
     , m_jugemPoints(nullptr)
     , m_jugemPointCount(0)
-    , m_courseName(nullptr) {}
+    , m_courseName(nullptr)
+    , m_platformLoaded(false) {}
 
 Course::~Course() {
     unload();
@@ -419,6 +420,72 @@ void* Course::getKCL() const {
 /* Course_getKMP @ 0x80690080 */
 void* Course::getKMP() const {
     return nullptr;
+}
+
+// =============================================================================
+// Phase 24: loadFromPlatform — Load course data from platform TrackManager
+//
+// Called via course_bridge from SceneRace::initSubsystems() after the
+// platform TrackManager has parsed the KMP file. This fills the decompiled
+// Course's checkpoint, start position, cannon point, and Jugem point arrays
+// with real data from the course, enabling proper decompiled layer queries.
+//
+// In the original MKWii, Course::load() opens the BRRES archive, extracts
+// BMD/KCL/KMP, and populates these same arrays. On PC, the platform TrackManager
+// handles archive parsing, and this bridge function provides the results.
+// =============================================================================
+void Course::loadFromPlatform(u32 checkpointCount, const Checkpoint* checkpoints,
+                              u32 startPosCount, const StartPosition* startPositions,
+                              u32 cannonCount, const CannonPoint* cannonPoints,
+                              u32 jugemCount, const JugemPoint* jugemPoints,
+                              const Vec3& boundaryMin, const Vec3& boundaryMax) {
+    // --- Checkpoints ---
+    if (checkpoints != nullptr && checkpointCount > 0) {
+        u32 maxCP = (checkpointCount < MAX_CHECKPOINTS) ? checkpointCount : MAX_CHECKPOINTS;
+        for (u32 i = 0; i < maxCP; i++) {
+            m_checkpoints[i] = checkpoints[i];
+        }
+        m_checkpointCount = maxCP;
+    }
+
+    // --- Start positions ---
+    if (startPositions != nullptr && startPosCount > 0) {
+        u32 maxSP = (startPosCount < MAX_START_POSITIONS) ? startPosCount : MAX_START_POSITIONS;
+        for (u32 i = 0; i < maxSP; i++) {
+            m_startPositions[i] = startPositions[i];
+        }
+        m_startPositionCount = maxSP;
+    }
+
+    // --- Cannon points ---
+    if (cannonPoints != nullptr && cannonCount > 0) {
+        u32 maxCP = (cannonCount < MAX_CANNON_POINTS) ? cannonCount : MAX_CANNON_POINTS;
+        for (u32 i = 0; i < maxCP; i++) {
+            m_cannonPoints[i] = cannonPoints[i];
+        }
+        m_cannonPointCount = maxCP;
+    }
+
+    // --- Jugem (rescue) points ---
+    if (jugemPoints != nullptr && jugemCount > 0) {
+        u32 maxJP = (jugemCount < MAX_JUGEM_POINTS) ? jugemCount : MAX_JUGEM_POINTS;
+        for (u32 i = 0; i < maxJP; i++) {
+            m_jugemPoints[i] = jugemPoints[i];
+        }
+        m_jugemPointCount = maxJP;
+    }
+
+    // --- Boundary ---
+    m_boundaryMin = boundaryMin;
+    m_boundaryMax = boundaryMax;
+
+    m_platformLoaded = true;
+    m_loaded = true;
+
+    printf("[Course] Loaded from platform: %u checkpoints, %u start positions, "
+           "%u cannon points, %u jugem points\n",
+           m_checkpointCount, m_startPositionCount,
+           m_cannonPointCount, m_jugemPointCount);
 }
 
 // =============================================================================

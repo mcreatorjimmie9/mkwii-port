@@ -98,6 +98,12 @@ public:
     // Lifecycle
     void init();
     bool load(u16 courseId);
+    // Phase 24: Load from platform TrackManager data (extern "C" bridge)
+    void loadFromPlatform(u32 checkpointCount, const Checkpoint* checkpoints,
+                         u32 startPosCount, const StartPosition* startPositions,
+                         u32 cannonCount, const CannonPoint* cannonPoints,
+                         u32 jugemCount, const JugemPoint* jugemPoints,
+                         const Vec3& boundaryMin, const Vec3& boundaryMax);
     void unload();
     void calc(f32 dt);
     void draw() const;
@@ -211,6 +217,7 @@ private:
 
     // Course name (loaded from BRRES or course database)
     const char* m_courseName;
+    bool m_platformLoaded; // Phase 24: true when loaded from platform data
 };
 
 } // namespace Scene

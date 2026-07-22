@@ -144,6 +144,8 @@ public:
     void registerCheckpoint(u32 playerId, u32 checkpointId, u32 sectorIndex);
     // @addr 0x804616C0
     void setupCheckpoints(u16 courseId);
+    // Phase 24: Load checkpoints from platform KMP data (extern "C" bridge)
+    void setupCheckpointsFromKMP(u32 count, const LapCheckpoint* checkpoints);
     // @addr 0x80461840
     const LapCheckpoint* getCheckpoints(u32* outCount) const;
 
@@ -201,6 +203,7 @@ private:
     u32 mPlayerCheckpoints[MAX_RACE_PLAYERS]; // bitmask
     u32 mPlayerLastCheckpoint[MAX_RACE_PLAYERS];
     u32 mPlayerSectorTimes[MAX_RACE_PLAYERS][5];
+    bool mCheckpointsLoadedFromKMP; // Phase 24: flag when platform data loaded
 
     // Ghost
     RaceResult* mGhostResult;

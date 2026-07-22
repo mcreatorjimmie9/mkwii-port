@@ -423,12 +423,23 @@ f32 InputManager::getTriggerInput(s32 playerIdx) const {
     // Get the combined trigger input (L + R analog triggers).
     // In the real game, this reads the analog trigger values from PADStatus
     // and maps them to a 0.0-1.0 range. Used for braking/acceleration.
+    // Phase 24: Read from the raceInput triggerL/triggerR fields which are
+    // populated by the PAD bridge (pad_bridge.cpp → processKPadStatus).
     if (playerIdx < 0 || playerIdx >= MAX_PLAYERS) return 0.0f;
     if (!mControllers[playerIdx].connected) return 0.0f;
-    // Placeholder: return 0 since we don't have analog trigger data yet.
-    // When the PAD bridge is implemented, this will read triggerL/triggerR
-    // from the raceInput state and average them.
-    return 0.0f;
+
+    const System::KPadRaceInputState& ri = mControllers[playerIdx].raceInput;
+    // Combine L and R triggers (0.0-1.0 each), take the max for acceleration
+    f32 triggerL = ri.triggerL;
+    f32 triggerR = ri.triggerR;
+    if (triggerL > 1.0f) triggerL = 1.0f;
+    if (triggerR > 1.0f) triggerR = 1.0f;
+    if (triggerL < 0.0f) triggerL = 0.0f;
+    if (triggerR < 0.0f) triggerR = 0.0f;
+
+    // In MKWii, acceleration uses triggerR (gas), braking uses triggerL
+    // Combined value returns triggerR for acceleration queries
+    return triggerR > triggerL ? triggerR : triggerL;
 }
 
 } // namespace Field
