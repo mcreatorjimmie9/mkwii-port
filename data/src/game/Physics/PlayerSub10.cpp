@@ -886,87 +886,141 @@ void PlayerSub10::update() {
     if (!playerPointers)
         return;
 
-    // 1. Compute speed-dependent turn parameters
+    // =====================================================================
+    // Original MKWii update() call order (from 0x805788dc disassembly):
+    //
+    // Pre-body: check playerIndex locked state, update driving direction,
+    //   update airtime tracking
+    //
+    // main_update_body:
+    // 1. updateHopAndSlipdrift()
+    // 2. If not bullet bill:
+    //    a. updateTurn()
+    //    b. updateVehicleSpeed()
+    //    c. updateAcceleration()
+    //    d. updateOffroad()
+    //    e. applyWheelSlipToSpeed()
+    //    f. updateRotation()
+    //    g. updateStandstillBoostRot()
+    //    h. updateUps()
+    //    i. updateVehicleRotationVector()
+    //    j. updateManualDrift() or updateAutoDrift()
+    //       OR updateUpsWhileAirborne() if airborne
+    // 3. updateBoost()
+    // 4. updateDir()
+    // 5. updateVehicleRotationVector() — apply final rotation
+    // 6. updatePlayerScale()
+    // 7. Update sub-objects (trick, zipper)
+    // 8. updateDiving()
+    // 9. updateStickyRoad()
+    // 10. tryEndJumpPad()
+    // 11. Update drivingDirection from speed
+    // 12. Update hitbox scale from someScale
+    // 13. Status ticks: updateStar/Mega/Crush/Invincibility/Squish/Ink
+    // 14. lastSpeed = vehicleSpeed
+    // =====================================================================
+
+    // --- Pre-body: set turn parameters for this frame ---
     setTurnParams();
 
-    // 2. Process steering input and compute effective turn
-    updateTurn();
+    // 1. Hop and slip-drift physics
+    updateHopAndSlipdrift();
 
-    // 3. Apply acceleration and drag to vehicle speed
-    updateVehicleSpeed();
+    // 2. Main physics chain (not bullet bill path)
+    // In the original, bullet bill is handled separately with path logic.
+    // For now, all karts go through the normal physics path.
+    {
+        // a. Process steering input and compute effective turn
+        updateTurn();
 
-    // 4. Rotate direction vector by turn angle
-    // Use the conserved turn for smoother steering
-    updateVehicleRotationVector(conservedTurn);
+        // b. Apply drag to vehicle speed, clamp to limits
+        updateVehicleSpeed();
 
-    // 5. Update direction/movement vector from dir + speed
-    updateDir();
+        // c. Compute acceleration from input + boost + KCL
+        updateAcceleration();
 
-    // 6. Offroad/surface effects (KCL)
-    updateOffroad();
+        // d. KCL offroad/surface penalties
+        updateOffroad();
 
-    // 6b. Drift initiation: check if player should start drifting
-    // In MKWii, drift is initiated when the player holds the drift button
-    // (R trigger) while steering at sufficient speed and not already drifting.
-    if (driftState == 0 && hopFrame == 0) {
-        bool driftBtn = sub_getDriftInput(this);
-        f32 stickX = sub_getTurnInput(this);
-        if (driftBtn && (stickX > 0.3f || stickX < -0.3f) &&
-            vehicleSpeed > baseSpeed * 0.4f) {
-            // Check for hop or direct drift initiation
-            if (canHop()) {
-                hop();
+        // e. Wheel slip at high speed (rear tire traction loss)
+        applyWheelSlipToSpeed();
+
+        // f. Apply turn to direction vector (rotation)
+        updateRotation();
+
+        // g. Standstill boost rotation (turn while stopped + boosting)
+        updateStandstillBoostRot();
+
+        // h. Main ground physics update (position integration)
+        if (hopFrame > 0) {
+            updateUpsWhileAirborne();
+        } else {
+            updateUps();
+        }
+
+        // i. Apply final vehicle rotation
+        updateVehicleRotationVector(conservedTurn);
+
+        // j. Drift state machine
+        if (hopFrame <= 0) {
+            if (driftState != 0) {
+                updateManualDrift();
+                updateMtCharge();
             } else {
-                // Manual drift (state 1) when hop not available
-                initDriftForced();
-                driftState = 1; // Override forced to manual
+                updateAutoDrift();
             }
         }
     }
 
-    // 7. Drift state machine and MT charge
-    if (driftState != 0) {
-        updateManualDrift();
-        updateMtCharge();
+    // 3. Boost system update (decrement timers, compute multiplier)
+    updateBoost();
 
-        // Check drift end condition: drift button released
-        // In the original MKWii, the drift ends when the R trigger is released
-        if (!sub_getDriftInput(this) && driftState != 3) {
-            endDrift();
+    // 4. Update direction vector from current state
+    updateDir();
+
+    // 5. Apply final rotation from conserved turn
+    updateVehicleRotationVector(conservedTurn);
+
+    // 6. Player scale (mega mushroom, squish, crush)
+    updatePlayerScale();
+
+    // 7. Sub-objects (trick, zipper) — no-op if nullptr
+    if (trick) {
+        // trick->update(); // Future: trick state update
+    }
+
+    // 8. Diving (underwater) — no-op for now
+    // updateDiving();
+
+    // 9. Sticky road surface
+    updateStickyRoad();
+
+    // 10. Jump pad end check
+    // tryEndJumpPad();
+
+    // 11. Update driving direction from speed
+    if (vehicleSpeed > 2.0f) {
+        drivingDirection = DRIVING_FWD;
+        backwardsAllowCounter = 0;
+    } else if (vehicleSpeed < -2.0f) {
+        backwardsAllowCounter++;
+        if (backwardsAllowCounter > 30) {
+            drivingDirection = DRIVING_BACK;
         }
     }
 
-    // 8. Boost system update
-    updateBoost();
+    // 12. Hitbox scale from someScale (used by collision system)
+    // someScale is updated by status effects
 
-    // 9. Status effect timers
+    // 13. Status effect ticks
     updateStar();
     updateMega();
-    updateInk();
-    updateSquish();
     updateCrush();
+    updateInvincibility();
+    updateSquish();
+    updateInk();
 
-    // 10. Airborne/hop physics
-    if (hopFrame > 0) {
-        updateUpsWhileAirborne();
-    } else {
-        updateUps();
-    }
-
-    // 11. Standstill boost rotation (allows turning while stationary
-    //     with boost active)
-    updateStandstillBoostRot();
-
-    // 12. Special floor effects (boost pads, cannon, etc.)
-    updateSpecialFloor();
-
-    // 13. Wheel slip (rear tire traction loss at high speed)
-    applyWheelSlipToSpeed();
-
-    // 14. Update player scale (mega mushroom, squish)
-    updatePlayerScale();
-
-    // Store speed for next frame delta calculations
+    // 14. Store speed for next frame delta calculations
     lastSpeed = vehicleSpeed;
 }
 
@@ -1200,21 +1254,87 @@ void PlayerSub10::updateRotation() {
 // ============================================================================
 // @addr 0x8057d1d4
 void PlayerSub10::updateStandstillBoostRot() {
-    // Only apply when nearly stationary
-    if (vehicleSpeed > 5.0f) {
-        return;
+    // @addr 0x8057d1d4 (452 bytes)
+    // When standing still with a boost or forced drift, applies a rotational
+    // effect. In the original MKWii, this reads playerState flags to
+    // determine the current condition and applies turn rate from the
+    // vehicle parameter table.
+    //
+    // Turn rate modifiers from vehicle param struct:
+    //   0x4C: standstill boost turn rate base (0.04)
+    //   0x50: shock/off-road turn rate modifier (0.6)
+    //   0x1C: mega turn rate modifier (0.8)
+    //   0x18: rapid boost (mushroom) turn modifier (1.2)
+    //   0x5C: online forced-drift turn rate (0.04)
+    //   0x9C: online forced-drift duration factor (1.0)
+    //   0xA4: normal boost turn modifier (0.8)
+
+    f32 turnRate = 0.0f;
+
+    if (!playerPointers) return;
+
+    void* stateBase = *reinterpret_cast<void**>(playerPointers);
+    u32 flags8 = *reinterpret_cast<u32*>(
+        reinterpret_cast<u8*>(stateBase) + 0x08);
+    u32 flagsC = *reinterpret_cast<u32*>(
+        reinterpret_cast<u8*>(stateBase) + 0x0C);
+    u32 flags14 = *reinterpret_cast<u32*>(
+        reinterpret_cast<u8*>(stateBase) + 0x14);
+
+    bool hasForcedDrift = (flags14 & 0x08) != 0;   // bit 3 of 0x14
+    bool isAirborne = (flags14 & 0x01) != 0;       // bit 0 of 0x14
+    bool isShock = (flags8 & 0x800) != 0;           // bit 11 of 0x08
+    bool isMega = (flagsC & 0x8000) != 0;           // bit 15 of 0x0C
+    bool isStarOrInvincible = ((flags8 >> 27) & 0x3) != 0; // bits 27-28 of 0x08
+    bool isRapidBoost = (flags8 & 0x1000) != 0;    // bit 12 of 0x08
+
+    if (hasForcedDrift) {
+        // Forced drift: compute turn rate from boost duration ratio
+        // Use the longest remaining boost frame count as the factor
+        f32 boostFactor = 0.0f;
+        s16 maxFrames = 0;
+        for (s32 i = 0; i < 6; i++) {
+            if (boost.frames[i] > maxFrames) {
+                maxFrames = boost.frames[i];
+            }
+        }
+        // Normalize: max boost duration ~180 frames (3 seconds at 60fps)
+        if (maxFrames > 0) {
+            boostFactor = static_cast<f32>(maxFrames) / 180.0f;
+            if (boostFactor > 1.0f) boostFactor = 1.0f;
+        }
+        turnRate = 0.04f * boostFactor; // paramTable[0x4C] * factor
+    } else if (isAirborne) {
+        // No standstill rotation in air
+        turnRate = 0.0f;
+    } else {
+        // Normal standstill rotation from speed delta
+        f32 speedDelta = lastSpeed - vehicleSpeed;
+        if (speedDelta < -1.0f) speedDelta = -1.0f;
+        if (speedDelta > 1.0f) speedDelta = 1.0f;
+
+        turnRate = speedDelta * 0.04f; // paramTable[0x4C]
+
+        // Apply shock modifier
+        if (isShock) {
+            turnRate *= 0.6f; // paramTable[0x50]
+        }
+        // Apply mega/star modifier
+        if (isMega || isStarOrInvincible) {
+            turnRate *= 0.8f; // paramTable[0x1C]
+        }
     }
 
-    // Only apply when boost is active
-    if (!boost.isActive() && mtBoost == 0) {
-        return;
+    // Special floor (jump pad) multiplier
+    if (specialFloor & 0x100) {
+        if (isRapidBoost) {
+            turnRate *= 1.2f; // paramTable[0x18] mushroom modifier
+        } else {
+            turnRate *= 0.8f; // paramTable[0xA4] normal boost modifier
+        }
     }
 
-    // Allow a small amount of rotation while stationary + boosting
-    f32 standstillTurn = rawTurn * 0.03f;
-
-    // Apply to the direction vector
-    updateVehicleRotationVector(standstillTurn);
+    boostRot = turnRate;
 }
 
 // ============================================================================
