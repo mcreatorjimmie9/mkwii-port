@@ -161,9 +161,14 @@ extern "C" void updateAIForPlayer(u32 playerId) {
         steer = engine->getTotalSteer();
 
         u16 actions = AIInfo_getActions(info);
-        accel = (actions & 0x01) != 0;
-        brake = (actions & 0x02) != 0;
-        drift = (actions & 0x04) != 0;
+        // Phase 26: Fixed action bit mismatch — AIInfo uses:
+        //   0x0001 = STEER_LEFT, 0x0002 = STEER_RIGHT, 0x0004 = ACCEL
+        //   0x0008 = BRAKE, 0x0010 = DRIFT, 0x0020 = ITEM, 0x0040 = HOP
+        // Previously the bridge used wrong bits (0x01=accel, 0x02=brake, 0x04=drift)
+        // which caused AI karts to never properly brake or drift.
+        accel = (actions & 0x0004) != 0; // AI_ACTION_ACCEL
+        brake = (actions & 0x0008) != 0; // AI_ACTION_BRAKE
+        drift = (actions & 0x0010) != 0; // AI_ACTION_DRIFT
     }
 
     sub_setAIPlayerInput(playerId, steer, accel ? 1.0f : 0.0f,

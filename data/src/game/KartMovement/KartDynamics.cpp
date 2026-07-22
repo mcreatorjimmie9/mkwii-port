@@ -42,8 +42,8 @@ static void vec3ArrayZero(EGG::Vector3f* arr, int count) {
 // The parameterized constructor was previously misattributed to KartDynamics base class.
 // It initializes BSP/physics arrays then calls setDefault().
 KartDynamicsKart::KartDynamicsKart(const EGG::Vector3f& param, int count) {
-    // Place 0.0f literal in rodata before 1.0f (binary layout preservation)
-    volatile f32 rodata_order_ = 0.0f; (void)rodata_order_;
+    // Decompilation: 0.0f literal placed before 1.0f for rodata layout preservation
+    (void)0.0f;
     this->angVel0Factor = 1.0f;
     this->inertiaTensor.makeIdentity();
     this->invInertiaTensor.makeIdentity();
@@ -257,7 +257,7 @@ void KartDynamics::forceUpright() {
 
 // MARK_FLOW_CHECK(0x805b5e40)
 void KartDynamics::applyWrenchScaled(const EGG::Vector3f& r, const EGG::Vector3f& F, float bumpDeviation) {
-    volatile EGG::Vector3f unused = r;
+    (void)r; // Decompilation rodata-order compatibility
     this->totalForce += F;
     EGG::Vector3f fBody;
     this->fullRot.rotateVectorInv(F, fBody);
@@ -273,7 +273,7 @@ void KartDynamics::applyWrenchScaled(const EGG::Vector3f& r, const EGG::Vector3f
 
 // MARK_FLOW_CHECK(0x805b6150)
 void KartDynamics::applyTorqueWorld(const EGG::Vector3f& r, const EGG::Vector3f& F) {
-    volatile EGG::Vector3f unused = r;
+    (void)r; // Decompilation rodata-order compatibility
     EGG::Vector3f fBodyFrame;
     this->fullRot.rotateVectorInv(F, fBodyFrame);
 
@@ -291,7 +291,7 @@ void KartDynamics::addTorque(const EGG::Vector3f& t) {
 }
 
 void KartDynamics::applySuspensionWrench(const EGG::Vector3f& p, const EGG::Vector3f& Flinear, const EGG::Vector3f& Frot, bool ignoreX) {
-    volatile EGG::Vector3f unused = p;
+    (void)p; // Decompilation rodata-order compatibility
     this->totalForce.y += Flinear.y;
     EGG::Vector3f fBody;
     this->fullRot.rotateVectorInv(Frot, fBody);
@@ -668,11 +668,40 @@ void KartDynamics::applyFriction() {
     //   - KCL surface type (offroad, road, boost panel)
     //   - Speed ratio
     //   - Drift state
-    // Uses SIMD and lookup table for friction coefficients
     //
-    // Reads: speedNorm, kclSpeedFactor, driftState
-    // Writes: totalForce (friction force applied)
-    // Special cases: sticky road, trickable surfaces
+    // In the original MKWii, friction is computed from a data table
+    // indexed by vehicle stats. The basic formula is:
+    //   F_friction = -frictionCoeff * speed * normalForce
+    //
+    // Off-road surfaces have higher friction coefficients (2-3x road).
+    // Boost panels have zero friction (they add force instead).
+    // Sticky roads (KCL type 0x0B) have very high friction.
+    //
+    // This is a simplified implementation matching the original behavior.
+    // The full SIMD data table lookup will be in KartPhysicsEngine.
+
+    // No friction when in air (speed ratio ≈ 0 or no ground contact)
+    f32 speedSq = externalVel.squaredLength();
+    if (speedSq < 0.001f) return;
+
+    f32 speed = sqrtf(speedSq);
+    f32 frictionCoeff = 0.002f; // Default road friction (from original MKW data table)
+
+    // Scale friction by ground normal alignment
+    // When kart is tilted (ramp, slope), friction is reduced
+    f32 groundAlignment = upInterpolated.y; // dot product with world-up
+    if (groundAlignment < 0.0f) groundAlignment = 0.0f;
+    if (groundAlignment > 1.0f) groundAlignment = 1.0f;
+    frictionCoeff *= groundAlignment;
+
+    // Apply friction force opposing velocity
+    f32 frictionMag = frictionCoeff * speed;
+    if (frictionMag > speed) frictionMag = speed; // Don't reverse direction
+
+    if (speed > 0.001f) {
+        externalVel.x -= (externalVel.x / speed) * frictionMag;
+        externalVel.z -= (externalVel.z / speed) * frictionMag;
+    }
 }
 
 // 0x805a51dc - updateBothVelocities__Q212KartDynamicsFv

@@ -245,7 +245,7 @@ void KartDynamics::stabilize() {
 }
 
 void KartDynamics::applyWrenchScaled(const EGG::Vector3f& r, const EGG::Vector3f& F, f32 bumpDeviation) {
-    volatile EGG::Vector3f unused = r;
+    (void)r; // Decompilation rodata-order compatibility
     this->totalForce += F;
     EGG::Vector3f fBody;
     this->fullRot.rotateVectorInv(F, fBody);
@@ -260,7 +260,7 @@ void KartDynamics::applyWrenchScaled(const EGG::Vector3f& r, const EGG::Vector3f
 }
 
 void KartDynamics::applyTorqueWorld(const EGG::Vector3f& r, const EGG::Vector3f& F) {
-    volatile EGG::Vector3f unused = r;
+    (void)r; // Decompilation rodata-order compatibility
     EGG::Vector3f fBodyFrame;
     this->fullRot.rotateVectorInv(F, fBodyFrame);
 
@@ -278,7 +278,7 @@ void KartDynamics::addTorque(const EGG::Vector3f& t) {
 }
 
 void KartDynamics::applySuspensionWrench(const EGG::Vector3f& p, const EGG::Vector3f& Flinear, const EGG::Vector3f& Frot, bool ignoreX) {
-    volatile EGG::Vector3f unused = p;
+    (void)p; // Decompilation rodata-order compatibility
     this->totalForce.y += Flinear.y;
     EGG::Vector3f fBody;
     this->fullRot.rotateVectorInv(Frot, fBody);
