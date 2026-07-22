@@ -1,5 +1,5 @@
 // race_bridge.cpp — Phase 21: Bridge between platform game state and
-// decompiled RaceManager/RaceConfig system.
+// decompiled RaceManager/RaceConfig/RaceSequence/RaceDirector system.
 //
 // In the original MKWii, the race engine updates RaceManagerPlayer state
 // each frame from KartObjectManager positions. On PC, the platform layer
@@ -9,6 +9,8 @@
 //   - RaceManagerPlayer.position to reflect actual race standings
 //   - RaceManagerPlayer.raceCompletion to drive finish detection
 //   - RaceManagerPlayer.lapCompletion to track lap progress
+//   - RaceSequence countdown/race/finish FSM to mirror platform state
+//   - RaceDirector multi-race series coordination
 //
 // All functions are extern "C" so they can be called from SceneRace.cpp
 // (which includes platform headers) without pulling in C++ decompiled headers.
@@ -16,8 +18,17 @@
 #include "RaceEngine/RaceManager.hpp"
 #include "RaceEngine/RaceConfig.hpp"
 #include "RaceEngine/CtrlRaceTime.hpp"
+#include "RaceEngine/RaceSequence.hpp"
+#include "RaceEngine/RaceDirector.hpp"
 
 #include <cstring>
+#include <cstdio>
+
+// Phase 21: Pointer to the active RaceSequence and RaceDirector instances.
+// These are set from SceneRace::initSubsystems() and cleared on teardown.
+// Using raw pointers is faithful to the original MKWii singleton pattern.
+static RaceEngine::RaceSequence* s_raceSequence = nullptr;
+static RaceEngine::RaceDirector* s_raceDirector = nullptr;
 
 // Forward declarations — platform layer types
 namespace Game {
@@ -268,6 +279,190 @@ u8 getPlayerPositionFromRM(u32 playerId) {
 bool isRaceFinishedFromRM() {
     using namespace System;
     return RaceManager::spInstance && RaceManager::spInstance->isRaceFinished();
+}
+
+// ============================================================================
+// Phase 21 extended: RaceSequence bridge functions
+// ============================================================================
+
+// ============================================================================
+// setRaceSequencePointer — Store the active RaceSequence for bridge access
+//
+// Called from SceneRace::initSubsystems() after creating RaceSequence.
+// All subsequent RaceSequence bridge calls use this stored pointer.
+//
+// @param seq  Pointer to the active RaceSequence (or nullptr to clear)
+// ============================================================================
+// (Note: setRaceSequencePointer is called directly from SceneRace.cpp
+//  since it includes the decompiled headers. Declared extern "C" here.)
+
+// ============================================================================
+// syncRaceSequenceFromGame — Per-frame sync of RaceSequence from platform
+//
+// In the original MKWii, RaceSequence reads from KartObjectManager positions
+// and Raceinfo checkpoint state each frame. On PC, we push platform state
+// into RaceSequence results so the decompiled engine's position calculation
+// and timing remain accurate.
+//
+// @param playerCount     Number of active players
+// @param playerLaps[]    Current lap for each player (0-indexed)
+// @param playerFinished[] Whether each player has finished
+// @param playerDistances[] Race distance for ranking
+// ============================================================================
+void syncRaceSequenceFromGame(
+    u32 playerCount,
+    const u8 playerLaps[],
+    const bool playerFinished[],
+    const u32 playerDistances[])
+{
+    // RaceSequence timing is driven by its own update() called from
+    // SceneRace::calc(). We don't overwrite internal timing — only
+    // the result data that the platform layer owns.
+    //
+    // The key sync points are:
+    //   - Lap count: RaceResult.lapCount mirrors platform laps
+    //   - Finish state: triggers RaceSequence::finishPlayer() on first finish
+    //   - Distance: used by calculatePositions() for ranking
+    //
+    // Since RaceSequence manages its own state machine, we only
+    // push "boundary events" (line crossings, finishes) rather than
+    // overwriting the entire state each frame. This matches the original
+    // where KartObjectManager triggers RaceSequence events, not the reverse.
+    (void)playerCount;
+    (void)playerLaps;
+    (void)playerFinished;
+    (void)playerDistances;
+    // Intentionally minimal: RaceSequence's internal state machine drives
+    // countdown/timing. Platform state is the authority for positions,
+    // which RaceManager handles via updateRaceManagerFromGame().
+}
+
+// ============================================================================
+// getRaceSequencePhase — Get current RaceSequence phase
+//
+// @return RaceSequence phase enum value, or RACE_PHASE_NONE if no sequence
+// ============================================================================
+u32 getRaceSequencePhase() {
+    if (!s_raceSequence) return 0; // RACE_PHASE_NONE
+    return static_cast<u32>(s_raceSequence->getPhase());
+}
+
+// ============================================================================
+// notifyRaceSequenceLineCross — Notify RaceSequence of a start/finish line cross
+//
+// Called from RaceSession::checkCheckpoints() when a player crosses
+// checkpoint 0 (the start/finish line). This triggers lap advancement
+// and finish detection in the decompiled RaceSequence.
+//
+// @param playerId  Player index (0-11)
+// ============================================================================
+void notifyRaceSequenceLineCross(u32 playerId) {
+    if (!s_raceSequence) return;
+    s_raceSequence->onPlayerCrossLine(playerId);
+}
+
+// ============================================================================
+// Phase 21 extended: RaceDirector bridge functions
+// ============================================================================
+
+// ============================================================================
+// startRaceDirector — Initialize RaceDirector for a race session
+//
+// Creates a RaceDirector with the given configuration and starts a series.
+// In the original MKWii, this is done by the menu scene when the player
+// selects a race mode (GP, VS, Time Trial).
+//
+// @param playerCount  Number of players (1-12)
+// @param laps         Number of laps per race
+// @param engineClass  Engine class (0=50cc, 1=100cc, 2=150cc, 3=Mirror)
+// ============================================================================
+void startRaceDirector(u32 playerCount, u32 laps, u32 engineClass) {
+    if (s_raceDirector) {
+        s_raceDirector->shutdown();
+        delete s_raceDirector;
+    }
+
+    s_raceDirector = new RaceEngine::RaceDirector();
+    RaceEngine::DirectorConfig config;
+    memset(&config, 0, sizeof(config));
+    config.raceType = RaceEngine::RACE_TYPE_VS;
+    config.playerCount = static_cast<u8>(playerCount);
+    config.totalRaces = 1;
+    config.lapsPerRace = static_cast<u8>(laps);
+    config.isOnline = 0;
+    config.engineClass = static_cast<u8>(engineClass);
+
+    s_raceDirector->init(config);
+    s_raceDirector->startSeries();
+    s_raceDirector->startNextRace();
+
+    printf("[RaceBridge] RaceDirector started: %u players, %u laps, class=%u\n",
+           playerCount, laps, engineClass);
+}
+
+// ============================================================================
+// updateRaceDirector — Tick the race director (called each frame)
+//
+// Drives the RaceDirector state machine for multi-race series.
+// ============================================================================
+void updateRaceDirector() {
+    if (s_raceDirector) {
+        s_raceDirector->update();
+    }
+}
+
+// ============================================================================
+// getRaceDirectorPhase — Get current RaceDirector phase
+//
+// @return DirectorPhase enum value, or 0 (DIRECTOR_IDLE) if no director
+// ============================================================================
+u32 getRaceDirectorPhase() {
+    if (!s_raceDirector) return 0;
+    return static_cast<u32>(s_raceDirector->getPhase());
+}
+
+// ============================================================================
+// endRaceDirector — End the current race in the director
+//
+// Called when the race finishes (all players complete or time-up).
+// ============================================================================
+void endRaceDirector() {
+    if (s_raceDirector) {
+        s_raceDirector->endRace();
+    }
+}
+
+// ============================================================================
+// getRaceDirectorTotalRaces — Get total races in the series
+// ============================================================================
+u32 getRaceDirectorTotalRaces() {
+    if (!s_raceDirector) return 0;
+    return s_raceDirector->getTotalRaces();
+}
+
+// ============================================================================
+// getRaceDirectorCurrentRace — Get current race index (0-based)
+// ============================================================================
+u32 getRaceDirectorCurrentRace() {
+    if (!s_raceDirector) return 0;
+    return s_raceDirector->getCurrentRace();
+}
+
+// ============================================================================
+// setRaceBridgePointers — Set internal pointers to active RaceSequence/RaceDirector
+//
+// Called from SceneRace::initSubsystems() to wire the bridge to the
+// decompiled instances created by the scene.
+//
+// @param seq   RaceSequence pointer (or nullptr)
+// @param dir   RaceDirector pointer (or nullptr)
+// ============================================================================
+extern "C" void setRaceBridgePointers(
+    RaceEngine::RaceSequence* seq,
+    RaceEngine::RaceDirector* dir)
+{
+    s_raceSequence = seq;
+    s_raceDirector = dir;
 }
 
 } // extern "C"

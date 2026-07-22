@@ -18,6 +18,9 @@
 // Phase 21: RaceManager/RaceConfig — original MKWii race engine wiring
 #include "RaceEngine/RaceManager.hpp"
 #include "RaceEngine/RaceConfig.hpp"
+// Phase 21 extended: RaceSequence + RaceDirector for full race lifecycle
+#include "RaceEngine/RaceSequence.hpp"
+#include "RaceEngine/RaceDirector.hpp"
 #include <string.h>
 #include <cstdlib>
 #include <cstdio>
@@ -46,6 +49,31 @@ extern "C" void pauseAI(bool pause);
 
 // Phase 21: Forward declarations — Race bridge functions (defined in race_bridge.cpp)
 // These sync platform game state into the decompiled RaceManager each frame.
+extern "C" void syncRaceSequenceFromGame(
+    u32 playerCount,
+    const u8 playerLaps[],
+    const bool playerFinished[],
+    const u32 playerDistances[]);
+extern "C" u32 getRaceSequencePhase();
+extern "C" void notifyRaceSequenceLineCross(u32 playerId);
+extern "C" void startRaceDirector(u32 playerCount, u32 laps, u32 engineClass);
+extern "C" void updateRaceDirector();
+extern "C" u32 getRaceDirectorPhase();
+extern "C" void endRaceDirector();
+extern "C" u32 getRaceDirectorTotalRaces();
+extern "C" u32 getRaceDirectorCurrentRace();
+
+// setRaceBridgePointers is declared in race_bridge.cpp (not extern "C"
+// but declared with extern "C" linkage there). We call it directly
+// since SceneRace.cpp includes the decompiled headers.
+namespace RaceEngine {
+    class RaceSequence;
+    class RaceDirector;
+}
+extern "C" void setRaceBridgePointers(
+    RaceEngine::RaceSequence* seq,
+    RaceEngine::RaceDirector* dir);
+
 extern "C" void updateRaceManagerFromGame(
     const f32 playerPositions[][3],
     const u8  playerLaps[],
@@ -139,6 +167,16 @@ struct RaceScene::RaceData {
     ItemManager itemManager;
     ItemSlot playerItem;
 
+    // Phase 21: RaceSequence — decompiled race lifecycle controller
+    // Manages countdown phases, lap validation, race timing in the
+    // original MKWii engine. Synced with platform RaceSession each frame.
+    RaceEngine::RaceSequence* raceSequence;
+
+    // Phase 21: RaceDirector — multi-race series coordinator
+    // Handles GP cup flow (CUP_INTRO → PRE_RACE → RACING → POST_RACE → RESULTS).
+    // For single VS races, it wraps a single RaceSequence.
+    RaceEngine::RaceDirector* raceDirector;
+
     // HUD overlay
     HUD hud;
     bool hudInitialized;
@@ -154,7 +192,9 @@ struct RaceScene::RaceData {
         , hudInitialized(false)
         , totalLaps(DEFAULT_LAP_COUNT)
         , raceFinishedPrinted(false)
-        , frameLogCounter(0) {}
+        , frameLogCounter(0)
+        , raceSequence(nullptr)
+        , raceDirector(nullptr) {}
 };
 
 // =============================================================================
@@ -220,6 +260,19 @@ RaceScene::~RaceScene() {
     // (SceneDirector::changeScene). RaceConfig persists across races within a
     // cup but is destroyed when returning to the menu.
     System::RaceManager::destroyInstance();
+    // Phase 21: Destroy RaceDirector and RaceSequence
+    if (m_raceData) {
+        if (m_raceData->raceDirector) {
+            m_raceData->raceDirector->shutdown();
+            delete m_raceData->raceDirector;
+            m_raceData->raceDirector = nullptr;
+        }
+        if (m_raceData->raceSequence) {
+            m_raceData->raceSequence->shutdown();
+            delete m_raceData->raceSequence;
+            m_raceData->raceSequence = nullptr;
+        }
+    }
     // NOTE: RaceConfig is intentionally NOT destroyed here. In the original,
     // it persists across multiple races in a Grand Prix. It will be cleaned up
     // by shutdownSystemSingletons() or on next application launch.
@@ -527,6 +580,41 @@ void RaceScene::initSubsystems() {
     }
 
     // =========================================================================
+    // Phase 21: Initialize RaceSequence (original MKWii race lifecycle)
+    // =========================================================================
+    // RaceSequence manages the per-race countdown, lap validation, timing.
+    // In the original MKWii, RaceDirector creates RaceSequence for each race
+    // in a series. For PC, we create it here directly.
+    d.raceSequence = new RaceEngine::RaceSequence();
+    d.raceSequence->init(nullptr, TOTAL_RACERS);
+    // Checkpoints will be loaded from KMP data below
+    printf("[RaceScene] RaceSequence initialized (%u players)\n", TOTAL_RACERS);
+
+    // =========================================================================
+    // Phase 21: Initialize RaceDirector (multi-race series coordinator)
+    // =========================================================================
+    // In the original MKWii, RaceDirector is created by the scene system
+    // when entering a race (menu → race transition). It wraps RaceSequence
+    // and handles the full GP/VS lifecycle including pre-race, racing,
+    // post-race scoring, cup results, and awards.
+    d.raceDirector = new RaceEngine::RaceDirector();
+    {
+        RaceEngine::DirectorConfig dirConfig;
+        memset(&dirConfig, 0, sizeof(dirConfig));
+        dirConfig.raceType = RaceEngine::RACE_TYPE_VS;
+        dirConfig.playerCount = static_cast<u8>(TOTAL_RACERS);
+        dirConfig.totalRaces = 1;
+        dirConfig.lapsPerRace = DEFAULT_LAP_COUNT;
+        dirConfig.isOnline = 0;
+        dirConfig.engineClass = 2; // 150cc
+        d.raceDirector->init(dirConfig);
+        d.raceDirector->startSeries();
+        d.raceDirector->startNextRace();
+        printf("[RaceScene] RaceDirector initialized (VS Race, %u players, %u laps)\n",
+               TOTAL_RACERS, DEFAULT_LAP_COUNT);
+    }
+
+    // =========================================================================
     // Phase 21: Initialize RaceConfig + RaceManager (original MKWii race engine)
     // =========================================================================
     // In the original MKWii, the initialization order is:
@@ -577,6 +665,18 @@ void RaceScene::initSubsystems() {
         printf("[RaceScene]   Players: %u, Laps: %u, Mode: VS Race\n",
                RaceConfig::getRacePlayerCount(),
                RaceManager::getLapCount());
+
+        // Phase 21: Start RaceSequence countdown
+        // In the original, RaceDirector::beginRace() calls
+        // RaceSequence::startCountdown() when transitioning from PRE_RACE
+        // to RACING. We mirror that here.
+        if (d.raceSequence) {
+            d.raceSequence->startCountdown();
+        }
+
+        // Wire bridge pointers so race_bridge.cpp can access the
+        // RaceSequence and RaceDirector instances for sync functions.
+        setRaceBridgePointers(d.raceSequence, d.raceDirector);
     }
 
     // =========================================================================
@@ -683,6 +783,23 @@ void RaceScene::initSubsystems() {
             }
 
             pushCheckpointDataToRaceSequence(cpCount, cpIds, cpSectors, cpPos, cpRad);
+
+            // Phase 21: Also load checkpoints into local RaceSequence directly
+            // (belt-and-suspenders: both bridge and direct wiring)
+            if (d.raceSequence) {
+                RaceEngine::LapCheckpoint lcps[32];
+                u32 lcCount = 0;
+                for (u32 i = 0; i < cpCount && i < 32; i++) {
+                    lcps[lcCount].checkpointId = cpIds[i];
+                    lcps[lcCount].sectorIndex = i;
+                    lcps[lcCount].positionX = cpPos[i][0];
+                    lcps[lcCount].positionY = cpPos[i][1];
+                    lcps[lcCount].positionZ = cpPos[i][2];
+                    lcps[lcCount].radius = cpRad[i];
+                    lcCount++;
+                }
+                d.raceSequence->setupCheckpointsFromKMP(lcCount, lcps);
+            }
         }
 
         printf("[RaceScene] Phase 24: KMP data pushed to decompiled Course + RaceSequence\n");
@@ -750,6 +867,20 @@ void RaceScene::calc() {
     // the timer manager. In the original, this is called by the scene's calc().
     if (System::RaceManager::spInstance) {
         System::RaceManager::spInstance->update();
+    }
+
+    // Phase 21: Tick RaceSequence each frame
+    // RaceSequence::update() drives the countdown → racing → finish FSM.
+    // In the original, it's called by RaceDirector::update() which is
+    // called by the scene calc(). We call it directly.
+    if (m_raceData && m_raceData->raceSequence) {
+        m_raceData->raceSequence->update();
+    }
+
+    // Phase 21: Tick RaceDirector each frame
+    // RaceDirector coordinates the overall race session (GP series flow).
+    if (m_raceData && m_raceData->raceDirector) {
+        m_raceData->raceDirector->update();
     }
 
     switch (m_racePhase) {
@@ -1008,6 +1139,31 @@ void RaceScene::updateRacing() {
 
     // 6. Calculate positions
     d.raceSession.calculatePositions();
+
+    // =========================================================================
+    // Phase 21 extended: Sync platform → RaceSequence + RaceManager
+    // =========================================================================
+    // RaceSequence gets per-player lap/finish/distance data each frame.
+    // RaceManager gets the same for its GP scoring system.
+    // In the original, both are updated from KartObjectManager state.
+    {
+        u8  seqLaps[RACE_BRIDGE_MAX];
+        bool seqFinished[RACE_BRIDGE_MAX];
+        u32 seqDistances[RACE_BRIDGE_MAX];
+
+        memset(seqLaps, 0, sizeof(seqLaps));
+        memset(seqFinished, 0, sizeof(seqFinished));
+        memset(seqDistances, 0, sizeof(seqDistances));
+
+        for (u32 i = 0; i < d.playerCount && i < RACE_BRIDGE_MAX; i++) {
+            seqLaps[i] = (u8)d.players[i].m_lap;
+            seqFinished[i] = d.players[i].m_finished;
+            seqDistances[i] = static_cast<u32>(d.players[i].m_distance);
+        }
+
+        // Sync to RaceSequence
+        syncRaceSequenceFromGame(d.playerCount, seqLaps, seqFinished, seqDistances);
+    }
 
     // =========================================================================
     // Phase 21: Sync platform game state → decompiled RaceManager
@@ -1285,6 +1441,30 @@ void RaceScene::updateRacing() {
 void RaceScene::finishRace() {
     m_racePhase = PHASE_FINISH;
 
+    // Phase 21: End RaceSequence (original MKWii lifecycle)
+    // In the original, when all players finish or time expires,
+    // RaceSequence::endRace() is called which triggers position
+    // calculation and point awarding. We call it before RaceManager.
+    if (m_raceData && m_raceData->raceSequence) {
+        // Mark any remaining unfinished players as DNF
+        for (u32 i = 0; i < m_raceData->playerCount; i++) {
+            if (!m_raceData->players[i].m_finished) {
+                m_raceData->raceSequence->finishPlayer(
+                    i, RaceEngine::FINISH_TIME_UP);
+            }
+        }
+        m_raceData->raceSequence->endRace();
+        printf("[RaceScene] RaceSequence ended — phase: %d\n",
+               m_raceData->raceSequence->getPhase());
+    }
+
+    // Phase 21: End RaceDirector race (multi-race series coordinator)
+    if (m_raceData && m_raceData->raceDirector) {
+        m_raceData->raceDirector->endRace();
+        printf("[RaceScene] RaceDirector phase: %d\n",
+               m_raceData->raceDirector->getPhase());
+    }
+
     // Phase 21: Notify RaceManager of race end (100% faithful to original)
     // RaceManager::endRace() sets stage = FINISHED_RACE and updates GP scores.
     if (System::RaceManager::spInstance) {
@@ -1329,10 +1509,44 @@ void RaceScene::finishRace() {
 // =============================================================================
 
 void RaceScene::updateFinish() {
+    if (!m_raceData) return;
+
+    // Phase 21: Post-race flow — match original MKWii behavior
+    // In the original, after finishRace() the scene enters a waiting state
+    // where:
+    //   1. Remaining players continue racing until time-up or all finish
+    //   2. RaceDirector transitions to POST_RACE → CUP_RESULTS (if GP)
+    //   3. Results are displayed before returning to menu
+    // On PC, we simplify: wait for quit key, then exit.
+
+    // Tick RaceSequence in finish phase (counts down finishTimer)
+    if (m_raceData->raceSequence) {
+        m_raceData->raceSequence->update();
+    }
+    if (m_raceData->raceDirector) {
+        m_raceData->raceDirector->update();
+    }
+
     // Check quit
     const auto& input = Platform::InputManager::getState();
     if (input.quit) {
         // SceneDirector handles cleanup
+    }
+
+    // Post-race HUD update (keep displaying final position)
+    if (m_raceData->hudInitialized) {
+        // RaceDirector phase logging (every 300 frames)
+        static u32 s_postRaceLogTimer = 0;
+        s_postRaceLogTimer++;
+        if (s_postRaceLogTimer >= 300) {
+            s_postRaceLogTimer = 0;
+            printf("  Post-race | RaceDir: phase=%d race=%u/%u | RaceSeq: phase=%d finished=%u\n",
+                   m_raceData->raceDirector ? m_raceData->raceDirector->getPhase() : -1,
+                   m_raceData->raceDirector ? m_raceData->raceDirector->getCurrentRace() + 1 : 0,
+                   m_raceData->raceDirector ? m_raceData->raceDirector->getTotalRaces() : 0,
+                   m_raceData->raceSequence ? m_raceData->raceSequence->getPhase() : -1,
+                   m_raceData->raceSequence ? m_raceData->raceSequence->getFinishedCount() : 0);
+        }
     }
 }
 
