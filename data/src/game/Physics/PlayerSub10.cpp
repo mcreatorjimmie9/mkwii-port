@@ -4,7 +4,11 @@
 #include <egg/math/eggVector.hpp>
 #include <cmath>
 
-extern "C" f32 sub_getTurnInput(void* obj); // @addr 0x8057e900
+// Input bridges (implemented in pad_bridge.cpp, bridging Platform::InputManager)
+extern "C" f32  sub_getTurnInput(void* obj);   // @addr 0x8057e900 — analog stick X
+extern "C" f32  sub_getAccelInput(void* obj);  // @addr 0x80590a9c — accelerate [0,1]
+extern "C" f32  sub_getBrakeInput(void* obj);  // @addr 0x80590a80 — brake [0,1]
+extern "C" bool sub_getDriftInput(void* obj);  // @addr 0x80590aac — drift button
 
 // ============================================================================
 // PlayerSub10 — Base Virtual Methods, Constructor, and Destructor
@@ -889,10 +893,35 @@ void PlayerSub10::update() {
     // 6. Offroad/surface effects (KCL)
     updateOffroad();
 
+    // 6b. Drift initiation: check if player should start drifting
+    // In MKWii, drift is initiated when the player holds the drift button
+    // (R trigger) while steering at sufficient speed and not already drifting.
+    if (driftState == 0 && hopFrame == 0) {
+        bool driftBtn = sub_getDriftInput(this);
+        f32 stickX = sub_getTurnInput(this);
+        if (driftBtn && (stickX > 0.3f || stickX < -0.3f) &&
+            vehicleSpeed > baseSpeed * 0.4f) {
+            // Check for hop or direct drift initiation
+            if (canHop()) {
+                hop();
+            } else {
+                // Manual drift (state 1) when hop not available
+                initDriftForced();
+                driftState = 1; // Override forced to manual
+            }
+        }
+    }
+
     // 7. Drift state machine and MT charge
     if (driftState != 0) {
         updateManualDrift();
         updateMtCharge();
+
+        // Check drift end condition: drift button released
+        // In the original MKWii, the drift ends when the R trigger is released
+        if (!sub_getDriftInput(this) && driftState != 3) {
+            endDrift();
+        }
     }
 
     // 8. Boost system update
@@ -999,22 +1028,44 @@ void PlayerSub10::updateAcceleration() {
         return;
     }
 
+    // Read acceleration/brake input from the platform input system
+    // In the original MKWii, this reads KPad button state via sub_getPhysicsInput
+    f32 accelInput = sub_getAccelInput(this);  // [0.0, 1.0]
+    f32 brakeInput = sub_getBrakeInput(this);  // [0.0, 1.0]
+
     // Base acceleration from vehicle parameters
     // In the original, this is read from KartParam.bin and scaled
-    // by the CC class. Default: ~0.1 per frame at full speed
-    f32 baseAccel = 0.1f * (1.0f + speedRatioCapped * 0.3f);
+    // by the CC class. Default: ~0.1 per frame at full speed.
+    // Only apply when the player is actively pressing the accelerate button.
+    f32 baseAccel = 0.0f;
+    if (accelInput > 0.0f) {
+        baseAccel = 0.1f * accelInput * (1.0f + speedRatioCapped * 0.3f);
+    }
 
     // Apply KCL surface speed factor (offroad reduces acceleration)
     if (kclSpeedFactor != 0.0f) {
         baseAccel *= (1.0f + kclSpeedFactor);
     }
 
-    // Forward acceleration (assuming always pressing A)
-    // In the original, this reads the KPad accelerator button state
+    // Set acceleration from input
     acceleration = baseAccel;
 
     // Apply boost acceleration bonus if active
     acceleration += boost.acceleration;
+
+    // Braking: apply deceleration when brake is held
+    // In MKWii, braking reduces speed proportionally to brake input strength.
+    // The brake force scales with current speed for realistic deceleration.
+    if (brakeInput > 0.0f) {
+        // Brake force: proportional to speed, modulated by brake input
+        f32 brakeForce = 0.15f * brakeInput;
+        if (vehicleSpeed > 0.0f) {
+            acceleration -= vehicleSpeed * brakeForce;
+        } else {
+            // Allow reverse when stationary and braking
+            acceleration -= 0.05f * brakeInput;
+        }
+    }
 
     // Offroad penalty: reduce acceleration on offroad surfaces
     if (kclSpeedFactor < -0.3f) {

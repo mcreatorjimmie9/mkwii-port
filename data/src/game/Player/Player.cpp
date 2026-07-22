@@ -361,14 +361,23 @@ void Player::updateWithDecompiledPhysics(f32 dt, const void* inputState) {
     f32 wallNX = 0.0f, wallNZ = 0.0f;
     kart->queryCollision(offroad, boostPad, wallHit, wallNX, wallNZ, m_collision);
 
-    // Feed collision state into KartState flags
+    // Feed collision state into KartState flags and PlayerSub10 KCL factors
     if (m_kartState) {
         // Ground collision
         m_kartState->set(Kart::KART_FLAG_TOUCHING_GROUND);
 
-        // Off-road
+        // Off-road — set KCL speed/rotation factors for PlayerSub10
         if (offroad) {
-            // Set offroad via effect system (KartState bitfield)
+            // KCL offroad penalty factors (typical MKWii values)
+            sub10->kclSpeedFactor = -0.4f;    // 40% speed reduction
+            sub10->kclRotFactor = -0.3f;      // 30% rotation reduction
+            sub10->kclWheelSpeedFactor = -0.2f;
+            sub10->kclWheelRotFactor = -0.2f;
+        } else {
+            sub10->kclSpeedFactor = 0.0f;
+            sub10->kclRotFactor = 0.0f;
+            sub10->kclWheelSpeedFactor = 0.0f;
+            sub10->kclWheelRotFactor = 0.0f;
         }
 
         // Wall hit
@@ -382,11 +391,13 @@ void Player::updateWithDecompiledPhysics(f32 dt, const void* inputState) {
         }
     }
 
-    // Feed acceleration/brake input into KartState stick data
-    // (PlayerSub10 reads input through sub_getTurnInput for steer,
-    // and through playerPointers for accel/brake flags)
-    (void)input; // input is read via sub_getTurnInput (steer) and
-                 // could be extended to accel/brake via future extern bridges
+    // Input is read by PlayerSub10 via extern bridge functions in pad_bridge.cpp:
+    //   sub_getTurnInput()  → Platform::InputManager::getState().steer
+    //   sub_getAccelInput() → Platform::InputManager::getState().accelerate
+    //   sub_getBrakeInput() → Platform::InputManager::getState().brake
+    //   sub_getDriftInput() → Platform::InputManager::getState().drift
+    // No explicit input feeding needed here — PlayerSub10::update() queries directly.
+    (void)input;
 
     // Run the full MKWii physics tick
     sub10->update();
