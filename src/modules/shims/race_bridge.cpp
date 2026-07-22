@@ -30,6 +30,25 @@
 static RaceEngine::RaceSequence* s_raceSequence = nullptr;
 static RaceEngine::RaceDirector* s_raceDirector = nullptr;
 
+// Phase 25: Cached kart positions updated each frame by updateRaceManagerFromGame().
+// The decompiled code (RaceinfoPlayer::updateCheckpoint, RaceManager::update) reads
+// these via bridge_getKartPosition() to get real kart world positions without
+// depending on the stubbed KartObjectManager.
+static f32 s_playerPositions[MAX_PLAYER_COUNT][3];
+static bool s_playerPositionsValid[MAX_PLAYER_COUNT];
+static u32 s_cachedRaceTimerMs = 0;
+
+// Phase 25: Cached course start point data, populated from KMP KTP section.
+// Raceinfo::getInitialPosAndRotForPlayer() reads these via bridge_getCourseStartPoint().
+static f32 s_startPositions[12][3];
+static f32 s_startRotations[12][3];
+static u32 s_startPositionCount = 0;
+
+// Phase 25: Cached checkpoint positions for RaceinfoPlayer::updateCheckpoint().
+// Populated from KMP KCPO section via bridge functions.
+static f32 s_checkpointPositions[64][3];
+static u32 s_checkpointCount = 0;
+
 // Forward declarations — platform layer types
 namespace Game {
     class Player;
@@ -68,6 +87,23 @@ void updateRaceManagerFromGame(
 
     RaceManager& rm = *RaceManager::spInstance;
     u8 maxPlayers = (playerCount < MAX_PLAYER_COUNT) ? (u8)playerCount : MAX_PLAYER_COUNT;
+
+    // Phase 25: Cache kart positions for decompiled code access.
+    // RaceinfoPlayer::updateCheckpoint() and RaceManager::update() read these
+    // via bridge_getKartPosition() instead of the stubbed KartObjectManager.
+    for (u8 i = 0; i < maxPlayers; i++) {
+        s_playerPositions[i][0] = playerPositions[i][0];
+        s_playerPositions[i][1] = playerPositions[i][1];
+        s_playerPositions[i][2] = playerPositions[i][2];
+        s_playerPositionsValid[i] = true;
+    }
+    // Invalidate unused slots
+    for (u8 i = maxPlayers; i < MAX_PLAYER_COUNT; i++) {
+        s_playerPositionsValid[i] = false;
+    }
+
+    // Phase 25: Cache race timer in ms
+    s_cachedRaceTimerMs = (u32)((f32)RaceManager::spInstance->timer * (1000.0f / 60.0f));
 
     // Update per-player RaceManagerPlayer state
     for (u8 i = 0; i < maxPlayers; i++) {
@@ -465,6 +501,176 @@ extern "C" void setRaceBridgePointers(
 {
     s_raceSequence = seq;
     s_raceDirector = dir;
+}
+
+// ============================================================================
+// Phase 25: Data provider bridge functions
+// ============================================================================
+// These functions are called FROM the decompiled layer (RaceinfoPlayer,
+// Raceinfo, RaceManager) TO get data from the platform layer. They replace
+// the original MKWii's direct calls to KartObjectManager::spInstance and
+// course data pointers (0x80590144 / 0x80590cd8).
+//
+// The data flow is:
+//   Platform (SceneRace) → updateRaceManagerFromGame() → caches data
+//   Decompile (RaceinfoPlayer) → bridge_getKartPosition() → reads cached data
+// ============================================================================
+
+// ============================================================================
+// bridge_getKartPosition — Get cached kart world position for a player
+//
+// Replaces KartObjectManager::spInstance->getObject(playerId)->getPos()
+// which is used throughout the original binary by RaceinfoPlayer::update(),
+// RaceinfoPlayer::updateCheckpoint(), and RaceManager::update().
+//
+// @param playerId  Player index (0-11)
+// @param outX     Output X position
+// @param outY     Output Y position
+// @param outZ     Output Z position
+// @return true if position data is available
+// ============================================================================
+bool bridge_getKartPosition(u32 playerId, f32* outX, f32* outY, f32* outZ) {
+    if (playerId >= MAX_PLAYER_COUNT || !s_playerPositionsValid[playerId]) {
+        if (outX) *outX = 0.0f;
+        if (outY) *outY = 0.0f;
+        if (outZ) *outZ = 0.0f;
+        return false;
+    }
+    if (outX) *outX = s_playerPositions[playerId][0];
+    if (outY) *outY = s_playerPositions[playerId][1];
+    if (outZ) *outZ = s_playerPositions[playerId][2];
+    return true;
+}
+
+// ============================================================================
+// bridge_getRaceTimerMs — Get current race timer in milliseconds
+//
+// Replaces direct reads from RaceManager::timer with ms conversion.
+// Used by RaceinfoPlayer::endLap() to record lap finish times.
+//
+// @return Race timer in milliseconds
+// ============================================================================
+u32 bridge_getRaceTimerMs() {
+    return s_cachedRaceTimerMs;
+}
+
+// ============================================================================
+// bridge_pushCourseStartPoints — Push course start grid data into bridge cache
+//
+// Called from SceneRace::initSubsystems() after KMP KTP section is parsed.
+// Raceinfo::getInitialPosAndRotForPlayer() reads these cached values
+// instead of using hardcoded grid positions.
+//
+// @param count     Number of start positions (from KTP section)
+// @param pos[][3]  Start position XYZ for each grid slot
+// @param rot[][3]  Start rotation (pitch/yaw/roll) for each grid slot
+// ============================================================================
+void bridge_pushCourseStartPoints(
+    u32 count,
+    const f32 pos[][3],
+    const f32 rot[][3])
+{
+    u32 maxCount = (count < 12) ? count : 12;
+    s_startPositionCount = maxCount;
+    for (u32 i = 0; i < maxCount; i++) {
+        s_startPositions[i][0] = pos[i][0];
+        s_startPositions[i][1] = pos[i][1];
+        s_startPositions[i][2] = pos[i][2];
+        s_startRotations[i][0] = rot ? rot[i][0] : 0.0f;
+        s_startRotations[i][1] = rot ? rot[i][1] : 0.0f;
+        s_startRotations[i][2] = rot ? rot[i][2] : 0.0f;
+    }
+}
+
+// ============================================================================
+// bridge_getCourseStartPoint — Get cached course start point for a player
+//
+// Replaces 0x80590144 course data lookup used by
+// Raceinfo::getInitialPosAndRotForPlayer(). Returns real KMP KTP data
+// if available, or generates a fallback 2-column grid layout.
+//
+// @param playerIdx  Player/grid index (0-11)
+// @param outPos[3]  Output position (XYZ)
+// @param outRot[3]  Output rotation (pitch/yaw/roll in radians)
+// @return true if real course data was used
+// ============================================================================
+bool bridge_getCourseStartPoint(u32 playerIdx, f32 outPos[3], f32 outRot[3]) {
+    if (s_startPositionCount > 0 && playerIdx < s_startPositionCount) {
+        // Real course data available from KMP KTP section
+        outPos[0] = s_startPositions[playerIdx][0];
+        outPos[1] = s_startPositions[playerIdx][1];
+        outPos[2] = s_startPositions[playerIdx][2];
+        outRot[0] = s_startRotations[playerIdx][0];
+        outRot[1] = s_startRotations[playerIdx][1];
+        outRot[2] = s_startRotations[playerIdx][2];
+        return true;
+    }
+
+    // Fallback: generate 2-column staggered grid layout matching original MKW
+    // This matches Raceinfo::getInitialPosAndRotForPlayer() original behavior:
+    //   Row spacing ~15 units, column spacing ~8 units
+    u8 row = (u8)(playerIdx / 2);
+    u8 col = (u8)(playerIdx % 2);
+    f32 colSpacing = 8.0f;
+    f32 rowSpacing = 15.0f;
+
+    outPos[0] = (col == 0) ? -(colSpacing * 0.5f) : (colSpacing * 0.5f);
+    outPos[1] = 0.0f;
+    outPos[2] = -(f32)row * rowSpacing;
+    outRot[0] = 0.0f;
+    outRot[1] = 0.0f;
+    outRot[2] = 0.0f;
+    return false;
+}
+
+// ============================================================================
+// bridge_pushCheckpointPositions — Push checkpoint world positions into cache
+//
+// Called from SceneRace::initSubsystems() after KMP KCPO section is parsed.
+// RaceinfoPlayer::updateCheckpoint() reads these to detect checkpoint crossings
+// instead of using hardcoded (0,0,0) positions.
+//
+// @param count  Number of checkpoints (from KCPO section)
+// @param pos[][3] Checkpoint XYZ positions
+// ============================================================================
+void bridge_pushCheckpointPositions(u32 count, const f32 pos[][3]) {
+    u32 maxCount = (count < 64) ? count : 64;
+    s_checkpointCount = maxCount;
+    for (u32 i = 0; i < maxCount; i++) {
+        s_checkpointPositions[i][0] = pos[i][0];
+        s_checkpointPositions[i][1] = pos[i][1];
+        s_checkpointPositions[i][2] = pos[i][2];
+    }
+}
+
+// ============================================================================
+// bridge_getCheckpointPosition — Get cached checkpoint world position
+//
+// Replaces 0x80590cd8 checkpoint position resolver used by
+// RaceinfoPlayer::updateCheckpoint(). Returns real KMP data if available.
+//
+// @param checkpointIdx  Checkpoint index
+// @param outPos[3]      Output position (XYZ)
+// @return true if real checkpoint data exists
+// ============================================================================
+bool bridge_getCheckpointPosition(u32 checkpointIdx, f32 outPos[3]) {
+    if (checkpointIdx < s_checkpointCount) {
+        outPos[0] = s_checkpointPositions[checkpointIdx][0];
+        outPos[1] = s_checkpointPositions[checkpointIdx][1];
+        outPos[2] = s_checkpointPositions[checkpointIdx][2];
+        return true;
+    }
+    outPos[0] = 0.0f;
+    outPos[1] = 0.0f;
+    outPos[2] = 0.0f;
+    return false;
+}
+
+// ============================================================================
+// bridge_getCheckpointCount — Get number of loaded checkpoints
+// ============================================================================
+u32 bridge_getCheckpointCount() {
+    return s_checkpointCount;
 }
 
 } // extern "C"

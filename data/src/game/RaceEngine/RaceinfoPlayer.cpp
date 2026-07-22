@@ -6,6 +6,17 @@
 #include "Raceinfo.hpp"
 #include "RaceConfig.hpp"
 
+// Phase 25: Bridge functions for accessing platform kart positions, checkpoint
+// positions, and race timer from the decompiled layer.
+// These replace KartObjectManager::spInstance->getObject() and course data
+// lookups (0x80590144 / 0x80590cd8) from the original binary.
+extern "C" {
+    bool bridge_getKartPosition(u32 playerId, f32* outX, f32* outY, f32* outZ);
+    u32 bridge_getRaceTimerMs();
+    bool bridge_getCheckpointPosition(u32 checkpointIdx, f32 outPos[3]);
+    u32 bridge_getCheckpointCount();
+}
+
 namespace System {
 
 // Checkpoint proximity threshold in world units.
@@ -166,8 +177,9 @@ void RaceinfoPlayer::update() {
 // - Position/ranking update
 void RaceinfoPlayer::endLap() {
     // Record lap finish time
-    u32 now = 0; // Would come from race timer in full implementation
-    u32 lapTimeMs = now - lastCheckpointTimeMs;
+    // Phase 25: Use bridge_getRaceTimerMs() instead of hardcoded 0.
+    u32 now = bridge_getRaceTimerMs();
+    u32 lapTimeMs = (lastCheckpointTimeMs > 0) ? (now - lastCheckpointTimeMs) : 0;
 
     // Validate lap time is reasonable (> 5 seconds)
     if (lapTimeMs < MIN_VALID_LAP_TIME_MS) {
@@ -267,31 +279,39 @@ void RaceinfoPlayer::updateCheckpoint() {
     // Step 1: Get player's current world position.
     // In the original binary, this is obtained from:
     //   KartObjectManager::spInstance->getObject(playerId)->getPos()
-    // For the decompilation stub, we use a local position variable.
+    // Phase 25: Now reads from the platform layer via bridge_getKartPosition(),
+    // which is cached each frame by updateRaceManagerFromGame().
     f32 playerX = 0.0f;
     f32 playerY = 0.0f;
     f32 playerZ = 0.0f;
+    bridge_getKartPosition(playerId, &playerX, &playerY, &playerZ);
 
     // Step 2: Get the next expected checkpoint position.
     // Checkpoints are loaded from course data and indexed sequentially.
     // The next checkpoint index is: (lapCount * checkpointsPerLap) + numCheckpoints
     //
-    // The original binary accesses course data via:
+    // In the original binary, checkpoint positions are resolved via:
     //   0x80590144 = course data lookup function
     //   0x80590cd8 = checkpoint position resolver
     //
-    // For this implementation, we compute the checkpoint index and
-    // would look up the position from the course's checkpoint array.
-    u16 checkpointIdx = static_cast<u16>(lapCount) * 10
-                      + static_cast<u16>(numCheckpoints);
+    // Phase 25: Uses bridge_getCheckpointPosition() which reads from cached
+    // KMP KCPO data pushed by bridge_pushCheckpointPositions().
+    u32 totalCheckpoints = bridge_getCheckpointCount();
+    u32 checkpointsPerLap = (totalCheckpoints > 0) ? (totalCheckpoints / (maxLap > 0 ? maxLap : 3)) : 10;
+    if (checkpointsPerLap == 0) checkpointsPerLap = 10;
+
+    u32 checkpointIdx = static_cast<u32>(lapCount) * checkpointsPerLap
+                      + static_cast<u32>(numCheckpoints);
 
     f32 cpX = 0.0f;
     f32 cpY = 0.0f;
     f32 cpZ = 0.0f;
-
-    // In the original, these would be filled from:
-    //   const CheckpointGate& gate = courseCheckpoints[checkpointIdx];
-    //   cpX = gate.position.x; cpY = gate.position.y; cpZ = gate.position.z;
+    f32 cpPos[3];
+    if (bridge_getCheckpointPosition(checkpointIdx, cpPos)) {
+        cpX = cpPos[0];
+        cpY = cpPos[1];
+        cpZ = cpPos[2];
+    }
 
     // Step 3: Check if player is within threshold distance of checkpoint.
     // The threshold is approximately 50 world units (CHECKPOINT_THRESHOLD).
@@ -332,8 +352,11 @@ void RaceinfoPlayer::updateCheckpoint() {
     totalCheckpointsHit++;
 
     // Compute time split for this sector
-    u32 sectorTimeMs = 0; // Would be computed from current time - lastCheckpointTimeMs
-    lastCheckpointTimeMs += sectorTimeMs;
+    u32 now = bridge_getRaceTimerMs();
+    u32 sectorTimeMs = (lastCheckpointTimeMs > 0) ? (now - lastCheckpointTimeMs) : 0;
+    lastCheckpointTimeMs = now;
+
+    (void)sectorTimeMs; // Available for sector split recording
 
     // Step 6: Check if this was the last checkpoint before the finish line.
     // If numCheckpoints has reached the expected count per lap, and we're

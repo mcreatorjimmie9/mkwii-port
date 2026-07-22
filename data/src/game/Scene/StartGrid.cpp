@@ -305,8 +305,10 @@ bool validateGrid(const GridSlot* slots, u32 count, f32 minSpacing) {
     return true;
 }
 
+} // anonymous namespace
+
 // ============================================================================
-// getSlot — Access a grid slot by index with bounds checking
+// getSlotSafe — Access a grid slot by index with bounds checking
 // ============================================================================
 
 const GridSlot* StartGrid::getSlotSafe(u8 gridIdx) const {
@@ -389,15 +391,7 @@ void StartGrid::reset() {
 }
 
 // ============================================================================
-// getSlotCount — Return number of active grid slots
-// ============================================================================
-
-u32 StartGrid::getSlotCount() const {
-    return mSlotCount;
-}
-
-// ============================================================================
-// getGridSize — Return the grid width and row spacing as a pair
+// getGridSizeValues — Return the grid width and row spacing
 // ============================================================================
 
 void StartGrid::getGridSizeValues(f32& outWidth, f32& outRowSpacing) const {
@@ -429,4 +423,4 @@ f32 StartGrid_calcIdealWidth(u32 playerCount) {
     return idealGridWidth(playerCount);
 }
 
-} // namespace
+} // namespace Scene

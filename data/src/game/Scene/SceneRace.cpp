@@ -99,6 +99,14 @@ extern "C" void bridge_setDriftDir(u32 playerIdx, u8 dir);
 extern "C" void bridge_setVehicleType(u32 playerIdx, u8 type);
 extern "C" void bridge_setRacerInfo(u32 playerIdx, void* info);
 
+// Phase 25: Forward declarations — Race bridge data push functions
+// These push course start points and checkpoint positions into the race bridge cache,
+// enabling RaceinfoPlayer::updateCheckpoint() and Raceinfo::getInitialPosAndRotForPlayer()
+// to read real KMP data instead of using hardcoded (0,0,0) positions.
+extern "C" void bridge_pushCourseStartPoints(
+    u32 count, const f32 pos[][3], const f32 rot[][3]);
+extern "C" void bridge_pushCheckpointPositions(u32 count, const f32 pos[][3]);
+
 // Phase 24: Forward declarations — Course bridge functions (defined in course_bridge.cpp)
 // These push platform TrackManager KMP data into the decompiled Course/RaceSequence.
 extern "C" void pushCourseDataToDecompiled(
@@ -805,6 +813,16 @@ void RaceScene::initSubsystems() {
                 spCount, spPositions, spRotations, spIds,
                 cnCount, cnPositions, cnRotations, cnSpeeds,
                 bMin, bMax);
+
+            // Phase 25: Push start positions to race bridge cache.
+            // This enables Raceinfo::getInitialPosAndRotForPlayer() to return
+            // real course start grid data instead of hardcoded (0,0,0).
+            bridge_pushCourseStartPoints(spCount, spPositions, spRotations);
+
+            // Phase 25: Push checkpoint positions to race bridge cache.
+            // This enables RaceinfoPlayer::updateCheckpoint() to detect checkpoint
+            // crossings using real course checkpoint positions.
+            bridge_pushCheckpointPositions(cpCount, cpPositions);
         }
 
         // --- Push to decompiled RaceSequence ---

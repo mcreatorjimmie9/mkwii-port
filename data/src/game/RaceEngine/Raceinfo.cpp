@@ -6,6 +6,12 @@
 #include "RaceinfoPlayer.hpp"
 #include "RaceConfig.hpp"
 
+// Phase 25: Bridge functions for course start point data.
+// Replaces 0x80590144 course data lookup from the original binary.
+extern "C" {
+    bool bridge_getCourseStartPoint(u32 playerIdx, f32 outPos[3], f32 outRot[3]);
+}
+
 namespace System {
 
 // Static helper: count leading zeros for PowerPC (32-bit)
@@ -408,46 +414,52 @@ void Raceinfo::setFinishPosition(u8 playerIdx, u8 position) {
 //   0=front-left, 1=front-right, 2=second-left, 3=second-right, etc.
 void Raceinfo::getInitialPosAndRotForPlayer(u8 playerIdx, void* pos, void* rot) {
     if (pos != nullptr) {
-        // Default starting position if course data is unavailable
         f32* posF = static_cast<f32*>(pos);
 
-        // Grid layout: 2 columns, 6 rows
-        // Row spacing ~15 units, column spacing ~8 units
-        u8 row = playerIdx / 2;
-        u8 col = playerIdx % 2;
+        // Phase 25: Use bridge_getCourseStartPoint() which returns real KMP KTP
+        // data if available, or a faithful fallback 2-column grid layout.
+        // This replaces the original 0x80590144 course data lookup.
+        f32 bridgePos[3];
+        f32 bridgeRot[3];
+        bool hasCourseData = bridge_getCourseStartPoint(playerIdx, bridgePos, bridgeRot);
 
-        f32 rowSpacing = 15.0f;
-        f32 colSpacing = 8.0f;
+        if (hasCourseData) {
+            // Real course data from KMP KTP section
+            posF[0] = bridgePos[0];
+            posF[1] = bridgePos[1];
+            posF[2] = bridgePos[2];
+        } else {
+            // Fallback: 2-column staggered grid layout matching original MKW.
+            // Row spacing ~15 units, column spacing ~8 units.
+            u8 row = playerIdx / 2;
+            u8 col = playerIdx % 2;
+            f32 rowSpacing = 15.0f;
+            f32 colSpacing = 8.0f;
 
-        // Starting positions relative to the start/finish line
-        posF[0] = (col == 0 ? -colSpacing * 0.5f : colSpacing * 0.5f);
-        posF[1] = 0.0f; // Y position (ground level)
-        posF[2] = -(static_cast<f32>(row) * rowSpacing); // Z offset behind S/F line
-
-        // In the original binary, 0x80590144 resolves the actual course start
-        // point data and overrides these default values. The course data
-        // contains a start point position and direction vector that is
-        // transformed based on the grid slot index.
-        //
-        // The full lookup chain is:
-        //   CourseMap::getInstance() → getStartPoint(idx)
-        //   StartPoint contains: position (Vec3), direction (Vec3), up (Vec3)
-        //   The grid slot is computed from playerIdx using row/col formula
-        //   Position = startPoint.position + row * rowSpacing * (-direction)
-        //                                      + col * colSpacing * (perpDirection)
+            posF[0] = (col == 0 ? -colSpacing * 0.5f : colSpacing * 0.5f);
+            posF[1] = 0.0f;
+            posF[2] = -(static_cast<f32>(row) * rowSpacing);
+        }
     }
 
     if (rot != nullptr) {
-        // Default starting rotation (facing +Z direction)
         f32* rotF = static_cast<f32*>(rot);
 
-        // Y-axis rotation (heading) - default facing forward
-        rotF[0] = 0.0f; // X rotation (pitch)
-        rotF[1] = 0.0f; // Y rotation (yaw) - aligned with start direction
-        rotF[2] = 0.0f; // Z rotation (roll)
+        // Phase 25: Get rotation from bridge if course data exists
+        f32 bridgePos[3];
+        f32 bridgeRot[3];
+        bool hasCourseData = bridge_getCourseStartPoint(playerIdx, bridgePos, bridgeRot);
 
-        // In the original binary, the rotation is derived from the start
-        // point's direction vector using atan2 to get the Y-axis heading.
+        if (hasCourseData) {
+            rotF[0] = bridgeRot[0]; // Pitch
+            rotF[1] = bridgeRot[1]; // Yaw (heading) — aligned with start direction
+            rotF[2] = bridgeRot[2]; // Roll
+        } else {
+            // Default: facing forward (+Z direction)
+            rotF[0] = 0.0f;
+            rotF[1] = 0.0f;
+            rotF[2] = 0.0f;
+        }
     }
 }
 

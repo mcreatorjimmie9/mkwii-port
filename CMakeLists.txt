@@ -218,7 +218,7 @@ set(RENDERING_SOURCES
     data/src/game/Rendering/RenderUtil.cpp
 )
 
-# --- Scene (14 files) ---
+# --- Scene (15 files) ---
 set(SCENE_SOURCES
     data/src/game/Scene/SceneDirector.cpp
     data/src/game/Scene/SceneBase.cpp
@@ -239,6 +239,7 @@ set(SCENE_SOURCES
     data/src/game/Scene/HomeButton.cpp
     data/src/game/Scene/SceneBase2D.cpp
     data/src/game/Scene/SceneBase3D.cpp
+    data/src/game/Scene/StartGrid.cpp
 )
 
 # --- UI (15 files) ---
