@@ -378,4 +378,42 @@ parsePaneRecursive() advances by child entry size after each child, enabling ful
 
 ### Stage Summary
 - Phase 11 (Integration Gap Fixes): COMPLETE
-- Next: Runtime EGG subsystem (threads, memory allocators, display lists)
+- Next: SceneGraph integration, RaceScene→SceneBase3D migration
+
+---
+
+## Task: Phase 12 — Real System_Init with Root ExpHeap + FrameTimer with std::chrono
+
+### Summary
+Implemented the EGG system initialization path and real-time FrameTimer. The root ExpHeap (32MB) is created from system memory at startup, replacing the stub System_Init. FrameTimer now uses std::chrono for accurate delta time measurement instead of hardcoded 1/60.
+
+### Files Modified (4 files)
+
+| File | Changes |
+|------|---------|
+| `data/src/game/EGG/FrameTimer.cpp` | +pcGetTick() using std::chrono, real tick acquisition in beginFrame/endFrame, init() sets VSync interval, FPS from real elapsed ticks |
+| `src/main.cpp` | +System_Init() creates 32MB root ExpHeap, +FrameTimer beginFrame/endFrame in main loop, include Heap_Classes.hpp + FrameTimer.hpp |
+| `CMakeLists.txt` | +data/src/game/Runtime in mkwii-port include paths |
+| `worklog.md` | Phase 12 worklog entry |
+
+### System_Init() Design
+- Allocates 32MB from OS via malloc (replaces Wii's MEM1 24MB + MEM2 56MB)
+- Creates EGG::ExpHeap via ExpHeap::create() in the allocated region
+- Sets root heap as EGG::Heap::sCurrentHeap for global allocation
+- Total free size logged at startup (~32MB minus ExpHeap overhead)
+
+### FrameTimer Real-Time Acquisition
+- pcGetTick(): std::chrono::steady_clock → nanoseconds → Broadway ticks (937.5 MHz)
+- beginFrame(): Records real tick at frame start
+- endFrame(): Computes diff = mEndTick - mStartTick, converts to seconds via ticksToSeconds()
+- Fallback: If diff <= 0, uses default interval (1/60)
+- FPS measurement: Real elapsed ticks / frame count, rolling 70/30 average
+
+### Build & Validation
+- Build: **0 errors, 0 warnings** across all 4 targets
+- Physics tests: **56/56 passed**
+- Commit: 691886f7
+
+### Stage Summary
+- Phase 12 (System Init + FrameTimer): COMPLETE
+- Next: SceneGraph integration, RaceScene→SceneBase3D migration

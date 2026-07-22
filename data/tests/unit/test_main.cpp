@@ -11,10 +11,11 @@ void test_item_probability();
 void test_drift_mechanics();
 void test_offroad();
 void test_handling();
+void test_heap_allocators();
 
 int main() {
     printf("==========================================================\n");
-    printf("  Mario Kart Wii — Physics Validation Test Suite\n");
+    printf("  Mario Kart Wii — Validation Test Suite\n");
     printf("  MAESTRO Phase 6: NEWTON Agent\n");
     printf("==========================================================\n");
 
@@ -24,6 +25,7 @@ int main() {
     test_drift_mechanics();
     test_offroad();
     test_handling();
+    test_heap_allocators();
 
     int total = g_passed + g_failed + g_skipped;
     printf("\n==========================================================\n");

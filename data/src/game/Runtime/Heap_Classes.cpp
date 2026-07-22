@@ -77,11 +77,15 @@ ExpHeap* ExpHeap::create(void* addr, u32 size, Heap* parent) {
     ExpHeap* heap = nullptr;
 
     // Round to 4-byte alignment (matches EXP_HEAP_ALIGN in decompiled code)
-    u32 heapEnd = (static_cast<u32>(reinterpret_cast<uintptr_t>(addr) + size)) & ~3u;
-    u32 heapStart = (static_cast<u32>(reinterpret_cast<uintptr_t>(addr)) + 3u) & ~3u;
+    // NOTE: Use uintptr_t for address arithmetic to work correctly on 64-bit platforms.
+    //       The original Wii code used 32-bit pointers; on PC (x86-64) we must
+    //       preserve full 64-bit addresses to avoid truncation crashes.
+    uintptr_t addrVal = reinterpret_cast<uintptr_t>(addr);
+    uintptr_t heapEnd = (addrVal + static_cast<uintptr_t>(size)) & ~(uintptr_t)3;
+    uintptr_t heapStart = (addrVal + 3) & ~(uintptr_t)3;
 
     // Minimum: ExpHeap object + one MemoryBlock header + at least 4 bytes data
-    u32 minSize = sizeof(ExpHeap) + sizeof(MemoryBlock) + 4;
+    uintptr_t minSize = sizeof(ExpHeap) + sizeof(MemoryBlock) + 4;
 
     if (heapStart > heapEnd || heapEnd - heapStart < minSize) {
         return nullptr;
@@ -392,16 +396,57 @@ void ExpHeap::free(void* ptr) {
     block->mFlags = MemoryBlock::BLOCK_FREE;
     block->mGroupID = 0;
 
-    // Insert at head of free list
-    block->mPrev = nullptr;
-    block->mNext = mFreeHead;
-    if (mFreeHead)
-        mFreeHead->mPrev = block;
-    mFreeHead = block;
+    // Insert into free list, maintaining address order for coalescing.
+    // Find insertion point: the first free block whose start > block->start.
+    MemoryBlock* insertAfter = nullptr;
+    for (MemoryBlock* cur = mFreeHead; cur != nullptr; cur = cur->mNext) {
+        if (reinterpret_cast<uintptr_t>(cur->mStart) >
+            reinterpret_cast<uintptr_t>(block->mStart)) {
+            break;
+        }
+        insertAfter = cur;
+    }
+
+    if (insertAfter) {
+        block->mPrev = insertAfter;
+        block->mNext = insertAfter->mNext;
+        if (insertAfter->mNext)
+            insertAfter->mNext->mPrev = block;
+        insertAfter->mNext = block;
+    } else {
+        block->mPrev = nullptr;
+        block->mNext = mFreeHead;
+        if (mFreeHead)
+            mFreeHead->mPrev = block;
+        mFreeHead = block;
+    }
+
+    // Coalesce with next block if adjacent
+    if (block->mNext &&
+        static_cast<u8*>(block->mEnd) == static_cast<u8*>(block->mNext->mStart)) {
+        MemoryBlock* next = block->mNext;
+        block->mEnd = next->mEnd;
+        block->mNext = next->mNext;
+        if (next->mNext)
+            next->mNext->mPrev = block;
+        // The merged free space: next->mStart..next->mEnd was already counted
+        // in mTotalFreeSize; the gap between block->mEnd and next->mStart
+        // (which is 0 here) needs no adjustment.
+    }
+
+    // Coalesce with previous block if adjacent
+    if (block->mPrev &&
+        static_cast<u8*>(block->mPrev->mEnd) == static_cast<u8*>(block->mStart)) {
+        MemoryBlock* prev = block->mPrev;
+        prev->mEnd = block->mEnd;
+        prev->mNext = block->mNext;
+        if (block->mNext)
+            block->mNext->mPrev = prev;
+    }
 
     // Debug fill pattern (original: 0xBAADF00D)
     if (hasFlag(FLAG_DEBUG_FILL))
-        std::memset(block->mStart, 0xBA, blockSize);
+        std::memset(ptr, 0xBA, blockSize);
 }
 
 // @addr 0x8045b070 — destroy this ExpHeap
@@ -624,10 +669,18 @@ u32 ExpHeap::getTotalUsedSize() const {
 }
 
 // @addr 0x8045a88c — free all blocks in a group
-// No direct decompiled source.
+// Iterates the used block list and frees every block whose mGroupID matches.
+// This is used by the EGG::GroupHeap to batch-free allocations tagged with
+// the same group identifier (e.g., all objects for a destroyed scene).
 void ExpHeap::freeGroup(u16 groupID) {
-    UNUSED(groupID);
-    // Would iterate mUsedHead and free blocks where mGroupID matches
+    MemoryBlock* block = mUsedHead;
+    while (block != nullptr) {
+        MemoryBlock* next = block->mNext;
+        if (block->mGroupID == groupID) {
+            free(block->mStart);
+        }
+        block = next;
+    }
 }
 
 // @addr 0x8045973c — find the heap containing a pointer
@@ -675,9 +728,28 @@ FrameHeap* FrameHeap::create(Heap* parent, u32 size, s32 align) {
 }
 
 void* FrameHeap::alloc(u32 size, s32 align) {
-    // @addr 0x8045cb40 — no decompiled source
-    UNUSED(size); UNUSED(align);
-    return nullptr;
+    // @addr 0x8045cb40 — MEMAllocFromFrmHeap
+    // Bump allocator: advances watermark forward by (alignment + size).
+    // Individual free is not supported — use freeAll() or restoreState().
+    if (size == 0) return nullptr;
+    if (align < 4) align = 4;
+
+    u8* wm = static_cast<u8*>(mWatermark);
+    u8* heapEnd = static_cast<u8*>(mEnd);
+
+    // Align the watermark
+    uintptr_t wmVal = reinterpret_cast<uintptr_t>(wm);
+    uintptr_t alignedVal = (wmVal + static_cast<uintptr_t>(align) - 1)
+                           & ~(static_cast<uintptr_t>(align) - 1);
+    u8* userAddr = reinterpret_cast<u8*>(alignedVal);
+
+    // Check if there's enough space
+    if (userAddr + size > heapEnd) {
+        return nullptr; // Out of memory in this frame heap
+    }
+
+    mWatermark = userAddr + size;
+    return userAddr;
 }
 
 void FrameHeap::free(void* ptr) {

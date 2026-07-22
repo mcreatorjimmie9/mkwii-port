@@ -291,7 +291,7 @@ private:
     mutable u32 mCollectedCount;
 
     // Cached sphere query state (matches RKGndCol cache pattern)
-    static const u32 PRISM_CACHE_SIZE = 256;
+    static constexpr u32 PRISM_CACHE_SIZE = 256;
     u32 mPrismCache[PRISM_CACHE_SIZE];  // Cached prism indices
     u32 mPrismCacheCount;               // Number of cached prisms
     EGG::Vector3f mCachedPos;           // Cached query position
