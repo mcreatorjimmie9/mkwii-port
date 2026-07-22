@@ -231,6 +231,11 @@ void Layout::updateAnimations(f32 deltaTime) {
 // In the original game, nw4r::lyt::Layout::BuildFromMemory() does
 // the same thing: parse the binary → create Pane objects → register with
 // the layout's pane tree.
+//
+// Phase 11: Layout::parse() validates the BRLYT header and extracts
+// section offsets. The actual pane tree construction is done by the
+// LayoutLoader (platform layer) which calls setParsedPaneCount() and
+// setParsedLayout() after using BrlytParser.
 
 void Layout::parse(const void* data, u32 size) {
     if (!data || size < 16) return;
@@ -248,30 +253,34 @@ void Layout::parse(const void* data, u32 size) {
         return;
     }
 
-    // Phase 10: Full BRLYT parsing via BrlytParser
-    // The parser is available in the platform loader layer (src/loaders/).
-    // In a full integration, Layout::parse() would call through to
-    // LayoutLoader which uses BrlytParser to extract the pane tree.
+    // Phase 11: Validate BRLYT header and extract section offsets.
+    // The BrlytParser in the platform layer will do the full pane tree
+    // extraction and call setParsedPaneCount() / setParsedLayout().
+    // Here we just validate the header is parseable.
     //
-    // For now, we count panes from the header and mark sections as valid.
-    // The actual J2DPane tree construction from parsed BrlytLayout data
-    // will be done when LayoutLoader::loadFromFile() is called.
-    //
-    // Count estimated panes (simplified: count byte pattern 0x00-0x06
-    // as pane type bytes in the lyt1 section)
-    mGroupCount = 0;
-    for (u32 i = 16; i + 1 < size; i++) {
-        u8 b = ptr[i];
-        if (b <= 6) { // Valid pane type range
-            // Check if this looks like the start of a pane entry
-            // (pane entries are spaced at least 40+ bytes apart)
-            mGroupCount++;
-            i += 39; // Skip past the estimated pane entry
-        }
+    // BRLYT header: magic(4) + fileSize(4) + revision(2) + version(3) + pad(3)
+    //              + lyt1_offset(4) + sectionCount(2) + pad(2) + pan1/mat1/txl1/fnt1/pas1
+    if (size < 0x34) {
+        mGroupCount = 0;
+        mState = LAYOUT_STATE_ACTIVE;
+        return;
     }
-    if (mGroupCount > 64) mGroupCount = 64;
+
+    // Read section count for initial capacity estimate
+    u16 sectionCount = (u16(ptr[0x14]) << 8) | u16(ptr[0x15]);
+    mGroupCount = sectionCount > 0 ? sectionCount : 1;
+    if (mGroupCount > 128) mGroupCount = 128;
 
     mState = LAYOUT_STATE_ACTIVE;
+}
+
+// Phase 11: Called by LayoutLoader (platform layer) after BrlytParser
+// completes full pane tree extraction. Updates the pane count
+// with the actual parsed value.
+void Layout::setParsedPaneCount(u32 count) {
+    if (count > 0 && count < 256) {
+        mGroupCount = count;
+    }
 }
 
 // --- Layout queries ---

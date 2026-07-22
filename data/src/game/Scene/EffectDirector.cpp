@@ -86,6 +86,7 @@ void EffectDirector::init() {
     m_loadedEffectCount = 0;
     m_breffEffectCount = 0;
     m_breftTextureCount = 0;
+    m_texUploadFn = nullptr;
 
     for (u32 i = 0; i < MAX_LOADED_EFFECTS; i++) {
         m_loadedEffectData[i] = nullptr;
@@ -93,6 +94,8 @@ void EffectDirector::init() {
         m_loadedEffectValid[i] = false;
         m_loadedEffectParsed[i] = false;
         memset(m_loadedEffectNames[i], 0, sizeof(m_loadedEffectNames[i]));
+        memset(&m_parsedTemplates[i], 0, sizeof(BreffParsedTemplate));
+        m_parsedTemplates[i].valid = false;
     }
 
     for (u32 i = 0; i < MAX_BREFT_TEXTURES; i++) {
@@ -101,6 +104,8 @@ void EffectDirector::init() {
         m_breftTextures[i].width = 0;
         m_breftTextures[i].height = 0;
         memset(m_breftTextures[i].name, 0, sizeof(m_breftTextures[i].name));
+        m_breftRGBAData[i] = nullptr;
+        m_breftRGBASize[i] = 0;
     }
 
     m_initialized = true;
@@ -115,6 +120,15 @@ void EffectDirector::shutdown() {
         if (m_loadedEffectData[i]) {
             delete[] static_cast<u8*>(m_loadedEffectData[i]);
             m_loadedEffectData[i] = nullptr;
+        }
+        m_parsedTemplates[i].valid = false;
+    }
+
+    // Free BREFT texture RGBA data
+    for (u32 i = 0; i < MAX_BREFT_TEXTURES; i++) {
+        if (m_breftRGBAData[i]) {
+            delete[] m_breftRGBAData[i];
+            m_breftRGBAData[i] = nullptr;
         }
     }
 
@@ -169,11 +183,10 @@ u32 EffectDirector::createEmitter(EffectType type, const Vec3& position,
     e.resource = nullptr;
     e.breffBound = false;
 
-    // Check if there's a parsed BREFF template for this effect type
+    // Phase 11: Bind parsed BREFF template to this emitter
     u32 effectId = static_cast<u32>(type) % MAX_LOADED_EFFECTS;
-    if (m_loadedEffectParsed[effectId]) {
-        e.breffBound = true;
-        e.resource = m_loadedEffectData[effectId];
+    if (m_loadedEffectParsed[effectId] && m_parsedTemplates[effectId].valid) {
+        bindTemplateToEmitter(e, effectId);
     }
 
     m_activeEmitterCount++;
@@ -776,40 +789,62 @@ bool EffectDirector::parseBreffEffect(u32 effectId) {
                     switch (paramTag) {
                         case 0x45465244: { // "EFRD" — Emitter base data
                             if (pDataSize >= 16) {
-                                // Store in a temporary — will bind on next createEmitter()
+                                BreffParsedTemplate& tmpl = m_parsedTemplates[slot];
+                                tmpl.emitRate = breffReadBE32f(pData + 0);
+                                tmpl.emitLife = breffReadBE32f(pData + 4);
+                                tmpl.maxParticles = breffReadBE16(pData + 8);
                                 printf("[EffectDirector]   EFRD: emitRate=%.2f, life=%.2f, maxP=%u\n",
-                                       (double)breffReadBE32f(pData + 0),
-                                       (double)breffReadBE32f(pData + 4),
-                                       breffReadBE16(pData + 8));
+                                       (double)tmpl.emitRate, (double)tmpl.emitLife, tmpl.maxParticles);
                             }
                             break;
                         }
                         case 0x50545250: { // "PTRP" — Particle properties
                             if (pDataSize >= 32) {
+                                BreffParsedTemplate& tmpl = m_parsedTemplates[slot];
+                                tmpl.lifeMin = breffReadBE32f(pData + 0);
+                                tmpl.lifeMax = breffReadBE32f(pData + 4);
+                                tmpl.speedMin = breffReadBE32f(pData + 8);
+                                tmpl.speedMax = breffReadBE32f(pData + 12);
+                                tmpl.sizeMin = breffReadBE32f(pData + 16);
+                                tmpl.sizeMax = breffReadBE32f(pData + 20);
+                                tmpl.gravity = breffReadBE32f(pData + 24);
+                                tmpl.airResistance = (pDataSize >= 28) ? breffReadBE32f(pData + 28) : 0.0f;
                                 printf("[EffectDirector]   PTRP: life=[%.2f,%.2f] speed=[%.2f,%.2f] size=[%.2f,%.2f] grav=%.2f damp=%.2f\n",
-                                       (double)breffReadBE32f(pData + 0),
-                                       (double)breffReadBE32f(pData + 4),
-                                       (double)breffReadBE32f(pData + 8),
-                                       (double)breffReadBE32f(pData + 12),
-                                       (double)breffReadBE32f(pData + 16),
-                                       (double)breffReadBE32f(pData + 20),
-                                       (double)breffReadBE32f(pData + 24),
-                                       (double)(pDataSize >= 28 ? breffReadBE32f(pData + 28) : 0.0f));
+                                       (double)tmpl.lifeMin, (double)tmpl.lifeMax,
+                                       (double)tmpl.speedMin, (double)tmpl.speedMax,
+                                       (double)tmpl.sizeMin, (double)tmpl.sizeMax,
+                                       (double)tmpl.gravity, (double)tmpl.airResistance);
                             }
                             break;
                         }
                         case 0x44524157: { // "DRAW" — Drawing parameters
                             if (pDataSize >= 12) {
+                                BreffParsedTemplate& tmpl = m_parsedTemplates[slot];
+                                tmpl.drawMethod = pData[0];
+                                tmpl.blendMode = pData[1];
+                                tmpl.billboardSize = breffReadBE32f(pData + 4);
+                                tmpl.textureIndex = (pDataSize >= 14) ? breffReadBE16(pData + 12) : 0;
                                 printf("[EffectDirector]   DRAW: method=%u blend=%u bbSize=%.2f texIdx=%u\n",
-                                       pData[0], pData[1],
-                                       (double)breffReadBE32f(pData + 4),
-                                       (pDataSize >= 14 ? breffReadBE16(pData + 12) : 0));
+                                       tmpl.drawMethod, tmpl.blendMode,
+                                       (double)tmpl.billboardSize, tmpl.textureIndex);
                             }
                             break;
                         }
                         case 0x53484150: { // "SHAP" — Emission shape
                             if (pDataSize >= 4) {
-                                printf("[EffectDirector]   SHAP: type=%u\n", pData[0]);
+                                BreffParsedTemplate& tmpl = m_parsedTemplates[slot];
+                                tmpl.shapeType = pData[0];
+                                // Read up to 6 shape params (f32 each)
+                                u32 nParams = (pDataSize - 1) / 4;
+                                if (nParams > 6) nParams = 6;
+                                for (u32 pi = 0; pi < nParams; pi++) {
+                                    tmpl.shapeParams[pi] = breffReadBE32f(pData + 4 + pi * 4);
+                                }
+                                printf("[EffectDirector]   SHAP: type=%u params=[%.1f,%.1f,%.1f,%.1f,%.1f,%.1f]\n",
+                                       tmpl.shapeType,
+                                       (double)tmpl.shapeParams[0], (double)tmpl.shapeParams[1],
+                                       (double)tmpl.shapeParams[2], (double)tmpl.shapeParams[3],
+                                       (double)tmpl.shapeParams[4], (double)tmpl.shapeParams[5]);
                             }
                             break;
                         }
@@ -830,13 +865,64 @@ bool EffectDirector::parseBreffEffect(u32 effectId) {
 
     if (foundEmitter) {
         m_loadedEffectParsed[slot] = true;
+        m_parsedTemplates[slot].valid = true;
         m_breffEffectCount++;
-        printf("[EffectDirector] Successfully parsed BREFF effect %u\n", effectId);
+        printf("[EffectDirector] Successfully parsed BREFF effect %u (template stored)\n", effectId);
     } else {
         printf("[EffectDirector] No emitter templates found in BREFF effect %u\n", effectId);
     }
 
     return foundEmitter;
+}
+
+// =============================================================================
+// bindTemplateToEmitter — Copy parsed BREFF template values to an emitter
+//
+// Phase 11: This bridges the gap between parseBreffEffect() (which now stores
+// values in m_parsedTemplates[slot]) and spawnParticleFromBreff() (which reads
+// emitter.breff* fields). Without this, parsed BREFF data was lost.
+// =============================================================================
+void EffectDirector::bindTemplateToEmitter(EffectEmitter& emitter, u32 slot) {
+    if (slot >= MAX_LOADED_EFFECTS) return;
+    const BreffParsedTemplate& tmpl = m_parsedTemplates[slot];
+    if (!tmpl.valid) return;
+
+    emitter.breffBound = true;
+    emitter.resource = m_loadedEffectData[slot];
+    emitter.emitRate = tmpl.emitRate > 0.0f ? tmpl.emitRate : emitter.emitRate;
+    emitter.maxParticles = tmpl.maxParticles > 0 ? tmpl.maxParticles : emitter.maxParticles;
+
+    emitter.breffEmitRate = tmpl.emitRate;
+    emitter.breffInitLifeMin = tmpl.lifeMin;
+    emitter.breffInitLifeMax = tmpl.lifeMax;
+    emitter.breffInitSpeedMin = tmpl.speedMin;
+    emitter.breffInitSpeedMax = tmpl.speedMax;
+    emitter.breffInitSizeMin = tmpl.sizeMin;
+    emitter.breffInitSizeMax = tmpl.sizeMax;
+    emitter.breffGravity = tmpl.gravity;
+    emitter.breffAirResistance = tmpl.airResistance;
+    emitter.breffDrawMethod = tmpl.drawMethod;
+    emitter.breffBlendMode = tmpl.blendMode;
+    emitter.breffBillboardSize = tmpl.billboardSize;
+    emitter.breffTextureIndex = tmpl.textureIndex;
+    emitter.breffShapeType = tmpl.shapeType;
+
+    for (s32 i = 0; i < 6; i++) {
+        emitter.breffShapeParams[i] = tmpl.shapeParams[i];
+    }
+
+    for (s32 i = 0; i < 8; i++) {
+        for (s32 c = 0; c < 4; c++) {
+            emitter.breffColorKeys[i][c] = tmpl.colorKeys[i][c];
+        }
+        emitter.breffSizeKeys[i] = tmpl.sizeKeys[i];
+        emitter.breffAlphaKeys[i] = tmpl.alphaKeys[i];
+    }
+    emitter.breffColorKeyCount = tmpl.colorKeyCount;
+    emitter.breffSizeKeyCount = tmpl.sizeKeyCount;
+
+    printf("[EffectDirector] Bound BREFF template %u to emitter: rate=%.1f life=[%.2f,%.2f] grav=%.1f\n",
+           slot, (double)tmpl.emitRate, (double)tmpl.lifeMin, (double)tmpl.lifeMax, (double)tmpl.gravity);
 }
 
 // =============================================================================
@@ -850,10 +936,19 @@ void EffectDirector::storeBreftTexture(u32 texIndex, const void* rgbaData,
 
     u32 slot = texIndex % MAX_BREFT_TEXTURES;
 
-    // Mark as valid (texture data is NOT copied here — the caller retains
-    // ownership. In production, the platform renderer would upload to GL
-    // immediately and we'd store only the GL texture ID.)
-    m_breftTextures[slot].glTexId = 0; // Not yet uploaded
+    // Free any previously retained data
+    if (m_breftRGBAData[slot]) {
+        delete[] m_breftRGBAData[slot];
+        m_breftRGBAData[slot] = nullptr;
+    }
+
+    // Retain a copy of the RGBA pixel data (for later re-upload or platform use)
+    m_breftRGBAData[slot] = new u8[dataSize];
+    memcpy(m_breftRGBAData[slot], rgbaData, dataSize);
+    m_breftRGBASize[slot] = dataSize;
+
+    // Store metadata
+    m_breftTextures[slot].glTexId = 0; // Will be set by upload callback
     m_breftTextures[slot].width = width;
     m_breftTextures[slot].height = height;
     m_breftTextures[slot].valid = true;
@@ -870,6 +965,11 @@ void EffectDirector::storeBreftTexture(u32 texIndex, const void* rgbaData,
 
     printf("[EffectDirector] Stored BREFT texture %u: '%s' (%ux%u, %u bytes)\n",
            slot, name ? name : "unnamed", width, height, dataSize);
+
+    // Phase 11: If a platform-layer upload callback is registered, call it now
+    if (m_texUploadFn) {
+        m_texUploadFn(slot, m_breftRGBAData[slot], width, height, name);
+    }
 }
 
 const BreffTextureHandle* EffectDirector::getBreftTexture(u32 texIndex) const {

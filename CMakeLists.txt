@@ -506,6 +506,8 @@ set(APP_SOURCES
     # Bridge layer: Player class + SceneRace (uses platform headers)
     data/src/game/Player/Player.cpp
     data/src/game/Scene/SceneRace.cpp
+    # Phase 11: EffectsManager (screen-space vignette/flash effects)
+    src/game/EffectsManager.cpp
     # PAD/KPAD shim bridge to Platform::InputManager
     src/modules/shims/pad_bridge.cpp
 )

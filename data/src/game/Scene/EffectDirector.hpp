@@ -208,6 +208,13 @@ public:
     /// Check if any BREFF effects have been successfully parsed.
     bool hasBreffEffects() const { return m_breffEffectCount > 0; }
 
+    // Phase 11: Platform-layer texture upload callback.
+    // Set by the platform layer to upload BREFT RGBA data to GPU.
+    // If set, storeBreftTexture() calls this with the decoded pixel data.
+    typedef void (*TexUploadFn)(u32 texIndex, const void* rgba,
+                                  u16 width, u16 height, const char* name);
+    void setTexUploadCallback(TexUploadFn fn) { m_texUploadFn = fn; }
+
 private:
     static const u32 MAX_EMITTERS = 128;
     static const u32 MAX_PARTICLES = 8192;
@@ -249,10 +256,43 @@ private:
     u32  m_loadedEffectCount;
     u32  m_breffEffectCount; // Number of successfully parsed BREFF effects
 
-    // BREFT texture storage (Phase 9)
+    // Phase 11: Parsed BREFF emitter template — stores extracted EFRD/PTRP/DRAW/SHAP
+    // data so createEmitter() can bind it to new EffectEmitter instances.
+    struct BreffParsedTemplate {
+        f32 emitRate;           // EFRD
+        f32 emitLife;           // EFRD
+        u16 maxParticles;       // EFRD
+        f32 lifeMin, lifeMax;   // PTRP
+        f32 speedMin, speedMax; // PTRP
+        f32 sizeMin, sizeMax;   // PTRP
+        f32 gravity;            // PTRP
+        f32 airResistance;      // PTRP
+        u8  drawMethod;         // DRAW
+        u8  blendMode;          // DRAW
+        f32 billboardSize;      // DRAW
+        u16 textureIndex;      // DRAW
+        u8  shapeType;          // SHAP
+        f32 shapeParams[6];     // SHAP
+        f32 colorKeys[8][4];    // ANIM (RGBA per keyframe)
+        f32 sizeKeys[8];        // ANIM
+        f32 alphaKeys[8];       // ANIM
+        u8  colorKeyCount;
+        u8  sizeKeyCount;
+        u8  alphaKeyCount;
+        bool valid;
+    };
+    BreffParsedTemplate m_parsedTemplates[MAX_LOADED_EFFECTS];
+
+    // Phase 11: Helper to bind parsed template to emitter
+    void bindTemplateToEmitter(EffectEmitter& emitter, u32 slot);
+
+    // BREFT texture storage (Phase 9, enhanced Phase 11)
     static const u32 MAX_BREFT_TEXTURES = 64;
     BreffTextureHandle m_breftTextures[MAX_BREFT_TEXTURES];
+    u8*  m_breftRGBAData[MAX_BREFT_TEXTURES]; // Retained RGBA pixel data
+    u32  m_breftRGBASize[MAX_BREFT_TEXTURES];
     u32 m_breftTextureCount;
+    TexUploadFn m_texUploadFn; // Platform-layer upload callback
 };
 
 } // namespace Scene

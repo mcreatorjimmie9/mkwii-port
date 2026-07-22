@@ -406,6 +406,32 @@ void BrlytParser::parsePaneTree(const u8* data, u32 size) {
     parsePaneRecursive(data, 8, sectionSize, 0xFFFFFFFF, 0);
 }
 
+// =============================================================================
+// Pane entry size computation
+//
+// In BRLYT, each pane entry has a known structure:
+//   - Base: type(1) + flags(1) + alpha(1) + nameIdx(2) + userData(1) + pad(3) = 8
+//   - Position/rotation/scale/size: 7 × f32 = 28
+//   - Type-specific: varies (0 for base, 20 for picture, 16 for textbox, 48 for window)
+//
+// Total base = 8 + 28 = 36 bytes, plus type-specific extras.
+// =============================================================================
+static u32 computePaneEntrySize(BrlytPaneType type) {
+    u32 base = 36; // type(1) + common(8) + transforms(28) - type byte counted in common
+    // Actually: type(1) + flags(1) + alpha(1) + nameIdx(2) + userData(1) + pad(3) + 7*f32(28) = 37
+    // Let's be precise: offset starts at type byte.
+    // After reading type(1), we read 8 bytes (flags..padding2) + 7*f32 (pos/rot/scale/size)
+    // = 1 + 8 + 28 = 37 bytes for base pane
+    u32 size = 37;
+    switch (type) {
+        case BRLYT_PANE_PICTURE:   size += 20; break; // 4*f32 UV + 2*u16 material+pad
+        case BRLYT_PANE_TEXTBOX:   size += 16; break; // 2*u16 font/align + 2*f32 line/char + 2*u16 max/pad
+        case BRLYT_PANE_WINDOW:    size += 48; break; // 4*f32 frame + 16*u8 colors + u16 content
+        default: break;
+    }
+    return size;
+}
+
 void BrlytParser::parsePaneRecursive(const u8* data, u32 offset, u32 sectionSize,
                                        u32 parentIndex, u32 depth) {
     if (depth > 32 || offset + 4 > sectionSize) return; // Safety limit
@@ -499,33 +525,38 @@ void BrlytParser::parsePaneRecursive(const u8* data, u32 offset, u32 sectionSize
     m_layout.panes.push_back(pane);
 
     // Recursively parse children.
-    // In BRLYT, children follow the parent's data.
-    // The exact mechanism depends on version:
-    //   - Each child's data follows immediately after the parent's type-specific data
-    //   - We use a heuristic: after reading the parent's data, there should be
-    //     another pane type byte if children exist
-    //
-    // Simple approach: scan ahead for valid pane type bytes (0-6)
-    // and recursively parse each as a child.
+    // In BRLYT, children follow the parent's data immediately.
+    // We know the parent consumed `computePaneEntrySize(pane.type)` bytes,
+    // so children start right after.
     if (depth < 32) {
-        // Estimate where children might start (after type-specific data)
-        u32 childScanStart = offset + 8 + 32 + 16; // conservative: base(8+32) + max type data(16)
-        while (childScanStart + 4 <= sectionSize) {
-            u8 nextType = data[childScanStart];
+        u32 childStart = offset + computePaneEntrySize(pane.type);
+        u32 remaining = sectionSize - childStart;
+
+        // Try to parse children: each child is a pane entry that starts
+        // with a valid type byte (0-6). After each child (and its subtree),
+        // advance by the child's entry size.
+        while (remaining >= 37 && childStart + 4 <= sectionSize) {
+            u8 nextType = data[childStart];
             if (nextType <= BRLYT_PANE_SCREEN_CAPTURE) {
-                parsePaneRecursive(data, childScanStart, sectionSize,
+                parsePaneRecursive(data, childStart, sectionSize,
                                      paneIndex, depth + 1);
-                // After parsing a child (and its subtree), advance past it
-                // The parsePaneRecursive will have consumed the child's data
-                // We need to figure out how much it consumed...
-                // This is the tricky part of BRLYT parsing: without knowing
-                // each child's exact size, we rely on recursive parsing
-                // which naturally advances the offset.
-                // For now, we break after one child to avoid over-parsing.
-                // Real implementation would track consumed bytes.
+                // Advance past this child and all its descendants.
+                // The child consumed computePaneEntrySize(childType) bytes
+                // plus all its own children. We need to compute the total.
+                // Since parsePaneRecursive added panes to m_layout.panes,
+                // we can compute the span: from childStart to the end of
+                // the last pane that was added as a descendant.
+                //
+                // Simpler approach: compute the immediate child's entry size,
+                // then check if there are more panes after it.
+                u32 childEntrySize = computePaneEntrySize(
+                    static_cast<BrlytPaneType>(nextType));
+                childStart += childEntrySize;
+                remaining = sectionSize - childStart;
+            } else {
+                // Not a valid pane type byte — no more children
                 break;
             }
-            childScanStart += 1;
         }
     }
 }

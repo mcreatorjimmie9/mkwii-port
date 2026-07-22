@@ -68,6 +68,9 @@ public:
     // Layout data parsing
     void parse(const void* data, u32 size);
 
+    // Phase 11: Called by LayoutLoader after BrlytParser completes.
+    void setParsedPaneCount(u32 count);
+
     // Layout queries
     u32 getPaneCount() const { return mGroupCount; }
     u32 getAnimationCount() const { return 0; }
