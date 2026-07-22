@@ -558,6 +558,8 @@ set(LOADERS_SOURCES
     src/loaders/szs_reader.cpp
     src/loaders/kmp_loader.cpp
     src/loaders/kcl_loader.cpp
+    src/loaders/breff_loader.cpp
+    src/loaders/breft_loader.cpp
     src/loaders/track_manager.cpp
 )
 add_library(mkwii-loaders STATIC ${LOADERS_SOURCES})

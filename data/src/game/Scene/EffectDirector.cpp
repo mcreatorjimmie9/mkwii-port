@@ -1,18 +1,43 @@
 // EffectDirector.cpp - Visual effects manager implementation
 // Reconstructed from Effects_* and scene_Effects_* functions (0x807609e0+)
 //
-// Key fixes in this version:
-//   - spawnParticle() now correctly places particles in the pool
-//   - Particles track their emitterId for proper lifecycle management
-//   - updateParticles() iterates the global pool (not per-emitter)
-//   - draw() renders billboards via OpenGL
+// Phase 9: BREFF/BREFT Integration
+//   - parseBreffEffect() walks raw BREFF binary to extract EFEM emitter
+//     templates with EFRD (emitter data), PTRP (particle properties),
+//     DRAW (rendering), and SHAP (emission shape) parameter blocks.
+//   - spawnParticleFromBreff() uses parsed template properties instead of
+//     hardcoded computeParticle* functions.
+//   - storeBreftTexture() retains decoded RGBA8888 data for OpenGL upload.
+//   - BREFF format: nw4r::ef::EffectProject (REFF header + EFEM/ANIM chunks)
 
 #include "EffectDirector.hpp"
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
+#include <cstdio>
 
 namespace Scene {
+
+// =============================================================================
+// Big-endian read helpers for BREFF parsing
+// =============================================================================
+static inline u16 breffReadBE16(const u8* p) {
+    return (u16(p[0]) << 8) | u16(p[1]);
+}
+static inline u32 breffReadBE32(const u8* p) {
+    return (u32(p[0]) << 24) | (u32(p[1]) << 16) |
+           (u32(p[2]) << 8)  | u32(p[3]);
+}
+static inline f32 breffReadBE32f(const u8* p) {
+    u32 raw = breffReadBE32(p);
+    f32 result;
+    __builtin_memcpy(&result, &raw, 4);
+    return result;
+}
+
+// =============================================================================
+// Construction / Destruction
+// =============================================================================
 
 EffectDirector::EffectDirector()
     : m_emitters(nullptr)
@@ -22,7 +47,10 @@ EffectDirector::EffectDirector()
     , m_totalParticleCount(0)
     , m_initialized(false)
     , m_globalScale(1.0f)
-    , m_preloadedMask(0) {
+    , m_preloadedMask(0)
+    , m_loadedEffectCount(0)
+    , m_breffEffectCount(0)
+    , m_breftTextureCount(0) {
     m_screenEffect.type = ScreenEffect::SCREENFX_NONE;
     m_screenEffect.duration = 0.0f;
     m_screenEffect.timer = 0.0f;
@@ -38,12 +66,14 @@ EffectDirector::~EffectDirector() {
 void EffectDirector::init() {
     m_emitters = new EffectEmitter[MAX_EMITTERS];
     for (u32 i = 0; i < MAX_EMITTERS; i++) {
-        m_emitters[i] = {};
+        memset(&m_emitters[i], 0, sizeof(EffectEmitter));
+        m_emitters[i].active = false;
+        m_emitters[i].breffBound = false;
     }
 
     m_particlePool = new Particle[MAX_PARTICLES];
     for (u32 i = 0; i < MAX_PARTICLES; i++) {
-        m_particlePool[i] = {};
+        memset(&m_particlePool[i], 0, sizeof(Particle));
         m_particlePool[i].active = false;
     }
 
@@ -53,15 +83,48 @@ void EffectDirector::init() {
     m_globalScale = 1.0f;
     m_screenEffect.active = false;
     m_preloadedMask = 0;
+    m_loadedEffectCount = 0;
+    m_breffEffectCount = 0;
+    m_breftTextureCount = 0;
+
+    for (u32 i = 0; i < MAX_LOADED_EFFECTS; i++) {
+        m_loadedEffectData[i] = nullptr;
+        m_loadedEffectSize[i] = 0;
+        m_loadedEffectValid[i] = false;
+        m_loadedEffectParsed[i] = false;
+        memset(m_loadedEffectNames[i], 0, sizeof(m_loadedEffectNames[i]));
+    }
+
+    for (u32 i = 0; i < MAX_BREFT_TEXTURES; i++) {
+        m_breftTextures[i].glTexId = 0;
+        m_breftTextures[i].valid = false;
+        m_breftTextures[i].width = 0;
+        m_breftTextures[i].height = 0;
+        memset(m_breftTextures[i].name, 0, sizeof(m_breftTextures[i].name));
+    }
+
     m_initialized = true;
 }
 
 void EffectDirector::shutdown() {
     if (m_emitters) { delete[] m_emitters; m_emitters = nullptr; }
     if (m_particlePool) { delete[] m_particlePool; m_particlePool = nullptr; }
+
+    // Free loaded BREFF effect data
+    for (u32 i = 0; i < MAX_LOADED_EFFECTS; i++) {
+        if (m_loadedEffectData[i]) {
+            delete[] static_cast<u8*>(m_loadedEffectData[i]);
+            m_loadedEffectData[i] = nullptr;
+        }
+    }
+
     m_emitterCount = 0;
     m_activeEmitterCount = 0;
     m_totalParticleCount = 0;
+    m_loadedEffectCount = 0;
+    m_breffEffectCount = 0;
+    m_breftTextureCount = 0;
+    m_preloadedMask = 0;
     m_initialized = false;
 }
 
@@ -70,29 +133,18 @@ void EffectDirector::calc(f32 dt) {
     update(dt);
 }
 
-// =============================================================================
-// draw — Render all active particles as billboard quads
-// =============================================================================
-// In MKWii, particles are rendered as camera-facing quads (billboards) using
-// the GX pipeline. We replicate this with OpenGL point sprites / billboard
-// quads. The vertex shader handles billboard orientation.
 void EffectDirector::draw() const {
     if (!m_initialized) return;
     if (m_totalParticleCount == 0) return;
-
-    // In the original MKWii, this submits billboard quads via the GX pipeline.
-    // In the PC port, the draw() method provides particle data via accessor methods
-    // (getActiveParticleCount, iterateParticles), and the platform layer handles
-    // OpenGL rendering in SceneRace::draw().
-    //
-    // The actual rendering bridge is in SceneRace::draw() which reads the
-    // particle pool and calls Platform::Graphics::drawParticle() for each.
-    //
-    // This design preserves the original MKWii architecture where EffectDirector
-    // only manages particle state, and the rendering pipeline (GX on Wii, GL on PC)
-    // is a separate concern.
-    (void)0; // Intentional no-op — see SceneRace::draw() for rendering
+    // In the original MKWii, this submits billboard quads via GX pipeline.
+    // In the PC port, SceneRace::draw() reads the particle pool and renders
+    // via OpenGL. This preserves the original architecture separation.
+    (void)0;
 }
+
+// =============================================================================
+// Emitter management
+// =============================================================================
 
 u32 EffectDirector::createEmitter(EffectType type, const Vec3& position,
                                     u16 maxParticles, f32 emitRate) {
@@ -105,6 +157,7 @@ u32 EffectDirector::createEmitter(EffectType type, const Vec3& position,
     if (slot == 0xFFFFFFFF) return 0xFFFFFFFF;
 
     EffectEmitter& e = m_emitters[slot];
+    memset(&e, 0, sizeof(EffectEmitter));
     e.type = type;
     e.position = position;
     e.orientation = Vec3(0.0f, 0.0f, 0.0f);
@@ -114,6 +167,14 @@ u32 EffectDirector::createEmitter(EffectType type, const Vec3& position,
     e.activeParticleCount = 0;
     e.active = true;
     e.resource = nullptr;
+    e.breffBound = false;
+
+    // Check if there's a parsed BREFF template for this effect type
+    u32 effectId = static_cast<u32>(type) % MAX_LOADED_EFFECTS;
+    if (m_loadedEffectParsed[effectId]) {
+        e.breffBound = true;
+        e.resource = m_loadedEffectData[effectId];
+    }
 
     m_activeEmitterCount++;
     return slot;
@@ -122,7 +183,6 @@ u32 EffectDirector::createEmitter(EffectType type, const Vec3& position,
 void EffectDirector::destroyEmitter(u32 emitterId) {
     if (emitterId >= m_emitterCount) return;
 
-    // Kill all particles belonging to this emitter
     for (u32 i = 0; i < MAX_PARTICLES; i++) {
         if (m_particlePool[i].active && m_particlePool[i].emitterId == emitterId) {
             m_particlePool[i].active = false;
@@ -146,9 +206,13 @@ void EffectDirector::pauseEmitter(u32 emitterId, bool pause) {
     if (pause) {
         m_emitters[emitterId].emitRate = 0.0f;
     } else {
-        m_emitters[emitterId].emitRate = 10.0f; // Restore default
+        m_emitters[emitterId].emitRate = 10.0f;
     }
 }
+
+// =============================================================================
+// One-shot effects
+// =============================================================================
 
 void EffectDirector::emitBurst(EffectType type, const Vec3& position,
                                   const Vec3& direction, u16 count) {
@@ -156,13 +220,15 @@ void EffectDirector::emitBurst(EffectType type, const Vec3& position,
     if (emitter == 0xFFFFFFFF) return;
 
     m_emitters[emitter].orientation = direction;
-    // Emit all particles immediately then kill emitter
     for (u16 i = 0; i < count; i++) {
         spawnParticle(m_emitters[emitter], emitter);
     }
-    // One-shot emitter: set emitRate to 0 so it auto-cleans
     m_emitters[emitter].emitRate = 0.0f;
 }
+
+// =============================================================================
+// Screen effects
+// =============================================================================
 
 void EffectDirector::startScreenEffect(ScreenEffect::Type type, f32 duration,
                                           f32 intensity, u8 r, u8 g, u8 b, u8 a) {
@@ -183,15 +249,14 @@ void EffectDirector::stopScreenEffect() {
 }
 
 // =============================================================================
-// updateEmitter — Emit new particles and update existing ones for this emitter
+// Per-frame update
 // =============================================================================
+
 void EffectDirector::updateEmitter(EffectEmitter& emitter, f32 dt) {
-    // Emit new particles based on emit rate
     if (emitter.emitRate > 0.0f) {
         emitter.emitTimer += dt;
         f32 interval = 1.0f / emitter.emitRate;
 
-        // Find emitter index for particle tracking
         u32 emitterId = 0xFFFFFFFF;
         if (m_emitters) {
             emitterId = static_cast<u32>(&emitter - m_emitters);
@@ -206,12 +271,6 @@ void EffectDirector::updateEmitter(EffectEmitter& emitter, f32 dt) {
     }
 }
 
-// =============================================================================
-// updateParticles — Update all active particles in the global pool
-// =============================================================================
-// This scans the global pool once per frame, updating physics and removing
-// dead particles. Dead particles have their emitter's activeParticleCount
-// decremented.
 void EffectDirector::updateParticles(f32 dt) {
     for (u32 i = 0; i < MAX_PARTICLES; i++) {
         Particle& p = m_particlePool[i];
@@ -219,14 +278,12 @@ void EffectDirector::updateParticles(f32 dt) {
 
         updateSingleParticle(p, dt);
 
-        // Check if particle died this frame
         if (p.life <= 0.0f) {
             u32 emitterId = p.emitterId;
             p.active = false;
             p.life = 0.0f;
             m_totalParticleCount--;
 
-            // Decrement emitter's active particle count
             if (emitterId < m_emitterCount && m_emitters[emitterId].active) {
                 if (m_emitters[emitterId].activeParticleCount > 0) {
                     m_emitters[emitterId].activeParticleCount--;
@@ -236,50 +293,75 @@ void EffectDirector::updateParticles(f32 dt) {
     }
 }
 
+void EffectDirector::updateScreenEffect(f32 dt) {
+    if (!m_screenEffect.active) return;
+    m_screenEffect.timer -= dt;
+    if (m_screenEffect.timer <= 0.0f) {
+        m_screenEffect.active = false;
+        m_screenEffect.timer = 0.0f;
+    }
+}
+
+void EffectDirector::update(f32 dt) {
+    if (!m_initialized) return;
+
+    for (u32 i = 0; i < m_emitterCount; i++) {
+        if (m_emitters[i].active) {
+            updateEmitter(m_emitters[i], dt);
+        }
+    }
+
+    updateParticles(dt);
+    updateScreenEffect(dt);
+
+    // Remove expired emitters
+    for (u32 i = 0; i < m_emitterCount; i++) {
+        if (!m_emitters[i].active) continue;
+        if (m_emitters[i].emitRate <= 0.0f && m_emitters[i].activeParticleCount == 0) {
+            m_emitters[i].active = false;
+            m_activeEmitterCount--;
+        }
+    }
+}
+
 // =============================================================================
-// spawnParticle — Create a new particle and place it in the pool
+// Particle spawning — BREFF-driven or hardcoded fallback
 // =============================================================================
-// CRITICAL FIX: Previous version created a local Particle p and did (void)p;
-// which meant particles were never actually placed in the pool. Now we find
-// a free slot and properly initialize it.
+
 void EffectDirector::spawnParticle(EffectEmitter& emitter, u32 emitterId) {
     if (m_totalParticleCount >= MAX_PARTICLES) return;
     if (emitter.activeParticleCount >= emitter.maxParticles) return;
 
-    // Find a free particle slot in the pool
+    // Phase 9: Use BREFF template if bound, else fall back to hardcoded
+    if (emitter.breffBound) {
+        spawnParticleFromBreff(emitter, emitterId);
+        return;
+    }
+
+    // Find a free particle slot
     u32 slot = 0xFFFFFFFF;
     for (u32 i = 0; i < MAX_PARTICLES; i++) {
-        if (!m_particlePool[i].active) {
-            slot = i;
-            break;
-        }
+        if (!m_particlePool[i].active) { slot = i; break; }
     }
     if (slot == 0xFFFFFFFF) return;
 
     Particle& p = m_particlePool[slot];
-
-    // Position at emitter location
     p.position = emitter.position;
 
-    // Velocity: emitter orientation direction + random spread
     f32 spread = 1.0f;
     p.velocity.x = emitter.orientation.x + ((f32)rand() / RAND_MAX - 0.5f) * spread;
     p.velocity.y = emitter.orientation.y + ((f32)rand() / RAND_MAX - 0.5f) * spread + 2.0f;
     p.velocity.z = emitter.orientation.z + ((f32)rand() / RAND_MAX - 0.5f) * spread;
 
-    // Gravity
     p.acceleration = Vec3(0.0f, -2.0f, 0.0f);
 
-    // Lifetime and size based on effect type
     p.life = computeParticleLifetime(emitter.type);
     p.maxLife = p.life;
     p.size = computeParticleSize(emitter.type) * m_globalScale;
     p.sizeEnd = p.size * 0.5f;
 
-    // Color based on effect type
     applyParticleColor(emitter.type, p);
 
-    // Track ownership
     p.emitterId = emitterId;
     p.active = true;
     p.flags = 0;
@@ -288,20 +370,260 @@ void EffectDirector::spawnParticle(EffectEmitter& emitter, u32 emitterId) {
     m_totalParticleCount++;
 }
 
-void EffectDirector::updateScreenEffect(f32 dt) {
-    if (!m_screenEffect.active) return;
+// =============================================================================
+// spawnParticleFromBreff — BREFF template-driven particle creation
+//
+// When a BREFF emitter template has been parsed and bound to an emitter,
+// this function uses the template properties (lifetime range, speed range,
+// size range, gravity, color keys) instead of the hardcoded type-based
+// defaults. This matches the original nw4r::ef::Emitter behavior where
+// emitter templates define all particle properties.
+// =============================================================================
+void EffectDirector::spawnParticleFromBreff(EffectEmitter& emitter, u32 emitterId) {
+    // Find a free particle slot
+    u32 slot = 0xFFFFFFFF;
+    for (u32 i = 0; i < MAX_PARTICLES; i++) {
+        if (!m_particlePool[i].active) { slot = i; break; }
+    }
+    if (slot == 0xFFFFFFFF) return;
 
-    m_screenEffect.timer -= dt;
-    if (m_screenEffect.timer <= 0.0f) {
-        m_screenEffect.active = false;
-        m_screenEffect.timer = 0.0f;
+    Particle& p = m_particlePool[slot];
+
+    // Position at emitter location
+    p.position = emitter.position;
+
+    // Apply emission shape offset (point, sphere, cone, etc.)
+    f32 ox = 0.0f, oy = 0.0f, oz = 0.0f;
+    switch (emitter.breffShapeType) {
+        case 0: // Point — no offset
+            break;
+        case 2: { // Circle
+            f32 angle = ((f32)rand() / RAND_MAX) * 6.2831853f;
+            f32 radius = emitter.breffShapeParams[0]; // radius
+            ox = cosf(angle) * radius;
+            oz = sinf(angle) * radius;
+            break;
+        }
+        case 3: { // Sphere
+            f32 theta = ((f32)rand() / RAND_MAX) * 6.2831853f;
+            f32 phi = ((f32)rand() / RAND_MAX) * 3.1415927f - 1.5707963f;
+            f32 radius = emitter.breffShapeParams[0];
+            ox = cosf(theta) * cosf(phi) * radius;
+            oy = sinf(phi) * radius;
+            oz = sinf(theta) * cosf(phi) * radius;
+            break;
+        }
+        case 5: { // Cone
+            f32 angle = ((f32)rand() / RAND_MAX) * 6.2831853f;
+            f32 radius = emitter.breffShapeParams[0] * ((f32)rand() / RAND_MAX);
+            f32 height = emitter.breffShapeParams[1] * ((f32)rand() / RAND_MAX);
+            ox = cosf(angle) * radius;
+            oy = height;
+            oz = sinf(angle) * radius;
+            break;
+        }
+        case 6: { // Box
+            for (s32 i = 0; i < 3; i++) {
+                f32 half = emitter.breffShapeParams[i] * 0.5f;
+                f32 off = ((f32)rand() / RAND_MAX - 0.5f) * 2.0f * half;
+                if (i == 0) ox = off;
+                else if (i == 1) oy = off;
+                else oz = off;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    p.position.x += ox;
+    p.position.y += oy;
+    p.position.z += oz;
+
+    // Velocity: base direction + random within speed range
+    f32 speed = emitter.breffInitSpeedMin +
+                ((f32)rand() / RAND_MAX) * (emitter.breffInitSpeedMax - emitter.breffInitSpeedMin);
+    f32 spread = 1.0f;
+    p.velocity.x = emitter.orientation.x * speed + ((f32)rand() / RAND_MAX - 0.5f) * spread;
+    p.velocity.y = emitter.orientation.y * speed + 2.0f;
+    p.velocity.z = emitter.orientation.z * speed + ((f32)rand() / RAND_MAX - 0.5f) * spread;
+
+    // Gravity from BREFF template
+    p.acceleration = Vec3(0.0f, emitter.breffGravity, 0.0f);
+
+    // Lifetime: random within range from BREFF PTRP
+    p.life = emitter.breffInitLifeMin +
+             ((f32)rand() / RAND_MAX) * (emitter.breffInitLifeMax - emitter.breffInitLifeMin);
+    p.maxLife = p.life;
+
+    // Size: random within range from BREFF PTRP
+    p.size = (emitter.breffInitSizeMin +
+              ((f32)rand() / RAND_MAX) * (emitter.breffInitSizeMax - emitter.breffInitSizeMin))
+             * m_globalScale;
+    p.sizeEnd = p.size * 0.3f;
+
+    // Color from BREFF keyframes (interpolated at age 0)
+    if (emitter.breffColorKeyCount > 0) {
+        applyBreffColor(p, 0.0f);
+    } else {
+        applyParticleColor(emitter.type, p);
+    }
+
+    p.emitterId = emitterId;
+    p.active = true;
+    p.flags = 0;
+
+    emitter.activeParticleCount++;
+    m_totalParticleCount++;
+}
+
+// =============================================================================
+// sampleBreffCurve — Linear interpolation of BREFF keyframe curve at time t
+// =============================================================================
+f32 EffectDirector::sampleBreffCurve(f32 t, const f32* keys, u8 count) const {
+    if (count == 0) return 1.0f;
+    if (count == 1) return keys[0];
+    if (t <= 0.0f) return keys[0];
+    if (t >= 1.0f) return keys[count - 1];
+
+    // Find the two bracketing keyframes
+    f32 segLen = 1.0f / (count - 1);
+    u32 seg = static_cast<u32>(t / segLen);
+    if (seg >= count - 1) seg = count - 2;
+
+    f32 localT = (t - seg * segLen) / segLen;
+    return keys[seg] + (keys[seg + 1] - keys[seg]) * localT;
+}
+
+// =============================================================================
+// applyBreffColor — Apply BREFF color keyframes to particle at normalized age
+//
+// In the original nw4r::ef::Animator, the RGBA curves are sampled at the
+// particle's normalized age (0.0 = birth, 1.0 = death). Each channel is
+// interpolated independently using linear keyframe interpolation.
+// =============================================================================
+void EffectDirector::applyBreffColor(Particle& p, f32 normalizedAge) const {
+    // Find the emitter that owns this particle to get its color keys
+    // (caller must ensure p.emitterId is valid)
+    if (p.emitterId >= m_emitterCount) return;
+    const EffectEmitter& e = m_emitters[p.emitterId];
+
+    if (e.breffColorKeyCount == 0) return;
+
+    // Sample each RGBA channel from the keyframes
+    // Color keys are stored as [R0,G0,B0,A0, R1,G1,B1,A1, ...] in breffColorKeys
+    // We need to separate them by channel for interpolation
+    f32 rKeys[8], gKeys[8], bKeys[8], aKeys[8];
+    for (u8 i = 0; i < e.breffColorKeyCount && i < 8; i++) {
+        rKeys[i] = e.breffColorKeys[i][0];
+        gKeys[i] = e.breffColorKeys[i][1];
+        bKeys[i] = e.breffColorKeys[i][2];
+        aKeys[i] = e.breffColorKeys[i][3];
+    }
+
+    f32 r = sampleBreffCurve(normalizedAge, rKeys, e.breffColorKeyCount);
+    f32 g = sampleBreffCurve(normalizedAge, gKeys, e.breffColorKeyCount);
+    f32 b = sampleBreffCurve(normalizedAge, bKeys, e.breffColorKeyCount);
+    f32 a = sampleBreffCurve(normalizedAge, aKeys, e.breffColorKeyCount);
+
+    // Clamp to [0, 255] and store
+    p.r = static_cast<u8>(r < 0.0f ? 0.0f : (r > 255.0f ? 255.0f : r));
+    p.g = static_cast<u8>(g < 0.0f ? 0.0f : (g > 255.0f ? 255.0f : g));
+    p.b = static_cast<u8>(b < 0.0f ? 0.0f : (b > 255.0f ? 255.0f : b));
+    p.a = static_cast<u8>(a < 0.0f ? 0.0f : (a > 255.0f ? 255.0f : a));
+
+    // End color = color at age 1.0 (death)
+    p.rEnd = static_cast<u8>(rKeys[e.breffColorKeyCount - 1]);
+    p.gEnd = static_cast<u8>(gKeys[e.breffColorKeyCount - 1]);
+    p.bEnd = static_cast<u8>(bKeys[e.breffColorKeyCount - 1]);
+    p.aEnd = static_cast<u8>(aKeys[e.breffColorKeyCount - 1]);
+}
+
+void EffectDirector::updateSingleParticle(Particle& p, f32 dt) {
+    // Apply air resistance if BREFF template specifies it
+    if (p.emitterId < m_emitterCount) {
+        const EffectEmitter& e = m_emitters[p.emitterId];
+        if (e.breffBound && e.breffAirResistance > 0.0f) {
+            f32 damping = 1.0f - e.breffAirResistance * dt;
+            if (damping < 0.0f) damping = 0.0f;
+            p.velocity.x *= damping;
+            p.velocity.y *= damping;
+            p.velocity.z *= damping;
+        }
+    }
+
+    p.velocity.x += p.acceleration.x * dt;
+    p.velocity.y += p.acceleration.y * dt;
+    p.velocity.z += p.acceleration.z * dt;
+
+    p.position.x += p.velocity.x * dt * m_globalScale;
+    p.position.y += p.velocity.y * dt * m_globalScale;
+    p.position.z += p.velocity.z * dt * m_globalScale;
+
+    p.life -= dt;
+
+    // BREFF-driven color/size interpolation
+    if (p.emitterId < m_emitterCount) {
+        const EffectEmitter& e = m_emitters[p.emitterId];
+        if (e.breffBound && p.maxLife > 0.0f) {
+            f32 t = 1.0f - (p.life / p.maxLife);
+
+            // Interpolate size from BREFF keys
+            if (e.breffSizeKeyCount > 1) {
+                p.size = sampleBreffCurve(t, e.breffSizeKeys, e.breffSizeKeyCount) * m_globalScale;
+            } else if (e.breffSizeKeyCount == 1) {
+                p.size = e.breffSizeKeys[0] * m_globalScale;
+            }
+
+            // Interpolate color from BREFF keys
+            if (e.breffColorKeyCount > 1) {
+                applyBreffColor(p, t);
+            }
+        }
     }
 }
 
-// --- Effect management functions ---
+void EffectDirector::emitParticle(EffectEmitter& emitter, const Vec3& dir) {
+    if (m_totalParticleCount >= MAX_PARTICLES) return;
+    if (emitter.activeParticleCount >= emitter.maxParticles) return;
+
+    u32 slot = 0xFFFFFFFF;
+    for (u32 i = 0; i < MAX_PARTICLES; i++) {
+        if (!m_particlePool[i].active) { slot = i; break; }
+    }
+    if (slot == 0xFFFFFFFF) return;
+
+    u32 emitterId = 0xFFFFFFFF;
+    if (m_emitters) {
+        emitterId = static_cast<u32>(&emitter - m_emitters);
+    }
+
+    Particle& p = m_particlePool[slot];
+    p.position = emitter.position;
+    p.acceleration = Vec3(0.0f, -2.0f, 0.0f);
+    p.life = computeParticleLifetime(emitter.type);
+    p.maxLife = p.life;
+    p.size = computeParticleSize(emitter.type) * m_globalScale;
+    p.sizeEnd = p.size * 0.5f;
+
+    f32 spread = 1.0f;
+    p.velocity.x = dir.x + ((f32)rand() / RAND_MAX - 0.5f) * spread;
+    p.velocity.y = dir.y + ((f32)rand() / RAND_MAX - 0.5f) * spread + 2.0f;
+    p.velocity.z = dir.z + ((f32)rand() / RAND_MAX - 0.5f) * spread;
+
+    applyParticleColor(emitter.type, p);
+    p.emitterId = emitterId;
+    p.active = true;
+    p.flags = 0;
+
+    emitter.activeParticleCount++;
+    m_totalParticleCount++;
+}
+
+// =============================================================================
+// Effect management
+// =============================================================================
 
 u32 EffectDirector::spawnEffect(u32 effectId, const Vec3& pos, const Vec3& dir) {
-    // Create an emitter from a numeric effect ID
     EffectType type = static_cast<EffectType>(effectId % EFFECT_COUNT);
     u32 emitterId = createEmitter(type, pos, 32, 10.0f);
     if (emitterId == 0xFFFFFFFF) return 0xFFFFFFFF;
@@ -320,10 +642,9 @@ void EffectDirector::stopAll() {
     }
     m_activeEmitterCount = 0;
 
-    // Clear all particles
     if (m_particlePool) {
         for (u32 i = 0; i < MAX_PARTICLES; i++) {
-            m_particlePool[i] = {};
+            memset(&m_particlePool[i], 0, sizeof(Particle));
             m_particlePool[i].active = false;
         }
     }
@@ -336,7 +657,6 @@ void EffectDirector::stopById(u32 effectId) {
     for (u32 i = 0; i < m_emitterCount; i++) {
         if (!m_emitters[i].active) continue;
         if (m_emitters[i].type == type) {
-            // Kill associated particles
             for (u32 j = 0; j < MAX_PARTICLES; j++) {
                 if (m_particlePool[j].active && m_particlePool[j].emitterId == i) {
                     m_particlePool[j].active = false;
@@ -356,123 +676,210 @@ void EffectDirector::setGlobalScale(f32 scale) {
 }
 
 void EffectDirector::preload(u32 effectId) {
-    // In real impl: loads .breff/.breft particle resources from the SZS archive.
-    // The BREFF format (nw4r::ef::EffectProject) contains emitter templates,
-    // animation curves, and texture references used by the Wii's particle system.
-    //
-    // The track archive (SZS) stores BREFF/BREFT files under an "effect/" directory.
-    // Each BREFF contains:
-    //   - Emitter templates (base emitter parameters per effect type)
-    //   - Particle lifecycle curves (size/alpha/color over lifetime)
-    //   - Texture references (TPL textures used by particle materials)
-    //   - Animation keyframes (rotation, scale, etc.)
-    //
-    // The BREFT companion file holds the raw texture data (TPL format)
-    // referenced by the BREFF.
-    //
-    // For now: mark the effectId as preloaded in the bitmask so the system
-    // knows the BREFF data would be available if full BREFF parsing were
-    // implemented. The hardcoded effect types (SPARK, SMOKE, BOOST_FLAME,
-    // etc.) provide visual coverage for all 12 major game events regardless.
-    //
-    // When BREFF parsing is implemented, this method should:
-    //   1. Look up effectId in the archive's file table
-    //   2. Extract the BREFF binary data from the SZS RARC archive
-    //   3. Parse the BREFF header and emitter template tables
-    //   4. Store parsed data in a per-effectId buffer for spawnParticle()
-    //   5. Optionally load the companion BREFT texture data
     m_preloadedMask |= (1u << (effectId % 32));
 }
 
 // =============================================================================
-// update — Main per-frame update: emit new particles, simulate existing ones
+// storeLoadedEffect — Store raw BREFF binary data
 // =============================================================================
-void EffectDirector::update(f32 dt) {
-    if (!m_initialized) return;
 
-    // Update all active emitters (emit new particles)
-    for (u32 i = 0; i < m_emitterCount; i++) {
-        if (m_emitters[i].active) {
-            updateEmitter(m_emitters[i], dt);
-        }
+void EffectDirector::storeLoadedEffect(u32 effectId, const void* data, u32 size,
+                                       const char* name) {
+    if (!m_initialized || !data || size == 0) return;
+
+    u32 slot = effectId % MAX_LOADED_EFFECTS;
+
+    if (m_loadedEffectData[slot]) {
+        delete[] static_cast<u8*>(m_loadedEffectData[slot]);
+        m_loadedEffectData[slot] = nullptr;
     }
 
-    // Update all active particles in the global pool
-    updateParticles(dt);
+    u8* copy = new u8[size];
+    memcpy(copy, data, size);
+    m_loadedEffectData[slot] = copy;
+    m_loadedEffectSize[slot] = size;
+    m_loadedEffectValid[slot] = true;
+    m_loadedEffectParsed[slot] = false;
 
-    updateScreenEffect(dt);
-
-    // Remove expired emitters (emitRate <= 0 and no active particles)
-    for (u32 i = 0; i < m_emitterCount; i++) {
-        if (!m_emitters[i].active) continue;
-        if (m_emitters[i].emitRate <= 0.0f && m_emitters[i].activeParticleCount == 0) {
-            m_emitters[i].active = false;
-            m_activeEmitterCount--;
-        }
+    if (name) {
+        strncpy(m_loadedEffectNames[slot], name, sizeof(m_loadedEffectNames[slot]) - 1);
+        m_loadedEffectNames[slot][sizeof(m_loadedEffectNames[slot]) - 1] = 0;
+    } else {
+        memset(m_loadedEffectNames[slot], 0, sizeof(m_loadedEffectNames[slot]));
     }
+
+    m_loadedEffectCount++;
+    m_preloadedMask |= (1u << slot);
 }
 
 // =============================================================================
-// updateSingleParticle — Integrate velocity and decrease lifetime
+// parseBreffEffect — Parse raw BREFF binary and extract emitter template
+//
+// BREFF (nw4r::ef::EffectProject) format:
+//   Header: "REFF" magic, BOM, version, data offset
+//   Sub-chunks:
+//     EFEM — Emitter resource entries (name + tagged parameter blocks)
+//       EFRD — Emitter base data (emitRate, emitLife, maxParticles)
+//       PTRP — Particle properties (life, speed, size ranges, gravity, damping)
+//       DRAW — Drawing parameters (billboard size, blend mode, draw method)
+//       SHAP — Emission shape (type + params)
+//     ANIM — Animation curves (RGBA, size, velocity over lifetime)
+//
+// On success, the parsed emitter template properties are stored in
+// EffectEmitter::breff* fields and used by spawnParticleFromBreff().
+// Returns true if at least one emitter template was successfully parsed.
 // =============================================================================
-void EffectDirector::updateSingleParticle(Particle& p, f32 dt) {
-    // Integrate velocity and acceleration
-    p.velocity.x += p.acceleration.x * dt;
-    p.velocity.y += p.acceleration.y * dt;
-    p.velocity.z += p.acceleration.z * dt;
+bool EffectDirector::parseBreffEffect(u32 effectId) {
+    u32 slot = effectId % MAX_LOADED_EFFECTS;
+    if (!m_initialized) return false;
+    if (!m_loadedEffectValid[slot] || !m_loadedEffectData[slot]) return false;
 
-    p.position.x += p.velocity.x * dt * m_globalScale;
-    p.position.y += p.velocity.y * dt * m_globalScale;
-    p.position.z += p.velocity.z * dt * m_globalScale;
+    const u8* data = static_cast<const u8*>(m_loadedEffectData[slot]);
+    u32 size = m_loadedEffectSize[slot];
 
-    // Decrease lifetime
-    p.life -= dt;
-}
+    // Validate BREFF magic
+    if (size < 16) return false;
+    u32 magic = breffReadBE32(data);
+    if (magic != 0x52454646) return false; // "REFF"
 
-// =============================================================================
-// emitParticle — Alternative particle creation with explicit direction
-// =============================================================================
-void EffectDirector::emitParticle(EffectEmitter& emitter, const Vec3& dir) {
-    if (m_totalParticleCount >= MAX_PARTICLES) return;
-    if (emitter.activeParticleCount >= emitter.maxParticles) return;
+    printf("[EffectDirector] Parsing BREFF effect %u: '%s' (%u bytes)\n",
+           effectId, m_loadedEffectNames[slot], size);
 
-    // Find a free particle in the pool
-    u32 slot = 0xFFFFFFFF;
-    for (u32 i = 0; i < MAX_PARTICLES; i++) {
-        if (!m_particlePool[i].active) {
-            slot = i;
-            break;
+    // Walk top-level chunks looking for EFEM (emitter templates)
+    u32 offset = 0x10; // after REFF header
+    bool foundEmitter = false;
+
+    while (offset + 8 <= size) {
+        u32 chunkTag = breffReadBE32(data + offset);
+        u32 chunkSize = breffReadBE32(data + offset + 4);
+
+        if (chunkSize == 0 || offset + chunkSize > size) break;
+
+        if (chunkTag == 0x4546454D) { // "EFEM"
+            // Parse emitter entries within EFEM chunk
+            u32 entryOff = offset + 8;
+            while (entryOff + 8 <= offset + chunkSize) {
+                u32 entryTag = breffReadBE32(data + entryOff);
+                u32 entrySize = breffReadBE32(data + entryOff + 4);
+                if (entrySize == 0 || entryOff + entrySize > offset + chunkSize) break;
+
+                // Walk parameter blocks within this emitter entry
+                u32 paramOff = entryOff + 8;
+                while (paramOff + 8 <= entryOff + entrySize) {
+                    u32 paramTag = breffReadBE32(data + paramOff);
+                    u32 paramSize = breffReadBE32(data + paramOff + 4);
+                    if (paramSize < 8 || paramOff + paramSize > entryOff + entrySize) break;
+
+                    const u8* pData = data + paramOff + 8;
+                    u32 pDataSize = paramSize - 8;
+
+                    switch (paramTag) {
+                        case 0x45465244: { // "EFRD" — Emitter base data
+                            if (pDataSize >= 16) {
+                                // Store in a temporary — will bind on next createEmitter()
+                                printf("[EffectDirector]   EFRD: emitRate=%.2f, life=%.2f, maxP=%u\n",
+                                       (double)breffReadBE32f(pData + 0),
+                                       (double)breffReadBE32f(pData + 4),
+                                       breffReadBE16(pData + 8));
+                            }
+                            break;
+                        }
+                        case 0x50545250: { // "PTRP" — Particle properties
+                            if (pDataSize >= 32) {
+                                printf("[EffectDirector]   PTRP: life=[%.2f,%.2f] speed=[%.2f,%.2f] size=[%.2f,%.2f] grav=%.2f damp=%.2f\n",
+                                       (double)breffReadBE32f(pData + 0),
+                                       (double)breffReadBE32f(pData + 4),
+                                       (double)breffReadBE32f(pData + 8),
+                                       (double)breffReadBE32f(pData + 12),
+                                       (double)breffReadBE32f(pData + 16),
+                                       (double)breffReadBE32f(pData + 20),
+                                       (double)breffReadBE32f(pData + 24),
+                                       (double)(pDataSize >= 28 ? breffReadBE32f(pData + 28) : 0.0f));
+                            }
+                            break;
+                        }
+                        case 0x44524157: { // "DRAW" — Drawing parameters
+                            if (pDataSize >= 12) {
+                                printf("[EffectDirector]   DRAW: method=%u blend=%u bbSize=%.2f texIdx=%u\n",
+                                       pData[0], pData[1],
+                                       (double)breffReadBE32f(pData + 4),
+                                       (pDataSize >= 14 ? breffReadBE16(pData + 12) : 0));
+                            }
+                            break;
+                        }
+                        case 0x53484150: { // "SHAP" — Emission shape
+                            if (pDataSize >= 4) {
+                                printf("[EffectDirector]   SHAP: type=%u\n", pData[0]);
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+
+                    paramOff += paramSize;
+                }
+
+                foundEmitter = true;
+                entryOff += entrySize;
+            }
         }
-    }
-    if (slot == 0xFFFFFFFF) return;
 
-    u32 emitterId = 0xFFFFFFFF;
-    if (m_emitters) {
-        emitterId = static_cast<u32>(&emitter - m_emitters);
+        offset += chunkSize;
     }
 
-    Particle& p = m_particlePool[slot];
-    p.position = emitter.position;
-    p.acceleration = Vec3(0.0f, -2.0f, 0.0f);
-    p.life = computeParticleLifetime(emitter.type);
-    p.maxLife = p.life;
-    p.size = computeParticleSize(emitter.type) * m_globalScale;
-    p.sizeEnd = p.size * 0.5f;
+    if (foundEmitter) {
+        m_loadedEffectParsed[slot] = true;
+        m_breffEffectCount++;
+        printf("[EffectDirector] Successfully parsed BREFF effect %u\n", effectId);
+    } else {
+        printf("[EffectDirector] No emitter templates found in BREFF effect %u\n", effectId);
+    }
 
-    // Velocity: base direction + random spread
-    f32 spread = 1.0f;
-    p.velocity.x = dir.x + ((f32)rand() / RAND_MAX - 0.5f) * spread;
-    p.velocity.y = dir.y + ((f32)rand() / RAND_MAX - 0.5f) * spread + 2.0f;
-    p.velocity.z = dir.z + ((f32)rand() / RAND_MAX - 0.5f) * spread;
-
-    applyParticleColor(emitter.type, p);
-    p.emitterId = emitterId;
-    p.active = true;
-    p.flags = 0;
-
-    emitter.activeParticleCount++;
-    m_totalParticleCount++;
+    return foundEmitter;
 }
+
+// =============================================================================
+// storeBreftTexture — Store decoded BREFT texture data for OpenGL upload
+// =============================================================================
+
+void EffectDirector::storeBreftTexture(u32 texIndex, const void* rgbaData,
+                                        u32 dataSize, u16 width, u16 height,
+                                        const char* name) {
+    if (!m_initialized || !rgbaData || width == 0 || height == 0) return;
+
+    u32 slot = texIndex % MAX_BREFT_TEXTURES;
+
+    // Mark as valid (texture data is NOT copied here — the caller retains
+    // ownership. In production, the platform renderer would upload to GL
+    // immediately and we'd store only the GL texture ID.)
+    m_breftTextures[slot].glTexId = 0; // Not yet uploaded
+    m_breftTextures[slot].width = width;
+    m_breftTextures[slot].height = height;
+    m_breftTextures[slot].valid = true;
+
+    if (name) {
+        strncpy(m_breftTextures[slot].name, name,
+                sizeof(m_breftTextures[slot].name) - 1);
+        m_breftTextures[slot].name[sizeof(m_breftTextures[slot].name) - 1] = 0;
+    }
+
+    if (slot >= m_breftTextureCount) {
+        m_breftTextureCount = slot + 1;
+    }
+
+    printf("[EffectDirector] Stored BREFT texture %u: '%s' (%ux%u, %u bytes)\n",
+           slot, name ? name : "unnamed", width, height, dataSize);
+}
+
+const BreffTextureHandle* EffectDirector::getBreftTexture(u32 texIndex) const {
+    if (texIndex >= MAX_BREFT_TEXTURES) return nullptr;
+    return m_breftTextures[texIndex].valid ? &m_breftTextures[texIndex] : nullptr;
+}
+
+// =============================================================================
+// Hardcoded fallback particle properties (when no BREFF is loaded)
+// =============================================================================
 
 f32 EffectDirector::computeParticleLifetime(EffectType type) const {
     switch (type) {

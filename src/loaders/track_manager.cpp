@@ -475,4 +475,32 @@ std::string TrackManager::deriveTrackName(const std::string& path) {
     return filename.empty() ? path : filename;
 }
 
+// =============================================================================
+// BREFF/BREFT Effect Extraction
+// =============================================================================
+
+std::vector<const SzsReader::Entry*> TrackManager::getBreffEntries() const {
+    return m_szsReader.getEntriesByExtension(".breff");
+}
+
+std::vector<const SzsReader::Entry*> TrackManager::getBreftEntries() const {
+    return m_szsReader.getEntriesByExtension(".breft");
+}
+
+const SzsReader::Entry* TrackManager::findBreffEntry(const std::string& name) const {
+    return m_szsReader.findEntry(name);
+}
+
+const SzsReader::Entry* TrackManager::findBreftEntry(const std::string& name) const {
+    return m_szsReader.findEntry(name);
+}
+
+bool TrackManager::hasBreffFiles() const {
+    return !m_szsReader.getEntriesByExtension(".breff").empty();
+}
+
+bool TrackManager::hasBreftFiles() const {
+    return !m_szsReader.getEntriesByExtension(".breft").empty();
+}
+
 } // namespace Loaders

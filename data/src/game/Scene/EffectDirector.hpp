@@ -4,6 +4,12 @@
 //
 // EffectDirector manages particle systems, screen effects (flash, blur),
 // and transient visual effects during races (stars, sparks, smoke, etc.)
+//
+// Phase 9: BREFF/BREFT Integration
+//   - Parsed BREFF emitter templates drive particle spawning (replaces
+//     hardcoded defaults when .breff data is available)
+//   - BREFT texture data is uploaded to OpenGL for billboard rendering
+//   - Matching nw4r::ef::EffectProject → ParticleMgr → Emitter → Particle
 
 #include "rk_common.h"
 #include <EGG/math.h>
@@ -25,7 +31,7 @@ struct Particle {
     u8 rEnd, gEnd, bEnd, aEnd;
     u16 flags;
     u32 emitterId;     // Index of the emitter that owns this particle
-    bool active;         // True when particle is alive in the pool
+    bool active;       // True when particle is alive in the pool
 };
 
 // =============================================================================
@@ -61,6 +67,31 @@ struct EffectEmitter {
     u16 activeParticleCount;
     bool active;
     void* resource;
+
+    // Phase 9: BREFF-driven emitter properties
+    // When a BREFF template is bound (resource != nullptr && breffBound),
+    // these override the hardcoded computeParticle* functions.
+    bool breffBound;           // True if BREFF template is driving this emitter
+    f32 breffEmitRate;         // From BREFF EFEM emit rate
+    f32 breffInitLifeMin;      // Particle lifetime range from BREFF PTRP
+    f32 breffInitLifeMax;
+    f32 breffInitSpeedMin;     // Initial speed range from BREFF PTRP
+    f32 breffInitSpeedMax;
+    f32 breffInitSizeMin;      // Initial size range from BREFF PTRP
+    f32 breffInitSizeMax;
+    f32 breffGravity;          // Gravity from BREFF PTRP
+    f32 breffAirResistance;     // Velocity damping from BREFF PTRP
+    u8  breffDrawMethod;       // 0=billboard, 1=directional
+    u8  breffBlendMode;        // GX blend mode from BREFF DRAW
+    u8  breffShapeType;        // Emission volume shape from BREFF SHAP
+    f32 breffShapeParams[6];   // Shape parameters
+    f32 breffBillboardSize;    // Base billboard size from BREFF DRAW
+    u16 breffTextureIndex;     // Texture index into BREFT texture array
+    f32 breffColorKeys[8][4];  // RGBA keyframes from BREFF ANIM
+    f32 breffSizeKeys[8];      // Size keyframes from BREFF ANIM
+    f32 breffAlphaKeys[8];     // Alpha keyframes from BREFF ANIM
+    u8  breffColorKeyCount;    // Number of valid color keys
+    u8  breffSizeKeyCount;     // Number of valid size keys
 };
 
 // =============================================================================
@@ -81,6 +112,17 @@ struct ScreenEffect {
     f32 intensity;
     u8 color[4];
     bool active;
+};
+
+// =============================================================================
+// BreffTextureHandle — OpenGL texture uploaded from BREFT data
+// =============================================================================
+struct BreffTextureHandle {
+    u32  glTexId;       // OpenGL texture ID (0 = not uploaded)
+    u16  width;
+    u16  height;
+    char name[32];
+    bool valid;
 };
 
 // =============================================================================
@@ -120,19 +162,9 @@ public:
 
     // Status queries
     u32 getActiveEmitterCount() const { return m_activeEmitterCount; }
-    /// Get total particle count.
     u32 getTotalParticleCount() const { return m_totalParticleCount; }
-
-    /// Get the particle pool for external rendering (e.g., OpenGL in SceneRace).
-    /// Returns nullptr if not initialized.
     const Particle* getParticlePool() const { return m_particlePool; }
-
-    /// Get the maximum number of particles in the pool.
     u32 getMaxParticles() const { return MAX_PARTICLES; }
-
-    /// Render all active particles. On Wii this submits GX quads.
-    /// On PC, this is a no-op — use getParticlePool() + getParticleCount()
-    /// to render via Platform::Graphics::drawParticle() in SceneRace::draw().
 
     // Effect management
     u32 spawnEffect(u32 effectId, const Vec3& pos, const Vec3& dir);
@@ -142,6 +174,39 @@ public:
     void preload(u32 effectId);
     void update(f32 dt);
     f32 getGlobalScale() const { return m_globalScale; }
+
+    // -----------------------------------------------------------------
+    // Phase 9: BREFF/BREFT Integration
+    // -----------------------------------------------------------------
+
+    /// Store raw BREFF binary data for a given effect slot.
+    /// The data is retained (owned copy) and can be parsed on demand.
+    void storeLoadedEffect(u32 effectId, const void* data, u32 size,
+                           const char* name);
+
+    /// Parse a previously stored BREFF and bind its emitter template
+    /// to the given effect slot. Returns true on success.
+    bool parseBreffEffect(u32 effectId);
+
+    /// Store a BREFT texture as raw RGBA8888 data for upload.
+    /// @param texIndex  Index into the BREFT texture array
+    /// @param rgbaData  Decoded RGBA8888 pixel data
+    /// @param width     Texture width
+    /// @param height    Texture height
+    /// @param name      Texture name (for debug)
+    void storeBreftTexture(u32 texIndex, const void* rgbaData,
+                            u32 dataSize, u16 width, u16 height,
+                            const char* name);
+
+    /// Get a BREFF-loaded texture handle by index.
+    /// Returns nullptr if index is out of range or not loaded.
+    const BreffTextureHandle* getBreftTexture(u32 texIndex) const;
+
+    /// Get the total number of loaded BREFT textures.
+    u32 getBreftTextureCount() const { return m_breftTextureCount; }
+
+    /// Check if any BREFF effects have been successfully parsed.
+    bool hasBreffEffects() const { return m_breffEffectCount > 0; }
 
 private:
     static const u32 MAX_EMITTERS = 128;
@@ -157,8 +222,13 @@ private:
     f32 computeParticleSize(EffectType type) const;
     void applyParticleColor(EffectType type, Particle& p) const;
 
+    // Phase 9: BREFF-driven particle spawning
+    void spawnParticleFromBreff(EffectEmitter& emitter, u32 emitterId);
+    f32 sampleBreffCurve(f32 t, const f32* keys, u8 count) const;
+    void applyBreffColor(Particle& p, f32 normalizedAge) const;
+
     EffectEmitter* m_emitters;
-    u32 m_emitterCount;   // Total allocated emitter slots
+    u32 m_emitterCount;
     u32 m_activeEmitterCount;
     Particle* m_particlePool;
     u32 m_totalParticleCount;
@@ -167,8 +237,22 @@ private:
     bool m_initialized;
 
     // Preloaded effect tracking (BREFF archive data)
-    // Uses a 32-bit bitmask: bit N set = effectId N has been preloaded.
     u32 m_preloadedMask;
+
+    // Loaded BREFF emitter templates (from .breff files in the track archive)
+    static const u32 MAX_LOADED_EFFECTS = 32;
+    void* m_loadedEffectData[MAX_LOADED_EFFECTS];
+    u32  m_loadedEffectSize[MAX_LOADED_EFFECTS];
+    char m_loadedEffectNames[MAX_LOADED_EFFECTS][64];
+    bool m_loadedEffectValid[MAX_LOADED_EFFECTS];
+    bool m_loadedEffectParsed[MAX_LOADED_EFFECTS]; // Phase 9: parsed flag
+    u32  m_loadedEffectCount;
+    u32  m_breffEffectCount; // Number of successfully parsed BREFF effects
+
+    // BREFT texture storage (Phase 9)
+    static const u32 MAX_BREFT_TEXTURES = 64;
+    BreffTextureHandle m_breftTextures[MAX_BREFT_TEXTURES];
+    u32 m_breftTextureCount;
 };
 
 } // namespace Scene

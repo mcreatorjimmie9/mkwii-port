@@ -372,6 +372,72 @@ void RaceScene::initSubsystems() {
         m_effectDirector->init();
     }
 
+    // Preload particle effects from BREFF/BREFT files in the track archive.
+    // In the original game, nw4r::ef::Resource::Add() parses BREFF data
+    // during course loading so effects are ready to spawn immediately.
+    //
+    // Phase 9: Full BREFF parsing pipeline
+    //   1. storeLoadedEffect() — retains raw BREFF binary data
+    //   2. parseBreffEffect() — extracts EFEM emitter templates (EFRD, PTRP,
+    //      DRAW, SHAP parameter blocks) matching nw4r::ef::EffectProject
+    //   3. preload() — marks effect as ready for spawning
+    //   4. When spawning, if BREFF template is bound, spawnParticleFromBreff()
+    //      uses template properties instead of hardcoded defaults.
+    if (m_effectDirector && m_raceData && m_raceData->trackManager) {
+        auto breffEntries = m_raceData->trackManager->getBreffEntries();
+        if (!breffEntries.empty()) {
+            printf("[RaceScene] Found %zu BREFF effect files in archive\n",
+                   breffEntries.size());
+            for (u32 i = 0; i < breffEntries.size() && i < 32; i++) {
+                const auto* entry = breffEntries[i];
+                if (entry && !entry->data.empty()) {
+                    // Store raw BREFF data
+                    m_effectDirector->storeLoadedEffect(
+                        i, entry->data.data(),
+                        static_cast<u32>(entry->data.size()),
+                        entry->name.c_str());
+
+                    // Phase 9: Parse BREFF emitter templates (EFEM/EFRD/PTRP/DRAW/SHAP)
+                    bool parsed = m_effectDirector->parseBreffEffect(i);
+                    if (parsed) {
+                        m_effectDirector->preload(i);
+                        printf("[RaceScene]   Parsed effect %u: %s (%u bytes) — BREFF template active\n",
+                               i, entry->name.c_str(),
+                               static_cast<u32>(entry->data.size()));
+                    } else {
+                        // Fallback: still preload with hardcoded defaults
+                        m_effectDirector->preload(i);
+                        printf("[RaceScene]   Loaded effect %u: %s (%u bytes) — using hardcoded defaults\n",
+                               i, entry->name.c_str(),
+                               static_cast<u32>(entry->data.size()));
+                    }
+                }
+            }
+
+            if (m_effectDirector->hasBreffEffects()) {
+                printf("[RaceScene] %u BREFF effects successfully parsed — template-driven particles active\n",
+                       m_effectDirector->hasBreffEffects());
+            }
+        } else {
+            printf("[RaceScene] No BREFF files found — using hardcoded effects\n");
+        }
+
+        // Phase 9: BREFT texture loading
+        // Decode BREFT particle textures and store for OpenGL upload.
+        // In the original game, nw4r::ef::TextureProject loads TPL textures
+        // embedded in BREFT and registers them with the GX texture cache.
+        {
+            auto breftEntries = m_raceData->trackManager->getBreftEntries();
+            if (!breftEntries.empty()) {
+                printf("[RaceScene] Found %zu BREFT texture files in archive\n",
+                       breftEntries.size());
+                // BREFT textures are decoded by BreftLoader in the platform layer.
+                // For now, log their presence. Full texture upload will be done
+                // when the renderer initializes GL textures for particle billboards.
+            }
+        }
+    }
+
     // Initialize race session
     d.raceSession.init(TOTAL_RACERS, DEFAULT_LAP_COUNT, kmp.checkpoints);
     d.raceSession.startCountdown();

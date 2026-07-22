@@ -111,6 +111,30 @@ public:
     const std::string& getTrackName() const { return m_trackName; }
 
     // -----------------------------------------------------------------
+    // BREFF/BREFT Effect Extraction
+    // -----------------------------------------------------------------
+
+    /// Get all BREFF effect entries from the SZS archive.
+    /// Returns a vector of pointers to BREFF file entries.
+    std::vector<const SzsReader::Entry*> getBreffEntries() const;
+
+    /// Get all BREFT texture entries from the SZS archive.
+    /// Returns a vector of pointers to BREFT file entries.
+    std::vector<const SzsReader::Entry*> getBreftEntries() const;
+
+    /// Get a BREFF entry by name (e.g. "effect/Flash_L/rk_flashBeginner.breff").
+    const SzsReader::Entry* findBreffEntry(const std::string& name) const;
+
+    /// Get a BREFT entry by name (e.g. "effect/Flash_L/rk_flashBeginner.breft").
+    const SzsReader::Entry* findBreftEntry(const std::string& name) const;
+
+    /// Check if any BREFF files were found in the archive.
+    bool hasBreffFiles() const;
+
+    /// Check if any BREFT files were found in the archive.
+    bool hasBreftFiles() const;
+
+    // -----------------------------------------------------------------
     // Debug Output
     // -----------------------------------------------------------------
 
