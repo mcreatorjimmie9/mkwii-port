@@ -4,6 +4,7 @@
 #include <cstring>
 #include "RaceDirector.hpp"
 #include "RaceSequence.hpp"
+#include "RaceConfig.hpp"
 
 namespace RaceEngine {
 

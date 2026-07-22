@@ -4,6 +4,7 @@
 // Address range: 0x80465000 - 0x80470000
 
 #include "rk_common.h"
+#include "RaceConfig.hpp"
 
 #ifndef UNUSED
 #define UNUSED(x) (void)(x)
@@ -164,7 +165,7 @@ private:
     DirectorPhase mPhase;
     u32 mCurrentRace;
     RaceSequence* mRaceSequence;
-    RaceConfig* mCurrentRaceConfig;
+    System::RaceConfig* mCurrentRaceConfig;
 
     // Cup data
     CupData mCupData;

@@ -4,6 +4,7 @@
 // Address range: 0x80460000 - 0x80465000
 
 #include "rk_common.h"
+#include "RaceConfig.hpp"
 
 #ifndef UNUSED
 #define UNUSED(x) (void)(x)
@@ -12,7 +13,6 @@
 namespace RaceEngine {
 
 class RaceManager;
-class RaceConfig;
 
 // Race sequence phases
 enum RacePhase {
@@ -104,7 +104,7 @@ public:
 
     // --- Initialization ---
     // @addr 0x80460000
-    void init(RaceConfig* config, u32 playerCount);
+    void init(System::RaceConfig* config, u32 playerCount);
     // @addr 0x804601A0
     void shutdown();
 
@@ -190,7 +190,7 @@ private:
 
     // Race state
     RaceState mState;
-    RaceConfig* mConfig;
+    System::RaceConfig* mConfig;
 
     // Per-player results
     RaceResult mResults[MAX_RACE_PLAYERS];

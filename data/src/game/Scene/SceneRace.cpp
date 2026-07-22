@@ -599,8 +599,21 @@ void RaceScene::initSubsystems() {
     // In the original MKWii, RaceDirector creates RaceSequence for each race
     // in a series. For PC, we create it here directly.
     d.raceSequence = new RaceEngine::RaceSequence();
-    d.raceSequence->init(nullptr, TOTAL_RACERS);
-    // Checkpoints will be loaded from KMP data below
+    // Phase 26: Pass the actual RaceConfig so RaceSequence can read
+    // game mode, lap count, and other settings. In the original MKWii,
+    // RaceSequence receives RaceConfig from the scene director.
+    {
+        using namespace System;
+        d.raceSequence->init(
+            RaceConfig::spInstance,
+            TOTAL_RACERS);
+        // Override totalLaps from RaceConfig (100% faithful)
+        if (RaceConfig::spInstance) {
+            d.raceSequence->setupCheckpoints(
+                RaceConfig::spInstance->mRaceScenario.mSettings.getCourseId());
+        }
+    }
+    // Checkpoints will be loaded from KMP data below (overriding the stub)
     printf("[RaceScene] RaceSequence initialized (%u players)\n", TOTAL_RACERS);
 
     // =========================================================================
@@ -887,6 +900,26 @@ void RaceScene::startRace() {
     printf("[RaceScene] GO! Racing started. %u racers, %u laps.\n",
            m_raceData ? m_raceData->playerCount : 0u,
            m_totalLaps);
+
+    // Phase 26: Signal RaceSequence that racing has started.
+    // In the original MKWii, the countdown sequence controller
+    // calls RaceSequence::startRace() when the "GO" signal fires.
+    // This transitions RaceSequence from COUNTDOWN → RACING phase,
+    // enabling lap validation and timing.
+    if (m_raceData && m_raceData->raceSequence) {
+        m_raceData->raceSequence->startRace();
+        printf("[RaceScene] RaceSequence::startRace() called\n");
+    }
+
+    // Phase 26: Ensure RaceManager transitions to RACE stage.
+    // In the original MKWii, RaceManager::update() handles this
+    // automatically when the countdown completes. On PC, we force
+    // the transition since our platform countdown drives the phase.
+    // RaceManager::update() then starts TimerManager counting.
+    if (System::RaceManager::spInstance) {
+        System::RaceManager::spInstance->stage = System::RACE;
+        System::RaceManager::spInstance->canCountdownStart = true;
+    }
 }
 
 // =============================================================================

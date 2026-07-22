@@ -132,8 +132,9 @@ void CtrlRaceTime::calcSelf() {
         currentMs = 0.0f;
     } else if (stage == RACE) {
         // During the race, compute elapsed time from frame counter
-        // 60 FPS → ~16.667ms per frame
-        currentMs = (f32)(RaceManager::spInstance->timer * 17);
+        // MKWii runs at 60 FPS exactly → 1000/60 = 16.666...ms per frame
+        // Phase 26: precise conversion matching original hardware
+        currentMs = (f32)(RaceManager::spInstance->timer) * (1000.0f / 60.0f);
     } else if (stage == FINISHED_RACE) {
         // After finish, freeze the displayed time
         currentMs = timeValue;

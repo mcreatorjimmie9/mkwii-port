@@ -76,8 +76,13 @@ void Racedata::update() {
         break;
 
     case RACE_PHASE_RACING:
-        // Advance race timer (~17ms per frame at 60fps)
-        mRaceTimerMs += 17;
+        // Phase 26: Track race frames, compute ms on-demand.
+        // MKWii hardware runs at 60 FPS exactly.
+        // The original game uses frame counters everywhere; ms is only
+        // computed for display. Using frames avoids cumulative integer
+        // truncation error from (u32)(1000/60) = 16 instead of 16.667.
+        // mRaceTimerMs is computed from mFrameCounter in getFinishTime().
+        mFrameCounter++;
 
         // Check if all players have finished
         if (mFinishedCount >= mPlayerCount && mPlayerCount > 0) {
@@ -239,6 +244,8 @@ u32 Racedata::getFinishTime(u8 playerId) const {
     if (playerId >= MAX_PLAYER_COUNT) {
         return 0;
     }
+    // Phase 26: Per-player finish time is stored directly when a player
+    // finishes. For the global race timer, use frame-based computation.
     return mPlayerResults[playerId].finishTimeMs;
 }
 

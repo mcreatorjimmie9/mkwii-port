@@ -226,7 +226,8 @@ u32 getRaceTimeString(char* buf, u32 bufSize) {
     }
 
     // Convert RaceManager::timer (frame count) to milliseconds
-    // MKWii: 1 frame ≈ 16.667ms → multiply by 1000/60 ≈ 16.667
+    // MKWii: 60 FPS exactly → 1000/60 = 16.666...ms per frame
+    // Phase 26: use same precise conversion as CtrlRaceTime::calcSelf()
     f32 timeMs = (f32)(RaceManager::spInstance->timer) * (1000.0f / 60.0f);
     return ::System::formatTime(buf, bufSize, timeMs);
 }
@@ -242,6 +243,7 @@ f32 getRaceTimeMs() {
     if (!RaceManager::spInstance) return 0.0f;
 
     // Convert frame count to milliseconds
+    // MKWii: 60 FPS exactly → 1000/60 = 16.666...ms per frame
     return (f32)(RaceManager::spInstance->timer) * (1000.0f / 60.0f);
 }
 
