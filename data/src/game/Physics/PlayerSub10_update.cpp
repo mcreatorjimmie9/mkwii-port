@@ -169,73 +169,73 @@ void  sub_getNoInputSquish(void* p, s32);                // 0x80591498
 // decompiled control flow. The full low-level reconstruction requires
 // resolving ~35 external call targets.
 // ============================================================================
-void PlayerSub10::update() {
-    // sub_0x00063358(); // Stack canary check
-
-    // Check if player is in "playerIndex locked" state
-    // Read flags from playerState->flags bit 18
-    // If not locked: call sub_0x000671b4 (global system update)
-    //   call sub_0x0005e200 (get some state)
-    //   Set global flag = 1
-    //   goto main_update_body
-    //
-    // If locked:
-    //   sub_0x0006db70(); // zero vec3
-    //   Zero fields at 0x14C-0x154 (some position)
-    //   goto main_update_body
-    //
-    // main_update_body:
-    //   Reset some flags
-    //   Update driving direction (backwards detection)
-    //   Update airtime tracking
-    //   Update sticky road
-    //   Update slipstream
-    //   Update special floor state
-    //   updateHopAndSlipdrift()
-    //   If not bullet bill:
-    //     Check respawn state
-    //     updateTurn()
-    //     updateVehicleSpeed()
-    //     updateAcceleration()
-    //     updateOffroad()
-    //     applyWheelSlipToSpeed()
-    //     updateRotation()
-    //     updateStandstillBoostRot()
-    //     updateUps()
-    //     updateVehicleRotationVector()
-    //     If not airborne:
-    //       updateManualDrift() or updateAutoDrift()
-    //     Else:
-    //       updateUpsWhileAirborne()
-    //   Else:
-    //     Bullet bill path logic
-    //
-    //   updateBoost()
-    //   updateDir()
-    //   updateVehicleRotationVector() — apply rotation
-    //   updatePlayerScale()
-    //   Update sub-objects (trick, zipper)
-    //   updateDiving()
-    //   updateStickyRoad()
-    //   tryEndJumpPad()
-    //   Update drivingDirection from speed
-    //   Update hitbox scale from someScale
-    //
-    //   // Status effect ticks
-    //   updateStar()
-    //   updateMega()
-    //   updateCrush()
-    //   updateInvincibility()
-    //   updateSquish()
-    //   updateInk()
-    //
-    //   // Store lastSpeed for next frame
-    //   lastSpeed = vehicleSpeed;
-    //
-    //   // Sync KartPhysics pose
-    //   sub_0x0006db70(); // get some physics data
-    //   Store to some position fields
-}
+// [ODR] void PlayerSub10::update() {
+// [ODR]     // sub_0x00063358(); // Stack canary check
+// [ODR] 
+// [ODR]     // Check if player is in "playerIndex locked" state
+// [ODR]     // Read flags from playerState->flags bit 18
+// [ODR]     // If not locked: call sub_0x000671b4 (global system update)
+// [ODR]     //   call sub_0x0005e200 (get some state)
+// [ODR]     //   Set global flag = 1
+// [ODR]     //   goto main_update_body
+// [ODR]     //
+// [ODR]     // If locked:
+// [ODR]     //   sub_0x0006db70(); // zero vec3
+// [ODR]     //   Zero fields at 0x14C-0x154 (some position)
+// [ODR]     //   goto main_update_body
+// [ODR]     //
+// [ODR]     // main_update_body:
+// [ODR]     //   Reset some flags
+// [ODR]     //   Update driving direction (backwards detection)
+// [ODR]     //   Update airtime tracking
+// [ODR]     //   Update sticky road
+// [ODR]     //   Update slipstream
+// [ODR]     //   Update special floor state
+// [ODR]     //   updateHopAndSlipdrift()
+// [ODR]     //   If not bullet bill:
+// [ODR]     //     Check respawn state
+// [ODR]     //     updateTurn()
+// [ODR]     //     updateVehicleSpeed()
+// [ODR]     //     updateAcceleration()
+// [ODR]     //     updateOffroad()
+// [ODR]     //     applyWheelSlipToSpeed()
+// [ODR]     //     updateRotation()
+// [ODR]     //     updateStandstillBoostRot()
+// [ODR]     //     updateUps()
+// [ODR]     //     updateVehicleRotationVector()
+// [ODR]     //     If not airborne:
+// [ODR]     //       updateManualDrift() or updateAutoDrift()
+// [ODR]     //     Else:
+// [ODR]     //       updateUpsWhileAirborne()
+// [ODR]     //   Else:
+// [ODR]     //     Bullet bill path logic
+// [ODR]     //
+// [ODR]     //   updateBoost()
+// [ODR]     //   updateDir()
+// [ODR]     //   updateVehicleRotationVector() — apply rotation
+// [ODR]     //   updatePlayerScale()
+// [ODR]     //   Update sub-objects (trick, zipper)
+// [ODR]     //   updateDiving()
+// [ODR]     //   updateStickyRoad()
+// [ODR]     //   tryEndJumpPad()
+// [ODR]     //   Update drivingDirection from speed
+// [ODR]     //   Update hitbox scale from someScale
+// [ODR]     //
+// [ODR]     //   // Status effect ticks
+// [ODR]     //   updateStar()
+// [ODR]     //   updateMega()
+// [ODR]     //   updateCrush()
+// [ODR]     //   updateInvincibility()
+// [ODR]     //   updateSquish()
+// [ODR]     //   updateInk()
+// [ODR]     //
+// [ODR]     //   // Store lastSpeed for next frame
+// [ODR]     //   lastSpeed = vehicleSpeed;
+// [ODR]     //
+// [ODR]     //   // Sync KartPhysics pose
+// [ODR]     //   sub_0x0006db70(); // get some physics data
+// [ODR]     //   Store to some position fields
+// [ODR] }
 
 // ============================================================================
 // updateDir()
@@ -245,21 +245,21 @@ void PlayerSub10::update() {
 // rotation matrix and KCL surface normal. Handles landing direction
 // blending, wall collision direction correction, and smoothing.
 // ============================================================================
-void PlayerSub10::updateDir() {
-    // Get KCL surface info at 0xF0
-    // Get the rotation matrix from KartPhysics
-    // Compute forward direction from pose
-    // If airborne or special conditions:
-    //   dir = rotated forward direction
-    // Else:
-    //   Blend dir with surface-aligned direction
-    //   Use KCL normal and speed to compute projected direction
-    //   Cross product to get perpendicular component
-    //   Clamp direction change rate
-
-    // Store normalized direction to this->dir
-    // Update lastDir
-}
+// [ODR] void PlayerSub10::updateDir() {
+// [ODR]     // Get KCL surface info at 0xF0
+// [ODR]     // Get the rotation matrix from KartPhysics
+// [ODR]     // Compute forward direction from pose
+// [ODR]     // If airborne or special conditions:
+// [ODR]     //   dir = rotated forward direction
+// [ODR]     // Else:
+// [ODR]     //   Blend dir with surface-aligned direction
+// [ODR]     //   Use KCL normal and speed to compute projected direction
+// [ODR]     //   Cross product to get perpendicular component
+// [ODR]     //   Clamp direction change rate
+// [ODR] 
+// [ODR]     // Store normalized direction to this->dir
+// [ODR]     // Update lastDir
+// [ODR] }
 
 // ============================================================================
 // updateTurn()
@@ -294,23 +294,23 @@ void PlayerSub10::updateDir() {
 // Updates vehicleSpeed based on acceleration input, deceleration from
 // offroad/drifting, and speed limits. Complex multi-branch logic.
 // ============================================================================
-void PlayerSub10::updateAcceleration() {
-    // Store previous speed: lastSpeed = vehicleSpeed
-
-    // Check player state for acceleration blocking conditions
-    // If blocked (wall collision, etc.): return
-
-    // Get acceleration from vehicle params
-    // Apply input (A button), braking (B button)
-    // Compute target speed change
-
-    // If offroad: apply offroad deceleration
-    // If drifting: apply drift speed penalty
-    // If boosting: apply boost acceleration from PlayerBoost
-
-    // Clamp vehicleSpeed to [0, softSpeedLimit]
-    // Apply hard speed limit checks
-}
+// [ODR] void PlayerSub10::updateAcceleration() {
+// [ODR]     // Store previous speed: lastSpeed = vehicleSpeed
+// [ODR] 
+// [ODR]     // Check player state for acceleration blocking conditions
+// [ODR]     // If blocked (wall collision, etc.): return
+// [ODR] 
+// [ODR]     // Get acceleration from vehicle params
+// [ODR]     // Apply input (A button), braking (B button)
+// [ODR]     // Compute target speed change
+// [ODR] 
+// [ODR]     // If offroad: apply offroad deceleration
+// [ODR]     // If drifting: apply drift speed penalty
+// [ODR]     // If boosting: apply boost acceleration from PlayerBoost
+// [ODR] 
+// [ODR]     // Clamp vehicleSpeed to [0, softSpeedLimit]
+// [ODR]     // Apply hard speed limit checks
+// [ODR] }
 
 // ============================================================================
 // updateOffroad()
@@ -319,21 +319,21 @@ void PlayerSub10::updateAcceleration() {
 // Checks if player is on offroad surface, applies speed/rotation penalties
 // and starts the offroad invincibility counter.
 // ============================================================================
-void PlayerSub10::updateOffroad() {
-    // Read player state flags
-    // Check if on offroad (bit 24 of some flags, NOT on boost panel/ramp)
-    // If on offroad:
-    //   Increment floorCollisionCount
-    //   Compute kclSpeedFactor and kclRotFactor from surface params
-    //   If speed ratio changes: trigger offroad sound
-    //   If not invincible from offroad:
-    //     Set offroadInvincibilityFrames
-
-    // If NOT on offroad:
-    //   kclSpeedFactor = 0 (no penalty)
-    //   kclRotFactor = 0
-    //   Reset offroad invincibility if expired
-}
+// [ODR] void PlayerSub10::updateOffroad() {
+// [ODR]     // Read player state flags
+// [ODR]     // Check if on offroad (bit 24 of some flags, NOT on boost panel/ramp)
+// [ODR]     // If on offroad:
+// [ODR]     //   Increment floorCollisionCount
+// [ODR]     //   Compute kclSpeedFactor and kclRotFactor from surface params
+// [ODR]     //   If speed ratio changes: trigger offroad sound
+// [ODR]     //   If not invincible from offroad:
+// [ODR]     //     Set offroadInvincibilityFrames
+// [ODR] 
+// [ODR]     // If NOT on offroad:
+// [ODR]     //   kclSpeedFactor = 0 (no penalty)
+// [ODR]     //   kclRotFactor = 0
+// [ODR]     //   Reset offroad invincibility if expired
+// [ODR] }
 
 // ============================================================================
 // updateRotation()
@@ -343,22 +343,22 @@ void PlayerSub10::updateOffroad() {
 // vehicle speed, KCL surface properties, drift state, and applies
 // it through the rotation matrix. Very complex vector math.
 // ============================================================================
-void PlayerSub10::updateRotation() {
-    // Determine if drifting (for inside/outside drift)
-    // Read base turn rate from vehicle params at 0x4C-0x58
-    // Apply KCL rotation factor, offroad factor
-    // Apply speed-dependent turn scaling
-
-    // Compute rotation magnitude from turn input
-    // If wall collision or special state: override rotation
-
-    // Apply rotation to direction vector
-    // Update dir, lastDir, outsideDriftLastDir
-    // Compute cross product for drift angle tracking
-
-    // If debug mode: apply additional rotation correction
-    // Store final rotation angle to boostRot (0xF8)
-}
+// [ODR] void PlayerSub10::updateRotation() {
+// [ODR]     // Determine if drifting (for inside/outside drift)
+// [ODR]     // Read base turn rate from vehicle params at 0x4C-0x58
+// [ODR]     // Apply KCL rotation factor, offroad factor
+// [ODR]     // Apply speed-dependent turn scaling
+// [ODR] 
+// [ODR]     // Compute rotation magnitude from turn input
+// [ODR]     // If wall collision or special state: override rotation
+// [ODR] 
+// [ODR]     // Apply rotation to direction vector
+// [ODR]     // Update dir, lastDir, outsideDriftLastDir
+// [ODR]     // Compute cross product for drift angle tracking
+// [ODR] 
+// [ODR]     // If debug mode: apply additional rotation correction
+// [ODR]     // Store final rotation angle to boostRot (0xF8)
+// [ODR] }
 
 // ============================================================================
 // updateStandstillBoostRot()
@@ -366,96 +366,96 @@ void PlayerSub10::updateRotation() {
 // ============================================================================
 // When standing still with a boost, applies a rotational effect.
 // ============================================================================
-void PlayerSub10::updateStandstillBoostRot() {
-    f32 turnRate = 0.0f;
-
-    // Read state flags to determine current boost/drift condition
-    void* stateBase = *reinterpret_cast<void**>(playerPointers);
-    u32 flags8 = *reinterpret_cast<u32*>(
-        reinterpret_cast<u8*>(stateBase) + 0x08);
-    u32 flagsC = *reinterpret_cast<u32*>(
-        reinterpret_cast<u8*>(stateBase) + 0x0C);
-
-    // Check if player has forced drift (bit 18 of 0x08)
-    bool hasForcedDrift = (flags8 & 0x40000) != 0;
-    // Check if airborne (bit 0 of 0x14)
-    u32 flags14 = *reinterpret_cast<u32*>(
-        reinterpret_cast<u8*>(stateBase) + 0x14);
-    bool isAirborne = (flags14 & 0x01) != 0;
-    // Check if in shock state (bit 11 of 0x08)
-    bool isShock = (flags8 & 0x800) != 0;
-    // Check if in mega state (bit 15 of 0x0C)
-    bool isMega = (flagsC & 0x8000) != 0;
-    // Check if in star/invincible state (bits 27-28 of 0x08)
-    bool isStarOrInvincible = ((flags8 >> 27) & 0x3) != 0;
-    // Check if in rapid boost (mushroom) — bit 12 of 0x08
-    bool isRapidBoost = (flags8 & 0x1000) != 0;
-
-    // Turn parameter table offsets (from vehicle param struct):
-    //   0x4C: standstill boost turn rate base
-    //   0x50: shock/off-road turn rate modifier (~0.6)
-    //   0x1C: mega turn rate modifier
-    //   0x18: rapid boost (special floor) turn modifier (~1.2)
-    //   0x5C: online forced-drift turn rate
-    //   0x9C: online forced-drift duration factor
-    //   0xA4: normal boost (special floor) turn modifier (~0.8)
-
-    if (hasForcedDrift) {
-        // Check if online or not (global flag at RaceInfo)
-        bool isOnline = false; // from global RaceInfo
-        if (isOnline) {
-            // Online: use fixed turn rate from param table
-            turnRate = -0.04f /* paramTable[0x5C] */ * 1.0f /* paramTable[0x9C] */;
-        } else {
-            // Local: compute turn rate from boost duration ratio
-            // Use the longest remaining boost frame count as the factor
-            f32 boostFactor = 0.0f;
-            s16 maxFrames = 0;
-            for (s32 i = 0; i < 6; i++) {
-                if (boost.frames[i] > maxFrames) {
-                    maxFrames = boost.frames[i];
-                }
-            }
-            // Normalize: assume max boost duration ~180 frames (3 seconds at 60fps)
-            if (maxFrames > 0) {
-                boostFactor = static_cast<f32>(maxFrames) / 180.0f;
-                if (boostFactor > 1.0f) boostFactor = 1.0f;
-            }
-            turnRate = 0.04f /* paramTable[0x4C] */ * boostFactor;
-        }
-        // Read turn rate from 0x284 (turn params) offset 0x0C
-    } else if (isAirborne) {
-        // No standstill rotation in air — leave turnRate at 0
-    } else {
-        // Normal standstill rotation from speed delta (lastSpeed - vehicleSpeed)
-        f32 speedDelta = lastSpeed - vehicleSpeed;
-        // Clamp speedDelta to [-1, 1] range to prevent extreme rotation
-        if (speedDelta < -1.0f) speedDelta = -1.0f;
-        if (speedDelta > 1.0f) speedDelta = 1.0f;
-
-        turnRate = speedDelta * 0.04f /* paramTable[0x4C] standstill turn rate */;
-
-        // Apply additional factors for shock/mega states
-        if (isShock) {
-            turnRate *= 0.6f /* paramTable[0x50] shock turn rate modifier */;
-        }
-        if (isMega || isStarOrInvincible) {
-            turnRate *= 0.8f /* paramTable[0x1C] mega/star turn rate modifier */;
-        }
-    }
-
-    // If on special floor (jump pad): multiply by floor rotation param
-    if (specialFloor & 0x100) {
-        if (isRapidBoost) {
-            turnRate *= 1.2f /* paramTable[0x18] rapid boost (mushroom) turn modifier */;
-        } else {
-            turnRate *= 0.8f /* paramTable[0xA4] normal boost turn modifier */;
-        }
-    }
-
-    // Apply turnRate to boostRot (0xF8)
-    boostRot = turnRate;
-}
+// [ODR] void PlayerSub10::updateStandstillBoostRot() {
+// [ODR]     f32 turnRate = 0.0f;
+// [ODR] 
+// [ODR]     // Read state flags to determine current boost/drift condition
+// [ODR]     void* stateBase = *reinterpret_cast<void**>(playerPointers);
+// [ODR]     u32 flags8 = *reinterpret_cast<u32*>(
+// [ODR]         reinterpret_cast<u8*>(stateBase) + 0x08);
+// [ODR]     u32 flagsC = *reinterpret_cast<u32*>(
+// [ODR]         reinterpret_cast<u8*>(stateBase) + 0x0C);
+// [ODR] 
+// [ODR]     // Check if player has forced drift (bit 18 of 0x08)
+// [ODR]     bool hasForcedDrift = (flags8 & 0x40000) != 0;
+// [ODR]     // Check if airborne (bit 0 of 0x14)
+// [ODR]     u32 flags14 = *reinterpret_cast<u32*>(
+// [ODR]         reinterpret_cast<u8*>(stateBase) + 0x14);
+// [ODR]     bool isAirborne = (flags14 & 0x01) != 0;
+// [ODR]     // Check if in shock state (bit 11 of 0x08)
+// [ODR]     bool isShock = (flags8 & 0x800) != 0;
+// [ODR]     // Check if in mega state (bit 15 of 0x0C)
+// [ODR]     bool isMega = (flagsC & 0x8000) != 0;
+// [ODR]     // Check if in star/invincible state (bits 27-28 of 0x08)
+// [ODR]     bool isStarOrInvincible = ((flags8 >> 27) & 0x3) != 0;
+// [ODR]     // Check if in rapid boost (mushroom) — bit 12 of 0x08
+// [ODR]     bool isRapidBoost = (flags8 & 0x1000) != 0;
+// [ODR] 
+// [ODR]     // Turn parameter table offsets (from vehicle param struct):
+// [ODR]     //   0x4C: standstill boost turn rate base
+// [ODR]     //   0x50: shock/off-road turn rate modifier (~0.6)
+// [ODR]     //   0x1C: mega turn rate modifier
+// [ODR]     //   0x18: rapid boost (special floor) turn modifier (~1.2)
+// [ODR]     //   0x5C: online forced-drift turn rate
+// [ODR]     //   0x9C: online forced-drift duration factor
+// [ODR]     //   0xA4: normal boost (special floor) turn modifier (~0.8)
+// [ODR] 
+// [ODR]     if (hasForcedDrift) {
+// [ODR]         // Check if online or not (global flag at RaceInfo)
+// [ODR]         bool isOnline = false; // from global RaceInfo
+// [ODR]         if (isOnline) {
+// [ODR]             // Online: use fixed turn rate from param table
+// [ODR]             turnRate = -0.04f /* paramTable[0x5C] */ * 1.0f /* paramTable[0x9C] */;
+// [ODR]         } else {
+// [ODR]             // Local: compute turn rate from boost duration ratio
+// [ODR]             // Use the longest remaining boost frame count as the factor
+// [ODR]             f32 boostFactor = 0.0f;
+// [ODR]             s16 maxFrames = 0;
+// [ODR]             for (s32 i = 0; i < 6; i++) {
+// [ODR]                 if (boost.frames[i] > maxFrames) {
+// [ODR]                     maxFrames = boost.frames[i];
+// [ODR]                 }
+// [ODR]             }
+// [ODR]             // Normalize: assume max boost duration ~180 frames (3 seconds at 60fps)
+// [ODR]             if (maxFrames > 0) {
+// [ODR]                 boostFactor = static_cast<f32>(maxFrames) / 180.0f;
+// [ODR]                 if (boostFactor > 1.0f) boostFactor = 1.0f;
+// [ODR]             }
+// [ODR]             turnRate = 0.04f /* paramTable[0x4C] */ * boostFactor;
+// [ODR]         }
+// [ODR]         // Read turn rate from 0x284 (turn params) offset 0x0C
+// [ODR]     } else if (isAirborne) {
+// [ODR]         // No standstill rotation in air — leave turnRate at 0
+// [ODR]     } else {
+// [ODR]         // Normal standstill rotation from speed delta (lastSpeed - vehicleSpeed)
+// [ODR]         f32 speedDelta = lastSpeed - vehicleSpeed;
+// [ODR]         // Clamp speedDelta to [-1, 1] range to prevent extreme rotation
+// [ODR]         if (speedDelta < -1.0f) speedDelta = -1.0f;
+// [ODR]         if (speedDelta > 1.0f) speedDelta = 1.0f;
+// [ODR] 
+// [ODR]         turnRate = speedDelta * 0.04f /* paramTable[0x4C] standstill turn rate */;
+// [ODR] 
+// [ODR]         // Apply additional factors for shock/mega states
+// [ODR]         if (isShock) {
+// [ODR]             turnRate *= 0.6f /* paramTable[0x50] shock turn rate modifier */;
+// [ODR]         }
+// [ODR]         if (isMega || isStarOrInvincible) {
+// [ODR]             turnRate *= 0.8f /* paramTable[0x1C] mega/star turn rate modifier */;
+// [ODR]         }
+// [ODR]     }
+// [ODR] 
+// [ODR]     // If on special floor (jump pad): multiply by floor rotation param
+// [ODR]     if (specialFloor & 0x100) {
+// [ODR]         if (isRapidBoost) {
+// [ODR]             turnRate *= 1.2f /* paramTable[0x18] rapid boost (mushroom) turn modifier */;
+// [ODR]         } else {
+// [ODR]             turnRate *= 0.8f /* paramTable[0xA4] normal boost turn modifier */;
+// [ODR]         }
+// [ODR]     }
+// [ODR] 
+// [ODR]     // Apply turnRate to boostRot (0xF8)
+// [ODR]     boostRot = turnRate;
+// [ODR] }
 
 // ============================================================================
 // updateUps()
@@ -465,30 +465,30 @@ void PlayerSub10::updateStandstillBoostRot() {
 // Moves the player along the direction vector at the current speed,
 // handles wall collisions, cannon entry, and KCL interactions.
 // ============================================================================
-void PlayerSub10::updateUps() {
-    // Get delta-time factor from global
-    // Clear hasLandingDir (0x098)
-    // Check if in invincible/star state
-
-    // If in cannon state (bit 9):
-    //   Interpolate position from cannon path
-    //   Set hasLandingDir = true
-    //   Skip normal physics
-    //   goto store_position
-    //
-    // Check if forced drift (bit 9 of state)
-    //   If so, skip to special drift handling
-    //
-    // Check air state, wall collision, etc.
-    //   Compute movement vector from dir * speed * dt
-    //   Apply KCL collision detection
-    //   Handle wall bouncing
-    //   Update position
-    //
-    // store_position:
-    //   Call sub_0x0006db70() to get KartPhysics position
-    //   Store to this position fields
-}
+// [ODR] void PlayerSub10::updateUps() {
+// [ODR]     // Get delta-time factor from global
+// [ODR]     // Clear hasLandingDir (0x098)
+// [ODR]     // Check if in invincible/star state
+// [ODR] 
+// [ODR]     // If in cannon state (bit 9):
+// [ODR]     //   Interpolate position from cannon path
+// [ODR]     //   Set hasLandingDir = true
+// [ODR]     //   Skip normal physics
+// [ODR]     //   goto store_position
+// [ODR]     //
+// [ODR]     // Check if forced drift (bit 9 of state)
+// [ODR]     //   If so, skip to special drift handling
+// [ODR]     //
+// [ODR]     // Check air state, wall collision, etc.
+// [ODR]     //   Compute movement vector from dir * speed * dt
+// [ODR]     //   Apply KCL collision detection
+// [ODR]     //   Handle wall bouncing
+// [ODR]     //   Update position
+// [ODR]     //
+// [ODR]     // store_position:
+// [ODR]     //   Call sub_0x0006db70() to get KartPhysics position
+// [ODR]     //   Store to this position fields
+// [ODR] }
 
 // ============================================================================
 // updateUpsWhileAirborne()
@@ -514,25 +514,25 @@ void PlayerSub10::updateUps() {
 // drift angle tracking, MT charge, drift direction changes, and drift end
 // (MT/SMT release).
 // ============================================================================
-void PlayerSub10::updateManualDrift() {
-    // Call updateHopAndSlipdrift() first
-    // Check state flags for cannon/forced drift
-
-    // If player can initiate drift:
-    //   Check drift direction from input
-    //   Compute cross product for drift angle
-    //   Update outsideDriftAngle (0x09C)
-    //   Update outsideDriftLastDir
-
-    // Check if drift should end:
-    //   If not drifting anymore or special condition
-    //     Call endDrift() or releaseMt()
-
-    // If still drifting:
-    //   Call updateDriftAngle() to increment drift angle
-    //   Update MT charge based on drift angle
-    //   Check for SMT threshold
-}
+// [ODR] void PlayerSub10::updateManualDrift() {
+// [ODR]     // Call updateHopAndSlipdrift() first
+// [ODR]     // Check state flags for cannon/forced drift
+// [ODR] 
+// [ODR]     // If player can initiate drift:
+// [ODR]     //   Check drift direction from input
+// [ODR]     //   Compute cross product for drift angle
+// [ODR]     //   Update outsideDriftAngle (0x09C)
+// [ODR]     //   Update outsideDriftLastDir
+// [ODR] 
+// [ODR]     // Check if drift should end:
+// [ODR]     //   If not drifting anymore or special condition
+// [ODR]     //     Call endDrift() or releaseMt()
+// [ODR] 
+// [ODR]     // If still drifting:
+// [ODR]     //   Call updateDriftAngle() to increment drift angle
+// [ODR]     //   Update MT charge based on drift angle
+// [ODR]     //   Check for SMT threshold
+// [ODR] }
 
 // ============================================================================
 // updateAutoDrift()
@@ -541,28 +541,28 @@ void PlayerSub10::updateManualDrift() {
 // Automatic drift correction when not actively drifting but the kart
 // is sliding (e.g., after releasing drift or on certain surfaces).
 // ============================================================================
-void PlayerSub10::updateAutoDrift() {
-    // Check state: must be in drift-capable state
-    // If not in appropriate state, return
-
-    // Check if outsideDriftAngle is non-zero
-    // If zero: no auto-drift needed
-
-    // Increment auto-drift counter (at 0x1CC)
-    // Clamp to max counter
-
-    // If counter exceeded:
-    //   Call vtable method to get drift direction
-    //   Set drift state flag (bit 12)
-    //   Apply drift correction to outsideDriftAngle (0x1C8)
-
-    // If not exceeded:
-    //   Clear drift state flags
-    //   Decay outsideDriftAngle (0x1C8) toward zero
-    //   Clamp with hopUp and hopDir values
-
-    // Apply the rotation correction to direction
-}
+// [ODR] void PlayerSub10::updateAutoDrift() {
+// [ODR]     // Check state: must be in drift-capable state
+// [ODR]     // If not in appropriate state, return
+// [ODR] 
+// [ODR]     // Check if outsideDriftAngle is non-zero
+// [ODR]     // If zero: no auto-drift needed
+// [ODR] 
+// [ODR]     // Increment auto-drift counter (at 0x1CC)
+// [ODR]     // Clamp to max counter
+// [ODR] 
+// [ODR]     // If counter exceeded:
+// [ODR]     //   Call vtable method to get drift direction
+// [ODR]     //   Set drift state flag (bit 12)
+// [ODR]     //   Apply drift correction to outsideDriftAngle (0x1C8)
+// [ODR] 
+// [ODR]     // If not exceeded:
+// [ODR]     //   Clear drift state flags
+// [ODR]     //   Decay outsideDriftAngle (0x1C8) toward zero
+// [ODR]     //   Clamp with hopUp and hopDir values
+// [ODR] 
+// [ODR]     // Apply the rotation correction to direction
+// [ODR] }
 
 // ============================================================================
 // updateHopAndSlipdrift()
