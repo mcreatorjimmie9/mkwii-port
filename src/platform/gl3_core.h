@@ -84,15 +84,28 @@ constexpr GLenum GL_CULL_FACE  = 0x0B44;
 constexpr GLenum GL_BLEND      = 0x0BE2;
 
 // Face culling
-constexpr GLenum GL_BACK = 0x0405;
-constexpr GLenum GL_CCW  = 0x0901;
+constexpr GLenum GL_BACK  = 0x0405;
+constexpr GLenum GL_FRONT = 0x0404;
+constexpr GLenum GL_FRONT_AND_BACK = 0x0408;
+constexpr GLenum GL_CCW   = 0x0901;
 
 // Depth comparison
-constexpr GLenum GL_LESS = 0x0201;
+constexpr GLenum GL_NEVER              = 0x0200;
+constexpr GLenum GL_LESS               = 0x0201;
+constexpr GLenum GL_EQUAL              = 0x0202;
+constexpr GLenum GL_LEQUAL             = 0x0203;
+constexpr GLenum GL_GREATER            = 0x0204;
+constexpr GLenum GL_NOTEQUAL           = 0x0205;
+constexpr GLenum GL_GEQUAL             = 0x0206;
+constexpr GLenum GL_ALWAYS             = 0x0207;
 
 // Blending
+constexpr GLenum GL_ZERO                 = 0;
+constexpr GLenum GL_ONE                  = 1;
 constexpr GLenum GL_SRC_ALPHA            = 0x0302;
 constexpr GLenum GL_ONE_MINUS_SRC_ALPHA  = 0x0303;
+constexpr GLenum GL_DST_ALPHA            = 0x0304;
+constexpr GLenum GL_ONE_MINUS_DST_ALPHA  = 0x0305;
 
 // Context profile
 constexpr GLenum GL_MAJOR_VERSION        = 0x821B;
@@ -120,9 +133,12 @@ constexpr GLenum GL_TEXTURE_WRAP_T     = 0x2803;
 constexpr GLenum GL_NEAREST           = 0x2600;
 constexpr GLenum GL_LINEAR            = 0x2601;
 constexpr GLenum GL_NEAREST_MIPMAP_NEAREST = 0x2700;
+constexpr GLenum GL_NEAREST_MIPMAP_LINEAR  = 0x2702;
+constexpr GLenum GL_LINEAR_MIPMAP_NEAREST  = 0x2701;
 constexpr GLenum GL_LINEAR_MIPMAP_LINEAR   = 0x2703;
 constexpr GLenum GL_CLAMP_TO_EDGE    = 0x812F;
 constexpr GLenum GL_REPEAT            = 0x2901;
+constexpr GLenum GL_MIRRORED_REPEAT   = 0x8370;
 constexpr GLenum GL_RGBA8             = 0x8058;
 constexpr GLenum GL_RGBA              = 0x1908;
 constexpr GLenum GL_RGB               = 0x1907;
@@ -141,6 +157,8 @@ using PFNGLENABLE      = void   (GLAPIENTRY *)(GLenum cap);
 using PFNGLDISABLE     = void   (GLAPIENTRY *)(GLenum cap);
 using PFNGLDEPTHFUNC   = void   (GLAPIENTRY *)(GLenum func);
 using PFNGLBLENDFUNC   = void   (GLAPIENTRY *)(GLenum sfactor, GLenum dfactor);
+using PFNGLCULLFACE    = void   (GLAPIENTRY *)(GLenum mode);
+using PFNGLFLUSH       = void   (GLAPIENTRY *)(void);
 using PFNGLGETERROR    = GLenum (GLAPIENTRY *)(void);
 
 // Shaders
@@ -212,6 +230,8 @@ struct GLFunctions {
     PFNGLDISABLE     glDisable     = nullptr;
     PFNGLDEPTHFUNC   glDepthFunc   = nullptr;
     PFNGLBLENDFUNC   glBlendFunc   = nullptr;
+    PFNGLCULLFACE    glCullFace    = nullptr;
+    PFNGLFLUSH       glFlush       = nullptr;
     PFNGLGETERROR    glGetError    = nullptr;
 
     // Shaders
@@ -310,6 +330,8 @@ inline bool loadFunctions(void* (*getProcAddr)(const char*)) {
     RESOLVE(glDisable,    PFNGLDISABLE,    "glDisable");
     RESOLVE(glDepthFunc,  PFNGLDEPTHFUNC, "glDepthFunc");
     RESOLVE(glBlendFunc,  PFNGLBLENDFUNC, "glBlendFunc");
+    RESOLVE(glCullFace,   PFNGLCULLFACE,  "glCullFace");
+    RESOLVE(glFlush,      PFNGLFLUSH,     "glFlush");
     RESOLVE(glGetError,   PFNGLGETERROR,  "glGetError");
 
     // Shaders

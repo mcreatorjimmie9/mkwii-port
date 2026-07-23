@@ -496,6 +496,7 @@ set(APP_SOURCES
     src/main.cpp
     src/platform/window.cpp
     src/platform/graphics.cpp
+    src/platform/gx_renderer.cpp
     src/platform/audio.cpp
     src/platform/input.cpp
     src/game/KartEntity.cpp
