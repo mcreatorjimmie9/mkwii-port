@@ -139,6 +139,15 @@ constexpr GLenum GL_LINEAR_MIPMAP_LINEAR   = 0x2703;
 constexpr GLenum GL_CLAMP_TO_EDGE    = 0x812F;
 constexpr GLenum GL_REPEAT            = 0x2901;
 constexpr GLenum GL_MIRRORED_REPEAT   = 0x8370;
+constexpr GLenum GL_FOG                 = 0x0B60;
+constexpr GLenum GL_FOG_MODE            = 0x0B65;
+constexpr GLenum GL_FOG_DENSITY         = 0x0B62;
+constexpr GLenum GL_FOG_START           = 0x0B63;
+constexpr GLenum GL_FOG_END             = 0x0B64;
+constexpr GLenum GL_FOG_COLOR           = 0x0B66;
+constexpr GLenum GL_EXP                 = 0x0800;
+constexpr GLenum GL_EXP2                = 0x0801;
+constexpr GLenum GL_DEPTH_WRITEMASK     = 0x0B73;
 constexpr GLenum GL_RGBA8             = 0x8058;
 constexpr GLenum GL_RGBA              = 0x1908;
 constexpr GLenum GL_RGB               = 0x1907;
@@ -215,6 +224,12 @@ using PFNGLTEXSUBIMAGE2D         = void  (GLAPIENTRY *)(GLenum target, GLint lev
 using PFNGLTEXPARAMETERI         = void  (GLAPIENTRY *)(GLenum target, GLenum pname, GLint param);
 using PFNGLACTIVETEXTURE         = void  (GLAPIENTRY *)(GLenum texture);
 using PFNGLGENERATEMIPMAP        = void  (GLAPIENTRY *)(GLenum target);
+using PFNGLFOGF                 = void  (GLAPIENTRY *)(GLenum pname, GLfloat param);
+using PFNGLFOGFV                = void  (GLAPIENTRY *)(GLenum pname, const GLfloat* params);
+using PFNGLFOGI                 = void  (GLAPIENTRY *)(GLenum pname, GLint param);
+using PFNGLGETFLOATV            = GLfloat(GLAPIENTRY *)(GLenum pname, GLfloat* params);
+using PFNGLDEPTHMASK            = void  (GLAPIENTRY *)(GLboolean flag);
+using PFNGLBLENDFUNCSEPARATE    = void  (GLAPIENTRY *)(GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha, GLenum dfactorAlpha);
 
 // ---------------------------------------------------------------------------
 // GL function pointer storage
@@ -288,6 +303,12 @@ struct GLFunctions {
     PFNGLTEXPARAMETERI   glTexParameteri    = nullptr;
     PFNGLACTIVETEXTURE   glActiveTexture   = nullptr;
     PFNGLGENERATEMIPMAP  glGenerateMipmap  = nullptr;
+    PFNGLFOGF              glFogf              = nullptr;
+    PFNGLFOGFV             glFogfv             = nullptr;
+    PFNGLFOGI              glFogi              = nullptr;
+    PFNGLGETFLOATV         glGetFloatv         = nullptr;
+    PFNGLDEPTHMASK         glDepthMask         = nullptr;
+    PFNGLBLENDFUNCSEPARATE glBlendFuncSeparate = nullptr;
 };
 
 // Global function pointer table (all initialized to nullptr above)
@@ -388,6 +409,12 @@ inline bool loadFunctions(void* (*getProcAddr)(const char*)) {
     RESOLVE(glTexParameteri,   PFNGLTEXPARAMETERI,   "glTexParameteri");
     RESOLVE(glActiveTexture,   PFNGLACTIVETEXTURE,   "glActiveTexture");
     RESOLVE(glGenerateMipmap,  PFNGLGENERATEMIPMAP,  "glGenerateMipmap");
+    RESOLVE(glFogf,              PFNGLFOGF,              "glFogf");
+    RESOLVE(glFogfv,             PFNGLFOGFV,             "glFogfv");
+    RESOLVE(glFogi,              PFNGLFOGI,              "glFogi");
+    RESOLVE(glGetFloatv,         PFNGLGETFLOATV,         "glGetFloatv");
+    RESOLVE(glDepthMask,         PFNGLDEPTHMASK,         "glDepthMask");
+    RESOLVE(glBlendFuncSeparate, PFNGLBLENDFUNCSEPARATE, "glBlendFuncSeparate");
 
     #undef RESOLVE
 

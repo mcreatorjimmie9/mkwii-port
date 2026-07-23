@@ -215,10 +215,42 @@ struct RendererState {
         bool enabled;
     } lights[MAX_LIGHTS];
 
+    // --- Fog ---
+    u8  fogType;             // GX_FOG_* type (0 = none)
+    f32 fogStartZ;
+    f32 fogEndZ;
+    f32 fogNearZ;
+    f32 fogFarZ;
+    u32 fogColor;            // Packed RGBA
+    bool fogEnable;
+
+    // --- TexGen ---
+    struct {
+        u8 type;       // 0=MAT4X3, 2=MAT4X3, 5=STRQ, 6=NORMAL, 7=NORMAL, 8=POSITION, 9=POSITION
+        u8 source;     // 0=TEXCOORD0..7, 1=TEXCOORD0, 4=NRM, 5=NRM, 8=POS
+        u8 matrix;     // Matrix index (0-9)
+        bool normalize;
+        u8 postMatrix;
+    } texGens[MAX_TEXGENS];
+
+    // --- TEV swap table (4 tables x 4 channels)
+    u8 swapTable[4][4]; // [table][channel] = swap mode (0-7)
+
     // --- GL objects ---
     u32 defaultVAO;
     u32 dynVBO;
     u32 currentProgram;
+
+    // --- TEV program cache ---
+    struct {
+        u32 program;
+        u32 tevHash;    // Hash of TEV config to detect changes
+        s32 mvpLoc;
+        s32 texLocs[MAX_TEXMAPS];
+        s32 kColorLocs[MAX_KCOLORS];
+        s32 tevColorLocs[MAX_TEV_COLORS];
+        s32 useTexLocs[MAX_TEXMAPS];
+    } tevProgCache;
 
     // --- Stats ---
     u32 frameDrawCalls;
@@ -366,5 +398,19 @@ u32 buildTEVProgram();
 /// Decode Wii texture format to RGBA8 and upload to a GL texture.
 /// Returns the GL texture ID.
 u32 decodeAndUploadTexture(void* wiiData, u16 width, u16 height, u8 format);
+
+// --- Fog ---
+
+void setFog(u8 type, f32 startZ, f32 endZ, f32 nearZ, f32 farZ, u32 color);
+void setFogRangeAdj(u8 enable, u16 center, u16* table);
+void initFogAdjTable(u16* table, u16 width, const f32 proj[4][4]);
+
+// --- TexGen ---
+
+void setTexCoordGen(u8 texCoordId, u8 type, u8 source, u8 matrix, u8 normalize, u8 postMatrix);
+
+// --- Display list replay ---
+
+void replayDisplayList(const void* list, u32 nbytes);
 
 } // namespace GXRenderer
