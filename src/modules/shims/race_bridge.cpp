@@ -20,6 +20,9 @@
 #include "RaceEngine/CtrlRaceTime.hpp"
 #include "RaceEngine/RaceSequence.hpp"
 #include "RaceEngine/RaceDirector.hpp"
+#include "RaceEngine/Raceinfo.hpp"
+#include "RaceEngine/RaceinfoPlayer.hpp"
+#include "RaceEngine/Racedata.hpp"
 
 #include <cstring>
 #include <cstdio>
@@ -29,6 +32,21 @@
 // Using raw pointers is faithful to the original MKWii singleton pattern.
 static RaceEngine::RaceSequence* s_raceSequence = nullptr;
 static RaceEngine::RaceDirector* s_raceDirector = nullptr;
+
+// Phase 32: Raceinfo and Racedata singletons.
+// In the original MKWii, Raceinfo is created during SceneRace::initSubsystems()
+// and ticked each frame in calc(). It manages per-player checkpoint detection,
+// progress calculation, and lap timing independently from RaceManager.
+// Racedata holds race result data for awards/credits sequences.
+// Both are owned by the scene and accessed via the race bridge.
+static System::Raceinfo* s_raceinfo = nullptr;
+static System::Racedata* s_racedata = nullptr;
+
+// Phase 32: CtrlRaceTime instance for authoritative HUD timer display.
+// In the original MKWii, CtrlRaceTime is a UI control that reads from
+// RaceManager::timer to compute displayed time. We create it here so
+// the HUD can use it as the single source of truth for time display.
+static System::CtrlRaceTime* s_ctrlRaceTime = nullptr;
 
 // Phase 25: Cached kart positions updated each frame by updateRaceManagerFromGame().
 // The decompiled code (RaceinfoPlayer::updateCheckpoint, RaceManager::update) reads
@@ -757,6 +775,314 @@ void bridge_clearStartBoost(u32 playerId) {
     if (!RaceManager::spInstance) return;
     if (playerId >= MAX_PLAYER_COUNT) return;
     RaceManager::spInstance->startBoostActive[playerId] = false;
+}
+
+// ============================================================================
+// Phase 32: Raceinfo singleton bridge functions
+// ============================================================================
+// In the original MKWii, Raceinfo is created once per race by the scene
+// and persists until the scene is destroyed. It provides:
+//   - Per-player checkpoint proximity detection (RaceinfoPlayer::updateCheckpoint)
+//   - Progress-based position calculation (Raceinfo::calcPositions)
+//   - Lap timing and validation
+//   - Start grid position queries (getInitialPosAndRotForPlayer)
+//
+// The Raceinfo system runs IN PARALLEL with RaceManager — both independently
+// track race state from the same kart positions. Raceinfo feeds into
+// CtrlRaceTime (HUD display) and Racedata (results), while RaceManager
+// feeds into GP scoring and the race director.
+// ============================================================================
+
+// ============================================================================
+// bridge_createRaceinfo — Create and initialize the Raceinfo singleton
+//
+// Called from SceneRace::initSubsystems() after RaceConfig and RaceManager
+// are set up. Allocates the Raceinfo player array and initializes per-player
+// state from RaceConfig settings.
+//
+// @param playerCount  Number of active players (typically 4 or 12)
+// ============================================================================
+void bridge_createRaceinfo(u32 playerCount) {
+    if (s_raceinfo) {
+        delete s_raceinfo;
+    }
+    s_raceinfo = new System::Raceinfo();
+
+    // Allocate player array (matching original binary: 0xF0 stride per player)
+    s_raceinfo->players = new System::RaceinfoPlayer[playerCount > MAX_PLAYER_COUNT ? MAX_PLAYER_COUNT : playerCount];
+    s_raceinfo->playerCount = playerCount > MAX_PLAYER_COUNT ? MAX_PLAYER_COUNT : playerCount;
+
+    // Initialize: construct all players, read config, set lap count
+    s_raceinfo->construct();
+    s_raceinfo->init();
+    s_raceinfo->initGamemode();
+
+    // Set race start time marker
+    for (u32 i = 0; i < s_raceinfo->playerCount; i++) {
+        s_raceinfo->players[i].raceStartTimeMs = 0;
+    }
+
+    printf("[RaceBridge] Raceinfo created (%u players, %u laps)\n",
+           s_raceinfo->playerCount, s_raceinfo->lapCount);
+}
+
+// ============================================================================
+// bridge_destroyRaceinfo — Destroy the Raceinfo singleton
+//
+// Called from SceneRace destructor to clean up.
+// ============================================================================
+void bridge_destroyRaceinfo() {
+    if (s_raceinfo) {
+        if (s_raceinfo->players) {
+            delete[] s_raceinfo->players;
+            s_raceinfo->players = nullptr;
+        }
+        delete s_raceinfo;
+        s_raceinfo = nullptr;
+    }
+}
+
+// ============================================================================
+// bridge_updateRaceinfo — Per-frame update of Raceinfo
+//
+// Called each frame during RACING phase from SceneRace::calc().
+// Ticks Raceinfo::update() which runs checkpoint detection on each player,
+// advances the race timer, and recalculates positions.
+//
+// In the original MKWii, this is called by RaceScene::calc() which
+// dispatches to Raceinfo::update() before RaceManager::update().
+// ============================================================================
+void bridge_updateRaceinfo() {
+    if (!s_raceinfo) return;
+    s_raceinfo->update();
+}
+
+// ============================================================================
+// bridge_startRaceinfoRace — Signal Raceinfo that the race has started
+//
+// Called from SceneRace::startRace() to set raceStartTimeMs for all players.
+// This enables accurate lap timing in RaceinfoPlayer::endLap().
+// ============================================================================
+void bridge_startRaceinfoRace() {
+    if (!s_raceinfo) return;
+    // Set race start time for all players
+    u32 now = s_cachedRaceTimerMs;
+    for (u32 i = 0; i < s_raceinfo->playerCount; i++) {
+        s_raceinfo->players[i].raceStartTimeMs = now;
+        s_raceinfo->players[i].lastCheckpointTimeMs = now;
+    }
+    s_raceinfo->raceTimerMs = 0;
+}
+
+// ============================================================================
+// bridge_raceinfoSetFinishPosition — Record a player's finish position
+//
+// Called when a player completes all laps. Updates both Raceinfo
+// and RaceManagerPlayer finish state.
+//
+// @param playerId       Player index
+// @param position       Finishing position (1-indexed)
+// ============================================================================
+void bridge_raceinfoSetFinishPosition(u32 playerId, u8 position) {
+    if (s_raceinfo && playerId < s_raceinfo->playerCount) {
+        s_raceinfo->setFinishPosition(static_cast<u8>(playerId), position);
+    }
+}
+
+// ============================================================================
+// bridge_getRaceinfoPosition — Get a player's position from Raceinfo
+//
+// @param playerId  Player index
+// @return Position (1-indexed), or 0 if not available
+// ============================================================================
+u8 bridge_getRaceinfoPosition(u32 playerId) {
+    if (!s_raceinfo) return 0;
+    return s_raceinfo->getPlayerPosition(static_cast<u8>(playerId));
+}
+
+// ============================================================================
+// bridge_getRaceinfoRaceTime — Get race time from Raceinfo (ms)
+//
+// @param playerId  Player index
+// @return Race time in milliseconds
+// ============================================================================
+u32 bridge_getRaceinfoRaceTime(u32 playerId) {
+    if (!s_raceinfo) return 0;
+    return s_raceinfo->getPlayerRaceTime(static_cast<u8>(playerId));
+}
+
+// ============================================================================
+// Phase 32: Racedata singleton bridge functions
+// ============================================================================
+
+// ============================================================================
+// bridge_createRacedata — Create and initialize the Racedata singleton
+//
+// Called from SceneRace::initSubsystems() to set up race results storage.
+// Racedata persists finish times, positions, and per-player results
+// for the awards and credits sequences.
+//
+// @param playerCount  Number of active players
+// ============================================================================
+void bridge_createRacedata(u32 playerCount) {
+    if (s_racedata) {
+        delete s_racedata;
+    }
+    s_racedata = new System::Racedata();
+    s_racedata->init();
+    s_racedata->mPlayerCount = playerCount > MAX_PLAYER_COUNT ? MAX_PLAYER_COUNT : playerCount;
+    printf("[RaceBridge] Racedata created (%u players)\n", s_racedata->mPlayerCount);
+}
+
+// ============================================================================
+// bridge_destroyRacedata — Destroy the Racedata singleton
+// ============================================================================
+void bridge_destroyRacedata() {
+    if (s_racedata) {
+        delete s_racedata;
+        s_racedata = nullptr;
+    }
+}
+
+// ============================================================================
+// bridge_updateRacedata — Per-frame update of Racedata
+//
+// Called each frame from SceneRace::calc(). Advances the phase FSM
+// (COUNTDOWN → RACING → FINISHED → RESULTS).
+// ============================================================================
+void bridge_updateRacedata() {
+    if (!s_racedata) return;
+    s_racedata->update();
+}
+
+// ============================================================================
+// bridge_racedataSetFinish — Record a player's finish in Racedata
+//
+// @param playerId       Player index
+// @param position       Finishing position (1-indexed)
+// @param finishTimeMs   Finish time in milliseconds
+// ============================================================================
+void bridge_racedataSetFinish(u32 playerId, u8 position, u32 finishTimeMs) {
+    if (!s_racedata) return;
+    if (playerId >= MAX_PLAYER_COUNT) return;
+
+    s_racedata->mPlayerResults[playerId].finishPosition = position;
+    s_racedata->mPlayerResults[playerId].finishTimeMs = finishTimeMs;
+    s_racedata->mFinishedCount++;
+
+    // Transition to FINISHED if all players done
+    if (s_racedata->mFinishedCount >= s_racedata->mPlayerCount) {
+        s_racedata->mPhase = System::RACE_PHASE_FINISHED;
+    }
+}
+
+// ============================================================================
+// Phase 32: CtrlRaceTime bridge functions
+// ============================================================================
+
+// ============================================================================
+// bridge_createCtrlRaceTime — Create the CtrlRaceTime HUD timer
+//
+// In the original MKWii, CtrlRaceTime is a UI control created by the
+// layout system during scene initialization. We create it here so
+// the HUD can query it for the authoritative time display string.
+//
+// @param lapCount  Number of laps in the race
+// ============================================================================
+void bridge_createCtrlRaceTime(u32 lapCount) {
+    if (s_ctrlRaceTime) {
+        delete s_ctrlRaceTime;
+    }
+    s_ctrlRaceTime = new System::CtrlRaceTime();
+    s_ctrlRaceTime->init(static_cast<u8>(lapCount > 0 ? lapCount : 3));
+    s_ctrlRaceTime->initSelf();
+    printf("[RaceBridge] CtrlRaceTime created (%u laps)\n",
+           lapCount > 0 ? lapCount : 3);
+}
+
+// ============================================================================
+// bridge_destroyCtrlRaceTime — Destroy the CtrlRaceTime instance
+// ============================================================================
+void bridge_destroyCtrlRaceTime() {
+    if (s_ctrlRaceTime) {
+        delete s_ctrlRaceTime;
+        s_ctrlRaceTime = nullptr;
+    }
+}
+
+// ============================================================================
+// bridge_updateCtrlRaceTime — Per-frame update of CtrlRaceTime
+//
+// Calls calcSelf() + refresh() which read from RaceManager::timer
+// and format the display string. Called each frame during racing.
+// ============================================================================
+void bridge_updateCtrlRaceTime() {
+    if (!s_ctrlRaceTime) return;
+    s_ctrlRaceTime->calcSelf();
+    s_ctrlRaceTime->refresh();
+}
+
+// ============================================================================
+// bridge_startCtrlRaceTimeClock — Start the CtrlRaceTime clock
+//
+// Called from SceneRace::startRace() when the "GO" signal fires.
+// ============================================================================
+void bridge_startCtrlRaceTimeClock() {
+    if (!s_ctrlRaceTime) return;
+    s_ctrlRaceTime->startClock();
+}
+
+// ============================================================================
+// bridge_stopCtrlRaceTimeClock — Stop the CtrlRaceTime clock
+//
+// Called from SceneRace::finishRace() when the race ends.
+// ============================================================================
+void bridge_stopCtrlRaceTimeClock() {
+    if (!s_ctrlRaceTime) return;
+    s_ctrlRaceTime->stopClock();
+}
+
+// ============================================================================
+// bridge_getCtrlRaceTimeText — Get the formatted time string from CtrlRaceTime
+//
+// Returns the current time display text (e.g., "1:23.456") from the
+// decompiled CtrlRaceTime. This is the authoritative time string
+// matching the original MKWii HUD display.
+//
+// @return Pointer to internal text buffer (valid until next update)
+// ============================================================================
+const char* bridge_getCtrlRaceTimeText() {
+    if (!s_ctrlRaceTime) return nullptr;
+    return s_ctrlRaceTime->getTimeDisplay();
+}
+
+// ============================================================================
+// bridge_recordLapToCtrlRaceTime — Record a lap completion in CtrlRaceTime
+//
+// Called when a player crosses the finish line. Records the lap time
+// for display in the HUD's "LAST LAP" indicator.
+//
+// @param lapTimeMs  Lap time in milliseconds
+// @param currentLap  Current lap (1-indexed)
+// ============================================================================
+void bridge_recordLapToCtrlRaceTime(f32 lapTimeMs, u32 currentLap) {
+    if (!s_ctrlRaceTime) return;
+    // Set current lap so recordLap stores it in the right slot
+    s_ctrlRaceTime->mCurrentLap = static_cast<u8>(currentLap);
+    s_ctrlRaceTime->recordLap(lapTimeMs);
+}
+
+// ============================================================================
+// bridge_ctrlRaceTimeStartLapTimer — Set the lap start time for CtrlRaceTime
+//
+// Called at race start and each lap crossing to track lap-internal timing.
+//
+// @param lapStartTimeMs  Time when the current lap started
+// ============================================================================
+void bridge_ctrlRaceTimeStartLapTimer(f32 lapStartTimeMs) {
+    if (!s_ctrlRaceTime) return;
+    s_ctrlRaceTime->mCurrentLapStartMs = lapStartTimeMs;
+    s_ctrlRaceTime->mTotalTimeMs = lapStartTimeMs;
 }
 
 } // extern "C"

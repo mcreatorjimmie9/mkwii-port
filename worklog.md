@@ -537,3 +537,29 @@ Stage Summary:
 - Drift timing, trick handling, item usage logic now work from real path waypoints
 - Committed and pushed: 11e917a3
 - Next: Collision helper methods, KartDynamics gravity/ground detection, further AI parameter tuning
+
+---
+Task ID: 33
+Agent: main
+Task: Phase 33 — GX display list replay, real fog, TexGen state, TEV shader infra, linktest fix
+
+Work Log:
+- Identified that the project was at Phase 32 (GX-to-OpenGL 3.3 renderer)
+- Fidelity gap analysis: ~130+ substantive stub functions, 0 TEV shader stages compiled, 0% display list support, 0% fog, 0% TexGen
+- Fixed mkwii-linktest build failure: added 80+ GX function stubs to test/link_stubs.cpp
+- Implemented GXCallDisplayList: parses custom bytecode format from GXDisplayList.cpp (big-endian vertex data)
+- Implemented GXSetFog: real OpenGL fog with GX_FOG_PERSP_LIN/EXP/EXP2/ORTHO type conversion
+- Implemented GXSetTexCoordGen: stores texgen parameters for future matrix computation
+- Added TEV shader infrastructure: hashTEVConfig(), tevColorSourceGLSL(), tevAlphaSourceGLSL()
+- Implemented setTevSwapModeTable (was no-op)
+- Enhanced initLightSpot/initLightDistAttn to store parameters in GXLightObj
+- Added GL3 fog/depth mask/blend func separate functions to gl3_core.h
+
+Stage Summary:
+- Phase 33: COMPLETE
+- All 4 targets build: mkwii-genesis (162 files), mkwii-port, mkwii-linktest, physics_tests (111/111)
+- Display list replay enables course/kart model rendering
+- Real fog enables distance fade atmosphere
+- TEV shader infrastructure ready for multi-stage shader compilation
+- Committed and pushed: 4da016b3
+- Next: Full TEV→GLSL multi-stage shader compilation, decompiled AudioEngine wiring, decompiled ItemSystem wiring

@@ -102,6 +102,26 @@ extern "C" u32 bridge_computeStartBoosts();
 extern "C" bool bridge_hasStartBoost(u32 playerId);
 extern "C" void bridge_clearStartBoost(u32 playerId);
 
+// Phase 32: Raceinfo/Racedata/CtrlRaceTime bridge functions (defined in race_bridge.cpp)
+extern "C" void bridge_createRaceinfo(u32 playerCount);
+extern "C" void bridge_destroyRaceinfo();
+extern "C" void bridge_updateRaceinfo();
+extern "C" void bridge_startRaceinfoRace();
+extern "C" void bridge_raceinfoSetFinishPosition(u32 playerId, u8 position);
+extern "C" u8 bridge_getRaceinfoPosition(u32 playerId);
+extern "C" void bridge_createRacedata(u32 playerCount);
+extern "C" void bridge_destroyRacedata();
+extern "C" void bridge_updateRacedata();
+extern "C" void bridge_racedataSetFinish(u32 playerId, u8 position, u32 finishTimeMs);
+extern "C" void bridge_createCtrlRaceTime(u32 lapCount);
+extern "C" void bridge_destroyCtrlRaceTime();
+extern "C" void bridge_updateCtrlRaceTime();
+extern "C" void bridge_startCtrlRaceTimeClock();
+extern "C" void bridge_stopCtrlRaceTimeClock();
+extern "C" const char* bridge_getCtrlRaceTimeText();
+extern "C" void bridge_recordLapToCtrlRaceTime(f32 lapTimeMs, u32 currentLap);
+extern "C" void bridge_ctrlRaceTimeStartLapTimer(f32 lapStartTimeMs);
+
 // Phase 27: Sound bridge function for start boost SFX
 extern "C" void sub_playStartBoostSound(void* p);
 
@@ -337,6 +357,13 @@ RaceScene::~RaceScene() {
     // (SceneDirector::changeScene). RaceConfig persists across races within a
     // cup but is destroyed when returning to the menu.
     System::RaceManager::destroyInstance();
+    // Phase 32: Destroy Raceinfo, Racedata, and CtrlRaceTime singletons.
+    // These are created in initSubsystems() and must be cleaned up
+    // before the scene is destroyed to prevent dangling pointers
+    // in the decompiled code that may still reference them.
+    bridge_destroyRaceinfo();
+    bridge_destroyRacedata();
+    bridge_destroyCtrlRaceTime();
     // Phase 21: Destroy RaceDirector and RaceSequence
     if (m_raceData) {
         if (m_raceData->raceDirector) {
@@ -827,6 +854,30 @@ void RaceScene::initSubsystems() {
         // Wire bridge pointers so race_bridge.cpp can access the
         // RaceSequence and RaceDirector instances for sync functions.
         setRaceBridgePointers(d.raceSequence, d.raceDirector);
+
+        // =============================================================
+        // Phase 32: Create Raceinfo singleton
+        // =============================================================
+        // In the original MKWii, Raceinfo is created after RaceConfig
+        // and RaceManager are initialized. It independently tracks per-
+        // player checkpoint progress, lap timing, and race positions.
+        // Raceinfo::update() is called each frame in calc() BEFORE
+        // RaceManager::update(), and its positions feed into CtrlRaceTime.
+        bridge_createRaceinfo(TOTAL_RACERS);
+
+        // =============================================================
+        // Phase 32: Create Racedata singleton
+        // =============================================================
+        // Racedata holds race results for awards/credits sequences.
+        // It is initialized with player count from RaceConfig.
+        bridge_createRacedata(TOTAL_RACERS);
+
+        // =============================================================
+        // Phase 32: Create CtrlRaceTime for authoritative HUD timer
+        // =============================================================
+        // CtrlRaceTime reads from RaceManager::timer each frame to
+        // compute the displayed time string, matching the original HUD.
+        bridge_createCtrlRaceTime(DEFAULT_LAP_COUNT);
     }
 
     // =========================================================================
@@ -1055,6 +1106,15 @@ void RaceScene::startRace() {
         System::RaceManager::spInstance->canCountdownStart = true;
     }
 
+    // Phase 32: Signal Raceinfo that the race has started.
+    // This sets raceStartTimeMs for all players, enabling accurate
+    // lap timing in RaceinfoPlayer::endLap().
+    bridge_startRaceinfoRace();
+
+    // Phase 32: Start CtrlRaceTime clock for HUD display.
+    // CtrlRaceTime::startClock() begins tracking elapsed time.
+    bridge_startCtrlRaceTimeClock();
+
     // Phase 27: Activate start-boost timers for players who earned rocket start.
     // bridge_hasStartBoost() was computed by bridge_computeStartBoosts() called
     // from updateCountdown() just before this function. Players who held accel
@@ -1083,6 +1143,16 @@ void RaceScene::calc() {
     if (System::RaceManager::spInstance) {
         System::RaceManager::spInstance->update();
     }
+
+    // Phase 32: Tick Raceinfo each frame (checkpoint detection + positions)
+    // In the original MKWii, Raceinfo::update() is called BEFORE
+    // RaceManager::update() in the calc() dispatch. It runs per-player
+    // checkpoint proximity detection and recalculates race positions.
+    bridge_updateRaceinfo();
+
+    // Phase 32: Tick Racedata each frame (phase FSM for results)
+    // Racedata::update() advances COUNTDOWN → RACING → FINISHED → RESULTS.
+    bridge_updateRacedata();
 
     // Phase 21: Tick RaceSequence each frame
     // RaceSequence::update() drives the countdown → racing → finish FSM.
@@ -1494,6 +1564,17 @@ void RaceScene::updateRacing() {
             notifyRaceSequenceLineCross(i);
             printf("[RaceScene] Player %u completed lap %u → %u\n",
                    i, prevLap, rs.currentLap);
+
+            // Phase 32: Record lap in CtrlRaceTime for HUD display.
+            // The "LAST LAP" indicator on the HUD reads from CtrlRaceTime.
+            f32 lapMs = d.raceSession.getRacer(0).raceTime * 1000.0f;
+            bridge_recordLapToCtrlRaceTime(lapMs, rs.currentLap);
+            bridge_ctrlRaceTimeStartLapTimer(lapMs);
+
+            // Phase 32: Record finish in Raceinfo when player finishes final lap.
+            if (rs.finished && rs.finishPosition > 0) {
+                bridge_raceinfoSetFinishPosition(i, (u8)rs.finishPosition);
+            }
         }
 
         if (i > 0) {
@@ -1531,6 +1612,13 @@ void RaceScene::updateRacing() {
         // Sync to RaceSequence
         syncRaceSequenceFromGame(d.playerCount, seqLaps, seqFinished, seqDistances);
     }
+
+    // =========================================================================
+    // Phase 32: Tick CtrlRaceTime each frame during racing.
+    // =========================================================================
+    // CtrlRaceTime reads from RaceManager::timer to compute the
+    // authoritative time display string matching the original HUD.
+    bridge_updateCtrlRaceTime();
 
     // =========================================================================
     // Phase 21: Sync platform game state → decompiled RaceManager
@@ -1831,17 +1919,24 @@ void RaceScene::updateRacing() {
         d.hud.setLap(d.raceSession.getPlayerLap(), m_totalLaps);
         d.hud.setSpeed(d.players[0].getSpeed());
 
-        // Phase 21: Use RaceManager time for HUD display (100% faithful)
-        // The decompiled CtrlRaceTime::calcSelf() reads RaceManager::timer
-        // to compute the displayed time. We use the same data source via
-        // the race_bridge, ensuring HUD time matches the race engine.
+        // Phase 32: Use CtrlRaceTime for HUD time display (100% faithful).
+        // CtrlRaceTime reads from RaceManager::timer each frame via calcSelf(),
+        // computing the exact same time string the original MKWii HUD shows.
+        // This is the authoritative source — matching the original binary's
+        // CtrlRaceTime::calcSelf() → formatTime() → UI text update chain.
         {
-            char timeBuf[16];
-            u32 len = getRaceTimeString(timeBuf, sizeof(timeBuf));
-            if (len > 0) {
-                d.hud.setRaceTime(timeBuf);
+            const char* timeText = bridge_getCtrlRaceTimeText();
+            if (timeText && timeText[0] != '\0') {
+                d.hud.setRaceTime(timeText);
             } else {
-                d.hud.setRaceTime(d.raceSession.getRaceTimeString());
+                // Fallback to race_bridge formatted time
+                char timeBuf[16];
+                u32 len = getRaceTimeString(timeBuf, sizeof(timeBuf));
+                if (len > 0) {
+                    d.hud.setRaceTime(timeBuf);
+                } else {
+                    d.hud.setRaceTime(d.raceSession.getRaceTimeString());
+                }
             }
         }
 
@@ -1908,11 +2003,19 @@ void RaceScene::finishRace() {
             for (u32 i = 0; i < m_raceData->playerCount && i < RACE_BRIDGE_MAX; i++) {
                 if (m_raceData->players[i].m_finished && m_raceData->players[i].m_finishPosition > 0) {
                     markPlayerFinished(i, (u8)m_raceData->players[i].m_finishPosition);
+                    // Phase 32: Also record in Racedata for awards/credits
+                    f32 raceTimeMs = m_raceData->raceSession.getRacer(0).raceTime * 1000.0f;
+                    bridge_racedataSetFinish(i, (u8)m_raceData->players[i].m_finishPosition,
+                                             (u32)raceTimeMs);
                 }
             }
         }
         System::RaceManager::spInstance->endRace();
     }
+
+    // Phase 32: Stop CtrlRaceTime clock at race end.
+    // This freezes the displayed time at the final value.
+    bridge_stopCtrlRaceTimeClock();
 
     // Splash effect at finish line for player 0
     if (m_effectDirector && m_raceData && m_raceData->players[0].isActive()) {
