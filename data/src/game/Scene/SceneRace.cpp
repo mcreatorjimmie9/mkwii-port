@@ -53,6 +53,9 @@ extern "C" void initAIManager();
 extern "C" void setAIPlayerBridge(u32 playerId, Game::Player* player);
 extern "C" void shutdownAIManager();
 extern "C" void pauseAI(bool pause);
+// Phase 31: Load KMP enemy path data into CourseMap for AI navigation
+extern "C" void loadAIPathFromKMP(
+    u32 count, const f32 points[][3], const s32 params[][2], const u32 eflags[]);
 
 // Phase 21: Forward declarations — Race bridge functions (defined in race_bridge.cpp)
 // These sync platform game state into the decompiled RaceManager each frame.
@@ -546,6 +549,40 @@ void RaceScene::initSubsystems() {
     }
     printf("[RaceScene] Decompiled AI system active (%u CPU players)\n",
            NUM_AI_KARTS);
+
+    // =====================================================================
+    // Phase 31: Load KMP enemy path data into CourseMap for AI navigation.
+    // This is the critical wiring that makes the decompiled AI brain work.
+    // Without this, CourseMap::getEnemyPathAccessor() returns nullptr or
+    // size()==0, and AI::update() skips AIEngine::update() entirely.
+    //
+    // In the original MKWii, the MapdataEnemy (ENPT) section is loaded
+    // from the course archive during scene init. Each waypoint has
+    // position, parameters (path group, point type), and eflags.
+    // =====================================================================
+    if (aiHasPath && d.trackLoaded) {
+        const auto& path0 = kmpPaths[0];
+        u32 ptCount = static_cast<u32>(path0.points.size());
+        if (ptCount > 256) ptCount = 256;
+
+        f32 pathPositions[256][3] = {};
+        s32 pathParams[256][2] = {};
+        u32 pathEflags[256] = {};
+
+        for (u32 i = 0; i < ptCount; i++) {
+            pathPositions[i][0] = path0.points[i].position.x;
+            pathPositions[i][1] = path0.points[i].position.y;
+            pathPositions[i][2] = path0.points[i].position.z;
+            pathParams[i][0] = static_cast<s32>(path0.points[i].param1);
+            pathParams[i][1] = static_cast<s32>(path0.points[i].param2);
+            pathEflags[i] = 0; // eflags not in KMP POTI section
+        }
+
+        loadAIPathFromKMP(ptCount, pathPositions, pathParams, pathEflags);
+        printf("[RaceScene] Phase 31: AI path data loaded (%u waypoints)\n", ptCount);
+    } else {
+        printf("[RaceScene] Phase 31: No AI paths in KMP — AI will use fallback controller\n");
+    }
 
     // =====================================================================
     // Phase 26: Initialize decompiled Collision module integration

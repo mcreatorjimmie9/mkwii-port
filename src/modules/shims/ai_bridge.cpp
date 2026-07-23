@@ -26,6 +26,10 @@
 #include "KartMovement/KartMove.hpp"
 #include "Collision/KartDynamics.hpp"
 
+// Phase 31: KPadController.hpp now includes the full MapdataEnemyPathAccessor
+// definition with setPoint()/setPointCount() methods for path data loading.
+#include "KPadController.hpp"
+
 // Forward declarations for AI types
 namespace Enemy { struct AIEngine; class AI; }
 
@@ -183,6 +187,64 @@ extern "C" void pauseAI(bool pause) {
     if (AIManager::getInstance()) {
         AIManager::getInstance()->pauseAI(pause);
     }
+}
+
+// ============================================================================
+// Phase 31: loadAIPathFromKMP — Push KMP enemy path data into CourseMap
+//
+// Called from SceneRace::initSubsystems() after TrackManager parses the KMP.
+// Populates the CourseMap's MapdataEnemyPathAccessor with real ENPT waypoints
+// so the decompiled AI::update() passes the accessor to AIEngine::update(),
+// enabling the full AI path-following brain (PD steering, drift decisions, etc.)
+//
+// In the original MKWii, the MapdataEnemy section is loaded from the course
+// archive during scene setup. Each waypoint has position, parameters (path
+// group, point type), and eflags (drift hints, mushroom usage, wheelie zones).
+//
+// Parameters:
+//   count   — Number of ENPT waypoints
+//   points  — XYZ positions for each waypoint
+//   params  — Optional: [param1, param2] pairs per waypoint (may be nullptr)
+//   eflags  — Optional: eflag bitmask per waypoint (may be nullptr)
+// ============================================================================
+extern "C" void loadAIPathFromKMP(
+    u32 count,
+    const f32 points[][3],
+    const s32 params[][2],
+    const u32 eflags[])
+{
+    using namespace System;
+
+    CourseMap* cm = CourseMap::spInstance;
+    if (!cm) return;
+
+    // Get (or create) the path accessor
+    MapdataEnemyPathAccessor* accessor = cm->getEnemyPathAccessor();
+    if (!accessor) return;
+
+    // Populate waypoints from KMP path data
+    u32 maxPoints = (count < 256) ? count : 256;
+    for (u32 i = 0; i < maxPoints; i++) {
+        EGG::Vector3f pos;
+        pos.x = points[i][0];
+        pos.y = points[i][1];
+        pos.z = points[i][2];
+
+        s32 p1 = 0, p2 = 0;
+        u32 ef = 0;
+        if (params) {
+            p1 = params[i][0];
+            p2 = params[i][1];
+        }
+        if (eflags) {
+            ef = eflags[i];
+        }
+
+        accessor->setPoint(i, pos, p1, p2, ef);
+    }
+    accessor->setPointCount(maxPoints);
+
+    printf("[AI Bridge] Loaded %u enemy path waypoints into CourseMap\n", maxPoints);
 }
 
 // ============================================================================
