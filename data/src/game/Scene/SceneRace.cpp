@@ -34,6 +34,7 @@
 
 // Platform and reimplemented systems (available in APP_SOURCES)
 #include "Player/Player.hpp"
+#include "Physics/PlayerPhysics.hpp"
 #include "loaders/track_manager.hpp"
 #include "game/RaceSession.hpp"
 #include "game/ItemBox.hpp"
@@ -100,6 +101,22 @@ extern "C" void bridge_clearStartBoost(u32 playerId);
 
 // Phase 27: Sound bridge function for start boost SFX
 extern "C" void sub_playStartBoostSound(void* p);
+
+// Phase 26: Forward declarations — Collision physics bridge functions
+extern "C" void collision_initGlobal(u32 courseId);
+extern "C" void collision_initPlayerPhysics(u32 playerIdx);
+extern "C" void collision_shutdownPlayer(u32 playerIdx);
+extern "C" void collision_shutdownGlobal();
+extern "C" void collision_updatePrePhysics(u32 playerIdx, f32 dt,
+    const f32 pos[3], const f32 vel[3], f32 floorY, u32 kclType, bool inAir);
+extern "C" f32 collision_updatePostPhysics(u32 playerIdx, f32 dt,
+    const f32 pos[3], const f32 vel[3]);
+extern "C" bool collision_isRespawning(u32 playerIdx);
+extern "C" bool collision_updateRespawn(u32 playerIdx, f32 dt,
+    f32 outPos[3], f32* outRot);
+extern "C" void collision_setLastValidPos(u32 playerIdx, const f32 pos[3], f32 rot);
+extern "C" void collision_updateGlobal(f32 dt);
+extern "C" bool collision_isOffRoad(u32 playerIdx);
 
 // Phase 25: Forward declarations — Effect bridge state setters
 // These push per-frame game state into the effect_bridge for KCL/collision queries
@@ -517,6 +534,21 @@ void RaceScene::initSubsystems() {
     }
     printf("[RaceScene] Decompiled AI system active (%u CPU players)\n",
            NUM_AI_KARTS);
+
+    // =====================================================================
+    // Phase 26: Initialize decompiled Collision module integration
+    // =====================================================================
+    // Initialize global collision systems (WaterCollision, MovingColObjManager, ColResponse)
+    // and per-player physics objects (KartGravity, KartSuspension, KartBoost, KartRespawn).
+    // In the original MKWii, these are created during KartPhysicsEngine::init()
+    // which is called when each kart is spawned.
+    collision_initGlobal(m_courseId);
+
+    for (u32 i = 0; i < d.playerCount; i++) {
+        collision_initPlayerPhysics(i);
+    }
+    printf("[RaceScene] Collision physics: global + %u players initialized\n",
+           d.playerCount);
 
     // Spawn item boxes
     if (d.trackLoaded && !kmp.objects.empty()) {
@@ -1214,6 +1246,32 @@ void RaceScene::updateRacing() {
     for (u32 i = 0; i < d.playerCount; i++) {
         if (d.players[i].m_finished) continue;
 
+        // ===============================================================
+        // Phase 26: Pre-physics collision update
+        // ===============================================================
+        // Before PlayerSub10::update(), set up KartGravity state from
+        // KCL collision data. This feeds gravity/slope/moving-road forces
+        // into KartDynamics via the collision_physics_bridge.
+        {
+            const auto& ppos = d.players[i].getPosition();
+            f32 posArr[3] = { ppos.x, ppos.y, ppos.z };
+            f32 velArr[3] = { 0.0f, 0.0f, 0.0f };
+
+            // Get KCL floor data
+            f32 floorY = -9999.0f;
+            u32 kclType = 0;
+            bool inAir = false;
+            Field::CourseColManager* ccm = Field::CourseColManager::instance();
+            if (ccm && ccm->isLoaded()) {
+                floorY = ccm->getFloorAt(ppos.x, ppos.y + 50.0f, ppos.z);
+                inAir = (ppos.y - floorY > 20.0f);
+                // Get KCL type at player position (0 = road if no special type)
+                kclType = ccm->getSurfaceType(ppos.x, ppos.y, ppos.z);
+            }
+
+            collision_updatePrePhysics(i, FRAME_TIME, posArr, velArr, floorY, kclType, inAir);
+        }
+
         if (i == 0) {
             d.players[0].update(FRAME_TIME, &input);
         } else {
@@ -1249,6 +1307,56 @@ void RaceScene::updateRacing() {
                 bridge_clearStartBoost(i);
             }
         }
+    }
+
+    // Phase 26: Post-physics collision update
+    // After PlayerSub10::update() and KartDynamics::calc(), run
+    // WaterCollision, KartBoost timers, ColResponse, KartRespawn updates.
+    {
+        // Per-player post-physics
+        for (u32 i = 0; i < d.playerCount; i++) {
+            // Skip respawn check for finished players
+            if (d.players[i].m_finished) continue;
+
+            const auto& ppos = d.players[i].getPosition();
+            f32 posArr[3] = { ppos.x, ppos.y, ppos.z };
+            f32 velArr[3] = { 0.0f, 0.0f, 0.0f };
+
+            // Check if player is in respawn sequence
+            if (collision_isRespawning(i)) {
+                f32 rpos[3];
+                f32 rrot;
+                collision_updateRespawn(i, FRAME_TIME, rpos, &rrot);
+                // Apply respawn position to player via PlayerPhysics
+                auto* pp = d.players[i].getPlayerPhysics();
+                if (pp) {
+                    pp->setFramePosition(rpos[0], rpos[1], rpos[2]);
+                }
+                continue; // Don't do normal physics while respawning
+            }
+
+            // Post-physics: water, boost, collision response
+            f32 speedMult = collision_updatePostPhysics(i, FRAME_TIME, posArr, velArr);
+
+            // Update last valid position (for respawn targeting)
+            // In MKWii, JugemPoint data is used; we store the current position
+            // if on a road surface.
+            if (!collision_isOffRoad(i)) {
+                f32 yawRad = EGG::DegToRad(d.players[i].getYaw());
+                collision_setLastValidPos(i, posArr, yawRad);
+            }
+
+            // Apply speed multiplier from collision physics
+            // Note: In the original MKWii, the offroad/water speed penalty is handled
+            // by PlayerSub10's kclSpeedFactor which is already set in
+            // updateWithDecompiledPhysics(). This additional multiplier from
+            // WaterCollision/ColResponse is a secondary safety net.
+            // We don't directly modify PlayerPhysics speed here — the primary
+            // speed control is through PlayerSub10's kcl factors.
+        }
+
+        // Global collision updates (moving objects)
+        collision_updateGlobal(FRAME_TIME);
     }
 
     // 2b. Kart-kart collision resolution (after all players updated)

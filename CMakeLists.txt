@@ -526,6 +526,8 @@ set(APP_SOURCES
     src/modules/shims/sound_bridge.cpp
     # Phase 23: Effect/scale/KCL/status bridge
     src/modules/shims/effect_bridge.cpp
+    # Phase 26: Collision physics bridge (KartGravity/KartSuspension/KartBoost/KartRespawn/WaterCollision/ColResponse/MovingColObj)
+    src/modules/shims/collision_physics_bridge.cpp
 )
 
 add_executable(mkwii-port ${APP_SOURCES})
