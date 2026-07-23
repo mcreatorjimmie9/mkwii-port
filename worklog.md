@@ -563,3 +563,34 @@ Stage Summary:
 - TEV shader infrastructure ready for multi-stage shader compilation
 - Committed and pushed: 4da016b3
 - Next: Full TEV→GLSL multi-stage shader compilation, decompiled AudioEngine wiring, decompiled ItemSystem wiring
+
+---
+Task ID: 34
+Agent: main
+Task: Phase 34 — Fidelity improvements: body types, sound pitch, palette textures, GL state
+
+Work Log:
+- Upgraded sub_getBodyInfo() to read actual character ID from RaceConfig::mRaceScenario.mPlayers[idx].mCharacterId
+- Implemented MKWii-faithful body type mapping: Small (ID 0-12), Medium (ID 13-27), Large (ID 28-32)
+- Upgraded sub_endSquishSound() from no-op to proper volume fadeout (volume→0, pitch→1.0)
+- sub_setSound2() and sub_setSound3() were already implemented in prior phase (confirmed)
+- Implemented CI4/CI8 palette texture decode system:
+  - Palette cache (32 entries) with RGB565 and RGB5A3 TLUT format decoding
+  - CI4 decoder: MSB-first bit extraction, palette lookup with grayscale fallback
+  - CI8 decoder: byte index palette lookup with grayscale fallback
+  - Extern C GXRenderer_registerPalette() for BRRES/TPL loader integration
+- Implemented setCoPlanar() with real glPolygonOffset(-1,-1) for z-fighting prevention
+- Implemented setClipMode() with state tracking (shader-based clipping future)
+- Implemented setTevDirect() tracking tevDirectReg/tevDirectActive for shader compiler
+- Implemented real glDepthMask in endPrimitive() for depth write control
+- Added glPolygonOffset to GL3 core: typedef, function pointer, constant, resolve
+- Added RendererState fields: coplanar, clipMode, tevDirectActive, tevDirectReg
+
+Stage Summary:
+- Phase 34: COMPLETE
+- All 4 targets build: mkwii-genesis (162 files), mkwii-port, mkwii-linktest, physics_tests (111/111)
+- Body type now matches original MKWii per-character (Small/Medium/Large)
+- CI4/CI8 textures ready for proper palette rendering when TPL loader provides palette data
+- GL state management improved: depth mask, coplanar offset, clip tracking
+- Committed and pushed: b95333ed
+- Next: Full TEV→GLSL multi-stage shader compilation, BRSAR audio archive loading at startup

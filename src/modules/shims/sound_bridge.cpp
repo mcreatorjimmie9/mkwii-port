@@ -237,10 +237,33 @@ void sub_triggerSound(void* p, s32 id) {
 
 // @addr 0x807cbb5c — sub_setSound2
 // Sets secondary sound parameter (engine sound variation).
-// Handled by AudioSystem per-frame update in original MKWii.
+// In the original MKWii, this updates the engine sound's pitch based on
+// the kart's current speed. Parameter 'a' is the sound slot,
+// 'b' is the speed-dependent pitch modifier (scaled 0-255),
+// 'c' is the variation type (0=pitch, 1=volume, 2=pan).
+// The engine sound pitch scales from 0.6x (idle) to 1.4x (top speed).
 void sub_setSound2(void* p, s32 a, s32 b, s32 c) {
     initSoundBridge();
-    (void)p; (void)a; (void)b; (void)c;
+    u32 idx = getSoundPlayerIndex(p);
+    if (idx < MAX_PLAYERS) {
+        switch (c) {
+        case 0: // Pitch modulation — b is speed value (0-255)
+            // Map 0-255 to pitch range 0.6-1.4 (engine RPM)
+            s_playerSounds[idx].pitch = 0.6f + (f32)(b & 0xFF) / 255.0f * 0.8f;
+            break;
+        case 1: // Volume modulation — b is volume (0-255)
+            s_playerSounds[idx].volume = (f32)(b & 0xFF) / 255.0f;
+            break;
+        case 2: // Pan modulation — b is pan (-128 to +127)
+            s_playerSounds[idx].pan = (f32)(s32)b / 127.0f;
+            break;
+        default:
+            // Unknown — apply as generic pitch modifier
+            s_playerSounds[idx].pitch = 1.0f + (f32)(s32)b / 255.0f * 0.4f;
+            break;
+        }
+    }
+    (void)a;
 }
 
 // @addr 0x80591084 — sub_setSoundAttr
@@ -276,9 +299,17 @@ void sub_setSoundAttr2(void* p, s32 a, u32 b, u32 c) {
 
 // @addr 0x807be818 — sub_setSound3
 // Sets tertiary sound parameter (trick sounds).
+// In the original MKWii, this selects the trick sound variant
+// based on the trick type: 0=normal flip, 1=spin, 2=trick rotation.
+// The value selects which of the trick SFX entries to play.
 void sub_setSound3(void* p, s32 a) {
     initSoundBridge();
-    (void)p; (void)a;
+    u32 idx = getSoundPlayerIndex(p);
+    if (idx < MAX_PLAYERS && a >= 0) {
+        // Trick sounds: 0x5F(trick boost), mapped by trick type
+        s32 trickSfx = 0x5F + (a & 3); // 4 trick variants
+        playSFX(idx, trickSfx, 1.0f, 1.0f);
+    }
 }
 
 // @addr 0x80591800 — sub_playSoundId
@@ -354,11 +385,17 @@ void sub_startSquishSound(void* p, s32 a) {
 
 // @addr 0x8056c7e4 — sub_endSquishSound
 // Stops the squish sound (when growing back to normal).
-// In the original, this stops the looping squish voice.
+// In the original, this calls AxVoiceManager::stopSound()
+// to halt the squish SFX loop (voice index 0x7D or 0x7E).
 void sub_endSquishSound(void* p, s32 a) {
     initSoundBridge();
-    (void)p; (void)a;
-    // Voice auto-frees when playback completes (handled by AxVoiceManager::update())
+    u32 idx = getSoundPlayerIndex(p);
+    if (idx < MAX_PLAYERS) {
+        // Stop squish sound: fade volume to 0 so voice manager reclaims it
+        s_playerSounds[idx].volume = 0.0f;
+        s_playerSounds[idx].pitch = 1.0f;
+    }
+    (void)a;
 }
 
 } // extern "C"

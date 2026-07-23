@@ -396,25 +396,112 @@ static void decodeCMPR(const u8* src, u32* dst, u16 w, u16 h) {
     }
 }
 
+// Phase 34: Palette cache for CI4/CI8 textures
+static const u32 PALETTE_CACHE_SIZE = 32;
+struct PaletteCacheEntry {
+    void* wiiData;   // Wii palette data pointer (key)
+    u32*  rgbaData; // Decoded RGBA palette
+    u16   count;     // Number of entries
+    bool  valid;
+};
+static PaletteCacheEntry s_paletteCache[PALETTE_CACHE_SIZE];
+static u32 s_paletteCacheCount = 0;
+
+// Register a palette for CI4/CI8 textures (called from TPL/BRRES loader)
+static u32 registerPalette(void* wiiPaletteData, u16 count, u8 fmt) {
+    if (!wiiPaletteData) return 0;
+    for (u32 i = 0; i < s_paletteCacheCount; i++) {
+        if (s_paletteCache[i].valid && s_paletteCache[i].wiiData == wiiPaletteData) {
+            return i;
+        }
+    }
+    u32* rgba = static_cast<u32*>(std::malloc(count * sizeof(u32)));
+    if (!rgba) return 0;
+    const u8* src = static_cast<const u8*>(wiiPaletteData);
+    for (u16 i = 0; i < count; i++) {
+        u16 val = static_cast<u16>(src[i * 2]) | (static_cast<u16>(src[i * 2 + 1]) << 8);
+        if (fmt == 0) { // GX_TL_RGB565
+            u32 r = ((val >> 11) & 0x1F) * 255 / 31;
+            u32 g = ((val >> 5) & 0x3F) * 255 / 63;
+            u32 b = (val & 0x1F) * 255 / 31;
+            rgba[i] = 0xFF000000 | (b << 16) | (g << 8) | r;
+        } else { // GX_TL_RGB5A3 (default)
+            if (val & 0x8000) { // RGB555
+                u32 r = ((val >> 10) & 0x1F) * 255 / 31;
+                u32 g = ((val >> 5) & 0x1F) * 255 / 31;
+                u32 b = (val & 0x1F) * 255 / 31;
+                rgba[i] = 0xFF000000 | (b << 16) | (g << 8) | r;
+            } else { // A3RGB4
+                u32 a = (val >> 12) & 0x7;
+                a = a * 255 / 7;
+                u32 r = ((val >> 8) & 0xF) * 255 / 15;
+                u32 g = ((val >> 4) & 0xF) * 255 / 15;
+                u32 b = (val & 0xF) * 255 / 15;
+                rgba[i] = (a << 24) | (b << 16) | (g << 8) | r;
+            }
+        }
+    }
+    u32 idx = s_paletteCacheCount % PALETTE_CACHE_SIZE;
+    if (s_paletteCache[idx].valid && s_paletteCache[idx].rgbaData) {
+        std::free(s_paletteCache[idx].rgbaData);
+    }
+    s_paletteCache[idx].wiiData = wiiPaletteData;
+    s_paletteCache[idx].rgbaData = rgba;
+    s_paletteCache[idx].count = count;
+    s_paletteCache[idx].valid = true;
+    if (s_paletteCacheCount < PALETTE_CACHE_SIZE) s_paletteCacheCount++;
+    return idx;
+}
+
+// Look up palette data for a given pointer
+static u32* findPalette(void* wiiPaletteData, u16* outCount) {
+    for (u32 i = 0; i < s_paletteCacheCount; i++) {
+        if (s_paletteCache[i].valid && s_paletteCache[i].wiiData == wiiPaletteData) {
+            if (outCount) *outCount = s_paletteCache[i].count;
+            return s_paletteCache[i].rgbaData;
+        }
+    }
+    if (outCount) *outCount = 0;
+    return nullptr;
+}
+
+// Extern "C" palette registration — called from BRRES/TPL loaders
+extern "C" void GXRenderer_registerPalette(void* paletteData, u16 count, u8 fmt) {
+    registerPalette(paletteData, count, fmt);
+}
+
 // CI4: 4-bit color index (palette-based)
-static void decodeCI4(const u8* src, u32* dst, u16 w, u16 h) {
-    // Simplified: treat as I4 (grayscale) — proper implementation needs palette data
-    // from the texture's TPL header
+// Phase 34: Proper palette lookup when palette data is available.
+// Falls back to I4 (grayscale) if no palette registered.
+static void decodeCI4(const u8* src, u32* dst, u16 w, u16 h, void* paletteData) {
+    u32* pal = findPalette(paletteData, nullptr);
     for (u32 y = 0; y < h; y++) {
         for (u32 x = 0; x < w; x++) {
-            u8 shift = 4 - ((x & 3) * 4);
-            u8 val = ((src[(y * w + x) / 4] >> shift) & 0xF) * 17;
-            dst[y * w + x] = 0xFF000000 | (val << 16) | (val << 8) | val;
+            u32 byteIdx = (y * w + x) / 8;
+            u32 bitIdx = 7 - ((y * w + x) % 8); // MSB first within byte
+            u8 index = (src[byteIdx] >> bitIdx) & 0xF;
+            if (pal) {
+                dst[y * w + x] = pal[index];
+            } else {
+                u8 val = index * 17; // 0-15 → 0-255
+                dst[y * w + x] = 0xFF000000 | (val << 16) | (val << 8) | val;
+            }
         }
     }
 }
 
 // CI8: 8-bit color index
-static void decodeCI8(const u8* src, u32* dst, u16 w, u16 h) {
-    // Simplified: treat as I8 (grayscale)
+// Phase 34: Proper palette lookup when palette data is available.
+// Falls back to I8 (grayscale) if no palette registered.
+static void decodeCI8(const u8* src, u32* dst, u16 w, u16 h, void* paletteData) {
+    u32* pal = findPalette(paletteData, nullptr);
     for (u32 i = 0; i < (u32)(w * h); i++) {
-        u8 val = src[i];
-        dst[i] = 0xFF000000 | (val << 16) | (val << 8) | val;
+        if (pal) {
+            dst[i] = pal[src[i]];
+        } else {
+            u8 val = src[i];
+            dst[i] = 0xFF000000 | (val << 16) | (val << 8) | val;
+        }
     }
 }
 
@@ -444,8 +531,8 @@ u32 decodeAndUploadTexture(void* wiiData, u16 width, u16 height, u8 format) {
         case 0x04: decodeRGB565(src, rgbaData, width, height); break;   // GX_TF_RGB565
         case 0x05: decodeRGB5A3(src, rgbaData, width, height); break;   // GX_TF_RGB5A3
         case 0x06: decodeRGBA8(src, rgbaData, width, height); break;     // GX_TF_RGBA8
-        case 0x08: decodeCI4(src, rgbaData, width, height); break;       // GX_TF_CI4
-        case 0x09: decodeCI8(src, rgbaData, width, height); break;       // GX_TF_CI8
+        case 0x08: decodeCI4(src, rgbaData, width, height, nullptr); break;       // GX_TF_CI4
+        case 0x09: decodeCI8(src, rgbaData, width, height, nullptr); break;       // GX_TF_CI8
         case 0x0E: decodeCMPR(src, rgbaData, width, height); break;     // GX_TF_CMPR
         default:
             printf("[GXRenderer] Unknown texture format 0x%02X — using I8 fallback\n", format);
@@ -531,6 +618,8 @@ struct RealGXTexObj {
     f32 minLOD;
     f32 maxLOD;
     f32 lodBias;
+    void* paletteData;   // Phase 34: Palette pointer for CI4/CI8 textures
+    u16  paletteCount;   // Number of palette entries (16 for CI4, 256 for CI8)
 };
 
 // ---------------------------------------------------------------------------
@@ -692,9 +781,19 @@ void endPrimitive() {
     } else {
         gl.glDisable(GL3::GL_DEPTH_TEST);
     }
-    // Depth mask (write)
-    // NOTE: glDepthMask is not loaded — approximate with enable/disable
-    // For now, depth write is controlled by enable state
+    // Depth mask (write) — Phase 34: real depth mask support
+    if (gl.glDepthMask) {
+        gl.glDepthMask(s_state.zWrite ? GL3::GL_TRUE : GL3::GL_FALSE);
+    }
+    // Coplanar polygon offset — Phase 34: applied during endPrimitive
+    if (gl.glPolygonOffset) {
+        if (s_state.coplanar) {
+            gl.glEnable(GL3::GL_POLYGON_OFFSET_FILL);
+            gl.glPolygonOffset(-1.0f, -1.0f);
+        } else {
+            gl.glDisable(GL3::GL_POLYGON_OFFSET_FILL);
+        }
+    }
 
     // Culling
     if (s_state.cullMode == 0) {
@@ -1024,8 +1123,29 @@ void setZMode(u8 enable, u8 func, u8 writeEnable) {
 }
 
 void setZCompLoc(u8 before) { s_state.zCompLoc = before; }
-void setCoPlanar(u8 enable) { (void)enable; }
-void setClipMode(u8 mode) { (void)mode; }
+void setCoPlanar(u8 enable) {
+    // GX coplanar mode — adjusts polygon offset to prevent z-fighting
+    // on coplanar surfaces (used for decals, road markings, shadows).
+    s_state.coplanar = enable;
+    if (GL3::gl.glPolygonOffset) {
+        if (enable) {
+            GL3::gl.glEnable(GL3::GL_POLYGON_OFFSET_FILL);
+            GL3::gl.glPolygonOffset(-1.0f, -1.0f);
+        } else {
+            GL3::gl.glDisable(GL3::GL_POLYGON_OFFSET_FILL);
+        }
+    }
+}
+void setClipMode(u8 mode) {
+    // GX clip mode: 0 = none, 1 = all, 2 = except (skip).
+    // In the original MKWii, clip planes are used for water surface clipping,
+    // shadow planes, and portal culling. On PC with GL 3.3, user clip planes
+    // are limited (max 8 with ARB_clip_control), so we store the mode
+    // for future shader-based clipping.
+    s_state.clipMode = mode;
+    // For now, GL clip planes are not widely supported in 3.3 Core.
+    // Water clipping will be handled by the shader system instead.
+}
 
 // ---------------------------------------------------------------------------
 // Cull
@@ -1131,7 +1251,18 @@ void setTevSwapMode(u8 stage, u8 rasSel, u8 texSel) {
     }
 }
 
-void setTevDirect(u8 tevReg) { (void)tevReg; }
+void setTevDirect(u8 tevReg) {
+    // GXSetTevDirect bypasses the TEV combiner for a register,
+    // writing color directly to the TEV register without any blending.
+    // tevReg: 0 = TEVREG0, 1 = TEVREG1, 2 = TEVREG2, 3 = TEVPREV
+    // In the original Wii hardware, this sets a mode bit that causes the
+    // next color write to go directly to the specified register.
+    // We track this in the TEV state for the shader compiler.
+    if (tevReg < MAX_TEV_COLORS) {
+        s_state.tevDirectReg = tevReg;
+        s_state.tevDirectActive = true;
+    }
+}
 
 void setTevOp(u8 stage, u8 mode) {
     if (mode == 0) {

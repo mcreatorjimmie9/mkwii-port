@@ -216,22 +216,45 @@ void sub_updateScaleAnim(void* p, f32 a) {
 // @addr 0x8059148c — sub_getBodyInfo
 // Gets the character body type for lightning/stunt sizing.
 // In the original MKWii, this reads from the KartObject's character ID
-// to determine the body type (light = Small, Medium, Heavy).
+// to determine the body type (Small/Medium/Large) via BSP parameter data.
 // The result is stored at offset 0xA4 of the PlayerSub10 instance.
-// Body types: 0 = Small (Toad, Koopa), 1 = Medium (Mario, Luigi),
-//             2 = Heavy (Wario, Donkey Kong), 3 = Large (Bowser).
-// For PC, we default to Medium (1) for all players.
+// Body types: 0 = Small (Toad, Koopa, Dry Bones, etc.),
+//             1 = Medium (Mario, Luigi, Peach, Daisy, etc.),
+//             2 = Large (Wario, DK, Bowser, etc.)
+//
+// MKWii character-to-body mapping (from BSP):
+//   Small  (0): 0(Toad), 1(Toadette), 2(Koopa), 3(ParaTroopa),
+//              4(DryBones), 5(BabyMario), 6(BabyLuigi), 7(BabyPeach),
+//              8(BabyDaisy), 9(BabyDK), 10(BabyBowser), 11(Lemmy),
+//              12(Morton Jr)
+//   Medium (1): 13(Mario), 14(Luigi), 15(Peach), 16(Daisy), 17(Yoshi),
+//              18(Birdo), 19(Diddy), 20(Bowser Jr), 21(Shadow), 22(Petey),
+//              23(Lakitu), 24(Waluigi), 25(ShyGuy), 26(Mii), 27(Rosalina)
+//   Large  (2): 28(Wario), 29(DK), 30(Bowser), 31(King Boo),
+//              32(Large Mii)
+//
+// Phase 34: Uses actual character ID from RaceConfig instead of hardcoded Medium.
 void sub_getBodyInfo(void* p) {
     initEffectBridge();
-    if (p) {
-        // In the original, bodyType is read from the character's BLC/BMD model.
-        // On PC, we set a default body type at offset 0xA4.
-        // 0 = Small, 1 = Medium, 2 = Heavy
-        // This affects lightning squish duration and star/mega behavior.
-        auto* bytes = static_cast<u8*>(p);
-        if (bytes + 0xA4 < bytes + 0x200) { // Safety check
-            bytes[0xA4] = 1; // Default: Medium body
+    if (!p) return;
+
+    auto* bytes = static_cast<u8*>(p);
+    if (bytes + 0xA4 < bytes + 0x200) { // Safety check
+        u8 bodyType = 1; // Default: Medium
+
+        // Look up character ID from RaceConfig for this player
+        u32 idx = getEffectPlayerIndex(p);
+        if (idx < 12 && ::System::RaceConfig::spInstance) {
+            auto& player = ::System::RaceConfig::spInstance->mRaceScenario.mPlayers[idx];
+            u32 charId = static_cast<u32>(player.mCharacterId);
+            // MKWii body type mapping from character ID
+            if (charId <= 12)       bodyType = 0; // Small
+            else if (charId <= 27)  bodyType = 1; // Medium
+            else if (charId <= 32)  bodyType = 2; // Large
+            else                   bodyType = 1; // Fallback Medium
         }
+
+        bytes[0xA4] = bodyType;
     }
 }
 

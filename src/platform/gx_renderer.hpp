@@ -178,11 +178,17 @@ struct RendererState {
     u8 alphaCmp1;
     u8 alphaRef1;
 
+    // --- Coplanar / Clip ---
+    u8 coplanar;
+    u8 clipMode;
+
     // --- TEV ---
     u8  numTevStages;
     TEVStage tevStages[MAX_TEV_STAGES];
     u32 tevColors[MAX_TEV_COLORS]; // GX_TEVREG0..2 + PREV
     u32 kColors[MAX_KCOLORS];
+    bool tevDirectActive;  // Phase 34: GXSetTevDirect active
+    u8  tevDirectReg;      // Phase 34: Target register for direct write
 
     // --- Color channels ---
     u8  numChans;

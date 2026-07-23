@@ -122,6 +122,8 @@ constexpr GLenum GL_OUT_OF_MEMORY     = 0x0505;
 
 // Pixel formats
 constexpr GLenum GL_DEPTH24_STENCIL8 = 0x88F0;
+// Phase 34: Polygon offset and coplanar
+constexpr GLenum GL_POLYGON_OFFSET_FILL = 0x8037;
 
 // Texture
 constexpr GLenum GL_TEXTURE_2D        = 0x0DE1;
@@ -229,6 +231,7 @@ using PFNGLFOGFV                = void  (GLAPIENTRY *)(GLenum pname, const GLflo
 using PFNGLFOGI                 = void  (GLAPIENTRY *)(GLenum pname, GLint param);
 using PFNGLGETFLOATV            = GLfloat(GLAPIENTRY *)(GLenum pname, GLfloat* params);
 using PFNGLDEPTHMASK            = void  (GLAPIENTRY *)(GLboolean flag);
+using PFNGLPOLYGONOFFSET        = void  (GLAPIENTRY *)(GLfloat factor, GLfloat units); // Phase 34
 using PFNGLBLENDFUNCSEPARATE    = void  (GLAPIENTRY *)(GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha, GLenum dfactorAlpha);
 
 // ---------------------------------------------------------------------------
@@ -309,6 +312,7 @@ struct GLFunctions {
     PFNGLGETFLOATV         glGetFloatv         = nullptr;
     PFNGLDEPTHMASK         glDepthMask         = nullptr;
     PFNGLBLENDFUNCSEPARATE glBlendFuncSeparate = nullptr;
+    PFNGLPOLYGONOFFSET     glPolygonOffset     = nullptr; // Phase 34
 };
 
 // Global function pointer table (all initialized to nullptr above)
@@ -414,6 +418,7 @@ inline bool loadFunctions(void* (*getProcAddr)(const char*)) {
     RESOLVE(glFogi,              PFNGLFOGI,              "glFogi");
     RESOLVE(glGetFloatv,         PFNGLGETFLOATV,         "glGetFloatv");
     RESOLVE(glDepthMask,         PFNGLDEPTHMASK,         "glDepthMask");
+    RESOLVE(glPolygonOffset,     PFNGLPOLYGONOFFSET,     "glPolygonOffset"); // Phase 34
     RESOLVE(glBlendFuncSeparate, PFNGLBLENDFUNCSEPARATE, "glBlendFuncSeparate");
 
     #undef RESOLVE
