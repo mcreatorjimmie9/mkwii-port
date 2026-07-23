@@ -465,3 +465,27 @@ Stage Summary:
 - KCL type system faithfully matches original (5-bit types, proper bitmasks)
 - 162 GENESIS files + full platform layer compile and link successfully
 - Next: Sound system real implementation, KartDynamics gravity refinement
+
+---
+Task ID: 22
+Agent: main
+Task: Phase 26 — Collision module integration (KartGravity/KartSuspension/KartBoost/KartRespawn/WaterCollision/ColResponse/MovingColObj)
+
+Work Log:
+- Created collision_physics_bridge.cpp with 30 extern "C" functions
+- Wired 7 decompiled Collision module classes into per-frame Player update loop
+- Added forward declarations in SceneRace.cpp for collision bridge functions
+- Added collision_initGlobal() + collision_initPlayerPhysics() in initSubsystems()
+- Added collision_updatePrePhysics() before PlayerSub10::update() (KCL data → KartGravity)
+- Added collision_updatePostPhysics() after PlayerSub10::update() (water/boost/respawn/collision response)
+- Fixed MAX_PLAYERS macro conflict with rk_common.h
+- Fixed extern "C" declarations (cannot be inside function bodies)
+- Fixed Player API (no setPosition/setSpeed — used PlayerPhysics instead)
+
+Stage Summary:
+- Phase 26: COMPLETE
+- 30 bridge functions: init, shutdown, pre-physics, post-physics, boost, respawn, water, collision response, moving objects
+- 162 GENESIS files + full platform layer compile and link (0 errors)
+- All 111 physics tests pass
+- Committed and pushed: dcbea299
+- Next: AI system deep integration, BRSAR audio archive loading

@@ -125,6 +125,18 @@ extern "C" void bridge_setDriftDir(u32 playerIdx, u8 dir);
 extern "C" void bridge_setVehicleType(u32 playerIdx, u8 type);
 extern "C" void bridge_setRacerInfo(u32 playerIdx, void* info);
 
+// Phase 29: Forward declarations — Item system bridge functions
+extern "C" void item_initSystem(u32 playerCount);
+extern "C" void item_shutdownSystem();
+extern "C" void item_initPlayer(u32 playerIdx);
+extern "C" void item_decideItemForPlayer(u32 playerIdx, u32 position);
+extern "C" void item_update(f32 dt);
+extern "C" void item_setPlayerPosition(u32 playerIdx, f32 posX, f32 posY, f32 posZ);
+extern "C" void item_setPlayerCount(u32 count);
+extern "C" void item_setPlayerPositionRank(u32 playerIdx, u32 rank);
+extern "C" u32 item_getPlayerStoredItem(u32 playerIdx);
+extern "C" void item_useItem(u32 playerIdx);
+
 // Phase 25: Forward declarations — Race bridge data push functions
 // These push course start points and checkpoint positions into the race bridge cache,
 // enabling RaceinfoPlayer::updateCheckpoint() and Raceinfo::getInitialPosAndRotForPlayer()
@@ -567,6 +579,17 @@ void RaceScene::initSubsystems() {
     }
     d.itemManager.initAllGL();
     printf("[RaceScene] %u item boxes\n", d.itemManager.getBoxCount());
+
+    // Phase 29: Initialize decompiled Item system bridge
+    // The item bridge connects the 16 compiled ItemSystem GENESIS files
+    // to the platform ItemBox system. It manages item roulette, storage,
+    // usage, and active item objects (shells, bananas, bob-ombs, etc.)
+    item_initSystem(d.playerCount);
+    for (u32 i = 0; i < d.playerCount; i++) {
+        item_initPlayer(i);
+    }
+    item_setPlayerCount(d.playerCount);
+    printf("[RaceScene] Item system initialized (%u players)\n", d.playerCount);
 
     // Initialize SceneCamera — decompiled camera system
     if (!m_camera) {
@@ -1377,9 +1400,25 @@ void RaceScene::updateRacing() {
     // 3. Update item boxes
     d.itemManager.updateBoxes(FRAME_TIME);
 
+    // Phase 29: Update decompiled Item system (roulette, active items, collisions)
+    // Push player positions into item bridge before update
+    for (u32 i = 0; i < d.playerCount; i++) {
+        const auto& ppos = d.players[i].getPosition();
+        item_setPlayerPosition(i, ppos.x, ppos.y, ppos.z);
+        // Push position rank from race session
+        u32 rank = d.raceSession.getRacePosition(i);
+        item_setPlayerPositionRank(i, rank > 0 ? rank : 1);
+    }
+    item_update(FRAME_TIME);
+
     // 4. Item collection for player 0
     if (d.players[0].isActive() && !d.players[0].m_finished) {
-        d.itemManager.tryCollect(d.players[0].getPosition(), *d.players[0].m_itemSlot);
+        bool collected = d.itemManager.tryCollect(d.players[0].getPosition(), *d.players[0].m_itemSlot);
+        // Phase 29: If item box collected, trigger item roulette via bridge
+        if (collected) {
+            u32 rank = d.raceSession.getRacePosition(0);
+            item_decideItemForPlayer(0, rank > 0 ? rank : 1);
+        }
     }
 
     // Item usage (edge-triggered)

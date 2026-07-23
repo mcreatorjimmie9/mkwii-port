@@ -528,6 +528,8 @@ set(APP_SOURCES
     src/modules/shims/effect_bridge.cpp
     # Phase 26: Collision physics bridge (KartGravity/KartSuspension/KartBoost/KartRespawn/WaterCollision/ColResponse/MovingColObj)
     src/modules/shims/collision_physics_bridge.cpp
+    # Phase 29: Item system bridge (ITEMHandler/ItemObj/ItemSlotData ↔ platform ItemBox)
+    src/modules/shims/item_bridge.cpp
 )
 
 add_executable(mkwii-port ${APP_SOURCES})

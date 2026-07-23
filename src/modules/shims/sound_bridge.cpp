@@ -1,4 +1,4 @@
-// sound_bridge.cpp — Phase 23: Real sound bridge wiring
+// sound_bridge.cpp — Phase 29: BRSAR-aware sound bridge wiring
 //
 // Connects the 16 sound stub functions to the decompiled AudioEngine
 // (nw4r::snd::AudioSystem). In the original MKWii, these functions are
@@ -6,19 +6,26 @@
 //
 // Architecture:
 //   PlayerSub10::update() → sub_playBoostSound() → AudioSystem::instance()
+//     → SoundArchive::getWaveData() → decodeADPCM if needed
 //     → AxVoiceManager::allocVoice() → setVolume/setPitch/setPan → startVoice()
+//
+// Phase 29 upgrade: playSFX() now checks SoundArchive for real BRSAR wave
+// data before falling back to the placeholder sine wave. When a BRSAR is
+// loaded via AudioSystem::loadArchive(), all SFX play with authentic game audio.
 //
 // Sound ID mapping follows the original MKWii BRSAR archive:
 //   0x5C boost mushroom, 0x5E start boost, 0x5F trick boost, 0x81 boost pad
 //   0x60-0x67 item sounds, 0x78-0x7E hit sounds, 0x74-0x77 race sounds
 
 #include <cstring>
+#include <cstdlib>
 #include <cmath>
 
 #include "rk_types.h"
 
 // Decompiled AudioEngine headers
 #include "AudioEngine/AudioSystem.hpp"
+#include "AudioEngine/SoundArchive.hpp"
 #include "AudioEngine/SoundTypes.hpp"
 #include "AudioEngine/AxVoiceManager.hpp"
 
@@ -98,28 +105,99 @@ static void playSFX(u32 playerIdx, s32 sfxId, f32 volume, f32 pitch) {
     vm->setPitch((u32)voiceIdx, effPitch);
     vm->setPan((u32)voiceIdx, effPan);
 
-    // Generate a short sine buffer as placeholder
-    // When BRSAR is loaded, setAddr will be called with real wave data instead.
-    // For now, we use a small 16-bit PCM sine burst so OpenAL has something to play.
-    static const u32 PLACEHOLDER_SAMPLES = 512;
-    static const u32 PLACEHOLDER_SR = 32000;
-    static s16 s_placeholderBuf[PLACEHOLDER_SAMPLES];
-    static bool s_placeholderGenerated = false;
-    if (!s_placeholderGenerated) {
-        for (u32 i = 0; i < PLACEHOLDER_SAMPLES; i++) {
-            f32 t = (f32)i / (f32)PLACEHOLDER_SAMPLES;
-            f32 envelope = 1.0f;
-            // Simple attack-decay envelope
-            if (t < 0.1f) envelope = t / 0.1f;
-            else envelope = 1.0f - (t - 0.1f) / 0.9f;
-            s_placeholderBuf[i] = (s16)(32767.0f * envelope * sinf(2.0f * 3.14159265f * t * 8.0f));
+    // Phase 29: Try real BRSAR wave data first, fallback to placeholder sine wave.
+    // When a BRSAR archive is loaded via AudioSystem::loadArchive(), the
+    // SoundArchive provides authentic game wave data. This replaces the
+    // placeholder sine wave with real Mario Kart Wii audio samples.
+    bool usedRealData = false;
+
+    SoundArchive* archive = audio.getArchive();
+    if (archive && archive->isLoaded()) {
+        WaveInfo info;
+        if (archive->getWaveInfo((u32)sfxId, &info)) {
+            u32 dataSize = 0;
+            const void* waveData = archive->getWaveData((u32)sfxId, &dataSize);
+
+            if (waveData && dataSize > 0) {
+                // Determine encoding and prepare PCM16 data for OpenAL
+                void* pcmData = nullptr;
+                u32 pcmSize = 0;
+                u32 sampleRate = info.sampleRate ? info.sampleRate : 32000;
+                u16 channels = info.channels ? info.channels : 1;
+
+                if (info.encoding == 0 || info.bitsPerSample == 16) {
+                    // PCM16 — use directly
+                    pcmData = const_cast<void*>(waveData);
+                    pcmSize = dataSize;
+                } else if (info.encoding == 1 || info.bitsPerSample == 4) {
+                    // ADPCM (4-bit per sample, 8 bytes per 14 samples per nibble)
+                    // Wii DSP ADPCM: 8 bytes → 14 samples per channel
+                    // Total samples = (dataSize / channels / 8) * 14
+                    u32 blocksPerChannel = dataSize / channels / 8;
+                    u32 numSamples = blocksPerChannel * 14;
+                    pcmSize = numSamples * channels * sizeof(s16);
+                    pcmData = std::malloc(pcmSize);
+                    if (pcmData) {
+                        SoundArchive::decodeADPCM(waveData, pcmData,
+                                                   numSamples, channels);
+                    }
+                } else if (info.bitsPerSample == 8) {
+                    // PCM8 → convert to PCM16
+                    pcmSize = dataSize * 2;
+                    pcmData = std::malloc(pcmSize);
+                    if (pcmData) {
+                        const u8* src = static_cast<const u8*>(waveData);
+                        s16* dst = static_cast<s16*>(pcmData);
+                        u32 sampleCount = dataSize;
+                        for (u32 i = 0; i < sampleCount; i++) {
+                            // Unsigned 8-bit → signed 16-bit
+                            dst[i] = (s16)(((s32)src[i] - 128) * 257);
+                        }
+                    }
+                }
+
+                if (pcmData && pcmSize > 0) {
+                    vm->setAddr((u32)voiceIdx, pcmData, pcmSize,
+                                sampleRate, channels, 1 /* PCM16 */);
+                    usedRealData = true;
+                }
+
+                // Free allocated decode buffer (PCM16 from waveData pointer
+                // is not freed since it references the archive's memory).
+                if (info.encoding != 0 && info.bitsPerSample != 16 &&
+                    pcmData && pcmSize > 0) {
+                    // This was allocated by std::malloc above
+                    // The AxVoiceManager copies data into OpenAL buffers,
+                    // so we can free immediately after setAddr.
+                    std::free(pcmData);
+                }
+            }
         }
-        s_placeholderGenerated = true;
     }
 
-    vm->setAddr((u32)voiceIdx, s_placeholderBuf,
-                PLACEHOLDER_SAMPLES * sizeof(s16),
-                PLACEHOLDER_SR, 1 /* mono */, 1 /* PCM16 */);
+    // Fallback: placeholder sine wave when no BRSAR loaded or sound not found
+    if (!usedRealData) {
+        static const u32 PLACEHOLDER_SAMPLES = 512;
+        static const u32 PLACEHOLDER_SR = 32000;
+        static s16 s_placeholderBuf[PLACEHOLDER_SAMPLES];
+        static bool s_placeholderGenerated = false;
+        if (!s_placeholderGenerated) {
+            for (u32 i = 0; i < PLACEHOLDER_SAMPLES; i++) {
+                f32 t = (f32)i / (f32)PLACEHOLDER_SAMPLES;
+                f32 envelope = 1.0f;
+                // Simple attack-decay envelope
+                if (t < 0.1f) envelope = t / 0.1f;
+                else envelope = 1.0f - (t - 0.1f) / 0.9f;
+                s_placeholderBuf[i] = (s16)(32767.0f * envelope *
+                    sinf(2.0f * 3.14159265f * t * 8.0f));
+            }
+            s_placeholderGenerated = true;
+        }
+
+        vm->setAddr((u32)voiceIdx, s_placeholderBuf,
+                    PLACEHOLDER_SAMPLES * sizeof(s16),
+                    PLACEHOLDER_SR, 1 /* mono */, 1 /* PCM16 */);
+    }
 
     // Start playback
     vm->startVoice((u32)voiceIdx);
