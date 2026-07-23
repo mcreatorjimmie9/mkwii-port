@@ -9,6 +9,10 @@
 // Full KMP loader header needed for initFromKMP to access StartPosition fields
 #include "loaders/kmp_loader.hpp"
 
+// Phase 21: Decompiled CourseColManager for KCL-based floor/wall/surface queries
+// This replaces the platform stub CollisionSystem when KCL data is available.
+#include "Field/CourseColManager.hpp"
+
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -660,6 +664,11 @@ void KartEntity::setSpeed(f32 speed) {
 // =============================================================================
 // queryCollision — Collision-only query (no physics, just KCL feedback)
 // =============================================================================
+// Phase 21: Now uses decompiled CourseColManager/KCollision when available,
+// falling back to the platform CollisionSystem when no KCL is loaded.
+// The decompiled KCollision uses the original MKWii octree spatial index
+// with proper prism triangle encoding, which gives more accurate floor,
+// wall, and surface type detection than the platform stub loader.
 
 void KartEntity::queryCollision(bool& offroad, bool& boostPad, bool& wallHit,
                                 f32& wallNX, f32& wallNZ,
@@ -670,6 +679,67 @@ void KartEntity::queryCollision(bool& offroad, bool& boostPad, bool& wallHit,
     wallNX = 0.0f;
     wallNZ = 0.0f;
 
+    // Phase 21: Prefer decompiled CourseColManager (KCollision) when loaded.
+    // This uses the original MKWii collision engine with proper octree,
+    // prism normals, and KCL type attributes for accurate surface detection.
+    // In the original game, KartCollide::testFloor() and testWall() both
+    // query KCollision for sphere/ray intersection results.
+    Field::CourseColManager* ccm = Field::CourseColManager::instance();
+    if (ccm && ccm->isLoaded()) {
+        // Floor query — raycast from above kart position downward
+        f32 floorY = 0.0f;
+        f32 floorNormal[3] = { 0.0f, 1.0f, 0.0f };
+        bool hasFloor = ccm->getFloorY(m_position.x, m_position.y + 100.0f,
+                                         m_position.z, &floorY, floorNormal);
+        if (hasFloor) {
+            // Snap kart to floor surface (with kart height offset)
+            m_position.y = floorY + 25.0f;
+
+            // Query road type from the floor surface
+            // In MKWii, KCL type bits encode surface properties.
+            // getRoadType() returns the 5-bit type value (0-31):
+            //   0 = road, 2-4 = offroad variants, 6-7 = boost pad/ramp,
+            //   12-15 = wall types, etc.
+            u32 roadType = ccm->getRoadType(m_position.x, floorY + 25.0f,
+                                             m_position.z);
+            // Offroad: types 2 (weak), 3 (standard), 4 (heavy)
+            if (roadType == 2 || roadType == 3 || roadType == 4) {
+                offroad = true;
+            }
+            // Boost: type 6 (boost pad), type 7 (boost ramp)
+            if (roadType == 6 || roadType == 7) {
+                boostPad = true;
+            }
+        }
+
+        // Wall collision query — sphere test at kart position
+        // KartCollide::testWall() uses bounding sphere radius.
+        // Wall types: 0xc-0xf, 0x14, 0x1c, 0x1e, 0x1f.
+        // KCL_TYPE_WALL bitmask = bits for all wall types combined.
+        const f32 kartRadius = 40.0f;
+        Field::SphereColResult sphereResult;
+        // Use KCL_TYPE_WALL mask for wall filtering (from CollisionEntries.hpp)
+        const u32 kclWallMask = (1u << 0xc) | (1u << 0xd) | (1u << 0xe) |
+                                (1u << 0xf) | (1u << 0x14) | (1u << 0x1c) |
+                                (1u << 0x1e) | (1u << 0x1f);
+        if (ccm->checkSphereFiltered(
+                m_position.x, m_position.y, m_position.z,
+                kartRadius, kclWallMask, &sphereResult)) {
+            if (sphereResult.hit) {
+                wallHit = true;
+                // Wall normal from KCL collision result
+                wallNX = sphereResult.normal.x;
+                wallNZ = sphereResult.normal.z;
+                f32 pushDist = m_speed * 0.016f + 50.0f;
+                m_position.x += wallNX * pushDist;
+                m_position.z += wallNZ * pushDist;
+                computeModelMatrix();
+            }
+        }
+        return;
+    }
+
+    // Fallback: platform CollisionSystem (from stub kcl_loader)
     if (!collision || !collision->isBuilt()) return;
 
     auto result = collision->query(m_position.x, m_position.y + 50.0f,
