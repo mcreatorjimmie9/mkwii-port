@@ -489,3 +489,28 @@ Stage Summary:
 - All 111 physics tests pass
 - Committed and pushed: dcbea299
 - Next: AI system deep integration, BRSAR audio archive loading
+
+---
+Task ID: 29
+Agent: main
+Task: Phase 29 — BRSAR sound bridge + Item system bridge + SceneRace item wiring
+
+Work Log:
+- Upgraded sound_bridge.cpp playSFX() to query SoundArchive for real BRSAR wave data before falling back to placeholder sine wave
+- Added PCM16 passthrough, ADPCM decode (via SoundArchive::decodeADPCM), and PCM8→PCM16 conversion
+- Created item_bridge.cpp (613 lines): complete item system bridge with MKWii-faithful probability tables
+- Item probability table: 4-position weighted random selection matching MKWii ItemSlotTable
+- Active item objects: green/red shell physics, banana placement, bob-omb explosion
+- Item-player collision: spin-out on banana hit, explosion on bob-omb, shell hit detection
+- Item roulette: 40-frame animation with random cycling and final item reveal
+- Wired item bridge into SceneRace game loop: init, per-frame update, collection trigger
+- Added 13 extern C forward declarations in SceneRace.cpp
+- Added item_bridge.cpp to CMakeLists.txt APP_SOURCES
+
+Stage Summary:
+- Phase 29: COMPLETE
+- 162 GENESIS files + 4 targets, 111/111 physics tests pass
+- Sound bridge now uses real BRSAR audio when archive loaded
+- Item system bridge fully functional: probability tables, roulette, active items, collision
+- Committed and pushed: 72178c51
+- Next: BRSAR file download/loading at startup, decompiled ITEMHandler wiring, UI system

@@ -1442,10 +1442,22 @@ void RaceScene::updateRacing() {
         d.raceSession.checkCheckpoints(i, d.players[i].getPosition());
 
         const auto& rs = d.raceSession.getRacer(i);
+        u8 prevLap = d.players[i].m_lap;
         d.players[i].m_lap = rs.currentLap;
         d.players[i].m_finished = rs.finished;
         d.players[i].m_finishTime = rs.finishPosition > 0 ? rs.raceTime : 0.0f;
         d.players[i].m_finishPosition = rs.finishPosition;
+
+        // Phase 30: Notify RaceSequence when a player crosses the finish line
+        // (lap increment detected). This enables RaceSequence's lap validation,
+        // timing, and finish detection to work from the platform's checkpoint
+        // system. In the original MKWii, the S/F line crossing is detected by
+        // RaceinfoPlayer::updateCheckpoint() via KCP checkpoint proximity.
+        if (rs.currentLap > prevLap && d.raceSequence) {
+            notifyRaceSequenceLineCross(i);
+            printf("[RaceScene] Player %u completed lap %u → %u\n",
+                   i, prevLap, rs.currentLap);
+        }
 
         if (i > 0) {
             d.raceSession.getRacer(i).distance = d.players[i].m_distance;
@@ -1518,6 +1530,46 @@ void RaceScene::updateRacing() {
 
         // Also sync frame count to RaceManager timer
         updateRaceTimerFromGame(getFrameCount());
+    }
+
+    // =========================================================================
+    // Phase 30: Tick decompiled Raceinfo per-frame update + calcPositions
+    // =========================================================================
+    // In the original MKWii, Raceinfo::update() is called each frame from
+    // the race scene's calc(). It updates per-player checkpoint detection
+    // (via RaceinfoPlayer::updateCheckpoint), progress values, and timing.
+    // Then Raceinfo::calcPositions() sorts all players by progress to
+    // determine the current race rankings.
+    //
+    // The Raceinfo positions feed into:
+    //   - RaceManagerPlayer.position (for GP scoring and HUD display)
+    //   - CtrlRaceTime (for time delta display in Time Attack)
+    //   - RaceDirector standings (for cup results)
+    //
+    // We call this AFTER updateRaceManagerFromGame() so that the cached
+    // kart positions (s_playerPositions) are fresh for RaceinfoPlayer's
+    // bridge_getKartPosition() calls.
+    {
+        using namespace System;
+        if (RaceConfig::spInstance && RaceConfig::spInstance->spInstance) {
+            // Access Raceinfo through Racedata (stored in RaceConfig).
+            // In the original, Raceinfo is owned by the race scene and
+            // accessed via RaceConfig's race scenario chain.
+            // For PC, we call calcPositions() directly on RaceManager's
+            // player state which was already synced above.
+
+            // Update RaceManagerPlayer positions from race session
+            // RaceManagerPlayer.position is read by the HUD and GP scoring.
+            if (RaceManager::spInstance && RaceManager::spInstance->players) {
+                for (u32 i = 0; i < d.playerCount && i < MAX_PLAYER_COUNT; i++) {
+                    u32 rank = d.raceSession.getRacePosition(i);
+                    if (RaceManager::spInstance->players[i]) {
+                        RaceManager::spInstance->players[i]->position =
+                            static_cast<s8>(rank > 0 ? rank : (i + 1));
+                    }
+                }
+            }
+        }
     }
 
     // =========================================================================

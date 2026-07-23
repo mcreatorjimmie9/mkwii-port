@@ -331,14 +331,36 @@ void RacedataFactory::packRacedataRecord() {
         }
 
         // Finish time in milliseconds (u32)
+        // Phase 30: Read from RaceManagerPlayer instead of placeholder 0.
+        // In the original MKWii, packRacedataRecord reads finish times from
+        // RaceManagerPlayer::raceFinishTime which is set when the player
+        // crosses the finish line after their final lap.
         u32 finishTime = 0;
-        // Would read from Raceinfo here; use 0 for now as placeholder
+        if (RaceManager::spInstance && RaceManager::spInstance->players &&
+            RaceManager::spInstance->players[i]) {
+            // raceFinishTime is a Time* pointer — dereference to get ms.
+            // If the pointer is null (player hasn't finished), use 0.
+            Time* ft = RaceManager::spInstance->players[i]->raceFinishTime;
+            if (ft) {
+                finishTime = ft->toMilliseconds();
+            }
+        }
         memcpy(&s_packedRecordBuffer[offset], &finishTime, 4);
         offset += 4;
 
         // Lap times (up to 10 laps, u32 each)
+        // Phase 30: Read from RaceManagerPlayer lap times.
+        // Each RaceManagerPlayer stores per-lap finish times that are
+        // recorded by CtrlRaceTime::recordLap() during the race.
         for (u8 lap = 0; lap < scenario.mSettings.mLapCount && lap < 10; lap++) {
             u32 lapTime = 0;
+            if (RaceManager::spInstance && RaceManager::spInstance->players &&
+                RaceManager::spInstance->players[i] &&
+                RaceManager::spInstance->players[i]->lapFinishTimes) {
+                // lapFinishTimes is an array of Time structs indexed by lap.
+                // Time::toMilliseconds() converts (min, sec, ms) to total ms.
+                lapTime = RaceManager::spInstance->players[i]->lapFinishTimes[lap].toMilliseconds();
+            }
             memcpy(&s_packedRecordBuffer[offset], &lapTime, 4);
             offset += 4;
         }
