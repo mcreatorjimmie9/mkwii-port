@@ -439,3 +439,29 @@ Stage Summary:
 - x86-64 pointer safety fix in Heap_Classes.cpp
 - 11 heap unit tests (ExpHeap + FrameHeap) all passing
 - Next: Phase 14 priorities — SceneCamera, ObjectDirector, KartMove→PlayerSub10
+
+---
+Task ID: 21
+Agent: main
+Task: Phase 21 — RaceManager→SceneRace wiring completion + KCL collision integration
+
+Work Log:
+- Verified 162 GENESIS files compile cleanly (162/162 = 100%)
+- Confirmed race_bridge.cpp already has comprehensive wiring: RaceManager sync, RaceSequence lifecycle, RaceDirector coordination, course start/checkpoint data bridge, start-boost system
+- Confirmed AI bridge already wired: initAIManager() in initSubsystems(), updateAIForPlayer() called from Player::update() for each CPU player
+- Wired decompiled KCollision into KartEntity::queryCollision():
+  - Added CourseColManager.hpp include to KartEntity.cpp
+  - queryCollision() now checks CourseColManager first (decompiled KCollision octree engine)
+  - Floor detection: KCollision::getFloor() raycast from above kart position
+  - Surface types: correct 5-bit KCL type values (2-4=offroad, 6-7=boost pad/ramp)
+  - Wall detection: checkSphereFiltered() with proper KCL_TYPE_WALL bitmask
+  - Falls back to platform CollisionSystem when no KCL data loaded
+- All 4 build targets pass: mkwii-genesis, mkwii-port, mkwii-linktest, physics_tests
+- Committed and pushed: 31692e50
+
+Stage Summary:
+- Phase 21: COMPLETE
+- KartEntity now uses original MKWii KCollision engine for collision queries
+- KCL type system faithfully matches original (5-bit types, proper bitmasks)
+- 162 GENESIS files + full platform layer compile and link successfully
+- Next: Sound system real implementation, KartDynamics gravity refinement

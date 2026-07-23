@@ -761,4 +761,9 @@ bool RaceConfig::isTimeAttackReplay() {
              : false;
 }
 
+// @addr 0x805343c0
+bool RaceConfig::Scenario::isTeamMode() {
+  return (mSettings.mModeFlags >> 1) & 1;
+}
+
 } // namespace System
