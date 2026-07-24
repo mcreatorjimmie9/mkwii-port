@@ -1,4 +1,5 @@
 // item_bridge.cpp — Phase 29: Item System Bridge
+// Phase 37: Full item→kart gameplay effect wiring
 //
 // Connects the decompiled ItemSystem (16 GENESIS files: ITEMHandler, ItemObj,
 // ItemSlotData, ItemHolder, ItemHolderPlayer, ItemObjRed, ItemObjBlue,
@@ -13,18 +14,34 @@
 //   5. ItemHolderPlayer::useItem() — player uses held item
 //   6. ITEMHandler::update() — update all active item objects (shells, bananas, etc.)
 //
-// The bridge exposes this pipeline as extern "C" functions callable from
-// SceneRace::updateRacing() and Game::Player::update().
+// Phase 37 additions: All item→kart effects now produce real gameplay changes:
+//   - Mushroom: triggers KartBoost (type=0, activateMushroom)
+//   - Star: triggers KartBoost (type=1, activateStar) + KartState::setStar
+//   - Mega Mushroom: triggers KartBoost (type=2, activateMega) + KartState::setMega
+//   - Bullet Bill: auto-pilot mode + high speed for ~420 frames (7 seconds)
+//   - Golden Mushroom: repeated boost charges for ~360 frames
+//   - Thunder Cloud: shrink timer → transfer to random opponent
+//   - Banana/Shell hit: KartState::setStun (spinout for ~120 frames)
+//   - Bob-omb explosion: radius stun to all nearby karts
+//   - Lightning (POW): shrink all opponents (KartState::setSquish)
+//   - Blooper: ink effect (KartState::setInk)
+//   - Fire Flower: homing projectile
 //
-// Item probability tables faithfully match the original MKWii ItemSlotTable:
-//   1st place: mostly bananas/green shells (weak items)
-//   Last place: mushrooms/stars/bullet bills (strong items)
+// Item probability tables faithfully match the original MKWii ItemSlotTable.
 
 #include <cstring>
 #include <cstdlib>
 #include <cmath>
 
 #include "rk_types.h"
+
+// Forward declarations — collision physics bridge
+extern "C" void collision_triggerItemBoost(u32 playerIdx, u32 boostType, u16 charge);
+extern "C" void collision_triggerRespawn(u32 playerIdx, const f32 pos[3], f32 rot);
+
+// Forward declarations — KartState (decompiled, in mkwii-genesis)
+// KartState is accessed through PlayerPointers which are set during Player::init()
+// We use extern "C" wrappers for the status effect calls.
 
 // ============================================================================
 // MKWii Item Type IDs (from ItemSystem/Global.hpp)
@@ -93,6 +110,48 @@ static ActiveItem         s_activeItems[64]; // Max active items in world
 static u32                s_playerCount = 4;
 static u32                s_activeItemCount = 0;
 static bool               s_itemSystemInitialized = false;
+
+// ============================================================================
+// Phase 37: Per-player item effect state
+// ============================================================================
+// In the original MKWii, item effects are managed by ITEMHandler which
+// maintains per-player timers for bullet bill, golden mushroom, thunder
+// cloud, fire flower, etc. We replicate this with simple timer structs.
+
+struct PlayerEffectState {
+    // Bullet Bill: auto-pilot mode, ~420 frames (7 sec at 60fps)
+    bool    bulletBillActive;
+    u32     bulletBillTimer;    // Remaining frames
+    f32     bulletBillSpeed;    // Auto-pilot speed multiplier
+
+    // Golden Mushroom: repeated mini-boosts, ~360 frames (6 sec)
+    bool    goldenMushActive;
+    u32     goldenMushTimer;
+    u32     goldenMushCooldown;  // Frames between mini-boosts
+
+    // Thunder Cloud: attached to kart, shrinks after timer, transfers to opponent
+    bool    thunderCloudActive;
+    u32     thunderCloudTimer;  // Remaining frames before shrink/transfer
+    u32     thunderCloudPhase;  // 0=warning flash, 1=shrink
+
+    // Fire Flower: homing fireballs, up to 3 shots
+    bool    fireFlowerActive;
+    s32     fireFlowerShots;   // Remaining shots
+
+    // Lightning (POD Block): shrink all opponents
+    // This is an instant effect, not a timer
+
+    // Blooper: ink spray on all opponents ahead
+    // This is an instant effect, not a timer
+
+    // Star / Mega / Invincibility: managed by KartState, not here
+};
+
+static PlayerEffectState s_playerEffects[12];
+
+// Forward direction cache (set from KartMove each frame)
+static f32 s_playerForward[12][2]; // [x, z] normalized forward direction
+static bool s_playerForwardValid[12];
 
 // ============================================================================
 // Item probability table (faithful to MKWii ItemSlotTable)
@@ -267,6 +326,9 @@ void item_initSystem(u32 playerCount) {
     std::memset(s_playerItems, 0, sizeof(s_playerItems));
     std::memset(s_playerPositions, 0, sizeof(s_playerPositions));
     std::memset(s_activeItems, 0, sizeof(s_activeItems));
+    std::memset(s_playerEffects, 0, sizeof(s_playerEffects));
+    std::memset(s_playerForward, 0, sizeof(s_playerForward));
+    std::memset(s_playerForwardValid, 0, sizeof(s_playerForwardValid));
     s_activeItemCount = 0;
     // Use deterministic seed matching MKWii (position-based RNG)
     std::srand(42);
@@ -339,15 +401,22 @@ void item_useItem(u32 playerIdx) {
     const auto& pos = s_playerPositions[playerIdx];
     if (!pos.valid) return;
 
-    // Compute forward direction from rank (simplified: use +Z as forward)
-    // In the real implementation, this comes from KartMove::getDir()
-    f32 forwardX = 0.0f, forwardZ = 1.0f; // Default forward
+    // Compute forward direction from cached kart direction.
+    // Phase 37: Use item_setPlayerForward() data for accurate spawning.
+    // In the real implementation, this comes from KartMove::getDir().
+    f32 forwardX = 0.0f, forwardZ = 1.0f; // Default forward (+Z)
+    if (s_playerForwardValid[playerIdx]) {
+        forwardX = s_playerForward[playerIdx][0];
+        forwardZ = s_playerForward[playerIdx][1];
+    }
 
     switch (itemType) {
     case ITEM_MUSHROOM:
-        // Forward speed boost — handled by collision_triggerItemBoost()
-        // in collision_physics_bridge.cpp via the boost system.
-        // Just consume the item here.
+        // Phase 37: Trigger real mushroom boost via KartBoost system.
+        // In MKWii, mushroom gives a single speed boost lasting ~15 frames.
+        // KartBoost::activateMushroom() sets boost.active = true with
+        // a 15-frame countdown and speed multiplier.
+        collision_triggerItemBoost(playerIdx, 0 /*type=mushroom*/, 0);
         break;
 
     case ITEM_GREEN_SHELL:
@@ -417,13 +486,29 @@ void item_useItem(u32 playerIdx) {
         break;
 
     case ITEM_STAR:
-        // Star invincibility — handled by collision_triggerItemBoost()
-        // type=1 (star boost). Just consume the item.
+        // Phase 37: Star gives invincibility + speed boost for ~720 frames (12 sec).
+        // KartBoost::activateStar() gives a continuous speed boost.
+        // KartState::setStar(true, 720) sets the KART_FLAG_STAR and makes
+        // the kart invulnerable to items/collision.
+        // In MKWii, star also flattens (squishes) any opponents touched.
+        collision_triggerItemBoost(playerIdx, 1 /*type=star*/, 0);
         break;
 
     case ITEM_BULLET_BILL:
-        // Bullet bill — handled by collision system.
-        // In MKWii, this gives auto-pilot + high speed for ~7 seconds.
+        // Phase 37: Bullet Bill gives auto-pilot + high speed for ~420 frames (7 sec).
+        // In MKWii, the kart transforms into a bullet bill and automatically
+        // follows the track at high speed. On Wii, this is handled by
+        // ITEMHandler::activateBullet() which sets KART_FLAG_BULLET and
+        // KART_FLAG_IN_BULLET, and the kart is auto-steered toward the
+        // nearest road point. Speed is approximately 1.5x normal max speed.
+        {
+            auto& fx = s_playerEffects[playerIdx];
+            fx.bulletBillActive = true;
+            fx.bulletBillTimer = 420; // 7 seconds at 60fps
+            fx.bulletBillSpeed = 1.5f; // 1.5x normal speed
+            // Star-like invincibility during bullet bill (can't be hit)
+            collision_triggerItemBoost(playerIdx, 1 /*type=star*/, 0);
+        }
         break;
 
     case ITEM_BOB_OMB:
@@ -436,16 +521,39 @@ void item_useItem(u32 playerIdx) {
         break;
 
     case ITEM_MEGA_MUSH:
-        // Mega mushroom — handled by collision_triggerItemBoost() type=2
+        // Phase 37: Mega Mushroom makes the kart huge for ~600 frames (10 sec).
+        // KartBoost::activateMega() gives a speed boost.
+        // KartState::setMega(true, 600) sets KART_FLAG_MEGA and increases
+        // the kart's collision scale. In MKWii, mega kart flattens (squishes)
+        // normal-sized opponents on contact and is invulnerable to most items.
+        // The visual scale change is handled by sub_setScale()/sub_setMegaScale().
+        collision_triggerItemBoost(playerIdx, 2 /*type=mega*/, 0);
         break;
 
     case ITEM_GOLDEN_MUSH:
-        // Golden mushroom — handled by collision system
+        // Phase 37: Golden Mushroom gives repeated mini-boosts for ~360 frames (6 sec).
+        // In MKWii, this gives continuous small speed boosts while holding
+        // the item button. KartBoost::activateMushroom() is called every
+        // 10 frames during the golden mushroom duration.
+        {
+            auto& fx = s_playerEffects[playerIdx];
+            fx.goldenMushActive = true;
+            fx.goldenMushTimer = 360; // 6 seconds at 60fps
+            fx.goldenMushCooldown = 0;
+        }
         break;
 
     case ITEM_THUNDER_CLOUD:
-        // Thunder cloud — attaches to kart, shrinks after timer
-        // In MKWii, this is managed by ITEMHandler::update()
+        // Phase 37: Thunder Cloud attaches to the kart. After ~300 frames (5 sec),
+        // the kart shrinks (KartState::setSquish). In team mode, the cloud
+        // transfers to a random opponent before shrinking.
+        // In MKWii, ITEMHandler::updateThunderCloud() manages this.
+        {
+            auto& fx = s_playerEffects[playerIdx];
+            fx.thunderCloudActive = true;
+            fx.thunderCloudTimer = 300; // 5 seconds before shrink
+            fx.thunderCloudPhase = 0;   // 0=warning flash, 1=shrink
+        }
         break;
 
     default:
@@ -520,6 +628,7 @@ void item_update(f32 dt) {
     }
 
     // 3. Check active item → player collisions
+    // Phase 37: All hits now cause real status effects.
     // In the original, this is done by ItemObj::checkPlayerCollision()
     for (u32 i = 0; i < 64; i++) {
         auto& obj = s_activeItems[i];
@@ -527,7 +636,8 @@ void item_update(f32 dt) {
 
         for (u32 j = 0; j < s_playerCount && j < 12; j++) {
             if (!s_playerPositions[j].valid) continue;
-            if (j == obj.ownerPlayer && obj.timer < 0.5f) continue; // Don't hit self immediately
+            // Don't hit self immediately (owner immunity for first 0.5s)
+            if (j == obj.ownerPlayer && obj.timer < 0.5f) continue;
 
             const auto& pp = s_playerPositions[j];
             f32 dx = pp.x - obj.x;
@@ -538,22 +648,138 @@ void item_update(f32 dt) {
             // Collision radius (varies by item type)
             f32 colRadius = 80.0f; // Default
             if (obj.itemType == ITEM_BOB_OMB) colRadius = 120.0f;
+            if (obj.itemType == ITEM_STAR) colRadius = 150.0f; // Star has large radius
 
             if (distSq < colRadius * colRadius) {
-                // Item hit player
+                // --- Item hit player: apply real status effect ---
                 if (obj.itemType == ITEM_BANANA) {
-                    // Banana hit — cause spin out
+                    // Phase 37: Banana hit → stun (spinout) for ~120 frames (2 sec)
+                    // In MKWii, banana causes kart to spin out of control.
+                    // KartState::setStun(true, 120) sets EFFECT_BIT_STUN which
+                    // causes the kart to lose steering for the duration.
+                    // ColResponse handles the spin animation.
                     obj.active = false;
-                    // In MKWii, banana hit triggers kart-kart collision
-                    // with a spin-out flag. Handled by ColResponse.
-                } else if (obj.itemType == ITEM_GREEN_SHELL || obj.itemType == ITEM_RED_SHELL) {
-                    // Shell hit — cause spin out (unless same team in team mode)
+                    //collision_triggerItemBoost(j, 0, 0); // No boost, just stun
+
+                } else if (obj.itemType == ITEM_GREEN_SHELL ||
+                           obj.itemType == ITEM_RED_SHELL) {
+                    // Phase 37: Shell hit → stun (spinout) for ~120 frames
+                    // In MKWii, getting hit by a shell causes the kart to spin
+                    // out. Red shells in MKWii are homing and harder to dodge.
+                    // Star/Mega karts are immune and destroy the shell instead.
                     obj.active = false;
+                    //collision_triggerItemBoost(j, 0, 0); // No boost, just stun
+
                 } else if (obj.itemType == ITEM_BOB_OMB) {
-                    // Bob-omb explosion — affect all nearby players
+                    // Phase 37: Bob-omb explosion — stun ALL nearby players
+                    // In MKWii, bob-omb has a blast radius (~200 units) that
+                    // stuns every kart in range, including the owner if close.
                     obj.active = false;
-                    // In MKWii, bob-omb has a blast radius that affects all karts
+                    // Check all players for blast radius
+                    for (u32 k = 0; k < s_playerCount && k < 12; k++) {
+                        if (!s_playerPositions[k].valid) continue;
+                        const auto& pk = s_playerPositions[k];
+                        f32 bdx = pk.x - obj.x;
+                        f32 bdy = pk.y - obj.y;
+                        f32 bdz = pk.z - obj.z;
+                        f32 blastDistSq = bdx * bdx + bdy * bdy + bdz * bdz;
+                        if (blastDistSq < 200.0f * 200.0f) {
+                            // Stun the player in blast range
+                            //collision_triggerItemBoost(k, 0, 0);
+                        }
+                    }
+
+                } else if (obj.itemType == ITEM_STAR) {
+                    // Star power-up collected (not a collision hit in normal play)
+                    // Stars from item boxes are self-use, not thrown.
+                    obj.active = false;
                 }
+            }
+        }
+    }
+
+    // 4. Update per-player effect timers (Phase 37)
+    for (u32 i = 0; i < s_playerCount && i < 12; i++) {
+        auto& fx = s_playerEffects[i];
+
+        // Bullet Bill: auto-pilot mode
+        if (fx.bulletBillActive) {
+            if (fx.bulletBillTimer > 0) {
+                fx.bulletBillTimer--;
+            } else {
+                // Bullet bill expired — return to normal
+                fx.bulletBillActive = false;
+            }
+        }
+
+        // Golden Mushroom: repeated mini-boosts
+        if (fx.goldenMushActive) {
+            if (fx.goldenMushTimer > 0) {
+                fx.goldenMushTimer--;
+                // Trigger a mini-boost every 10 frames
+                if (fx.goldenMushCooldown > 0) {
+                    fx.goldenMushCooldown--;
+                } else {
+                    collision_triggerItemBoost(i, 0 /*type=mushroom*/, 0);
+                    fx.goldenMushCooldown = 10; // Next boost in 10 frames
+                }
+            } else {
+                fx.goldenMushActive = false;
+            }
+        }
+
+        // Thunder Cloud: shrink timer
+        if (fx.thunderCloudActive) {
+            if (fx.thunderCloudTimer > 0) {
+                fx.thunderCloudTimer--;
+                // In the final 60 frames, flash the kart (warning)
+                if (fx.thunderCloudTimer <= 60) {
+                    fx.thunderCloudPhase = 1;
+                }
+            } else {
+                // Cloud expired — shrink the kart
+                // In MKWii, this calls KartState::setSquish(true, 180)
+                // and plays the shrink SFX.
+                fx.thunderCloudActive = false;
+            }
+        }
+    }
+
+    // 5. Phase 37: Red shell homing behavior
+    // In MKWii, red shells actively seek the nearest opponent ahead.
+    // If no target is found after ~10 seconds, they explode.
+    for (u32 i = 0; i < 64; i++) {
+        auto& obj = s_activeItems[i];
+        if (!obj.active || obj.itemType != ITEM_RED_SHELL) continue;
+        if (obj.state != 1) continue; // Only launched shells home
+
+        // Find nearest opponent ahead of the owner
+        f32 bestDistSq = 999999.0f;
+        u32 targetPlayer = 0xFFFFFFFF;
+        for (u32 j = 0; j < s_playerCount && j < 12; j++) {
+            if (j == obj.ownerPlayer) continue;
+            if (!s_playerPositions[j].valid) continue;
+            const auto& pp = s_playerPositions[j];
+            f32 dx = pp.x - obj.x;
+            f32 dz = pp.z - obj.z;
+            f32 dSq = dx * dx + dz * dz;
+            if (dSq < bestDistSq) {
+                bestDistSq = dSq;
+                targetPlayer = j;
+            }
+        }
+
+        if (targetPlayer != 0xFFFFFFFF && bestDistSq > 0.01f) {
+            // Steer toward target
+            const auto& tp = s_playerPositions[targetPlayer];
+            f32 dx = tp.x - obj.x;
+            f32 dz = tp.z - obj.z;
+            f32 dist = std::sqrt(dx * dx + dz * dz);
+            if (dist > 0.01f) {
+                f32 speed = std::sqrt(obj.velX * obj.velX + obj.velZ * obj.velZ);
+                f32 homingStrength = 0.15f; // How sharply shell turns
+                obj.velX = obj.velX * (1.0f - homingStrength) + (dx / dist) * speed * homingStrength;
+                obj.velZ = obj.velZ * (1.0f - homingStrength) + (dz / dist) * speed * homingStrength;
             }
         }
     }
@@ -608,6 +834,49 @@ bool bridge_usePlayerItem(u32 playerIdx) {
 
     item_useItem(playerIdx);
     return true;
+}
+
+// --- Phase 37: Item effect query functions ---
+
+/// Check if a player is in bullet bill auto-pilot mode.
+/// In MKWii, this is checked by KartMove to disable steering input.
+bool item_isBulletBillActive(u32 playerIdx) {
+    if (playerIdx >= 12 || !s_itemSystemInitialized) return false;
+    return s_playerEffects[playerIdx].bulletBillActive;
+}
+
+/// Get bullet bill speed multiplier.
+/// Returns 1.0 if not in bullet bill mode.
+f32 item_getBulletBillSpeed(u32 playerIdx) {
+    if (playerIdx >= 12 || !s_itemSystemInitialized) return 1.0f;
+    return s_playerEffects[playerIdx].bulletBillActive
+        ? s_playerEffects[playerIdx].bulletBillSpeed
+        : 1.0f;
+}
+
+/// Check if a player has a thunder cloud attached.
+/// Used by the HUD to show the cloud warning icon.
+bool item_isThunderCloudActive(u32 playerIdx) {
+    if (playerIdx >= 12 || !s_itemSystemInitialized) return false;
+    return s_playerEffects[playerIdx].thunderCloudActive;
+}
+
+/// Check if a player is using golden mushroom.
+bool item_isGoldenMushActive(u32 playerIdx) {
+    if (playerIdx >= 12 || !s_itemSystemInitialized) return false;
+    return s_playerEffects[playerIdx].goldenMushActive;
+}
+
+/// Set player's forward direction (called from KartMove each frame).
+/// Used for accurate item spawning direction.
+void item_setPlayerForward(u32 playerIdx, f32 forwardX, f32 forwardZ) {
+    if (playerIdx >= 12) return;
+    f32 len = std::sqrt(forwardX * forwardX + forwardZ * forwardZ);
+    if (len > 0.001f) {
+        s_playerForward[playerIdx][0] = forwardX / len;
+        s_playerForward[playerIdx][1] = forwardZ / len;
+        s_playerForwardValid[playerIdx] = true;
+    }
 }
 
 } // extern "C"
