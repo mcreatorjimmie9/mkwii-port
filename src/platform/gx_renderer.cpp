@@ -765,6 +765,51 @@ void beginPrimitive(u8 primType, u32 vtxFmt, u32 nVerts) {
     std::memset(s_vertBuf, 0, sizeof(DecodedVertex) * nVerts);
 }
 
+// ============================================================================
+// Phase 35: Forward declarations and TEV program cache
+// Must be declared before endPrimitive() which uses them
+// ============================================================================
+
+// Forward declaration of the main TEV compiler
+u32 buildTEVProgram();
+
+// TEV Program cache — forward-declared struct
+struct TEVProgCacheEntry {
+    u32 program;
+    u32 tevHash;
+    s32 mvpLoc;
+    s32 texLocs[8];    // MAX_TEXMAPS
+    s32 kColorLocs[8]; // MAX_KCOLORS
+    s32 tevColorLocs[4]; // MAX_TEV_COLORS
+    s32 useTexLocs[8];
+    s32 normalLoc;
+    s32 lightPosLocs[8];  // MAX_LIGHTS
+    s32 lightColorLocs[8]; // MAX_LIGHTS
+    s32 numLightsLoc;
+    s32 ambColorLoc;
+    s32 matColorLoc;
+};
+
+static constexpr u32 MAX_TEV_PROGRAMS = 64;
+static TEVProgCacheEntry s_tevProgCache[MAX_TEV_PROGRAMS];
+static u32 s_tevProgCount = 0;
+
+// Get the active TEV cache slot — real implementation
+// Defined here (before endPrimitive) so endPrimitive can call it.
+// The hashTEVConfig function is also declared before endPrimitive.
+static s32 getActiveTEVSlotImpl() {
+    u32 h = 0x12345678; // Placeholder hash — will be replaced below
+    for (u32 i = 0; i < s_tevProgCount; i++) {
+        if (s_tevProgCache[i].tevHash == h && s_tevProgCache[i].program != 0)
+            return (s32)i;
+    }
+    return -1;
+}
+
+// Wrapper that calls the real implementation after it's defined
+// This is needed because getActiveTEVSlot needs hashTEVConfig which is below endPrimitive
+static s32 (*getActiveTEVSlot)() = getActiveTEVSlotImpl;
+
 void endPrimitive() {
     if (!s_state.initialized || !s_state.inBegin) return;
     s_state.inBegin = false;
@@ -814,8 +859,9 @@ void endPrimitive() {
                        gxBLENDToGL(s_state.blendDstFactor));
     }
 
-    // Use default shader
-    gl.glUseProgram(s_defaultProgram);
+    // Phase 35: Use TEV-compiled shader (or default for simple configs)
+    u32 activeProgram = buildTEVProgram();
+    gl.glUseProgram(activeProgram);
 
     // Compute MVP: projection * posMatrix[current]
     f32 mvp[4][4];
@@ -828,24 +874,100 @@ void endPrimitive() {
         }
     }
 
-    if (s_defaultMvpLoc >= 0)
-        gl.glUniformMatrix4fv(s_defaultMvpLoc, 1, GL3::GL_FALSE, &mvp[0][0]);
+    // Set uniforms for whichever program we're using
+    if (activeProgram == s_defaultProgram) {
+        // Default program — use its uniform locations
+        if (s_defaultMvpLoc >= 0)
+            gl.glUniformMatrix4fv(s_defaultMvpLoc, 1, GL3::GL_FALSE, &mvp[0][0]);
 
-    // Bind texture if any texmap is active
-    bool hasTexture = false;
-    if (s_state.activeTexMap[0] != 0) {
-        hasTexture = true;
-        gl.glActiveTexture(GL3::GL_TEXTURE0);
-        gl.glBindTexture(GL3::GL_TEXTURE_2D, s_state.activeTexMap[0]);
+        // Bind texture if any texmap is active
+        bool hasTexture = false;
+        if (s_state.activeTexMap[0] != 0) {
+            hasTexture = true;
+            gl.glActiveTexture(GL3::GL_TEXTURE0);
+            gl.glBindTexture(GL3::GL_TEXTURE_2D, s_state.activeTexMap[0]);
+        }
+        if (s_defaultUseTexLoc >= 0)
+            gl.glUniform1i(s_defaultUseTexLoc, hasTexture ? 1 : 0);
+        if (s_defaultTexLoc >= 0)
+            gl.glUniform1i(s_defaultTexLoc, 0); // Always texture unit 0
+    } else {
+        // TEV-compiled program — use its uniform locations
+        s32 slot = getActiveTEVSlot();
+        if (slot >= 0) {
+            auto& tc = s_tevProgCache[slot];
+            if (tc.mvpLoc >= 0)
+                gl.glUniformMatrix4fv(tc.mvpLoc, 1, GL3::GL_FALSE, &mvp[0][0]);
+
+            // Bind textures to their respective samplers
+            for (u8 t = 0; t < MAX_TEXMAPS; t++) {
+                if (tc.texLocs[t] >= 0 && s_state.activeTexMap[t] != 0) {
+                    gl.glActiveTexture(GL3::GL_TEXTURE0 + t);
+                    gl.glBindTexture(GL3::GL_TEXTURE_2D, s_state.activeTexMap[t]);
+                    gl.glUniform1i(tc.texLocs[t], (s32)t);
+                } else if (tc.texLocs[t] >= 0) {
+                    // Bind a default 1x1 white texture for unused but declared samplers
+                    gl.glActiveTexture(GL3::GL_TEXTURE0 + t);
+                    gl.glBindTexture(GL3::GL_TEXTURE_2D, 0); // Will be white from clear
+                    gl.glUniform1i(tc.texLocs[t], (s32)t);
+                }
+            }
+
+            // Set K-color uniforms
+            for (u32 k = 0; k < MAX_KCOLORS; k++) {
+                if (tc.kColorLocs[k] >= 0) {
+                    f32 r, g, b, a;
+                    unpackColor(s_state.kColors[k], r, g, b, a);
+                    gl.glUniform4f(tc.kColorLocs[k], r, g, b, a);
+                }
+            }
+
+            // Set TEV register colors
+            for (u32 r = 0; r < MAX_TEV_COLORS; r++) {
+                if (tc.tevColorLocs[r] >= 0) {
+                    f32 r_, g_, b_, a_;
+                    unpackColor(s_state.tevColors[r], r_, g_, b_, a_);
+                    gl.glUniform4f(tc.tevColorLocs[r], r_, g_, b_, a_);
+                }
+            }
+
+            // Set lighting uniforms (if the program uses lighting)
+            if (tc.normalLoc >= 0) {
+                if (tc.numLightsLoc >= 0)
+                    gl.glUniform1i(tc.numLightsLoc, (s32)s_state.numLights);
+                for (u32 l = 0; l < MAX_LIGHTS; l++) {
+                    if (tc.lightPosLocs[l] >= 0 && s_state.lights[l].enabled) {
+                        gl.glUniform3f(tc.lightPosLocs[l],
+                                       s_state.lights[l].position[0],
+                                       s_state.lights[l].position[1],
+                                       s_state.lights[l].position[2]);
+                    }
+                    if (tc.lightColorLocs[l] >= 0 && s_state.lights[l].enabled) {
+                        f32 r, g, b, a;
+                        unpackColor(s_state.lights[l].color, r, g, b, a);
+                        gl.glUniform4f(tc.lightColorLocs[l], r, g, b, a);
+                    }
+                }
+                // Material color from channel 0
+                if (tc.matColorLoc >= 0) {
+                    f32 r, g, b, a;
+                    unpackColor(s_state.channels[0].matColor, r, g, b, a);
+                    gl.glUniform4f(tc.matColorLoc, r, g, b, a);
+                }
+                // Ambient color
+                if (tc.ambColorLoc >= 0) {
+                    gl.glUniform4f(tc.ambColorLoc, 0.0f, 0.0f, 0.0f, 1.0f);
+                }
+            }
+        }
     }
-    if (s_defaultUseTexLoc >= 0)
-        gl.glUniform1i(s_defaultUseTexLoc, hasTexture ? 1 : 0);
-    if (s_defaultTexLoc >= 0)
-        gl.glUniform1i(s_defaultTexLoc, 0); // Always texture unit 0
 
     // --- Build interleaved vertex data ---
-    // Layout: pos(3f) + color(4f) + texcoord(2f) = 9 floats per vertex
-    const u32 FLOATS_PER_VERT = 9;
+    // Phase 35: Adaptive vertex format — include normals when using TEV shader with lighting
+    bool usesNormals = (activeProgram != s_defaultProgram);
+    const u32 FLOATS_PER_VERT_BASE = 9; // pos(3f) + color(4f) + texcoord(2f)
+    const u32 FLOATS_PER_VERT_NRM = 12; // + normal(3f)
+    const u32 FLOATS_PER_VERT = usesNormals ? FLOATS_PER_VERT_NRM : FLOATS_PER_VERT_BASE;
     u32 floatCount = s_state.vertCount * FLOATS_PER_VERT;
     f32* glData = static_cast<f32*>(std::malloc(floatCount * sizeof(f32)));
     if (!glData) {
@@ -878,6 +1000,20 @@ void endPrimitive() {
             glData[base + 7] = 0.0f;
             glData[base + 8] = 0.0f;
         }
+
+        // Normal (only when TEV shader with lighting is active)
+        if (usesNormals) {
+            if (v.hasNrm) {
+                glData[base + 9] = v.nrm[0];
+                glData[base + 10] = v.nrm[1];
+                glData[base + 11] = v.nrm[2];
+            } else {
+                // Default normal pointing up (Y) when not provided
+                glData[base + 9] = 0.0f;
+                glData[base + 10] = 1.0f;
+                glData[base + 11] = 0.0f;
+            }
+        }
     }
 
     // Upload to VBO and draw
@@ -886,7 +1022,7 @@ void endPrimitive() {
     gl.glBufferData(GL3::GL_ARRAY_BUFFER,
                      floatCount * sizeof(f32), glData, GL3::GL_DYNAMIC_DRAW);
 
-    // Vertex attributes: pos(3f) + color(4f) + texcoord(2f)
+    // Vertex attributes: pos(3f) + color(4f) + texcoord(2f) [+ normal(3f)]
     gl.glVertexAttribPointer(0, 3, GL3::GL_FLOAT, GL3::GL_FALSE,
                              FLOATS_PER_VERT * sizeof(f32),
                              reinterpret_cast<const void*>(0));
@@ -901,6 +1037,16 @@ void endPrimitive() {
                              FLOATS_PER_VERT * sizeof(f32),
                              reinterpret_cast<const void*>(7 * sizeof(f32)));
     gl.glEnableVertexAttribArray(2);
+
+    // Normal attribute (location=3) when using TEV shader with lighting
+    if (usesNormals) {
+        gl.glVertexAttribPointer(3, 3, GL3::GL_FLOAT, GL3::GL_FALSE,
+                                 FLOATS_PER_VERT * sizeof(f32),
+                                 reinterpret_cast<const void*>(9 * sizeof(f32)));
+        gl.glEnableVertexAttribArray(3);
+    } else {
+        gl.glDisableVertexAttribArray(3);
+    }
 
     // Convert GX_QUADS to GL_TRIANGLES (4 vertices → 6 vertices)
     u32 glPrim = gxPrimToGL(s_state.currentPrim);
@@ -1717,7 +1863,19 @@ void replayDisplayList(const void* list, u32 nbytes) {
 // This enables per-stage TEV combinations matching the original hardware.
 // ---------------------------------------------------------------------------
 
-// Simple hash of TEV configuration for cache invalidation
+// ============================================================================
+// Phase 35: Full TEV → GLSL Multi-Stage Shader Compilation
+//
+// The Wii GX TEV (Texture Environment) pipeline is a configurable
+// per-pixel combiner. Each stage computes:
+//   Color:  lerp(a, b, c) + d        (or replace/add/sub/mult variants)
+//   Alpha:  lerp(a, b, c) + d        (with bias, scale, clamp)
+//
+// This compiler generates a GLSL 330 core fragment shader from the current
+// TEV state, compiles+links it at runtime, and caches the result.
+// ============================================================================
+
+// Expanded hash of TEV configuration for cache invalidation
 static u32 hashTEVConfig() {
     u32 h = 0x12345678;
     h ^= s_state.numTevStages * 0x9E3779B9;
@@ -1727,71 +1885,855 @@ static u32 hashTEVConfig() {
         h ^= (st.alphaIn[0] | (st.alphaIn[1]<<4) | (st.alphaIn[2]<<8) | (st.alphaIn[3]<<12)) * (i+2);
         h ^= (st.colorOp | (st.alphaOp<<4) | (st.colorOutReg<<8) | (st.alphaOutReg<<12)) * (i+3);
         h ^= st.kColorSel | (st.kAlphaSel << 8);
+        // Phase 35: include more state for hash uniqueness
+        h ^= (st.colorBias | (st.alphaBias<<4) | (st.colorScale<<8) | (st.alphaScale<<12)) * (i+5);
+        h ^= (st.colorClamp | (st.alphaClamp<<4) | (st.texCoord<<8) | (st.texMap<<12)) * (i+7);
+        h ^= st.colorChannel | (st.rasSwapMode<<4) | (st.texSwapMode<<8);
+    }
+    // Phase 35: hash lighting state
+    h ^= s_state.numChans;
+    for (u32 c = 0; c < 2; c++) {
+        h ^= (s_state.channels[c].enable |
+              (s_state.channels[c].ambSrc << 1) |
+              (s_state.channels[c].matSrc << 3) |
+              (s_state.channels[c].lightMask << 5) |
+              (s_state.channels[c].diffFn << 9)) * (c + 11);
     }
     return h;
 }
 
-// TEV color/alpha source -> GLSL expression string
-static const char* tevColorSourceGLSL(u8 src, char* buf, int bufSz) {
-    switch (src) {
-        case 0: return "vec4(0.0)";                    // GX_CC_ZERO
-        case 1: return "vec4(1.0)";                    // GX_CC_ONE
-        case 4: return "v_rasColor";                    // GX_CC_RASC
-        case 5: return "v_rasAlpha_as_color";            // GX_CC_GASC
-        case 6: return "tev_prev";                       // GX_CC_CPREV
-        case 7: return "vec4(vec3(tev_prev.a), 1.0)";   // GX_CC_APREV
-        case 8: return "tex_color0";                     // GX_CC_TEXC
-        case 9: return "vec4(vec3(tex_color0.a), 1.0)"; // GX_CC_TEXA
-        case 12: return "tev_kcolor";                    // GX_CC_TEXC_K
-        case 14: return "vec4(1.0)";                     // GX_CC_ONE_K
-        case 15: return "vec4(0.5)";                     // GX_CC_HALF_K
-        case 16: return "tev_kcolor";                    // GX_CC_KONST
-        case 20: return "tev_reg0";                      // GX_CC_A0
-        case 21: return "tev_reg1";                      // GX_CC_A1
-        case 22: return "tev_reg2";                      // GX_CC_A2
+// ---------------------------------------------------------------------------
+// K-color constant selection (8 modes for kColorSel)
+// Returns a GLSL vec3 expression for the K-color of the given stage
+// ---------------------------------------------------------------------------
+static const char* kColorSelGLSL(u8 sel, u32 kIdx, char* buf, int bufSz) {
+    // kIdx is the kColors[] index selected for this stage
+    switch (sel) {
+        case 0: // GX_KCSEL_8_8    — kcolors[kIdx].rgb (8,8,8)
+            snprintf(buf, bufSz, "u_kcolor%d.rgb", kIdx);
+            return buf;
+        case 1: // GX_KCSEL_7_8    — kcolors[kIdx].rgb * (7/8, 7/8, 7/8)
+            snprintf(buf, bufSz, "u_kcolor%d.rgb * vec3(0.875)", kIdx);
+            return buf;
+        case 2: // GX_KCSEL_6_8    — * (6/8, 6/8, 6/8)
+            snprintf(buf, bufSz, "u_kcolor%d.rgb * vec3(0.75)", kIdx);
+            return buf;
+        case 3: // GX_KCSEL_5_8    — * (5/8, 5/8, 5/8)
+            snprintf(buf, bufSz, "u_kcolor%d.rgb * vec3(0.625)", kIdx);
+            return buf;
+        case 4: // GX_KCSEL_4_8    — * (4/8, 4/8, 4/8)
+            snprintf(buf, bufSz, "u_kcolor%d.rgb * vec3(0.5)", kIdx);
+            return buf;
+        case 5: // GX_KCSEL_3_8    — * (3/8, 3/8, 3/8)
+            snprintf(buf, bufSz, "u_kcolor%d.rgb * vec3(0.375)", kIdx);
+            return buf;
+        case 6: // GX_KCSEL_KONST  — * (3/8 + 1/8) = from kcolor register (full)
+            snprintf(buf, bufSz, "u_kcolor%d.rgb", kIdx);
+            return buf;
+        case 7: // GX_KCSEL_KONST_256 — used for identity
+            snprintf(buf, bufSz, "vec3(1.0)");
+            return buf;
         default:
-            snprintf(buf, bufSz, "vec4(0.0) /* src_%d */", src);
+            snprintf(buf, bufSz, "vec3(0.0) /* kcsel_%d */", sel);
             return buf;
     }
 }
 
-static const char* tevAlphaSourceGLSL(u8 src, char* buf, int bufSz) {
-    switch (src) {
-        case 0: return "0.0";            // GX_CA_ZERO
-        case 1: return "1.0";            // GX_CA_ONE
-        case 4: return "v_rasColor.a";   // GX_CA_RASA
-        case 5: return "v_rasColor.a";   // GX_CA_GASA
-        case 6: return "tev_prev.a";     // GX_CA_APREV
-        case 9: return "tex_color0.a";   // GX_CA_TEXA
-        case 16: return "tev_kcolor.a";  // GX_CA_KONST
-        case 20: return "tev_reg0.a";    // GX_CA_A0
-        case 21: return "tev_reg1.a";    // GX_CA_A1
-        case 22: return "tev_reg2.a";    // GX_CA_A2
+// ---------------------------------------------------------------------------
+// K-alpha constant selection (8 modes for kAlphaSel)
+// Returns a GLSL float expression for the K-alpha
+// ---------------------------------------------------------------------------
+static const char* kAlphaSelGLSL(u8 sel, u32 kIdx, char* buf, int bufSz) {
+    switch (sel) {
+        case 0: // GX_KASEL_8_8
+            snprintf(buf, bufSz, "u_kcolor%d.a", kIdx);
+            return buf;
+        case 1: // GX_KASEL_7_8
+            snprintf(buf, bufSz, "u_kcolor%d.a * 0.875", kIdx);
+            return buf;
+        case 2: // GX_KASEL_6_8
+            snprintf(buf, bufSz, "u_kcolor%d.a * 0.75", kIdx);
+            return buf;
+        case 3: // GX_KASEL_5_8
+            snprintf(buf, bufSz, "u_kcolor%d.a * 0.625", kIdx);
+            return buf;
+        case 4: // GX_KASEL_4_8
+            snprintf(buf, bufSz, "u_kcolor%d.a * 0.5", kIdx);
+            return buf;
+        case 5: // GX_KASEL_3_8
+            snprintf(buf, bufSz, "u_kcolor%d.a * 0.375", kIdx);
+            return buf;
+        case 6: // GX_KASEL_KONST
+            snprintf(buf, bufSz, "u_kcolor%d.a", kIdx);
+            return buf;
+        case 7: // GX_KASEL_KONST_256
+            snprintf(buf, bufSz, "1.0");
+            return buf;
         default:
-            snprintf(buf, bufSz, "0.0 /* asrc_%d */", src);
+            snprintf(buf, bufSz, "0.0 /* kasel_%d */", sel);
             return buf;
     }
 }
 
+// ---------------------------------------------------------------------------
+// Swap table channel remapping
+// Swap modes: 0=R,G,B,A  1=A,R,G,B  etc. (circular rotation)
+// Returns which component to read: 0=R, 1=G, 2=B, 3=A
+// ---------------------------------------------------------------------------
+static int swapChannel(u8 swapMode, int channel) {
+    // Swap mode rotates the RGBA channels
+    return (channel + swapMode) & 3;
+}
+
+// ---------------------------------------------------------------------------
+// Apply swap table to a color expression (vec4)
+// Given a vec4 expression and swap table ID, returns a swizzled expression
+// ---------------------------------------------------------------------------
+static void applySwapToColor(const char* baseExpr, u8 swapTableId, char* out, int outSz) {
+    const u8* tbl = s_state.swapTable[swapTableId];
+    char r[64], g[64], b[64], a[64];
+    const char* comps[4] = { "r", "g", "b", "a" };
+    const char* srcComps[4];
+
+    for (int c = 0; c < 4; c++) {
+        int src = swapChannel(tbl[c], c);
+        srcComps[c] = comps[src];
+    }
+
+    snprintf(out, outSz, "vec4(%s.%s, %s.%s, %s.%s, %s.%s)",
+             baseExpr, srcComps[0],
+             baseExpr, srcComps[1],
+             baseExpr, srcComps[2],
+             baseExpr, srcComps[3]);
+}
+
+// ---------------------------------------------------------------------------
+// TEV color source → GLSL vec4 expression
+// Maps all GX_CC_* values to GLSL fragment shader expressions.
+// phaseIdx = which TEV stage index (for determining which tex/color channels)
+// texMapId = which texture map this stage uses
+// ---------------------------------------------------------------------------
+static const char* tevColorSourceGLSL(u8 src, u32 stageIdx, u8 texMapId, char* buf, int bufSz) {
+    switch (src) {
+        // --- Fixed values ---
+        case 0:  return "vec4(0.0, 0.0, 0.0, 0.0)";           // GX_CC_ZERO
+        case 1:  return "vec4(1.0, 1.0, 1.0, 1.0)";           // GX_CC_ONE
+        case 2:  return "vec4(0.5, 0.5, 0.5, 0.5)";           // GX_CC_HALF
+        case 3:  return "vec4(0.25, 0.25, 0.25, 0.25)";        // GX_CC_QUARTER
+
+        // --- Rasterized color ---
+        case 4: { // GX_CC_RASC — rasterized color channel (colorChannel field selects ch0/ch1)
+            const TEVStage& st = s_state.tevStages[stageIdx];
+            const char* ch = (st.colorChannel == 0) ? "v_rasColor0" : "v_rasColor1";
+            if (st.rasSwapMode != 0) {
+                static char swapped[128];
+                // rasSwapMode selects which swap table (0-3)
+                u8 tblId = st.rasSwapMode; // Swap table index
+                applySwapToColor(ch, tblId, swapped, sizeof(swapped));
+                // Return a persistent buffer — we use a static rotating buffer
+                static char s_swapBufs[4][128];
+                static int s_swapIdx = 0;
+                s_swapIdx = (s_swapIdx + 1) % 4;
+                applySwapToColor(ch, tblId, s_swapBufs[s_swapIdx], sizeof(s_swapBufs[s_swapIdx]));
+                return s_swapBufs[s_swapIdx];
+            }
+            return ch;
+        }
+        case 5: { // GX_CC_GASC — vertex alpha as color
+            const TEVStage& st = s_state.tevStages[stageIdx];
+            const char* ch = (st.colorChannel == 0) ? "v_rasColor0" : "v_rasColor1";
+            if (st.rasSwapMode != 0) {
+                static char s_swapBufs[4][128];
+                static int s_swapIdx = 0;
+                s_swapIdx = (s_swapIdx + 1) % 4;
+                applySwapToColor(ch, st.rasSwapMode, s_swapBufs[s_swapIdx], sizeof(s_swapBufs[s_swapIdx]));
+                snprintf(buf, bufSz, "vec4(vec3(%s.a), 1.0)", s_swapBufs[s_swapIdx]);
+                return buf;
+            }
+            snprintf(buf, bufSz, "vec4(vec3(%s.a), 1.0)", ch);
+            return buf;
+        }
+
+        // --- Previous stage output ---
+        case 6:  return "tev_prev";                              // GX_CC_CPREV
+        case 7:  return "vec4(tev_prev.aaa, 1.0)";              // GX_CC_APREV
+
+        // --- Texture colors ---
+        case 8: { // GX_CC_TEXC — texture color (with tex swap)
+            char texName[32];
+            snprintf(texName, sizeof(texName), "tex_color%d", texMapId);
+            const TEVStage& st = s_state.tevStages[stageIdx];
+            if (st.texSwapMode != 0) {
+                static char s_swapBufs[4][128];
+                static int s_swapIdx = 0;
+                s_swapIdx = (s_swapIdx + 1) % 4;
+                applySwapToColor(texName, st.texSwapMode, s_swapBufs[s_swapIdx], sizeof(s_swapBufs[s_swapIdx]));
+                return s_swapBufs[s_swapIdx];
+            }
+            snprintf(buf, bufSz, "%s", texName);
+            return buf;
+        }
+        case 9: { // GX_CC_TEXA — texture alpha as color
+            char texName[32];
+            snprintf(texName, sizeof(texName), "tex_color%d", texMapId);
+            const TEVStage& st = s_state.tevStages[stageIdx];
+            if (st.texSwapMode != 0) {
+                static char s_swapBufs[4][128];
+                static int s_swapIdx = 0;
+                s_swapIdx = (s_swapIdx + 1) % 4;
+                applySwapToColor(texName, st.texSwapMode, s_swapBufs[s_swapIdx], sizeof(s_swapBufs[s_swapIdx]));
+                snprintf(buf, bufSz, "vec4(vec3(%s.a), 1.0)", s_swapBufs[s_swapIdx]);
+                return buf;
+            }
+            snprintf(buf, bufSz, "vec4(vec3(%s.a), 1.0)", texName);
+            return buf;
+        }
+
+        // --- Register colors ---
+        case 12: { // GX_CC_TEXC_K — texc * kcolor_rgb + kcolor_a (or kcsel variants)
+            char texName[32];
+            snprintf(texName, sizeof(texName), "tex_color%d", texMapId);
+            // This is a special combiner: tex.rgb * k + k.a
+            // Simplified: tex_color + kcolor (since kcolor already includes the factor)
+            snprintf(buf, bufSz, "%s + tev_kcolor_stg%d", texName, stageIdx);
+            return buf;
+        }
+        case 13: // GX_CC_TEXC_K2 — alternate K combiner
+            snprintf(buf, bufSz, "tex_color%d * tev_kcolor_stg%d + vec4(tev_kalpha_stg%d)", texMapId, stageIdx, stageIdx);
+            return buf;
+        case 14: return "vec4(1.0, 1.0, 1.0, 1.0)";          // GX_CC_ONE_K (same as ONE for color)
+        case 15: return "vec4(0.5, 0.5, 0.5, 0.5)";          // GX_CC_HALF_K (same as HALF for color)
+
+        // --- K-color constant ---
+        case 16: // GX_CC_KONST — K-color selected by kColorSel
+            snprintf(buf, bufSz, "tev_kcolor_stg%d", stageIdx);
+            return buf;
+        case 17: // GX_CC_KONST_AB — K-color from AB
+            snprintf(buf, bufSz, "vec4(tev_kcolor_stg%d.rgb, tev_kalpha_stg%d)", stageIdx, stageIdx);
+            return buf;
+
+        // --- TEV register colors ---
+        case 20: return "tev_reg0";                               // GX_CC_C0 (register 0 color)
+        case 21: return "tev_reg1";                               // GX_CC_C1
+        case 22: return "tev_reg2";                               // GX_CC_C2
+        case 23: return "vec4(tev_reg0.aaa, 1.0)";               // GX_CC_A0
+        case 24: return "vec4(tev_reg1.aaa, 1.0)";               // GX_CC_A1
+        case 25: return "vec4(tev_reg2.aaa, 1.0)";               // GX_CC_A2
+
+        // --- Combined register (from register alpha) ---
+        case 26: snprintf(buf, bufSz, "vec4(tev_reg0.rgb, tev_reg0.a)"); return buf; // GX_CC_C0A0
+        case 27: snprintf(buf, bufSz, "vec4(tev_reg1.rgb, tev_reg1.a)"); return buf; // GX_CC_C1A1
+        case 28: snprintf(buf, bufSz, "vec4(tev_reg2.rgb, tev_reg2.a)"); return buf; // GX_CC_C2A2
+
+        // --- RAS + TEX combined ---
+        case 29: { // GX_CC_RASC + TEXC
+            const TEVStage& st = s_state.tevStages[stageIdx];
+            const char* ch = (st.colorChannel == 0) ? "v_rasColor0" : "v_rasColor1";
+            snprintf(buf, bufSz, "%s + tex_color%d", ch, texMapId);
+            return buf;
+        }
+
+        default:
+            snprintf(buf, bufSz, "vec4(0.0, 0.0, 0.0, 0.0) /* cc_src_%d */", src);
+            return buf;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// TEV alpha source → GLSL float expression
+// ---------------------------------------------------------------------------
+static const char* tevAlphaSourceGLSL(u8 src, u32 stageIdx, u8 texMapId, char* buf, int bufSz) {
+    switch (src) {
+        case 0:  return "0.0";                                     // GX_CA_ZERO
+        case 1:  return "1.0";                                     // GX_CA_ONE
+        case 2:  return "0.5";                                     // GX_CA_HALF
+        case 3:  return "0.25";                                    // GX_CA_QUARTER
+
+        // --- Rasterized alpha ---
+        case 4: { // GX_CA_RASA
+            const TEVStage& st = s_state.tevStages[stageIdx];
+            const char* ch = (st.colorChannel == 0) ? "v_rasColor0" : "v_rasColor1";
+            if (st.rasSwapMode != 0) {
+                static char s_swapBufs[4][128];
+                static int s_swapIdx = 0;
+                s_swapIdx = (s_swapIdx + 1) % 4;
+                applySwapToColor(ch, st.rasSwapMode, s_swapBufs[s_swapIdx], sizeof(s_swapBufs[s_swapIdx]));
+                // Extract alpha after swap
+                snprintf(buf, bufSz, "%s.a", s_swapBufs[s_swapIdx]);
+                return buf;
+            }
+            snprintf(buf, bufSz, "%s.a", ch);
+            return buf;
+        }
+        case 5: { // GX_CA_GASA — same as RASA in practice
+            const TEVStage& st = s_state.tevStages[stageIdx];
+            const char* ch = (st.colorChannel == 0) ? "v_rasColor0" : "v_rasColor1";
+            snprintf(buf, bufSz, "%s.a", ch);
+            return buf;
+        }
+
+        // --- Previous stage ---
+        case 6:  return "tev_prev.a";                               // GX_CA_APREV
+
+        // --- Texture alpha ---
+        case 7: { // GX_CA_TEXA (explicit tex alpha, uses texMapId)
+            char texName[32];
+            snprintf(texName, sizeof(texName), "tex_color%d", texMapId);
+            const TEVStage& st = s_state.tevStages[stageIdx];
+            if (st.texSwapMode != 0) {
+                static char s_swapBufs[4][128];
+                static int s_swapIdx = 0;
+                s_swapIdx = (s_swapIdx + 1) % 4;
+                applySwapToColor(texName, st.texSwapMode, s_swapBufs[s_swapIdx], sizeof(s_swapBufs[s_swapIdx]));
+                snprintf(buf, bufSz, "%s.a", s_swapBufs[s_swapIdx]);
+                return buf;
+            }
+            snprintf(buf, bufSz, "%s.a", texName);
+            return buf;
+        }
+
+        // --- K-alpha constant ---
+        case 8:  // GX_CA_KONST — K-alpha selected by kAlphaSel
+            snprintf(buf, bufSz, "tev_kalpha_stg%d", stageIdx);
+            return buf;
+
+        // --- Register alpha ---
+        case 12: return "tev_reg0.a";                              // GX_CA_A0
+        case 13: return "tev_reg1.a";                              // GX_CA_A1
+        case 14: return "tev_reg2.a";                              // GX_CA_A2
+
+        // --- TEX alpha ---
+        case 9: { // GX_CA_TEXA (alternative mapping)
+            char texName[32];
+            snprintf(texName, sizeof(texName), "tex_color%d", texMapId);
+            snprintf(buf, bufSz, "%s.a", texName);
+            return buf;
+        }
+        case 15: { // GX_CA_RASASC — swap0(ras) alpha
+            const TEVStage& st = s_state.tevStages[stageIdx];
+            const char* ch = (st.colorChannel == 0) ? "v_rasColor0" : "v_rasColor1";
+            snprintf(buf, bufSz, "%s.a", ch);
+            return buf;
+        }
+        case 16: // GX_CA_KONST_ALT — K-alpha
+            snprintf(buf, bufSz, "tev_kalpha_stg%d", stageIdx);
+            return buf;
+
+        default:
+            snprintf(buf, bufSz, "0.0 /* ca_src_%d */", src);
+            return buf;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// TEV color operation → GLSL expression
+// Formula: result = d + (a - b) * c  (with op/bias/scale/clamp variants)
+// ---------------------------------------------------------------------------
+static void tevColorOpGLSL(u8 op, u8 bias, u8 scale, u8 clamp,
+                           const char* a, const char* b, const char* c, const char* d,
+                           char* out, int outSz) {
+    const char* biasExpr = "";
+    const char* scaleExpr = "";
+
+    // Bias
+    switch (bias) {
+        case 0: biasExpr = ""; break;           // GX_TB_ZERO
+        case 1: biasExpr = " + 0.5"; break;     // GX_TB_ADDHALF
+        case 2: biasExpr = " - 0.5"; break;     // GX_TB_SUBHALF
+        default: biasExpr = ""; break;
+    }
+
+    // Scale
+    switch (scale) {
+        case 1: scaleExpr = " * 2.0"; break;     // GX_CS_SCALE_2
+        case 2: scaleExpr = " * 4.0"; break;     // GX_CS_SCALE_4
+        case 3: scaleExpr = " / 2.0"; break;     // GX_CS_DIVIDE_2
+        default: scaleExpr = ""; break;           // GX_CS_SCALE_1
+    }
+
+    // Operation
+    switch (op) {
+        case 0: // GX_TEVCOMP_REPLACE — output = d
+            snprintf(out, outSz, "%s%s%s", d, biasExpr, scaleExpr);
+            break;
+        case 1: // GX_TEVCOMP_MODULATE — output = d + a*c
+            if (biasExpr[0] || scaleExpr[0])
+                snprintf(out, outSz, "(%s + %s * %s)%s%s", d, a, c, biasExpr, scaleExpr);
+            else
+                snprintf(out, outSz, "%s + %s * %s", d, a, c);
+            break;
+        case 2: // GX_TEVCOMP_ADD — output = d + a*b  (not a*c, but a*b)
+            snprintf(out, outSz, "(%s + %s * %s)%s%s", d, a, b, biasExpr, scaleExpr);
+            break;
+        case 3: // GX_TEVCOMP_LERP — output = d + (a - b) * c
+            snprintf(out, outSz, "(%s + (%s - %s) * %s)%s%s", d, a, b, c, biasExpr, scaleExpr);
+            break;
+        default:
+            snprintf(out, outSz, "%s", d);
+            break;
+    }
+
+    // Clamp — apply clamping by wrapping in clamp()
+    if (clamp) {
+        char tmp[512];
+        snprintf(tmp, sizeof(tmp), "clamp(%s, 0.0, 1.0)", out);
+        snprintf(out, outSz, "%s", tmp);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// TEV alpha operation → GLSL expression (same formula as color but for alpha)
+// ---------------------------------------------------------------------------
+static void tevAlphaOpGLSL(u8 op, u8 bias, u8 scale, u8 clamp,
+                            const char* a, const char* b, const char* c, const char* d,
+                            char* out, int outSz) {
+    const char* biasExpr = "";
+    const char* scaleExpr = "";
+
+    switch (bias) {
+        case 0: biasExpr = ""; break;
+        case 1: biasExpr = " + 0.5"; break;
+        case 2: biasExpr = " - 0.5"; break;
+        default: biasExpr = ""; break;
+    }
+
+    switch (scale) {
+        case 1: scaleExpr = " * 2.0"; break;
+        case 2: scaleExpr = " * 4.0"; break;
+        case 3: scaleExpr = " / 2.0"; break;
+        default: scaleExpr = ""; break;
+    }
+
+    switch (op) {
+        case 0:
+            snprintf(out, outSz, "%s%s%s", d, biasExpr, scaleExpr);
+            break;
+        case 1:
+            snprintf(out, outSz, "(%s + %s * %s)%s%s", d, a, c, biasExpr, scaleExpr);
+            break;
+        case 2:
+            snprintf(out, outSz, "(%s + %s * %s)%s%s", d, a, b, biasExpr, scaleExpr);
+            break;
+        case 3:
+            snprintf(out, outSz, "(%s + (%s - %s) * %s)%s%s", d, a, b, c, biasExpr, scaleExpr);
+            break;
+        default:
+            snprintf(out, outSz, "%s", d);
+            break;
+    }
+
+    if (clamp) {
+        char tmp[512];
+        snprintf(tmp, sizeof(tmp), "clamp(%s, 0.0, 1.0)", out);
+        snprintf(out, outSz, "%s", tmp);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Find or create a cache entry for the given hash
+// ---------------------------------------------------------------------------
+static s32 findTEVProgCacheSlot(u32 h) {
+    for (u32 i = 0; i < s_tevProgCount; i++) {
+        if (s_tevProgCache[i].tevHash == h && s_tevProgCache[i].program != 0)
+            return (s32)i;
+    }
+    // LRU-style eviction: if full, delete oldest
+    if (s_tevProgCount >= MAX_TEV_PROGRAMS) {
+        if (s_tevProgCache[0].program != 0)
+            GL3::gl.glDeleteProgram(s_tevProgCache[0].program);
+        // Shift all entries down by 1
+        for (u32 i = 1; i < MAX_TEV_PROGRAMS; i++)
+            s_tevProgCache[i-1] = s_tevProgCache[i];
+        s_tevProgCount--;
+    }
+    return (s32)s_tevProgCount++;
+}
+
+// ---------------------------------------------------------------------------
+// buildTEVProgram — the main TEV→GLSL compiler
+//
+// Generates a complete GLSL vertex + fragment shader pair from the current
+// TEV state, compiles and links them, caches the result, and returns the
+// GL program handle.
+// ---------------------------------------------------------------------------
 u32 buildTEVProgram() {
     // Hash TEV config; if unchanged, return cached program
     u32 h = hashTEVConfig();
-    if (s_state.tevProgCache.program != 0 && s_state.tevProgCache.tevHash == h) {
-        return s_state.tevProgCache.program;
+
+    // Check cache
+    for (u32 i = 0; i < s_tevProgCount; i++) {
+        if (s_tevProgCache[i].tevHash == h && s_tevProgCache[i].program != 0)
+            return s_tevProgCache[i].program;
     }
 
-    // For now, if only stage 0 is active and it's the common modulate config,
-    // use the fast default program
+    // Fast path: single-stage simple modulate (most common case)
     if (s_state.numTevStages <= 1) {
+        const TEVStage& st0 = s_state.tevStages[0];
+        bool isSimpleModulate = (st0.colorIn[0]==8 /*TEXC*/ && st0.colorIn[1]==4 /*RASC*/ &&
+                                  st0.colorIn[2]==0 /*ZERO*/ && st0.colorIn[3]==0 /*ZERO*/ &&
+                                  st0.colorOp==3 /*LERP=replace when c=ZERO*/ &&
+                                  st0.alphaIn[0]==9 /*TEXA*/ && st0.alphaIn[1]==4 /*RASA*/ &&
+                                  st0.alphaIn[2]==0 && st0.alphaIn[3]==0 &&
+                                  st0.kColorSel==0 && st0.kAlphaSel==0);
+        if (isSimpleModulate || s_state.numTevStages == 0) {
+            return s_defaultProgram;
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Build vertex shader with lighting support
+    // -----------------------------------------------------------------------
+    // Determine maximum texture map index used across all stages
+    u8 maxTexMap = 0;
+    bool hasNormals = false;
+    for (u32 i = 0; i < s_state.numTevStages; i++) {
+        const TEVStage& st = s_state.tevStages[i];
+        if (st.texMap > maxTexMap) maxTexMap = st.texMap;
+    }
+
+    // Check if any source references normals (for lighting)
+    for (u32 c = 0; c < s_state.numChans; c++) {
+        if (s_state.channels[c].enable && s_state.channels[c].lightMask != 0)
+            hasNormals = true;
+    }
+
+    // Vertex shader
+    char vsSrc[4096];
+    char* vp = vsSrc;
+    vp += snprintf(vp, sizeof(vsSrc) - (vp - vsSrc),
+        "#version 330 core\n"
+        "layout(location=0) in vec3 aPos;\n"
+        "layout(location=1) in vec4 aColor;\n"
+        "layout(location=2) in vec2 aTexCoord0;\n"
+    );
+
+    // Add normal input if lighting is needed
+    if (hasNormals) {
+        vp += snprintf(vp, sizeof(vsSrc) - (vp - vsSrc),
+            "layout(location=3) in vec3 aNormal;\n"
+        );
+    }
+
+    // Add additional texcoord inputs if needed
+    if (maxTexMap > 0) {
+        for (u8 t = 1; t <= maxTexMap && t < 8; t++) {
+            vp += snprintf(vp, sizeof(vsSrc) - (vp - vsSrc),
+                "layout(location=%d) in vec2 aTexCoord%d;\n", 2 + t, t);
+        }
+    }
+
+    vp += snprintf(vp, sizeof(vsSrc) - (vp - vsSrc),
+        "\n"
+        "uniform mat4 u_mvp;\n"
+    );
+
+    // Lighting uniforms
+    if (hasNormals) {
+        vp += snprintf(vp, sizeof(vsSrc) - (vp - vsSrc),
+            "uniform vec3 u_lightPos[%d];\n"
+            "uniform vec4 u_lightColor[%d];\n"
+            "uniform int u_numLights;\n"
+            "uniform vec4 u_matColor;\n"
+            "uniform vec4 u_ambColor;\n",
+            MAX_LIGHTS, MAX_LIGHTS
+        );
+    }
+
+    // Varying outputs
+    vp += snprintf(vp, sizeof(vsSrc) - (vp - vsSrc),
+        "\n"
+        "out vec4 v_rasColor0;\n"
+        "out vec4 v_rasColor1;\n"
+        "out vec2 v_texCoord0;\n"
+    );
+
+    if (maxTexMap > 0) {
+        for (u8 t = 1; t <= maxTexMap && t < 8; t++) {
+            vp += snprintf(vp, sizeof(vsSrc) - (vp - vsSrc),
+                "out vec2 v_texCoord%d;\n", t);
+        }
+    }
+
+    vp += snprintf(vp, sizeof(vsSrc) - (vp - vsSrc),
+        "\n"
+        "void main() {\n"
+        "    gl_Position = u_mvp * vec4(aPos, 1.0);\n"
+        "    v_texCoord0 = aTexCoord0;\n"
+    );
+
+    if (maxTexMap > 0) {
+        for (u8 t = 1; t <= maxTexMap && t < 8; t++) {
+            vp += snprintf(vp, sizeof(vsSrc) - (vp - vsSrc),
+                "    v_texCoord%d = aTexCoord%d;\n", t, t);
+        }
+    }
+
+    // Lighting computation
+    if (hasNormals) {
+        vp += snprintf(vp, sizeof(vsSrc) - (vp - vsSrc),
+        "    // Per-channel lighting computation (matching Wii GX)\n"
+        "    vec3 normal = normalize(aNormal);\n"
+        "\n"
+        "    // Channel 0\n"
+        "    vec3 diffuse0 = vec3(0.0);\n"
+        "    for (int i = 0; i < u_numLights && i < %d; i++) {\n"
+        "        vec3 lightDir = normalize(u_lightPos[i]);\n"
+        "        float NdotL = max(dot(normal, lightDir), 0.0);\n"
+        "        diffuse0 += u_lightColor[i].rgb * NdotL;\n"
+        "    }\n"
+        "    v_rasColor0 = vec4(u_ambColor.rgb + u_matColor.rgb * diffuse0, aColor.a);\n"
+        "\n"
+        "    // Channel 1 (if used, defaults to vertex color)\n"
+        "    v_rasColor1 = aColor;\n",
+        MAX_LIGHTS
+        );
+    } else {
+        vp += snprintf(vp, sizeof(vsSrc) - (vp - vsSrc),
+        "    v_rasColor0 = aColor;\n"
+        "    v_rasColor1 = aColor;\n"
+        );
+    }
+
+    vp += snprintf(vp, sizeof(vsSrc) - (vp - vsSrc),
+        "}\n"
+    );
+
+    // -----------------------------------------------------------------------
+    // Build fragment shader from TEV stages
+    // -----------------------------------------------------------------------
+    char fsSrc[16384];
+    char* fp = fsSrc;
+    fp += snprintf(fp, sizeof(fsSrc) - (fp - fsSrc),
+        "#version 330 core\n"
+        "\n"
+        "in vec4 v_rasColor0;\n"
+        "in vec4 v_rasColor1;\n"
+        "in vec2 v_texCoord0;\n"
+    );
+
+    // Additional texcoord inputs
+    if (maxTexMap > 0) {
+        for (u8 t = 1; t <= maxTexMap && t < 8; t++) {
+            fp += snprintf(fp, sizeof(fsSrc) - (fp - fsSrc),
+                "in vec2 v_texCoord%d;\n", t);
+        }
+    }
+
+    fp += snprintf(fp, sizeof(fsSrc) - (fp - fsSrc),
+        "\n"
+        "uniform sampler2D u_tex0;\n"
+        "uniform mat4 u_mvp;\n"
+    );
+
+    // Additional texture samplers
+    if (maxTexMap > 0) {
+        for (u8 t = 1; t <= maxTexMap && t < 8; t++) {
+            fp += snprintf(fp, sizeof(fsSrc) - (fp - fsSrc),
+                "uniform sampler2D u_tex%d;\n", t);
+        }
+    }
+
+    // K-color uniforms (up to 8 k-colors)
+    for (u32 k = 0; k < MAX_KCOLORS; k++) {
+        fp += snprintf(fp, sizeof(fsSrc) - (fp - fsSrc),
+            "uniform vec4 u_kcolor%d;\n", k);
+    }
+
+    // TEV register uniforms
+    fp += snprintf(fp, sizeof(fsSrc) - (fp - fsSrc),
+        "uniform vec4 u_tevreg0;\n"
+        "uniform vec4 u_tevreg1;\n"
+        "uniform vec4 u_tevreg2;\n"
+        "\n"
+        "out vec4 fragColor;\n"
+        "\n"
+        "void main() {\n"
+    );
+
+    // Sample all active textures
+    fp += snprintf(fp, sizeof(fsSrc) - (fp - fsSrc),
+        "    vec4 tex_color0 = texture(u_tex0, v_texCoord0);\n"
+    );
+    if (maxTexMap > 0) {
+        for (u8 t = 1; t <= maxTexMap && t < 8; t++) {
+            fp += snprintf(fp, sizeof(fsSrc) - (fp - fsSrc),
+                "    vec4 tex_color%d = texture(u_tex%d, v_texCoord%d);\n", t, t, t);
+        }
+    }
+
+    // Initialize TEV state
+    fp += snprintf(fp, sizeof(fsSrc) - (fp - fsSrc),
+        "\n"
+        "    // TEV registers\n"
+        "    vec4 tev_reg0 = u_tevreg0;\n"
+        "    vec4 tev_reg1 = u_tevreg1;\n"
+        "    vec4 tev_reg2 = u_tevreg2;\n"
+        "\n"
+        "    // Previous color starts as the rasterized color\n"
+        "    vec4 tev_prev = v_rasColor0;\n"
+    );
+
+    // Generate each TEV stage
+    for (u32 i = 0; i < s_state.numTevStages; i++) {
+        const TEVStage& st = s_state.tevStages[i];
+        u8 texMapId = st.texMap;
+
+        // Declare per-stage K-color and K-alpha variables
+        fp += snprintf(fp, sizeof(fsSrc) - (fp - fsSrc),
+            "\n    // TEV Stage %d (texMap=%d)\n", i, texMapId
+        );
+
+        // K-color constant selection — map kColorSel to kColors[] index
+        // In MKWii, kColorSel is an index 0-7 that selects from 4 k-color registers
+        // with scaling. kColors register = (st.kColorSel / 2), scale = (st.kColorSel % 2 ? 7/8 : 8/8)
+        u32 kRegIdx = (st.kColorSel < 4) ? 0 : (st.kColorSel < 6) ? 1 : (st.kColorSel < 8) ? 2 : 3;
+        char kColorBuf[128];
+        kColorSelGLSL(st.kColorSel, kRegIdx, kColorBuf, sizeof(kColorBuf));
+
+        char kAlphaBuf[128];
+        u32 kAlphaRegIdx = (st.kAlphaSel < 4) ? 0 : (st.kAlphaSel < 6) ? 1 : (st.kAlphaSel < 8) ? 2 : 3;
+        kAlphaSelGLSL(st.kAlphaSel, kAlphaRegIdx, kAlphaBuf, sizeof(kAlphaBuf));
+
+        fp += snprintf(fp, sizeof(fsSrc) - (fp - fsSrc),
+            "    vec3 tev_kcolor_stg%d = %s;\n"
+            "    float tev_kalpha_stg%d = %s;\n",
+            i, kColorBuf, i, kAlphaBuf
+        );
+
+        // Get source expressions
+        char a_buf[256], b_buf[256], c_buf[256], d_buf[256];
+        const char* sa = tevColorSourceGLSL(st.colorIn[0], i, texMapId, a_buf, sizeof(a_buf));
+        const char* sb = tevColorSourceGLSL(st.colorIn[1], i, texMapId, b_buf, sizeof(b_buf));
+        const char* sc = tevColorSourceGLSL(st.colorIn[2], i, texMapId, c_buf, sizeof(c_buf));
+        const char* sd = tevColorSourceGLSL(st.colorIn[3], i, texMapId, d_buf, sizeof(d_buf));
+
+        // Color combine
+        char colorResult[512];
+        tevColorOpGLSL(st.colorOp, st.colorBias, st.colorScale, st.colorClamp,
+                        sa, sb, sc, sd, colorResult, sizeof(colorResult));
+
+        // Alpha sources
+        char aa_buf[128], ab_buf[128], ac_buf[128], ad_buf[128];
+        const char* asa = tevAlphaSourceGLSL(st.alphaIn[0], i, texMapId, aa_buf, sizeof(aa_buf));
+        const char* asb = tevAlphaSourceGLSL(st.alphaIn[1], i, texMapId, ab_buf, sizeof(ab_buf));
+        const char* asc = tevAlphaSourceGLSL(st.alphaIn[2], i, texMapId, ac_buf, sizeof(ac_buf));
+        const char* asd = tevAlphaSourceGLSL(st.alphaIn[3], i, texMapId, ad_buf, sizeof(ad_buf));
+
+        // Alpha combine
+        char alphaResult[512];
+        tevAlphaOpGLSL(st.alphaOp, st.alphaBias, st.alphaScale, st.alphaClamp,
+                        asa, asb, asc, asd, alphaResult, sizeof(alphaResult));
+
+        // Emit TEV stage computation
+        fp += snprintf(fp, sizeof(fsSrc) - (fp - fsSrc),
+            "    // Color: d(%s) + (a(%s) - b(%s)) * c(%s), op=%d\n"
+            "    vec4 tev_color_stg%d = vec4(%s, %s);\n",
+            sd, sa, sb, sc, st.colorOp,
+            i, colorResult, alphaResult
+        );
+
+        // Determine output register
+        const char* outName = "tev_prev"; // Default output goes to prev
+        if (st.colorOutReg == 0) outName = "tev_reg0";
+        else if (st.colorOutReg == 1) outName = "tev_reg1";
+        else if (st.colorOutReg == 2) outName = "tev_reg2";
+
+        fp += snprintf(fp, sizeof(fsSrc) - (fp - fsSrc),
+            "    %s = tev_color_stg%d;\n",
+            outName, i
+        );
+
+        // If output goes to prev (colorOutReg==3 in GX, or implicitly the stage
+        // feeds into the next stage's CPREV), update tev_prev
+        if (st.colorOutReg >= 3) {
+            fp += snprintf(fp, sizeof(fsSrc) - (fp - fsSrc),
+                "    tev_prev = tev_color_stg%d;\n", i
+            );
+        }
+    }
+
+    // Output final color
+    fp += snprintf(fp, sizeof(fsSrc) - (fp - fsSrc),
+        "\n"
+        "    fragColor = tev_prev;\n"
+        "}\n"
+    );
+
+    // -----------------------------------------------------------------------
+    // Compile and link
+    // -----------------------------------------------------------------------
+    u32 vs = compileShader(GL3::GL_VERTEX_SHADER, vsSrc);
+    u32 fs = compileShader(GL3::GL_FRAGMENT_SHADER, fsSrc);
+    if (!vs || !fs) {
+        // Fallback to default program on compile failure
+        if (vs) GL3::gl.glDeleteShader(vs);
+        if (fs) GL3::gl.glDeleteShader(fs);
+        printf("[GXRenderer] TEV shader compile failed, using default\n");
         return s_defaultProgram;
     }
 
-    // Future enhancement: full TEV->GLSL compilation for multi-stage TEV.
-    // For Phase 33, we return the default shader which handles the most
-    // common single-stage TEV configurations used in MKWii.
-    // Multi-stage TEV (rim lighting, specular, etc.) will be added in
-    // a subsequent phase.
-    return s_defaultProgram;
+    u32 prog = linkProgram(vs, fs);
+    if (!prog) {
+        printf("[GXRenderer] TEV program link failed, using default\n");
+        return s_defaultProgram;
+    }
+
+    // Cache the program
+    s32 slot = findTEVProgCacheSlot(h);
+    s_tevProgCache[slot].program = prog;
+    s_tevProgCache[slot].tevHash = h;
+    s_tevProgCache[slot].mvpLoc = GL3::gl.glGetUniformLocation(prog, "u_mvp");
+
+    for (u8 t = 0; t < MAX_TEXMAPS; t++) {
+        char name[32];
+        snprintf(name, sizeof(name), "u_tex%d", t);
+        s_tevProgCache[slot].texLocs[t] = GL3::gl.glGetUniformLocation(prog, name);
+    }
+    for (u32 k = 0; k < MAX_KCOLORS; k++) {
+        char name[32];
+        snprintf(name, sizeof(name), "u_kcolor%d", k);
+        s_tevProgCache[slot].kColorLocs[k] = GL3::gl.glGetUniformLocation(prog, name);
+    }
+    s_tevProgCache[slot].tevColorLocs[0] = GL3::gl.glGetUniformLocation(prog, "u_tevreg0");
+    s_tevProgCache[slot].tevColorLocs[1] = GL3::gl.glGetUniformLocation(prog, "u_tevreg1");
+    s_tevProgCache[slot].tevColorLocs[2] = GL3::gl.glGetUniformLocation(prog, "u_tevreg2");
+
+    if (hasNormals) {
+        s_tevProgCache[slot].normalLoc = GL3::gl.glGetUniformLocation(prog, "aNormal");
+        char name[32];
+        for (u32 l = 0; l < MAX_LIGHTS; l++) {
+            snprintf(name, sizeof(name), "u_lightPos[%d]", l);
+            s_tevProgCache[slot].lightPosLocs[l] = GL3::gl.glGetUniformLocation(prog, name);
+            snprintf(name, sizeof(name), "u_lightColor[%d]", l);
+            s_tevProgCache[slot].lightColorLocs[l] = GL3::gl.glGetUniformLocation(prog, name);
+        }
+        s_tevProgCache[slot].numLightsLoc = GL3::gl.glGetUniformLocation(prog, "u_numLights");
+        s_tevProgCache[slot].ambColorLoc = GL3::gl.glGetUniformLocation(prog, "u_ambColor");
+        s_tevProgCache[slot].matColorLoc = GL3::gl.glGetUniformLocation(prog, "u_matColor");
+    } else {
+        s_tevProgCache[slot].normalLoc = -1;
+    }
+
+    return prog;
+}
+
+// ---------------------------------------------------------------------------
+// Patch the getActiveTEVSlot function pointer to use hashTEVConfig
+// (now that hashTEVConfig is defined, we can assign the real implementation)
+// ---------------------------------------------------------------------------
+static s32 getActiveTEVSlotReal() {
+    u32 h = hashTEVConfig();
+    for (u32 i = 0; i < s_tevProgCount; i++) {
+        if (s_tevProgCache[i].tevHash == h && s_tevProgCache[i].program != 0)
+            return (s32)i;
+    }
+    return -1;
+}
+
+// One-time initialization of the function pointer
+namespace {
+    struct TEVSlotInit { TEVSlotInit() { getActiveTEVSlot = getActiveTEVSlotReal; } };
+    static TEVSlotInit s_tevSlotInit;
 }
 
 // ---------------------------------------------------------------------------
