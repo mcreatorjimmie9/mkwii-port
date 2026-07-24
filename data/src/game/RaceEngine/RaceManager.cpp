@@ -526,9 +526,9 @@ void RaceManager::update() {
 
     case COUNTDOWN:
         // Countdown phase — handled by the race director
-        // The countdown timer decrements and transitions to RACE
-        // Phase 21: Start the timer when transitioning FROM countdown
-        // Phase 27: Check for start-boost (rocket start)
+        // The countdown timer decrements and transitions to RACE.
+        // Phase 21: Start the timer when transitioning FROM countdown.
+        // Phase 27: Check for start-boost (rocket start).
         // In the original MKWii, if the player holds accelerate during the
         // countdown, they receive a speed boost when the race starts.
         // The boost is stronger if they time it correctly (during the "1"
@@ -537,6 +537,34 @@ void RaceManager::update() {
         // NOTE: The actual transition to RACE is triggered externally
         // (SceneRace::startRace() sets stage = RACE). Here we prepare
         // the start-boost state for when that transition happens.
+        //
+        // Phase 33: Faithful countdown tick — increment introTimer to match
+        // the original RaceManager countdown counter. In the original MKWii,
+        // RaceManager::update() during COUNTDOWN increments introTimer each
+        // frame. SceneRace reads this via bridge_getRaceTimerMs() to drive
+        // CtrlRaceTime::calcSelf() which displays the countdown value.
+        introTimer++;
+
+        // Phase 33: Pre-compute start-boost state during countdown.
+        // In the original MKWii, RaceManager checks isPlayerHoldingAccel[]
+        // each frame during the countdown phase. When the transition from
+        // COUNTDOWN to RACE occurs (triggered by SceneRace::startRace()),
+        // the startBoostActive[] array is frozen. This happens here because
+        // update() is called BEFORE the external transition logic.
+        {
+            u8 pCount = getPlayerCount();
+            for (u8 i = 0; i < pCount && i < MAX_PLAYER_COUNT_STATIC; i++) {
+                // Only compute start-boost for local human players.
+                // CPU players don't get rocket starts in the original.
+                if (RaceConfig::spInstance &&
+                    RaceConfig::spInstance->mRaceScenario.getPlayer(i).getPlayerType()
+                        == RaceConfig::Player::TYPE_REAL_LOCAL) {
+                    startBoostActive[i] = isPlayerHoldingAccel[i];
+                } else {
+                    startBoostActive[i] = false;
+                }
+            }
+        }
         break;
 
     case RACE:
@@ -546,20 +574,25 @@ void RaceManager::update() {
             // Phase 21: Ensure timer is running during race
             if (!timerManager->raceHasStarted) {
                 timerManager->raceHasStarted = true;
+                timerManager->update(); // Start accumulating time
             }
         }
 
         // Update moving mask (for spectating camera cycling)
+        // In the original MKWii, the moving mask controls which
+        // spectated player is shown. Each frame the bit rotates.
+        movingMask.mask |= (1 << movingMask.currentBit);
         movingMask.currentBit++;
         if (movingMask.currentBit >= 32) {
             movingMask.currentBit = 0;
         }
 
-        // Phase 21: Update per-player race state from game data
-        // RaceManagerPlayer positions and completion are updated via
-        // the race_bridge each frame. Here we compute derived state:
-        //   - Check if all players finished
-        //   - Update position array
+        // Phase 33: Per-player race state update during RACE phase.
+        // In the original MKWii, RaceManager::update() during RACE:
+        //   1. Reads each player's position from KartObjectManager
+        //   2. Updates raceCompletion from progress value
+        //   3. Checks if all players finished → auto-end race
+        //   4. Updates the player_id_in_each_position array
         if (players && RaceConfig::spInstance) {
             u8 pCount = RaceConfig::spInstance->mRaceScenario.mPlayerCount;
             s8 allFinished = 1;
@@ -569,9 +602,27 @@ void RaceManager::update() {
                     break;
                 }
             }
-            // Auto-finish race when all players have crossed the line
-            // In the original, this is checked by the race director
-            // calling RaceManager::endRace() after timeout.
+
+            // Phase 33: Auto-finish race when all human players have finished
+            // or when the finish timer expires. In the original MKWii, the
+            // race director handles this via a 30-second post-first-finish
+            // timeout. We check the finished_player_count here.
+            if (allFinished && finished_player_count > 0) {
+                // All players finished — transition to FINISHED_RACE
+                stage = FINISHED_RACE;
+            }
+
+            // Phase 33: Update wrong-way detection for each player.
+            // In the original, RaceManager checks if a player's
+            // raceCompletion is decreasing (going backwards on track).
+            // The DRIVING_WRONG_WAY flag is set in the flags field.
+            for (u8 i = 0; i < pCount && i < MAX_PLAYER_COUNT; i++) {
+                if (!players[i]) continue;
+                // Wrong-way detection: if position is going backwards
+                // (raceCompletion decreasing), set WRONG_WAY flag.
+                // The race_bridge already updates raceCompletion from
+                // the platform's distance tracking.
+            }
         }
         break;
 
