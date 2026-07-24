@@ -43,6 +43,7 @@
 #include "platform/graphics.hpp"
 #include "platform/input.hpp"
 #include "platform/window.hpp"
+#include "platform/course_model_renderer.hpp"
 #include "ai_input_store.hpp"
 
 // HUD overlay
@@ -245,6 +246,9 @@ struct RaceScene::RaceData {
     Loaders::TrackManager* trackManager;
     bool trackLoaded;
 
+    // Phase 36: Course model renderer — uploads BMD geometry to GPU
+    Render::CourseModelRenderer* courseModelRenderer;
+
     Game::Player players[TOTAL_RACERS];
     u32 playerCount;
 
@@ -282,6 +286,7 @@ struct RaceScene::RaceData {
     RaceData()
         : trackManager(nullptr)
         , trackLoaded(false)
+        , courseModelRenderer(nullptr)
         , playerCount(TOTAL_RACERS)
         , hudInitialized(false)
         , totalLaps(DEFAULT_LAP_COUNT)
@@ -343,6 +348,11 @@ RaceScene::~RaceScene() {
         m_effectDirector = nullptr;
     }
     if (m_raceData) {
+        if (m_raceData->courseModelRenderer) {
+            m_raceData->courseModelRenderer->shutdown();
+            delete m_raceData->courseModelRenderer;
+            m_raceData->courseModelRenderer = nullptr;
+        }
         if (m_raceData->trackManager) {
             delete m_raceData->trackManager;
             m_raceData->trackManager = nullptr;
@@ -465,6 +475,29 @@ void RaceScene::loadCourse(u32 courseId) {
                     printf("[RaceScene] CourseColManager failed to parse KCL data\n");
                 }
             }
+        }
+
+        // Phase 36: Initialize course model renderer and upload BMD geometry
+        if (m_raceData->trackManager->isBmdLoaded()) {
+            m_raceData->courseModelRenderer = new Render::CourseModelRenderer();
+            if (m_raceData->courseModelRenderer->init()) {
+                const auto& bmdLoader = m_raceData->trackManager->getBmdLoader();
+                for (u32 m = 0; m < bmdLoader.getModelCount(); m++) {
+                    u32 modelIdx = m_raceData->courseModelRenderer->uploadModel(
+                        bmdLoader.getModel(m));
+                    printf("[RaceScene] Uploaded course model %u → GPU index %u\n",
+                           m, modelIdx);
+                }
+                printf("[RaceScene] Course model renderer ready: %u models, %u total vertices\n",
+                       m_raceData->courseModelRenderer->getModelCount(),
+                       bmdLoader.getTotalVertexCount());
+            } else {
+                printf("[RaceScene] Course model shader compilation failed, using wireframe\n");
+                delete m_raceData->courseModelRenderer;
+                m_raceData->courseModelRenderer = nullptr;
+            }
+        } else {
+            printf("[RaceScene] No BMD models found in archive — course will render as wireframe\n");
         }
     } else {
         printf("[RaceScene] Track: Failed to download, using fallback\n");
@@ -1223,6 +1256,16 @@ void RaceScene::draw() {
             camPos.x, camPos.y, camPos.z,
             playerPos.x, playerPos.y, playerPos.z,
             CAMERA_FOV_DEG, aspect, CAMERA_NEAR, CAMERA_FAR);
+    }
+
+    // =========================================================================
+    // Phase 36: Render course model (BMD geometry from BRRES)
+    // =========================================================================
+    // This renders the actual track geometry — roads, scenery, buildings, etc.
+    // Drawn first so karts and items appear on top.
+    if (d.courseModelRenderer && d.courseModelRenderer->hasModels()) {
+        const auto& vp = Platform::Graphics::getViewProjMatrix();
+        d.courseModelRenderer->render(reinterpret_cast<const f32(*)[4]>(vp.m));
     }
 
     // Render all items and karts

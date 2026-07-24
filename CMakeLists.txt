@@ -497,6 +497,7 @@ set(APP_SOURCES
     src/platform/window.cpp
     src/platform/graphics.cpp
     src/platform/gx_renderer.cpp
+    src/platform/course_model_renderer.cpp
     src/platform/audio.cpp
     src/platform/input.cpp
     src/game/KartEntity.cpp
@@ -585,6 +586,7 @@ set(LOADERS_SOURCES
     src/loaders/breff_loader.cpp
     src/loaders/breft_loader.cpp
     src/loaders/brlyt_parser.cpp
+    src/loaders/bmd_loader.cpp
     src/loaders/track_manager.cpp
 )
 add_library(mkwii-loaders STATIC ${LOADERS_SOURCES})

@@ -28,6 +28,7 @@ TrackManager::TrackManager()
     : m_trackName("<unknown>")
     , m_kmpLoaded(false)
     , m_kclLoaded(false)
+    , m_bmdLoaded(false)
 {
 }
 
@@ -41,6 +42,7 @@ bool TrackManager::loadFromFile(const char* szsPath) {
     // Reset state from any previous load
     m_kmpLoaded = false;
     m_kclLoaded = false;
+    m_bmdLoaded = false;
     m_trackName = deriveTrackName(szsPath ? szsPath : "");
 
     printf("TrackManager: Loading track from file: %s\n", szsPath ? szsPath : "(null)");
@@ -61,6 +63,9 @@ bool TrackManager::loadFromFile(const char* szsPath) {
     // Step 3: Extract and parse course.kcl
     extractAndLoadKCL();
 
+    // Step 4: Extract and parse course model BRRES (Phase 36)
+    extractAndLoadBMD();
+
     // Return true if the SZS was parsed, even if sub-loaders partially failed
     return true;
 }
@@ -69,6 +74,7 @@ bool TrackManager::loadFromMemory(const std::vector<u8>& szsData) {
     // Reset state from any previous load
     m_kmpLoaded = false;
     m_kclLoaded = false;
+    m_bmdLoaded = false;
     m_trackName = "<memory>";
 
     printf("TrackManager: Loading track from memory (%u bytes)\n",
@@ -88,6 +94,9 @@ bool TrackManager::loadFromMemory(const std::vector<u8>& szsData) {
 
     // Step 3: Extract and parse course.kcl
     extractAndLoadKCL();
+
+    // Step 4: Extract and parse course model BRRES (Phase 36)
+    extractAndLoadBMD();
 
     return true;
 }
@@ -501,6 +510,74 @@ bool TrackManager::hasBreffFiles() const {
 
 bool TrackManager::hasBreftFiles() const {
     return !m_szsReader.getEntriesByExtension(".breft").empty();
+}
+
+// =============================================================================
+// Private: BMD Course Model Extraction & Loading (Phase 36)
+// =============================================================================
+
+bool TrackManager::extractAndLoadBMD() {
+    // Search for BRRES files in the archive. MKWii course archives typically
+    // contain the course model in one of these paths:
+    //   - model.brres         (most common for original courses)
+    //   - course_model.brres  (alternative naming)
+    //   - course.brres        (simplified naming)
+    // Also check for any .brres files that aren't item/effect/kart models.
+    const char* searchNames[] = {
+        "model.brres",
+        "course_model.brres",
+        "course.brres",
+        "course/model.brres",
+        nullptr
+    };
+
+    for (int i = 0; searchNames[i] != nullptr; i++) {
+        const std::vector<u8>* brresData = findArchiveEntry(searchNames[i]);
+        if (brresData && brresData->size() >= 16) {
+            printf("TrackManager: Found %s (%u bytes), parsing BMD model...\n",
+                   searchNames[i], static_cast<u32>(brresData->size()));
+
+            if (m_bmdLoader.loadFromMemory(*brresData)) {
+                m_bmdLoaded = true;
+                printf("TrackManager: BMD loaded — %u models, %u total vertices, %u textures\n",
+                       m_bmdLoader.getModelCount(),
+                       m_bmdLoader.getTotalVertexCount(),
+                       static_cast<u32>(m_bmdLoader.getTextures().size()));
+                return true;
+            } else {
+                printf("TrackManager: WARNING — BMD parsing of %s failed\n",
+                       searchNames[i]);
+            }
+        }
+    }
+
+    // Fallback: search for any .brres file in the archive
+    const auto& entries = m_szsReader.getEntries();
+    for (const auto& entry : entries) {
+        if (entry.name.size() >= 6 &&
+            entry.name.compare(entry.name.size() - 6, 6, ".brres") == 0) {
+            // Skip known non-course BRRES files
+            if (entry.name.find("item_") != std::string::npos) continue;
+            if (entry.name.find("kart_") != std::string::npos) continue;
+            if (entry.name.find("driver_") != std::string::npos) continue;
+            if (entry.name.find("effect_") != std::string::npos) continue;
+
+            printf("TrackManager: Trying fallback BRRES: %s (%u bytes)\n",
+                   entry.name.c_str(), static_cast<u32>(entry.data.size()));
+
+            if (m_bmdLoader.loadFromMemory(entry.data)) {
+                m_bmdLoaded = true;
+                printf("TrackManager: BMD loaded from fallback — %u models, %u vertices\n",
+                       m_bmdLoader.getModelCount(),
+                       m_bmdLoader.getTotalVertexCount());
+                return true;
+            }
+        }
+    }
+
+    printf("TrackManager: No BRRES model files found in SZS archive\n");
+    m_bmdLoaded = false;
+    return false;
 }
 
 } // namespace Loaders

@@ -12,6 +12,8 @@
 //                   checkpoints, objects, areas, routes, cameras, etc.)
 //   3. KclLoader  — Parses the course collision mesh (triangle soup with
 //                   per-triangle surface type attributes)
+//   4. BmdLoader  — Parses BRRES containers and extracts MDL0 3D models
+//                   (course geometry, textures, materials for rendering)
 //
 // Typical usage:
 //   Loaders::TrackManager tm;
@@ -28,6 +30,7 @@
 #include "szs_reader.hpp"
 #include "kmp_loader.hpp"
 #include "kcl_loader.hpp"
+#include "bmd_loader.hpp"
 #include "platform/graphics.hpp"
 
 #include <string>
@@ -111,6 +114,19 @@ public:
     const std::string& getTrackName() const { return m_trackName; }
 
     // -----------------------------------------------------------------
+    // BMD Course Model Accessors (Phase 36)
+    // -----------------------------------------------------------------
+
+    /// Check if course BMD models were successfully loaded.
+    bool isBmdLoaded() const { return m_bmdLoaded; }
+
+    /// Get the BMD loader (for accessing parsed models and textures).
+    const BmdLoader& getBmdLoader() const { return m_bmdLoader; }
+
+    /// Get the number of loaded BMD models.
+    u32 getBmdModelCount() const { return m_bmdLoader.getModelCount(); }
+
+    // -----------------------------------------------------------------
     // BREFF/BREFT Effect Extraction
     // -----------------------------------------------------------------
 
@@ -175,6 +191,11 @@ private:
     /// Sets m_kclLoaded on success.
     bool extractAndLoadKCL();
 
+    /// Extract and parse course model BRRES/BMD from the SZS archive.
+    /// Searches for model.brres or course_model.brres within the archive.
+    /// Sets m_bmdLoaded on success.
+    bool extractAndLoadBMD();
+
     /// Derive a track name from a file path or URL.
     /// Strips directory prefixes and file extensions.
     static std::string deriveTrackName(const std::string& path);
@@ -190,6 +211,9 @@ private:
     std::string m_trackName;  ///< Human-readable track name (from file path)
     bool        m_kmpLoaded;  ///< true if course.kmp was found and parsed
     bool        m_kclLoaded;  ///< true if course.kcl was found and parsed
+    bool        m_bmdLoaded;  ///< true if course model BRRES was found and parsed
+
+    BmdLoader   m_bmdLoader;   ///< BRRES/MDL0 3D model parser
 };
 
 } // namespace Loaders
