@@ -592,5 +592,36 @@ Stage Summary:
 - Body type now matches original MKWii per-character (Small/Medium/Large)
 - CI4/CI8 textures ready for proper palette rendering when TPL loader provides palette data
 - GL state management improved: depth mask, coplanar offset, clip tracking
-- Committed and pushed: b95333ed
+- Committed and pushed: 1b5adb22
 - Next: Full TEV→GLSL multi-stage shader compilation, BRSAR audio archive loading at startup
+
+---
+Task ID: 35
+Agent: main
+Task: Phase 35 — Full TEV→GLSL multi-stage shader compilation
+
+Work Log:
+- Replaced stub buildTEVProgram() (always returned default shader) with full TEV→GLSL compiler
+- Implemented complete TEV color combine formula: d + (a - b) * c with replace/add/sub/mult ops, bias (zero/addhalf/subhalf), scale (1x/2x/4x/div2), clamp
+- Implemented complete TEV alpha combine with identical formula
+- Implemented 8 K-color constant selection modes (GX_KCSEL_8_8 through GX_KCSEL_KONST_256)
+- Implemented 8 K-alpha constant selection modes (GX_KASEL_8_8 through GX_KASEL_KONST_256)
+- Implemented 24+ GX_CC_* color source mappings: ZERO/ONE/HALF/QUARTER, RASC/GASC (with color channel select), CPREV/APREV, TEXC/TEXA (with tex swap), KONST, C0..C2 registers, A0..A2 alpha, C0A0..C2A2 combined, RAS+TEX combined
+- Implemented 16+ GX_CA_* alpha source mappings with swap table support
+- Swap table: ras/tex swap modes with RGBA channel rotation
+- Multi-texture: up to 8 texture samplers (tex_color0..7)
+- Vertex shader with lighting: per-channel diffuse computation, ambSrc/matSrc/lightMask, normal-based NdotL
+- Dynamic vertex format: includes normals (3f) when TEV shader uses lighting, otherwise base format (9f)
+- Program cache with LRU eviction (64 entries max), hash-based invalidation
+- endPrimitive() now calls buildTEVProgram() and sets all uniforms (MVP, textures, k-colors, TEV regs, lighting)
+- Added GL primitive constants to gl3_core.h (TRIANGLE_STRIP, TRIANGLE_FAN, LINE_STRIP, POINTS)
+- Forward-declared cache and function pointer before endPrimitive() to resolve scope issues
+
+Stage Summary:
+- Phase 35: COMPLETE
+- All 4 targets build: mkwii-genesis (162 files), mkwii-port, mkwii-linktest, physics_tests (111/111)
+- Full Wii GX TEV pipeline now compiles to GLSL at runtime
+- Multi-stage TEV (rim lighting, specular, environment mapping, etc.) now works
+- Default shader fast-path for simple single-stage modulate (most common MKWii config)
+- Committed and pushed: 938fb007
+- Next: BRSAR audio archive loading at startup, decompiled ItemSystem/ITEMHandler wiring
